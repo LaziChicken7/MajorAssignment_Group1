@@ -35,6 +35,7 @@ Mot server admin nen co log de quan li user va transaction duoc ro rang hon de k
 
 /*
 ? Tu dung quen mat dinh viet gi roi =))
+Password: Tim kiem bang HashMap chu khong for binh thuong (de ctrinh chay nhanh hon)
 */
 
 /*
