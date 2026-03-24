@@ -1,2 +1,2 @@
-# MajorAssignment_Group3738
+# MajorAssignment_Group1
 Java + JavaFX Major Assignment: E-Auction System
