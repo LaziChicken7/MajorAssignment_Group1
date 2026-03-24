@@ -25,7 +25,6 @@ public abstract class Entity {
     public void delete() {
         this.isActived = false;
         this.update();
-        ///  ////////////
     }
 }
 
