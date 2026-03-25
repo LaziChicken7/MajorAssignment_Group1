@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.LoginController">
+    <padding>
+        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+    </padding>
+
+    <Label text="HỆ THỐNG ĐẤU GIÁ">
+        <font><Font name="System Bold" size="24.0" /></font>
+    </Label>
+    
+    <TextField fx:id="txtUsername" promptText="Tên đăng nhập (vd: admin)" prefWidth="250.0"/>
+    <PasswordField fx:id="txtPassword" promptText="Mật khẩu (vd: 123456)" prefWidth="250.0"/>
+    
+    <Label fx:id="lblError" textFill="RED" />
+    
+    <Button text="Đăng nhập" onAction="#handleLogin" prefWidth="250.0" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
+</VBox>
