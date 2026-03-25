@@ -31,7 +31,6 @@ public class LoginController {
             App.setRoot("view/Home");
         } else {
             lblError.setText("Sai tên đăng nhập hoặc mật khẩu!");
-            System.out.println("loz");
         }
     }
 }
