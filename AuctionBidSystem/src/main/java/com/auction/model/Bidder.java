@@ -1,5 +1,8 @@
 package com.auction.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // CẤP QUYỀN BIDDER
 public class Bidder extends User {
     // KHAI BÁO THUỘC TÍNH
@@ -11,12 +14,18 @@ public class Bidder extends User {
     protected double moneyOnWallet;
     protected double moneyinFrozen;
 
+    protected List<Item> successBidItem;
+    protected List<Item> failedBidItem;
+
     public Bidder(String userName, String password, String fullName, String email, String numberPhone, String citizenId, String address) {
         super(userName, password, fullName, email, numberPhone, citizenId);
         this.address = address;
         this.bankAccountNumber = String.valueOf(++bankingNumber);
         this.moneyOnWallet = 0;
         this.moneyinFrozen = 0;
+
+        this.successBidItem = new ArrayList<>();
+        this.failedBidItem = new ArrayList<>();
     }
     
     // LẤY THUỘC TÍNH
@@ -39,16 +48,4 @@ public class Bidder extends User {
     public void Withdraw(double money) {
         this.moneyOnWallet -= money;
     }
-
-    // ĐÓNG BĂNG VÀ HỦY ĐÓNG BĂNG MẶT HÀNG
-    public void Freeze(double moneyBidding) {
-        this.moneyOnWallet -= moneyBidding;
-        this.moneyinFrozen += moneyBidding;
-    }
-
-    public void Unfreeze(double moneyBidding) {
-        this.moneyOnWallet += moneyBidding;
-        this.moneyinFrozen -= moneyBidding;
-    }
-
 }

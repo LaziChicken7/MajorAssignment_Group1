@@ -21,6 +21,7 @@ public class User extends Entity {
 
     // KHAI BÁO THUỘC TÍNH
 
+    private static int idCounter = 0;
     protected final String userName;
     protected String fullName;
     protected String email;
@@ -29,7 +30,7 @@ public class User extends Entity {
     protected final String citizenId;
 
     
-
+    // KHAI BÁO CONSTRUCTOR
     public User(String userName, String password, String fullName, String email, String numberPhone, String citizenId) {
         super("USR" + (++idCounter));
         this.userName = userName;
