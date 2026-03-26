@@ -1,28 +1,18 @@
 package com.auction.model;
 
-public class Seller extends User {
+public class Seller extends Bidder {
+    //KHAI BÁO THUỘC TÍNH
+    
     private double rating;
-    private String bankAccountNumber;
 
-    public Seller(String id, String username, String password, String fullname, String email, String numberPhone, String cccd, double rating, String bankAccountNumber) {
-        super(id, username, password, fullname, email, numberPhone, cccd);
-        this.rating = rating;
-        this.bankAccountNumber = bankAccountNumber;
+    public Seller(String userName, String password, String fullName, String email, String numberPhone, String citizenId, String address) {
+        super(userName, password, fullName, email, numberPhone, citizenId, address);
+        this.rating = 0;
     }
 
-    public double rating() {
-        return rating;
-    }
+    //LẤY VÀ UPDATE THUỘC TÍNH
+    public double rating() { return rating; }
+    public void updateRating(double rating) { this.rating = rating; }
 
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    public String bankAccountNumber() {
-        return bankAccountNumber;
-    }
-
-    public void setBankAccountNumber(String bankAccountNumber) {
-        this.bankAccountNumber = bankAccountNumber;
-    }
+    //Cho phép quyền truy cập vào addItem
 }
