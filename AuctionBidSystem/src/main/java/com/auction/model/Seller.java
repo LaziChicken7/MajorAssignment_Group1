@@ -1,8 +1,7 @@
 package com.auction.model;
 
 public class Seller extends Bidder {
-    //KHAI BÁO THUỘC TÍNH
-    
+    // KHAI BÁO THUỘC TÍNH
     private double rating;
 
     public Seller(String userName, String password, String fullName, String email, String numberPhone, String citizenId, String address) {
@@ -10,9 +9,9 @@ public class Seller extends Bidder {
         this.rating = 0;
     }
 
-    //LẤY VÀ UPDATE THUỘC TÍNH
+    // LẤY VÀ UPDATE THUỘC TÍNH
     public double rating() { return rating; }
     public void updateRating(double rating) { this.rating = rating; }
 
-    //Cho phép quyền truy cập vào addItem
+    // Cho phép quyền truy cập vào addItem
 }

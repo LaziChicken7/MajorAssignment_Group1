@@ -1,7 +1,7 @@
 package com.auction.model;
 
 public class User extends Entity {
-    //MÃ HÓA VÀ GIẢI MÃ PASSWORD
+    // MÃ HÓA VÀ GIẢI MÃ PASSWORD
     
     public static String encode(String password) {
         StringBuilder encoded = new StringBuilder();
@@ -19,7 +19,7 @@ public class User extends Entity {
         return decoded.toString();
     }
 
-    //KHAI BÁO THUỘC TÍNH
+    // KHAI BÁO THUỘC TÍNH
 
     protected final String userName;
     protected String fullName;
@@ -40,7 +40,7 @@ public class User extends Entity {
         this.citizenId = citizenId;
     }
 
-    //LẤY VÀ UPDATE THUỘC TÍNH
+    // LẤY VÀ UPDATE THUỘC TÍNH
 
     public String getUserName() { return userName; }
 
