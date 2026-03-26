@@ -13,4 +13,6 @@ module com.auction {
     // (Tuỳ chọn thêm) Cấp quyền cho thư mục model để sau này bạn dùng TableView (Bảng) không bị lỗi hiển thị
     opens com.auction.model to javafx.base;
     exports com.auction.model;
+    exports com.auction.service;
+    opens com.auction.service to javafx.base;
 }

@@ -1,14 +1,20 @@
 package com.auction.model;
 
-public class User {
-    private String username;
-    private String role; // "Admin", "Bidder", "Seller"
+public class User extends Entity{
+    protected String username;
+    protected String password;
+    protected String fullname;
+    protected String email;
+    protected String numberPhone;
+    protected String cccd;
 
-    public User(String username, String role) {
+    public User(String id, String username, String password, String fullname, String email, String numberPhone, String cccd) {
+        super(id);
         this.username = username;
-        this.role = role;
+        this.password = password;
+        this.fullname = fullname;
+        this.email = email;
+        this.numberPhone = numberPhone;
+        this.cccd = cccd;
     }
-
-    public String getUsername() { return username; }
-    public String getRole() { return role; }
 }
