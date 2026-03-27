@@ -5,21 +5,15 @@ public class Item extends Entity{
     protected String name;
     protected String description;
     protected Seller seller;
+    protected LocalDateTime startTime;
     protected double startPrice;
 
-    // public Item(String id, String name, String information, double startPrice, double currentPrice, String sellerId, String status, LocalDateTime endTime) {
-    //     super(id);
-    //     this.name = name;
-    //     this.information = information;
-    //     this.startPrice = startPrice;
-    //     this.currentPrice = currentPrice;
-    //     this.sellerId = sellerId;
-    //     this.status = status;
-
-    //     if (endTime.isBefore(LocalDateTime.now())) {
-    //         throw new IllegalArgumentException("Thời gian kết thúc không hợp lệ");
-    //     }
-
-    //     this.endTime = endTime;
-    // }
+    public Item(String id, String name, String description, double startPrice) {
+        super(id);
+        this.name = name;
+        this.description = description;
+        this.startPrice = startPrice;
+        this.seller = null;
+        this.startTime = LocalDateTime.now();
+    }
 }

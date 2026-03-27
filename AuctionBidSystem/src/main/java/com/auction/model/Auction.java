@@ -31,9 +31,10 @@ public class Auction extends Entity {
     private static final int EXTENSION_SECONDS = 60; // Gia hạn Y giây
 
     // KHAI BÁO CONSTRUCTOR
-    public Auction(Item bidProduct, LocalDateTime startTime, LocalDateTime endTime) {
+    public Auction(Item bidProduct, Seller seller, LocalDateTime startTime, LocalDateTime endTime) {
         super("AUC" + (++auctionCounter));
         this.bidProduct = bidProduct;
+        this.bidProduct.seller = seller;
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = Status.OPEN;
@@ -113,6 +114,7 @@ public class Auction extends Entity {
     public void acceptPayment() {
         this.status = Status.PAID;
         winningUser.moneyinFrozen -= highestBid;
+        bidProduct.seller.moneyOnWallet += highestBid;
         winningUser.successBidItem.add(bidProduct);
     }
 
