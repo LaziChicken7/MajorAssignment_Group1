@@ -5,7 +5,7 @@ package com.auction.controller;
 import java.io.IOException;
 
 import com.auction.App;
-import com.auction.model.User;
+import com.auction.model.user.User;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

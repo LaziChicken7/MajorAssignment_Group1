@@ -1,9 +1,13 @@
-package com.auction.model;
+package com.auction.model.auction;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.auction.model.item.Item;
+import com.auction.model.user.Bidder;
+import com.auction.model.user.Seller;
 
 // TOÀN BỘ CÁC HÀNH ĐỘNG ĐẤU GIÁ
 

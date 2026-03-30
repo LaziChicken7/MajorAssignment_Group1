@@ -1,4 +1,4 @@
-package com.auction.model;
+package com.auction.model.user;
 
 public class Seller extends Bidder {
     // KHAI BÁO THUỘC TÍNH

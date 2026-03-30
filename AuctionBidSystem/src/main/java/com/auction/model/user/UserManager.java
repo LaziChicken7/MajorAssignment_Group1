@@ -1,4 +1,4 @@
-package com.auction.model;
+package com.auction.model.user;
 
 import java.util.ArrayList;
 import java.util.List;

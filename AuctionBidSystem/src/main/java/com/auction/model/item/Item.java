@@ -1,5 +1,7 @@
-package com.auction.model;
+package com.auction.model.item;
 import java.time.LocalDateTime;
+
+import com.auction.model.user.Seller;
 
 public class Item extends Entity{
     protected String name;
