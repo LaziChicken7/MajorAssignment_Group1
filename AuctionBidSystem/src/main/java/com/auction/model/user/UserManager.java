@@ -1,11 +1,14 @@
 package com.auction.model.user;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.auction.model.item.Item;
+
 public class UserManager {
 
-    List<User> users = new ArrayList<>();
+    static List<User> users = new ArrayList<>();
     
     // ĐĂNG NHẬP, ĐĂNG KÝ, QUÊN MẬT KHẨU
     
@@ -33,6 +36,8 @@ public class UserManager {
             System.err.println("Mật khẩu yếu");
             return false;
         }
+
+        users.add(new Bidder(userName, password, fullName, email, numberPhone, citizenId, ""));
         
         System.err.println("Đăng ký thành công");
         return true;
@@ -76,7 +81,7 @@ public class UserManager {
     public boolean ForgotPassword(String userName, String email, String newPassword) {
         for (User user : users) {
             if (user.userName.equals(userName) && user.email.equals(email)) {
-                user.updatePassword(newPassword);
+                user.setPassword(newPassword);
                 System.err.println("Đổi mật khẩu thành công");
                 return true;
             }
@@ -109,4 +114,166 @@ public class UserManager {
         }
         return true;
     }
+
+    //---------------------------------------------------------
+    // LẤY THÔNG TIN CỦA MỘT NGƯỜI
+
+    public User getUser(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    // LẤY VÀ UPDATE DATABASE
+
+    public static String getUserName(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return user.userName;
+            }
+        }
+        return null;
+    }
+    public static void updateUserName(String userName, String newUserName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                user.setUserName(newUserName);
+                break;
+            }
+        }
+    }
+
+    public static String getFullName(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return user.fullName;
+            }
+        }
+        return null;
+    }
+    public static void updateFullName(String userName, String fullName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                user.setFullName(fullName);
+                break;
+            }
+        }
+    }
+
+    public static String getEmail(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return user.email;
+            }
+        }
+        return null;
+    }
+    public static void updateEmail(String userName, String email) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                user.setEmail(email);
+                break;
+            }
+        }
+    }
+
+    public static String getPassword(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return user.password;
+            }
+        }
+        return null;
+    }
+    public static void updatePassword(String userName, String password) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                user.setPassword(password);
+                break;
+            }
+        }
+    }
+
+    public static String getNumberPhone(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return user.numberPhone;
+            }
+        }
+        return null;
+    }
+    public static void updateNumberPhone(String userName, String numberPhone) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                user.setNumberPhone(numberPhone);
+                break;
+            }
+        }
+    }
+
+    public static String getCitizenId(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return user.citizenId;
+            }
+        }
+        return null;
+    }
+
+    public static void updateMoneyinFrozen(String userName, BigDecimal moneyinFrozen) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                ((Bidder) user).updateMoneyinFrozen(moneyinFrozen);
+                break;
+            }
+        }
+    }
+    public static BigDecimal getMoneyinFrozen(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return ((Bidder) user).getMoneyinFrozen();
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+
+    public static void updateMoneyOnWallet(String userName, BigDecimal moneyinWallet) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                ((Bidder) user).updateMoneyOnWallet(moneyinWallet);
+                break;
+            }
+        }
+    }
+    public static BigDecimal getMoneyOnWallet(String userName) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                return ((Bidder) user).getMoneyOnWallet();
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+
+    public static void updateSuccessBidItem(String userName, Item item) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                ((Bidder) user).addSuccessBidItem(item);
+                break;
+            }
+        }
+    }
+
+    public static void updateFailedBidItem(String userName, Item item) {
+        for (User user : users) {
+            if (user.userName.equals(userName)) {
+                ((Bidder) user).addFailedBidItem(item);
+                break;
+            }
+        }
+    }
+
+
 }

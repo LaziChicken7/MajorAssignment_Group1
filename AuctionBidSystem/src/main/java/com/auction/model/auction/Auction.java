@@ -1,13 +1,16 @@
 package com.auction.model.auction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.auction.model.base.Entity;
 import com.auction.model.item.Item;
 import com.auction.model.user.Bidder;
 import com.auction.model.user.Seller;
+import com.auction.model.user.UserManager;
 
 // TOÀN BỘ CÁC HÀNH ĐỘNG ĐẤU GIÁ
 
@@ -26,7 +29,7 @@ public class Auction extends Entity {
     private Status status;
 
     // QUẢN LÝ NGƯỜI DẪN ĐẦU VÀ LỊCH SỬ (THAY THẾ BẰNG DATABASE TRONG TƯƠNG LAI)
-    private double highestBid;
+    private BigDecimal highestBid;
     private Bidder winningUser;
     private List<BidTransaction> bidTransactions; // Thay thế thành database trong tương lai
 
@@ -38,18 +41,18 @@ public class Auction extends Entity {
     public Auction(Item bidProduct, Seller seller, LocalDateTime startTime, LocalDateTime endTime) {
         super("AUC" + (++auctionCounter));
         this.bidProduct = bidProduct;
-        this.bidProduct.seller = seller;
+        this.bidProduct.updateSeller(seller);
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = Status.OPEN;
-        this.highestBid = bidProduct.startPrice;
+        this.highestBid = bidProduct.getStartPrice();
         this.winningUser = null;
         this.bidTransactions = new ArrayList<>();
     }
 
     
     // XỬ LÝ MỘT USER ĐẶT GIÁ
-    public synchronized boolean placeBid(Bidder bidder, double bidAmount, LocalDateTime bidTimestamp) {
+    public synchronized boolean placeBid(Bidder bidder, BigDecimal bidAmount, LocalDateTime bidTimestamp) {
         // Kiểm tra tính hợp lệ cơ bản
         // 1. Kiểm tra xem phiên đấu giá có đang mở hay không
         if (status != Status.RUNNING) {
@@ -58,7 +61,7 @@ public class Auction extends Entity {
         }
         
         // 2. Cấm người bán tự đấu giá
-        if (bidder instanceof Seller && ((Seller) bidder).equals(bidProduct.seller)) {
+        if (bidder instanceof Seller && ((Seller) bidder).equals(bidProduct.getSeller())) {
             System.err.println("Lỗi: Người bán không thể đấu giá!");
             return false;
         }
@@ -69,7 +72,7 @@ public class Auction extends Entity {
             return false;
         }
         
-        if (bidAmount <= highestBid) {
+        if (bidAmount.compareTo(highestBid) <= 0) {
             System.err.println("Lỗi: Giá đấu giá không hợp lệ!");
             return false;
         }
@@ -117,16 +120,14 @@ public class Auction extends Entity {
     // Chuyển sang trạng thái chấp nhận trả tiền
     public void acceptPayment() {
         this.status = Status.PAID;
-        winningUser.moneyinFrozen -= highestBid;
-        bidProduct.seller.moneyOnWallet += highestBid;
-        winningUser.successBidItem.add(bidProduct);
+        UserManager.updateMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()) - highestBid);
+        UserManager.updateMoneyOnWallet(bidProduct.getSeller().getId(), UserManager.getMoneyOnWallet(bidProduct.getSeller().getId()) + highestBid);
+        UserManager.updateSuccessBidItem(winningUser.getId(), bidProduct);
     }
 
     // Chuyển sang trạng thái hủy đấu giá
     public void cancelAuction() {
         this.status = Status.CANCELLED;
-        winningUser.moneyinFrozen -= highestBid;
-        winningUser.moneyOnWallet += highestBid;
-        winningUser.failedBidItem.add(bidProduct);
+        UserManager.updateMoneyinFrozen(winningUser.getId(), highestBid);
     }
 }

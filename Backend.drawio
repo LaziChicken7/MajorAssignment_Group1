@@ -19,7 +19,9 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-2" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;User&lt;/font&gt;" vertex="1">
-          <mxGeometry height="460" width="250" x="80" y="290" as="geometry" />
+          <mxGeometry height="460" width="250" x="80" y="290" as="geometry">
+            <mxRectangle height="30" width="70" x="80" y="290" as="alternateBounds" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-5" parent="_5j9WvsLw0db_FqGp3VM-2" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- int idCounter" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="35" as="geometry" />
@@ -63,14 +65,11 @@
         <mxCell id="_5j9WvsLw0db_FqGp3VM-209" parent="_5j9WvsLw0db_FqGp3VM-2" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- enum Role" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="275" as="geometry" />
         </mxCell>
-        <mxCell id="_5j9WvsLw0db_FqGp3VM-16" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;UserManager&lt;/font&gt;" vertex="1">
-          <mxGeometry height="250" width="250" x="-210" y="350" as="geometry" />
+        <mxCell id="_5j9WvsLw0db_FqGp3VM-16" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;UserManager (User Database)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="270" width="250" x="-220" y="320" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-17" parent="_5j9WvsLw0db_FqGp3VM-16" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Database users (tạm thời dùng List để lưu database)" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="35" as="geometry" />
-        </mxCell>
-        <mxCell id="_5j9WvsLw0db_FqGp3VM-18" parent="_5j9WvsLw0db_FqGp3VM-16" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- String userName" vertex="1">
-          <mxGeometry height="30" width="170" x="10" y="65" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-24" edge="1" parent="_5j9WvsLw0db_FqGp3VM-16" style="endArrow=none;html=1;rounded=0;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
@@ -89,6 +88,9 @@
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-30" parent="_5j9WvsLw0db_FqGp3VM-16" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- boolean checkWeakPassword (kiểm tra mật khẩu yếu)" vertex="1">
           <mxGeometry height="30" width="220" x="10" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="P5RCL_pYRZ_jqNHHKnNc-1" parent="_5j9WvsLw0db_FqGp3VM-16" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Get thông tin User hoặc update thông tin User database" vertex="1">
+          <mxGeometry height="30" width="220" x="10" y="230" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-28" edge="1" parent="1" source="_5j9WvsLw0db_FqGp3VM-2" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0;exitY=0;exitDx=0;exitDy=0;" target="_5j9WvsLw0db_FqGp3VM-16" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
@@ -123,10 +125,10 @@
         <mxCell id="_5j9WvsLw0db_FqGp3VM-36" parent="_5j9WvsLw0db_FqGp3VM-32" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- String BankAccountNumber" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="125" as="geometry" />
         </mxCell>
-        <mxCell id="_5j9WvsLw0db_FqGp3VM-37" parent="_5j9WvsLw0db_FqGp3VM-32" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Double moneyOnWallet" vertex="1">
+        <mxCell id="_5j9WvsLw0db_FqGp3VM-37" parent="_5j9WvsLw0db_FqGp3VM-32" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- BigDecimal moneyOnWallet" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="155" as="geometry" />
         </mxCell>
-        <mxCell id="_5j9WvsLw0db_FqGp3VM-38" parent="_5j9WvsLw0db_FqGp3VM-32" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Double moneyOnFrozen" vertex="1">
+        <mxCell id="_5j9WvsLw0db_FqGp3VM-38" parent="_5j9WvsLw0db_FqGp3VM-32" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- BigDecimal moneyOnFrozen" vertex="1">
           <mxGeometry height="30" width="170" x="10" y="185" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-39" parent="_5j9WvsLw0db_FqGp3VM-32" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Database successBidItem" vertex="1">
@@ -171,7 +173,7 @@
         <mxCell id="_5j9WvsLw0db_FqGp3VM-61" parent="_5j9WvsLw0db_FqGp3VM-55" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Status status" vertex="1">
           <mxGeometry height="30" width="300" x="10" y="155" as="geometry" />
         </mxCell>
-        <mxCell id="_5j9WvsLw0db_FqGp3VM-62" parent="_5j9WvsLw0db_FqGp3VM-55" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- double highestBid" vertex="1">
+        <mxCell id="_5j9WvsLw0db_FqGp3VM-62" parent="_5j9WvsLw0db_FqGp3VM-55" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- BigDecimal highestBid" vertex="1">
           <mxGeometry height="30" width="300" x="10" y="185" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-64" parent="_5j9WvsLw0db_FqGp3VM-55" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Bidder winningUser" vertex="1">
@@ -270,7 +272,7 @@
         <mxCell id="_5j9WvsLw0db_FqGp3VM-106" parent="_5j9WvsLw0db_FqGp3VM-100" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- LocalDateTime startTime" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="185" as="geometry" />
         </mxCell>
-        <mxCell id="_5j9WvsLw0db_FqGp3VM-107" parent="_5j9WvsLw0db_FqGp3VM-100" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Double startPrice" vertex="1">
+        <mxCell id="_5j9WvsLw0db_FqGp3VM-107" parent="_5j9WvsLw0db_FqGp3VM-100" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- BigDecimal startPrice" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="215" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-117" edge="1" parent="1" source="_5j9WvsLw0db_FqGp3VM-119" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="_5j9WvsLw0db_FqGp3VM-96" value="">
@@ -314,7 +316,7 @@
         <mxCell id="_5j9WvsLw0db_FqGp3VM-130" parent="_5j9WvsLw0db_FqGp3VM-124" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Bidder bidder (final)" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="150" as="geometry" />
         </mxCell>
-        <mxCell id="_5j9WvsLw0db_FqGp3VM-131" parent="_5j9WvsLw0db_FqGp3VM-124" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- Double bidAmount (final)" vertex="1">
+        <mxCell id="_5j9WvsLw0db_FqGp3VM-131" parent="_5j9WvsLw0db_FqGp3VM-124" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- BigDecimal bidAmount (final)" vertex="1">
           <mxGeometry height="30" width="230" x="10" y="180" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-132" parent="_5j9WvsLw0db_FqGp3VM-124" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;" value="- LocalDateTime BidTimestamp" vertex="1">
@@ -389,7 +391,9 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-167" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;Electronic&lt;/font&gt;" vertex="1">
-          <mxGeometry height="150" width="195" x="820" y="690" as="geometry" />
+          <mxGeometry height="150" width="195" x="820" y="690" as="geometry">
+            <mxRectangle height="30" width="100" x="820" y="690" as="alternateBounds" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-178" edge="1" parent="1" source="_5j9WvsLw0db_FqGp3VM-175" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;">
           <mxGeometry relative="1" as="geometry">
@@ -440,6 +444,9 @@
         </mxCell>
         <mxCell id="_5j9WvsLw0db_FqGp3VM-216" edge="1" parent="1" source="_5j9WvsLw0db_FqGp3VM-209" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="_5j9WvsLw0db_FqGp3VM-210">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="TE8Ny7_tfRV1YVTdVr-I-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Nunito;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DNunito;fontSize=14;" value="Nguyên nhân đổi từ Double sang BigDecimal:&amp;nbsp;https://viblo.asia/p/tai-sao-phai-dung-bigdecimal-khi-tinh-toan-ve-tien-te-trong-java-oOVlYqRnl8W" vertex="1">
+          <mxGeometry height="30" width="1020" x="-95" y="1600" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
