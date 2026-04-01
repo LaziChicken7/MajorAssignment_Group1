@@ -1,36 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.shape.Circle?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController" prefWidth="800.0" prefHeight="600.0">
-    <!-- Thanh Header giữ nguyên -->
+<BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" stylesheets="@style.css" styleClass="main-background" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
+
+    <!-- TOP BAR (THANH TÌM KIẾM Ở TRÊN) -->
     <top>
-        <HBox spacing="20" style="-fx-background-color: #f0f0f0;" alignment="CENTER_LEFT">
-            <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
-            <Label text="Trang Chủ Đấu Giá" style="-fx-font-size: 18px; -fx-font-weight: bold;" HBox.hgrow="ALWAYS"/>
+        <HBox alignment="CENTER_LEFT" prefHeight="60.0" styleClass="top-bar">
+            <Region prefWidth="60.0" />
+            <HBox alignment="CENTER_LEFT" prefHeight="35.0" prefWidth="400.0" styleClass="search-box">
+                <Label text="🔍" textFill="#999999"><HBox.margin><Insets left="10.0" right="10.0"/></HBox.margin></Label>
+                <TextField promptText="Tìm kiếm" styleClass="search-field" HBox.hgrow="ALWAYS" />
+            </HBox>
             <Region HBox.hgrow="ALWAYS" />
-            <Label fx:id="lblWelcome" text="Xin chào, User!" />
-            <Button text="Đăng xuất" onAction="#handleLogout" style="-fx-background-color: #d9534f; -fx-text-fill: white;"/>
+            <Label text="30/03/2026 22:19" textFill="WHITE" />
         </HBox>
     </top>
 
-    <!-- Phần Center thay bằng TableView -->
-    <center>
-        <VBox spacing="10" alignment="TOP_CENTER">
-            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="DANH SÁCH PHIÊN ĐẤU GIÁ HIỆN TẠI" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    <!-- SIDE BAR (THANH MENU BÊN TRÁI) -->
+    <left>
+        <VBox fx:id="sideBar" prefWidth="80.0" styleClass="side-bar" alignment="TOP_CENTER" spacing="10">
+            <!-- Nút Hamburger Mở Menu -->
+            <Button fx:id="btnMenu" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-cursor: hand;" text="≡" />
 
-            <TableView fx:id="auctionTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="colId" text="Mã SP" prefWidth="80"/>
-                    <TableColumn fx:id="colName" text="Tên sản phẩm" prefWidth="250"/>
-                    <TableColumn fx:id="colPrice" text="Giá hiện tại ($)" prefWidth="120"/>
-                    <TableColumn fx:id="colEndTime" text="Thời gian kết thúc" prefWidth="150"/>
-                    <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="100"/>
-                </columns>
-            </TableView>
+            <Region prefHeight="20.0" />
+
+            <!-- Các nút Menu -->
+            <Button fx:id="btnHome" onAction="#showHome" styleClass="nav-btn, nav-btn-active" text="🏠" prefWidth="250" prefHeight="50" />
+            <Button fx:id="btnWallet" onAction="#showWallet" styleClass="nav-btn" text="💼" prefWidth="250" prefHeight="50"/>
+            <Button fx:id="btnAuction" styleClass="nav-btn" text="⚖" prefWidth="250" prefHeight="50"/>
+            <Button fx:id="btnAdd" styleClass="nav-btn" text="⊕" prefWidth="250" prefHeight="50"/>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <!-- Avatar User -->
+            <VBox fx:id="userInfoBox" alignment="CENTER" spacing="10">
+                <Label fx:id="lblUserName" text="" textFill="WHITE" style="-fx-font-weight: bold;"/>
+                <Circle fill="WHITE" radius="15.0" />
+            </VBox>
+            <padding><Insets bottom="20.0" top="10.0"/></padding>
         </VBox>
+    </left>
+
+    <!-- TRUNG TÂM: ĐỂ TRỐNG. JAVA SẼ TỰ ĐỘNG LOAD DASHBOARD HOẶC WALLET VÀO ĐÂY -->
+    <center>
     </center>
 </BorderPane>

@@ -14,14 +14,17 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        // Giao diện mặc định khi bật app lên là Login
-        scene = new Scene(loadFXML("view/Login"));
+        // ĐỔI DÒNG NÀY: Thay "view/Login" thành "view/Home"
+        // Thêm kích thước 1280x720 để màn hình hiển thị rộng rãi giống bản thiết kế
+        scene = new Scene(loadFXML("view/Home"), 1280, 720);
+
         stage.setTitle("Hệ Thống Đấu Giá Trực Tuyến");
         stage.setScene(scene);
+        stage.centerOnScreen(); // Hiển thị cửa sổ ở giữa màn hình desktop
         stage.show();
     }
 
-    // Hàm tiện ích để đổi màn hình (Ví dụ: từ Login -> Home)
+    // Hàm tiện ích để đổi màn hình
     public static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #F4F6FB;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox spacing="25.0">
+        <padding><Insets bottom="30.0" left="40.0" right="40.0" top="30.0" /></padding>
+
+        <!-- KHU VỰC VÍ TIỀN & THẺ -->
+        <VBox styleClass="card" spacing="20">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Ví tiền của tôi" styleClass="title-text" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="Nạp tiền" styleClass="btn-green"/>
+                <Region prefWidth="15"/>
+                <Button text="Rút tiền" styleClass="btn-red"/>
+            </HBox>
+
+            <HBox spacing="40" alignment="CENTER_LEFT">
+                <!-- Thẻ Visa -->
+                <VBox styleClass="visa-card" alignment="BOTTOM_RIGHT">
+                    <Region VBox.vgrow="ALWAYS" />
+                    <Label text="VISA" styleClass="visa-text" />
+                </VBox>
+
+                <!-- Thông tin số dư -->
+                <VBox spacing="15" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Số tài khoản: " styleClass="title-text"/>
+                        <Label text="1023456789" style="-fx-font-size: 20px;"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Số dư" styleClass="title-text" prefWidth="150"/>
+                        <Label text="17.125.000 VND" styleClass="balance-box" prefWidth="250"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Số dư đóng băng" styleClass="title-text" prefWidth="150"/>
+                        <Label text="1.275.000.000 VND" styleClass="frozen-box" prefWidth="250"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- LỊCH SỬ GIAO DỊCH -->
+        <HBox spacing="25.0">
+            <!-- Thành công -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="15">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Giao dịch thành công" styleClass="title-text" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label text="Xem thêm" styleClass="link-text" />
+                </HBox>
+                <VBox spacing="10">
+                    <HBox alignment="CENTER_LEFT" styleClass="list-item">
+                        <Label text="SP12" style="-fx-font-weight: bold;" prefWidth="60"/>
+                        <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                            <Label text="Iphone 17 Pro Max" />
+                            <Label text="39.120.000 VND" style="-fx-background-color: #58B970; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 3 10 3 10;" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Thất bại -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="15">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Giao dịch thất bại" styleClass="title-text" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label text="Xem thêm" styleClass="link-text" />
+                </HBox>
+                <VBox spacing="10">
+                    <HBox alignment="CENTER_LEFT" styleClass="list-item">
+                        <Label text="SP13" style="-fx-font-weight: bold;" prefWidth="60"/>
+                        <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                            <Label text="Laptop Asus ROG" />
+                            <Label text="120.000.000 VND" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 3 10 3 10;" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>

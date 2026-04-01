@@ -6,7 +6,7 @@
 
 <BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" stylesheets="@style.css" styleClass="main-background" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
 
-    <!-- TOP BAR (THANH TÌM KIẾM Ở TRÊN) -->
+    <!-- TOP BAR -->
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="60.0" styleClass="top-bar">
             <Region prefWidth="60.0" />
@@ -19,10 +19,10 @@
         </HBox>
     </top>
 
-    <!-- SIDE BAR (THANH MENU BÊN TRÁI) -->
+    <!-- SIDE BAR CÓ THỂ TRƯỢT -->
     <left>
         <VBox fx:id="sideBar" prefWidth="80.0" styleClass="side-bar" alignment="TOP_CENTER" spacing="10">
-            <!-- Nút Hamburger Mở Menu -->
+            <!-- Nút Hamburger -->
             <Button fx:id="btnMenu" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-cursor: hand;" text="≡" />
 
             <Region prefHeight="20.0" />
@@ -35,7 +35,7 @@
 
             <Region VBox.vgrow="ALWAYS" />
 
-            <!-- Avatar User -->
+            <!-- User Info (ẩn khi thu gọn) -->
             <VBox fx:id="userInfoBox" alignment="CENTER" spacing="10">
                 <Label fx:id="lblUserName" text="" textFill="WHITE" style="-fx-font-weight: bold;"/>
                 <Circle fill="WHITE" radius="15.0" />
@@ -44,7 +44,8 @@
         </VBox>
     </left>
 
-    <!-- TRUNG TÂM: ĐỂ TRỐNG. JAVA SẼ TỰ ĐỘNG LOAD DASHBOARD HOẶC WALLET VÀO ĐÂY -->
+    <!-- NỘI DUNG Ở GIỮA SẼ ĐƯỢC LOAD ĐỘNG BẰNG JAVA -->
     <center>
+        <!-- Mặc định trống, Java sẽ nhét Dashboard.fxml vào đây -->
     </center>
 </BorderPane>

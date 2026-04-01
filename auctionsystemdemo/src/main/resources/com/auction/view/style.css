@@ -1,0 +1,167 @@
+/* --- BIẾN MÀU SẮC CHUNG --- */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-bg-color: #F4F6FB; /* Màu nền xám nhạt của vùng content */
+    -fx-primary-color: #324B9C; /* Màu xanh đậm của Sidebar & Topbar */
+    -fx-hover-color: #4364CA; /* Màu xanh sáng khi hover */
+    -fx-text-light: #FFFFFF;
+    -fx-text-dark: #333333;
+}
+
+/* --- LAYOUT CHÍNH --- */
+.main-background {
+    -fx-background-color: -fx-bg-color;
+}
+
+.top-bar {
+    -fx-background-color: -fx-primary-color;
+    -fx-padding: 15 30 15 20;
+}
+
+.side-bar {
+    -fx-background-color: -fx-primary-color;
+    -fx-padding: 20 0 20 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 2, 0);
+}
+
+/* --- THANH TÌM KIẾM --- */
+.search-box {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 20; /* Bo tròn như viên thuốc */
+    -fx-padding: 5 15 5 15;
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-prompt-text-fill: #999999;
+    -fx-text-fill: -fx-text-dark;
+}
+
+.search-field:focused {
+    -fx-background-color: transparent;
+}
+
+/* --- NÚT MENU SIDEBAR --- */
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-light;
+    -fx-font-size: 14px;
+    -fx-alignment: center-left;
+    -fx-padding: 15 20 15 20;
+    -fx-cursor: hand;
+}
+
+.nav-btn:hover {
+    -fx-background-color: -fx-hover-color;
+}
+
+.nav-btn-active {
+    -fx-background-color: -fx-hover-color;
+    -fx-border-color: transparent transparent transparent #FFFFFF;
+    -fx-border-width: 0 0 0 4; /* Vạch trắng bên trái cho tab đang chọn */
+}
+
+/* --- CARD (Bảng trắng bo tròn có bóng) --- */
+.card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5); /* Đổ bóng nhẹ */
+}
+
+/* --- TIÊU ĐỀ --- */
+.title-text {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-dark;
+}
+
+.link-text {
+    -fx-text-fill: -fx-text-light;
+    -fx-background-color: #4A65C8;
+    -fx-background-radius: 5 15 0 15; /* Bo góc riêng biệt cho nút "Xem thêm" */
+    -fx-padding: 5 15 5 15;
+    -fx-cursor: hand;
+}
+
+/* --- LIST ITEM (Hàng dữ liệu đấu giá) --- */
+.list-item {
+    -fx-background-color: #F8F9FA;
+    -fx-background-radius: 10;
+    -fx-padding: 10 20 10 20;
+}
+
+/* --- PILL CHIP (Các cục hiển thị giá, thời gian) --- */
+.pill-blue {
+    -fx-background-color: #4A65C8;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 15;
+    -fx-padding: 5 15 5 15;
+    -fx-font-weight: bold;
+}
+
+.pill-yellow {
+    -fx-background-color: #F8CB7C;
+    -fx-text-fill: #333333;
+    -fx-background-radius: 15;
+    -fx-padding: 5 15 5 15;
+    -fx-font-weight: bold;
+}
+
+.notification-badge {
+    -fx-background-color: #E74C3C;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 2 6 2 6;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+/* --- NÚT BẤM (BUTTONS) --- */
+.btn-green {
+    -fx-background-color: #58B970;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+.btn-red {
+    -fx-background-color: #E74C3C;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+/* --- THẺ VISA --- */
+.visa-card {
+    -fx-background-color: #2F54A3;
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-min-width: 350;
+    -fx-min-height: 200;
+}
+.visa-text {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+/* --- HỘP SỐ DƯ --- */
+.balance-box {
+    -fx-background-color: #F4F6FB;
+    -fx-background-radius: 20;
+    -fx-padding: 5 15 5 15;
+    -fx-font-size: 18px;
+    -fx-alignment: center-right;
+}
+.frozen-box {
+    -fx-background-color: #2F54A3;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 5 15 5 15;
+    -fx-font-size: 18px;
+    -fx-alignment: center-right;
+}

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!-- Lưu ý: File này bắt đầu bằng ScrollPane, không có BorderPane nữa -->
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #F4F6FB;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox spacing="25.0">
+        <padding><Insets bottom="30.0" left="40.0" right="40.0" top="30.0" /></padding>
+
+        <!-- SẢN PHẨM NỔI BẬT -->
+        <VBox styleClass="card" spacing="15">
+            <HBox alignment="BOTTOM_LEFT">
+                <Label text="Sản phẩm nổi bật" styleClass="title-text" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label text="Xem thêm" styleClass="link-text" />
+            </HBox>
+            <VBox spacing="10">
+                <HBox alignment="CENTER_LEFT" styleClass="list-item">
+                    <Label text="SP1" prefWidth="80" style="-fx-font-weight: bold;"/>
+                    <Label text="Auction Name 1" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label text="1.273.000VND" styleClass="pill-blue" />
+                    <Region prefWidth="10" />
+                    <Label text="00:01:12" styleClass="pill-yellow" />
+                </HBox>
+                <HBox alignment="CENTER_LEFT" styleClass="list-item">
+                    <Label text="SP2" prefWidth="80" style="-fx-font-weight: bold;"/>
+                    <Label text="Auction Name 2" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label text="184.000VND" styleClass="pill-blue" />
+                    <Region prefWidth="10" />
+                    <Label text="00:07:36" styleClass="pill-yellow" />
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- BIỂU ĐỒ & THÔNG BÁO -->
+        <HBox spacing="25.0">
+            <!-- Thông báo -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" prefWidth="400" spacing="15">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Thông báo" styleClass="title-text" />
+                    <Label text="2" styleClass="notification-badge" />
+                </HBox>
+                <VBox spacing="10">
+                    <HBox alignment="CENTER_LEFT" styleClass="list-item">
+                        <Label text="Xác thực giao dịch: SP01..." HBox.hgrow="ALWAYS" />
+                        <Label text="✅ ❌" />
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Biểu đồ -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" prefWidth="600">
+                <Label text="Biểu đồ" styleClass="title-text" />
+                <LineChart prefHeight="200.0">
+                    <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
+                    <yAxis><NumberAxis side="LEFT" /></yAxis>
+                </LineChart>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>
