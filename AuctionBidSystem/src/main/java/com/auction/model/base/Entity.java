@@ -1,6 +1,5 @@
 package com.auction.model.base;
 
-
 public abstract class Entity {
     protected String id;
 

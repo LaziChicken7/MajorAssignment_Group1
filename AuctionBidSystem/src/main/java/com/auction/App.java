@@ -19,6 +19,7 @@ public class App extends Application {
         stage.setTitle("Hệ Thống Đấu Giá Trực Tuyến");
         stage.setScene(scene);
         stage.show();
+
     }
 
     // Hàm tiện ích để đổi màn hình (Ví dụ: từ Login -> Home)

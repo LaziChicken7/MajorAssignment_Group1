@@ -1,8 +1,10 @@
 package com.auction.model.user;
 
 import com.auction.model.base.Entity;
+import com.auction.model.enums.Role;
 
 public class User extends Entity {
+
     // MÃ HÓA VÀ GIẢI MÃ PASSWORD
     
     public static String encode(String password) {
@@ -30,10 +32,11 @@ public class User extends Entity {
     protected String password;
     protected String numberPhone;
     protected final String citizenId;
+    protected Role role;
 
     
     // KHAI BÁO CONSTRUCTOR
-    public User(String userName, String password, String fullName, String email, String numberPhone, String citizenId) {
+    public User(String userName, String password, String fullName, String email, String numberPhone, String citizenId, Role role) {
         super("USR" + (++idCounter));
         this.userName = userName;
         this.fullName = fullName;
@@ -41,6 +44,7 @@ public class User extends Entity {
         this.password = encode(password);
         this.numberPhone = numberPhone;
         this.citizenId = citizenId;
+        this.role = role;
     }
 
     // LẤY VÀ UPDATE THUỘC TÍNH

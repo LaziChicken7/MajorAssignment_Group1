@@ -39,7 +39,7 @@ public class Auction extends Entity {
     public Auction(Item bidProduct, Seller seller, LocalDateTime startTime, LocalDateTime endTime) {
         super("AUC" + (++auctionCounter));
         this.bidProduct = bidProduct;
-        this.bidProduct.updateSeller(seller);
+        this.bidProduct.setSeller(seller);
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = AuctionStatus.OPEN;
@@ -76,15 +76,15 @@ public class Auction extends Entity {
         }
         
         // 4. Hoàn lại tiền cho người đấu giá cũ
-        UserManager.updateMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).subtract(highestBid));
-        UserManager.updateMoneyOnWallet(winningUser.getId(), UserManager.getMoneyOnWallet(winningUser.getId()).add(highestBid));
+        UserManager.setMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).subtract(highestBid));
+        UserManager.setMoneyOnWallet(winningUser.getId(), UserManager.getMoneyOnWallet(winningUser.getId()).add(highestBid));
 
         // 5. Cập nhật người dẫn đầu và giá cao nhất
         highestBid = bidAmount;
         winningUser = bidder;
 
-        UserManager.updateMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).add(highestBid));
-        UserManager.updateMoneyOnWallet(winningUser.getId(), UserManager.getMoneyOnWallet(winningUser.getId()).subtract(highestBid));
+        UserManager.setMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).add(highestBid));
+        UserManager.setMoneyOnWallet(winningUser.getId(), UserManager.getMoneyOnWallet(winningUser.getId()).subtract(highestBid));
 
         
         // 6. Lưu lịch sử giao dịch
@@ -148,16 +148,16 @@ public class Auction extends Entity {
     // Chuyển sang trạng thái chấp nhận trả tiền
     public void acceptPayment() {
         this.status = AuctionStatus.PAID;
-        UserManager.updateMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).subtract(highestBid));
-        UserManager.updateMoneyOnWallet(bidProduct.getSeller().getId(), UserManager.getMoneyOnWallet(bidProduct.getSeller().getId()).add(highestBid));
-        UserManager.updateSuccessBidItem(winningUser.getId(), bidProduct);
+        UserManager.setMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).subtract(highestBid));
+        UserManager.setMoneyOnWallet(bidProduct.getSeller().getId(), UserManager.getMoneyOnWallet(bidProduct.getSeller().getId()).add(highestBid));
+        UserManager.setSuccessBidItem(winningUser.getId(), bidProduct);
     }
 
     // Chuyển sang trạng thái hủy đấu giá
     public void cancelAuction() {
         this.status = AuctionStatus.CANCELLED;
-        UserManager.updateMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).subtract(highestBid));
-        UserManager.updateMoneyinFrozen(winningUser.getId(), UserManager.getMoneyOnWallet(winningUser.getId()).add(highestBid));
-        UserManager.updateFailedBidItem(winningUser.getId(), bidProduct);
+        UserManager.setMoneyinFrozen(winningUser.getId(), UserManager.getMoneyinFrozen(winningUser.getId()).subtract(highestBid));
+        UserManager.setMoneyinFrozen(winningUser.getId(), UserManager.getMoneyOnWallet(winningUser.getId()).add(highestBid));
+        UserManager.setFailedBidItem(winningUser.getId(), bidProduct);
     }
 }
