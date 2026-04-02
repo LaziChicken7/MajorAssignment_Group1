@@ -3,8 +3,8 @@ package com.auction.model.user;
 public class Admin extends User{
     private String department;
 
-    public Admin(String id, String username, String password, String fullname, String email, String numberPhone, String cccd, String department) {
-        super(id, username, password, fullname, email, numberPhone, cccd);
+    public Admin(String userName, String password, String fullName, String email, String numberPhone, String citizenId, String department) {
+        super(userName, password, fullName, email, numberPhone, citizenId);
         this.department = department;
     }
 

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.auction.model.enums.Role;
 import com.auction.model.item.Item;
 
 public class UserManager {
@@ -13,6 +14,7 @@ public class UserManager {
     // ĐĂNG NHẬP, ĐĂNG KÝ, QUÊN MẬT KHẨU
     
     public boolean Register(String userName, String password, String fullName, String email, String numberPhone, String citizenId) {
+
         for (User user : users) {
             if (user.userName.equals(userName)) {
                 System.err.println("Tài khoản đã tồn tại");
@@ -31,13 +33,14 @@ public class UserManager {
                 return false;
             }
         }
+        // DÙNG FOR -> CHƯA TỐI ƯU
         
         if (!checkWeakPassword(password)) {
             System.err.println("Mật khẩu yếu");
             return false;
         }
 
-        users.add(new Bidder(userName, password, fullName, email, numberPhone, citizenId, ""));
+        users.add(new Bidder(userName, password, fullName, email, numberPhone, citizenId, "", Role.BIDDER));
         
         System.err.println("Đăng ký thành công");
         return true;
@@ -223,10 +226,10 @@ public class UserManager {
         return null;
     }
 
-    public static void updateMoneyinFrozen(String userName, BigDecimal moneyinFrozen) {
+    public static void setMoneyinFrozen(String userName, BigDecimal moneyinFrozen) {
         for (User user : users) {
             if (user.userName.equals(userName)) {
-                ((Bidder) user).updateMoneyinFrozen(moneyinFrozen);
+                ((Bidder) user).setMoneyinFrozen(moneyinFrozen);
                 break;
             }
         }
@@ -240,10 +243,10 @@ public class UserManager {
         return BigDecimal.ZERO;
     }
 
-    public static void updateMoneyOnWallet(String userName, BigDecimal moneyinWallet) {
+    public static void setMoneyOnWallet(String userName, BigDecimal moneyinWallet) {
         for (User user : users) {
             if (user.userName.equals(userName)) {
-                ((Bidder) user).updateMoneyOnWallet(moneyinWallet);
+                ((Bidder) user).setMoneyOnWallet(moneyinWallet);
                 break;
             }
         }
@@ -257,7 +260,7 @@ public class UserManager {
         return BigDecimal.ZERO;
     }
 
-    public static void updateSuccessBidItem(String userName, Item item) {
+    public static void setSuccessBidItem(String userName, Item item) {
         for (User user : users) {
             if (user.userName.equals(userName)) {
                 ((Bidder) user).addSuccessBidItem(item);
@@ -266,7 +269,7 @@ public class UserManager {
         }
     }
 
-    public static void updateFailedBidItem(String userName, Item item) {
+    public static void setFailedBidItem(String userName, Item item) {
         for (User user : users) {
             if (user.userName.equals(userName)) {
                 ((Bidder) user).addFailedBidItem(item);

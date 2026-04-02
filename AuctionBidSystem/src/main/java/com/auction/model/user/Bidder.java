@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.auction.model.enums.Role;
 import com.auction.model.item.Item;
 
 // CẤP QUYỀN BIDDER
@@ -20,8 +21,8 @@ public class Bidder extends User {
     protected List<Item> successBidItem;
     protected List<Item> failedBidItem;
 
-    public Bidder(String userName, String password, String fullName, String email, String numberPhone, String citizenId, String address) {
-        super(userName, password, fullName, email, numberPhone, citizenId);
+    public Bidder(String userName, String password, String fullName, String email, String numberPhone, String citizenId, String address, Role role) {
+        super(userName, password, fullName, email, numberPhone, citizenId, role);
         this.address = address;
         this.bankAccountNumber = String.valueOf(++bankingNumber);
         this.moneyOnWallet = BigDecimal.ZERO;
@@ -29,19 +30,20 @@ public class Bidder extends User {
 
         this.successBidItem = new ArrayList<>();
         this.failedBidItem = new ArrayList<>();
+        this.role = role;
     }
     
     // LẤY THUỘC TÍNH
     public String getAddress() { return address; }
-    public void updateAddress(String address) { this.address = address; }
+    public void setAddress(String address) { this.address = address; }
 
     public String getBankAccountNumber() { return bankAccountNumber; }
 
     public BigDecimal getMoneyOnWallet() { return moneyOnWallet; }
-    public void updateMoneyOnWallet(BigDecimal moneyOnWallet) { this.moneyOnWallet = moneyOnWallet; }
+    public void setMoneyOnWallet(BigDecimal moneyOnWallet) { this.moneyOnWallet = moneyOnWallet; }
 
     public BigDecimal getMoneyinFrozen() { return moneyinFrozen; }
-    public void updateMoneyinFrozen(BigDecimal moneyinFrozen) { this.moneyinFrozen = moneyinFrozen; }
+    public void setMoneyinFrozen(BigDecimal moneyinFrozen) { this.moneyinFrozen = moneyinFrozen; }
 
     // NẠP VÀ RÚT TIỀN
     public void Deposit(BigDecimal money) {
