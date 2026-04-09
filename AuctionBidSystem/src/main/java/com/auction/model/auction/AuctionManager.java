@@ -40,9 +40,10 @@ public class AuctionManager {
     // 2. Tạo mới một phiên đấu giá
     public synchronized Auction createAuction(Item item, Seller seller, LocalDateTime startTime, LocalDateTime endTime) {
         String auctionId = "AUC" + (++auctionCounter);
-        Auction auction = new Auction(auctionId, item, seller, startTime, endTime);
+        Auction newAuction = new Auction(auctionId, item, seller, startTime, endTime);
 
-        auctions.put(auctionId, auction);
+        auctions.put(auctionId, newAuction);
+        return newAuction;
     }
 
     // 3. Lấy ra một phiên đấu giá cụ thể
@@ -51,12 +52,18 @@ public class AuctionManager {
     }
 
     // 4. Ủy quyền hành động đặt giá xuống cho Auction xử lý
-    public boolean placeBid(String auctionId, Bidder bidder, BigDecimal bidAmount, LocalDateTime bidTimestamp) throws NotFoundException {
+    public boolean placeBid(String auctionId, Bidder bidder, BigDecimal bidAmount, LocalDateTime bidTimestamp) throws NotFoundException, NotEnoughMoneyException {
         Auction auction = getAuction(auctionId);
         if (auction == null) {
             throw new NotFoundException("Phiên đấu giá không tồn tại");
         }
-        return auction.placeBid(bidder, bidAmount, bidTimestamp);
+        try {
+            return auction.placeBid(bidder, bidAmount, bidTimestamp);
+        } catch (NotEnoughMoneyException e) {
+            System.err.println(e.getMessage());
+            throw new NotEnoughMoneyException(e.getMessage());
+            // Chỉnh trong controller sau
+        }
     }
 
     // Lấy toàn bộ danh sách phiên đấu giá (để hiển thị lên GUI)

@@ -100,7 +100,7 @@ public class Auction extends Entity {
                 PaymentService.unFreezeMoney(winningUser.getId(), highestBid);
             } catch (NotEnoughMoneyException e) {
                 System.err.println(e.getMessage());
-                return false;
+                throw new NotEnoughMoneyException(e.getMessage());
                 // Chỉnh trong controller sau
             }
         }
@@ -112,7 +112,7 @@ public class Auction extends Entity {
             PaymentService.FreezeMoney(winningUser.getId(), bidAmount);
         } catch (NotEnoughMoneyException e) {
             System.err.println(e.getMessage());
-            return false;
+            throw new NotEnoughMoneyException(e.getMessage());
             // Chỉnh trong controller sau
         }
 

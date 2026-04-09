@@ -55,6 +55,7 @@ public abstract class PaymentService {
         } catch (NotEnoughMoneyException e) {
             // Sửa trong controller sau
             System.err.println(e.getMessage());
+            throw new NotEnoughMoneyException(e.getMessage());
         }
     }
 
@@ -66,6 +67,7 @@ public abstract class PaymentService {
         } catch (NotEnoughMoneyException e) {
             // Sửa trong controller sau
             System.err.println(e.getMessage());
+            throw new NotEnoughMoneyException(e.getMessage());
         }
     }
 
@@ -77,6 +79,7 @@ public abstract class PaymentService {
         } catch (NotEnoughMoneyException e) {
             // Sửa trong controller sau
             System.err.println(e.getMessage());
+            throw new NotEnoughMoneyException(e.getMessage());
         }
     }
 }
