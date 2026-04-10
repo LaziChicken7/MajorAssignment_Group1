@@ -3,20 +3,38 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.image.*?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.LoginController">
-    <padding>
-        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-    </padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.auction.controller.LoginController"
+           stylesheets="@style.css">
 
-    <Label text="HỆ THỐNG ĐẤU GIÁ">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
-    
-    <TextField fx:id="txtUsername" promptText="Tên đăng nhập (vd: admin)" prefWidth="250.0"/>
-    <PasswordField fx:id="txtPassword" promptText="Mật khẩu (vd: 123456)" prefWidth="250.0"/>
-    
-    <Label fx:id="lblError" textFill="RED" />
-    
-    <Button text="Đăng nhập" onAction="#handleLogin" prefWidth="250.0" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
-</VBox>
+    <ImageView preserveRatio="false" fitWidth="1280" fitHeight="720">
+        <image>
+            <Image url="@login_bg.png"/>
+        </image>
+    </ImageView>
+
+    <Region style="-fx-background-color: rgba(0,0,0,0.4);" />
+
+    <VBox alignment="CENTER" spacing="20.0" maxWidth="400.0" maxHeight="500.0"
+          styleClass="card">
+        <padding>
+            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+        </padding>
+
+        <Label text="HỆ THỐNG ĐẤU GIÁ TRỰC TUYẾN" styleClass="title-text">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
+
+        <TextField fx:id="txtUsername" promptText="Tên đăng nhập" prefHeight="45.0" styleClass="auth-input"/>
+        <PasswordField fx:id="txtPassword" promptText="Mật khẩu" prefHeight="45.0" styleClass="auth-input"/>
+
+        <Label fx:id="lblError" textFill="#E74C3C" />
+
+        <Button text="ĐĂNG NHẬP" onAction="#handleLogin" prefHeight="45.0"
+                maxWidth="Infinity" styleClass="auth-btn-primary" />
+
+        <Label text="Quên mật khẩu?" styleClass="link-text-small" />
+    </VBox>
+</StackPane>
