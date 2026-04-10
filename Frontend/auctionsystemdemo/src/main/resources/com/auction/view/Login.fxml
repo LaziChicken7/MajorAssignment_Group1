@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<!-- Giả lập nền xanh gradient giống thiết kế -->
+<BorderPane xmlns:fx="http://javafx.com/fxml" style="-fx-background-color: linear-gradient(to bottom, #0A439D, #001A4D);" prefWidth="1200" prefHeight="700">
+    <!-- Navbar Top -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 20 40;">
+            <Button text="Trang chủ" styleClass="btn-outline" style="-fx-border-color: white; -fx-text-fill: white;"/>
+            <Button text="Hướng dẫn" styleClass="btn-outline" style="-fx-border-color: white; -fx-text-fill: white;"/>
+            <Button text="Liên hệ" styleClass="btn-outline" style="-fx-border-color: white; -fx-text-fill: white;"/>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Đăng nhập" styleClass="btn-primary" style="-fx-background-color: white; -fx-text-fill: #0A439D;"/>
+            <Button text="Đăng ký" styleClass="btn-outline" style="-fx-border-color: white; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <!-- Center Content -->
+    <center>
+        <VBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 0 0 0 100;">
+            <Label text="ĐẤU GIÁ TRỰC TUYẾN" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: white;" />
+            <Button text="Đăng ký ngay" styleClass="btn-outline" style="-fx-border-color: white; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10 30;"/>
+            <Label text="Minh bạch - An toàn - Hiệu quả. Nền tảng&#10;công nghệ hiện đại giúp việc mua bán trở nên đơn giản và tin cậy."
+                   style="-fx-font-size: 16px; -fx-text-fill: white; -fx-wrap-text: true;" prefWidth="500"/>
+        </VBox>
+    </center>
+</BorderPane>

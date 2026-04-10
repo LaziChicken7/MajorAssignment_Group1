@@ -1,0 +1,34 @@
+package com.auction;
+
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import java.net.URL;
+
+public class App extends Application {
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        // SỬA DẤU CHẤM THÀNH DẤU GẠCH CHÉO Ở ĐÂY
+        URL fxmlLocation = getClass().getResource("/com/auction/view/Main.fxml");
+
+        if (fxmlLocation == null) {
+            System.out.println("Lỗi: Không tìm thấy file Main.fxml. Hãy kiểm tra lại thư mục resources!");
+            return;
+        }
+
+        Parent root = FXMLLoader.load(fxmlLocation);
+        Scene scene = new Scene(root, 1200, 800);
+
+        primaryStage.setTitle("Hệ thống đấu giá trực tuyến");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}

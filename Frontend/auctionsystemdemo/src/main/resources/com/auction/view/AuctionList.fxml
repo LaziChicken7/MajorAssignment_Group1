@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="20" style="-fx-background-color: transparent;">
+    <HBox alignment="CENTER_LEFT">
+        <Label text="&lt; Đấu giá" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="Số dư: 144.250.000 VND" styleClass="auction-price" style="-fx-font-size: 16px;" />
+    </HBox>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+        <VBox spacing="15" styleClass="card">
+            <!-- Row 1 -->
+            <VBox spacing="10" style="-fx-border-color: #E0E0E0; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 15 0;">
+                <HBox spacing="20"><Label text="SP1" styleClass="auction-title"/><Label text="Auction Name 1" style="-fx-font-size: 16px;"/></HBox>
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <Label text="Giá hiện tại:" style="-fx-font-weight: bold;"/>
+                    <Label text="1.273.000 VND" styleClass="auction-price"/>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label text="Thời gian còn lại:" style="-fx-font-weight: bold;"/>
+                    <Label text="00:01:12" styleClass="auction-time"/>
+                </HBox>
+            </VBox>
+            <!-- Row 2 -->
+            <VBox spacing="10" style="-fx-border-color: #E0E0E0; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 15 0;">
+                <HBox spacing="20"><Label text="SP2" styleClass="auction-title"/><Label text="Auction Name 2" style="-fx-font-size: 16px;"/></HBox>
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <Label text="Giá hiện tại:" style="-fx-font-weight: bold;"/>
+                    <Label text="184.000 VND" styleClass="auction-price"/>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label text="Thời gian còn lại:" style="-fx-font-weight: bold;"/>
+                    <Label text="00:07:36" styleClass="auction-time"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

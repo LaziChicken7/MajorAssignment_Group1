@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" stylesheets="@style.css" styleClass="main-background" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
+
+    <!-- TOP BAR (THANH TÌM KIẾM Ở TRÊN) -->
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="60.0" styleClass="top-bar">
+            <Region prefWidth="60.0" />
+            <HBox alignment="CENTER_LEFT" prefHeight="35.0" prefWidth="400.0" styleClass="search-box">
+                <Label text="🔍" textFill="#999999"><HBox.margin><Insets left="10.0" right="10.0"/></HBox.margin></Label>
+                <TextField promptText="Tìm kiếm" styleClass="search-field" HBox.hgrow="ALWAYS" />
+            </HBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Label text="30/03/2026 22:19" textFill="WHITE" />
+        </HBox>
+    </top>
+
+    <!-- SIDE BAR (THANH MENU BÊN TRÁI) -->
+    <left>
+        <VBox fx:id="sideBar" prefWidth="80.0" styleClass="side-bar" alignment="TOP_CENTER" spacing="10">
+            <!-- Nút Hamburger Mở Menu -->
+            <Button fx:id="btnMenu" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-cursor: hand;" text="≡" />
+
+            <Region prefHeight="20.0" />
+
+            <!-- Các nút Menu -->
+            <Button fx:id="btnHome" onAction="#showHome" styleClass="nav-btn, nav-btn-active" text="🏠" prefWidth="250" prefHeight="50" />
+            <Button fx:id="btnWallet" onAction="#showWallet" styleClass="nav-btn" text="💼" prefWidth="250" prefHeight="50"/>
+            <Button fx:id="btnAuction" styleClass="nav-btn" text="⚖" prefWidth="250" prefHeight="50"/>
+            <Button fx:id="btnAdd" styleClass="nav-btn" text="⊕" prefWidth="250" prefHeight="50"/>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <!-- Avatar User -->
+            <VBox fx:id="userInfoBox" alignment="CENTER" spacing="10">
+                <Label fx:id="lblUserName" text="" textFill="WHITE" style="-fx-font-weight: bold;"/>
+                <Circle fill="WHITE" radius="15.0" />
+            </VBox>
+            <padding><Insets bottom="20.0" top="10.0"/></padding>
+        </VBox>
+    </left>
+
+    <!-- TRUNG TÂM: ĐỂ TRỐNG. JAVA SẼ TỰ ĐỘNG LOAD DASHBOARD HOẶC WALLET VÀO ĐÂY -->
+    <center>
+    </center>
+</BorderPane>

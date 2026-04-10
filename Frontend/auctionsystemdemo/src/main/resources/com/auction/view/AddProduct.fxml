@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="20" style="-fx-background-color: transparent;">
+    <Label text="&lt; Thêm sản phẩm" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+
+    <HBox styleClass="card" spacing="30">
+        <!-- Cột trái: Ảnh -->
+        <VBox alignment="CENTER" spacing="15">
+            <StackPane styleClass="image-placeholder" prefWidth="200" prefHeight="200">
+                <Label text="🖼" style="-fx-font-size: 60px; -fx-text-fill: white;"/>
+            </StackPane>
+            <Button text="Tải ảnh lên" styleClass="btn-primary" />
+        </VBox>
+
+        <!-- Cột phải: Form nhập liệu -->
+        <VBox spacing="15" HBox.hgrow="ALWAYS">
+            <HBox spacing="20">
+                <TextField promptText="Mã sản phẩm" styleClass="input-field" prefWidth="150"/>
+                <TextField promptText="Tên sản phẩm" styleClass="input-field" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <TextArea promptText="Mô tả sản phẩm" styleClass="input-field" prefRowCount="5" wrapText="true"/>
+
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="Số tiền đấu giá ban đầu:" prefWidth="150" style="-fx-font-weight: bold;"/>
+                <TextField promptText="Số tiền đấu giá" styleClass="input-field" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="Thời gian bắt đầu:" prefWidth="150" style="-fx-font-weight: bold;"/>
+                <DatePicker styleClass="input-field" HBox.hgrow="ALWAYS"/>
+                <TextField promptText="06:50" styleClass="input-field" prefWidth="80"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="Thời gian kết thúc:" prefWidth="150" style="-fx-font-weight: bold;"/>
+                <DatePicker styleClass="input-field" HBox.hgrow="ALWAYS"/>
+                <TextField promptText="09:53" styleClass="input-field" prefWidth="80"/>
+            </HBox>
+
+            <HBox alignment="CENTER">
+                <Button text="Xác nhận" styleClass="btn-primary" style="-fx-padding: 10 40;"/>
+            </HBox>
+        </VBox>
+    </HBox>
+</VBox>
