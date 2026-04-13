@@ -3,6 +3,8 @@ package com.auction.model.user;
 import com.auction.model.base.Entity;
 import com.auction.model.enums.Role;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class User extends Entity {
 
     // MÃ HÓA VÀ GIẢI MÃ PASSWORD
@@ -25,7 +27,7 @@ public class User extends Entity {
 
     // KHAI BÁO THUỘC TÍNH
 
-    private static int idCounter = 0;
+    private static AtomicInteger idCounter = new AtomicInteger(0);
     protected String userName;
     protected String fullName;
     protected String email;
@@ -37,7 +39,7 @@ public class User extends Entity {
     
     // KHAI BÁO CONSTRUCTOR
     public User(String userName, String password, String fullName, String email, String numberPhone, String citizenId, Role role) {
-        super("USR" + (++idCounter));
+        super("USR" + idCounter.incrementAndGet());
         this.userName = userName;
         this.fullName = fullName;
         this.email = email;

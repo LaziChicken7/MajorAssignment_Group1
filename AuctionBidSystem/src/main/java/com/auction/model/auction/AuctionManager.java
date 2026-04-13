@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 class NotFoundException extends Exception {
     public NotFoundException(String msg) {
@@ -19,12 +21,13 @@ class NotFoundException extends Exception {
 // Chịu trách nghiệm tạo phiên mới, lưu trữ danh sách phiên, tìm kiếm phiên và điều phối các hành động từ người dùng
 public class AuctionManager {
     // 1. Áp dụng Singleton Pattern (là điểm vào duy nhất khi một User muốn thao tác với phiên đấu giá)
-    private static AuctionManager instance;
+    // Từ khóa volatile ngăn chặn vấn đề Cache và Instruction Reordering của CPU
+    private static volatile AuctionManager instance;
 
     // Sử dụng ConcurrentHashMap để an toàn trong môi trường đa luồng
     private final Map<String, Auction> auctions;
 
-    private int auctionCounter = 0;
+    private AtomicInteger auctionCounter = new AtomicInteger(0);
 
     private AuctionManager() {
         this.auctions = new ConcurrentHashMap<>();
@@ -38,8 +41,9 @@ public class AuctionManager {
     }
 
     // 2. Tạo mới một phiên đấu giá
-    public synchronized Auction createAuction(Item item, Seller seller, LocalDateTime startTime, LocalDateTime endTime) {
-        String auctionId = "AUC" + (++auctionCounter);
+    public Auction createAuction(Item item, Seller seller, LocalDateTime startTime, LocalDateTime endTime) {
+        // incrementAndGet() tự động cộng 1 một cách an toàn giữa các luồng
+        String auctionId = "AUC" + auctionCounter.incrementAndGet();
         Auction newAuction = new Auction(auctionId, item, seller, startTime, endTime);
 
         auctions.put(auctionId, newAuction);
@@ -57,6 +61,8 @@ public class AuctionManager {
         if (auction == null) {
             throw new NotFoundException("Phiên đấu giá không tồn tại");
         }
+
+        // Gọi xuống hàm placeBid của Auction (Nơi đã được bảo vệ bằng ReentrantLock)
         try {
             return auction.placeBid(bidder, bidAmount, bidTimestamp);
         } catch (NotEnoughMoneyException e) {
