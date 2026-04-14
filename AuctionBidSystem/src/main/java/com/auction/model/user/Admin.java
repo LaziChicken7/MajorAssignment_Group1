@@ -1,10 +1,12 @@
 package com.auction.model.user;
 
+import com.auction.model.enums.Role;
+
 public class Admin extends User{
     private String department;
 
-    public Admin(String userName, String password, String fullName, String email, String numberPhone, String citizenId, String department) {
-        super(userName, password, fullName, email, numberPhone, citizenId);
+    public Admin(String userName, String password, String fullName, String email, String numberPhone, String citizenId, Role role, String department) {
+        super(userName, password, fullName, email, numberPhone, citizenId, role);
         this.department = department;
     }
 

@@ -1,5 +1,7 @@
 package com.auction.model.enums;
 
-public class ItemType {
-    
+public enum ItemType {
+    VEHICLE,
+    ELECTRONICS,
+    ART
 }

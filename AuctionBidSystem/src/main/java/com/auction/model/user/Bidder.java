@@ -9,9 +9,8 @@ import com.auction.model.item.Item;
 
 // CẤP QUYỀN BIDDER
 public class Bidder extends User {
-    // KHAI BÁO THUỘC TÍNH
 
-    protected static long idCounter = 0;
+    // KHAI BÁO THUỘC TÍNH
     protected static long bankingNumber = 1000000000L;
     protected String address;
     protected final String bankAccountNumber;
