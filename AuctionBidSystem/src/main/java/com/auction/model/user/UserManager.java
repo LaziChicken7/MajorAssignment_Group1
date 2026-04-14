@@ -6,6 +6,14 @@ import java.util.List;
 import com.auction.model.enums.Role;
 import com.auction.model.item.Item;
 
+class RegisteredFailException extends Exception {
+    public RegisteredFailException(String msg) { super(msg); }
+}
+
+class ForgotPasswordException extends Exception {
+    public ForgotPasswordException(String msg) { super(msg); }
+}
+
 public class UserManager {
 
     private static List<User> users = new ArrayList<>();
@@ -26,18 +34,15 @@ public class UserManager {
 
     // LOGIC CHÍNH
 
-    public boolean Register(String userName, String password, String fullName, String email, String numberPhone, String citizenId) {
+    public boolean Register(String userName, String password, String fullName, String email, String numberPhone, String citizenId) throws RegisteredFailException {
         for (User user : users) {
-            if (user.getUserName().equals(userName)) { System.err.println("Tài khoản đã tồn tại"); return false; }
-            if (user.getEmail().equals(email)) { System.err.println("Email đã tồn tại"); return false; }
-            if (user.getNumberPhone().equals(numberPhone)) { System.err.println("Số điện thoại đã tồn tại"); return false; }
-            if (user.getCitizenId().equals(citizenId)) { System.err.println("CCCD đã tồn tại"); return false; }
+            if (user.getUserName().equals(userName)) { throw new RegisteredFailException("Tài khoản đã tồn tại"); }
+            if (user.getEmail().equals(email)) { throw new RegisteredFailException("Email đã tồn tại"); }
+            if (user.getNumberPhone().equals(numberPhone)) { throw new RegisteredFailException("Số điện thoại đã tồn tại"); }
+            if (user.getCitizenId().equals(citizenId)) { throw new RegisteredFailException("CCCD đã tồn tại"); }
         }
 
-        if (!checkWeakPassword(password)) {
-            System.err.println("Mật khẩu yếu");
-            return false;
-        }
+        if (!checkWeakPassword(password)) { throw new RegisteredFailException("Mật khẩu yếu"); }
 
         // Dùng Factory Method
         User newUser = UserFactory.createUser(Role.BIDDER, userName, password, fullName, email, numberPhone, citizenId);
@@ -57,15 +62,26 @@ public class UserManager {
         return false;
     }
 
-    public boolean ForgotPassword(String userName, String email, String newPassword) {
+    public boolean ForgotPassword(String userName, String email, String newPassword) throws ForgotPasswordException {
         User user = findUser(userName);
-        if (user != null && user.getEmail().equals(email)) {
-            user.setPassword(newPassword);
-            System.err.println("Đổi mật khẩu thành công");
-            return true;
+
+        if (user == null) {
+            throw new ForgotPasswordException("Tài khoản không tồn tại trong hệ thống.");
         }
-        System.err.println("Không tìm thấy tài khoản");
-        return false;
+
+        if (!user.getEmail().equals(email)) {
+            throw new ForgotPasswordException("Email xác thực không khớp với tài khoản.");
+        }
+
+        // Tái sử dụng hàm checkWeakPassword cho mật khẩu mới
+        if (!checkWeakPassword(newPassword)) {
+            throw new ForgotPasswordException("Mật khẩu mới quá yếu. Cần ít nhất 8 ký tự, có chữ hoa, chữ thường và số.");
+        }
+
+        // Nếu qua hết các vòng gửi xe trên
+        user.setPassword(User.encode(newPassword)); // Nhớ encode cả mật khẩu mới nhé (nếu hàm setPassword chưa tự encode)
+        System.out.println("Đổi mật khẩu thành công");
+        return true;
     }
 
     private boolean checkWeakPassword(String password) {
