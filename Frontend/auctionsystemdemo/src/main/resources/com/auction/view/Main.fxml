@@ -26,7 +26,7 @@
                 </VBox>
 
                 <VBox spacing="15" alignment="BOTTOM_CENTER">
-                    <Button fx:id="btnIconNotif" text="✉" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" />
+                    <Button fx:id="btnIconNotif" text="📩" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" />
                     <Button fx:id="btnIconProfile" text="👤" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showProfile"/>
                 </VBox>
             </VBox>

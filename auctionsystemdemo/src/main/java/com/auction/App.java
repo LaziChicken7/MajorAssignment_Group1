@@ -16,7 +16,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         // ĐỔI DÒNG NÀY: Thay "view/Login" thành "view/Home"
         // Thêm kích thước 1280x720 để màn hình hiển thị rộng rãi giống bản thiết kế
-        scene = new Scene(loadFXML("view/Home"), 1280, 720);
+        scene = new Scene(loadFXML("view/Login"), 1280, 720);
 
         stage.setTitle("Hệ Thống Đấu Giá Trực Tuyến");
         stage.setScene(scene);

@@ -2,13 +2,34 @@ package com.auction.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class WalletController {
 
     @FXML
+    private VBox contentArea;
+
+    @FXML
     public void handleDeposit(ActionEvent event) {
         // Hiển thị popup nạp tiền (Page 6)
-        System.out.println("Mở popup Nạp tiền...");
+        try {
+            // 1. Tải cái form nạp tiền nhỏ
+            Node depositForm = FXMLLoader.load(getClass().getResource("/com/auction/view/DepositForm.fxml"));
+
+            contentArea.getChildren().setAll(depositForm);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Mở popup lên Nạp tiền...");
+        }
     }
 
     @FXML
