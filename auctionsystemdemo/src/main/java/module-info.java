@@ -1,6 +1,7 @@
 module com.auction {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.graphics;
 
     // Cấp quyền cho JavaFX truy cập vào package chính
     opens com.auction to javafx.fxml;

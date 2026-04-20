@@ -1,5 +1,7 @@
 package com.auction.model.auction;
 
+import com.auction.model.exception.NotEnoughMoneyException;
+import com.auction.model.exception.NotFoundException;
 import com.auction.model.item.Item;
 import com.auction.model.user.Bidder;
 import com.auction.model.user.Seller;
@@ -10,12 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-
-class NotFoundException extends Exception {
-    public NotFoundException(String msg) {
-        super(msg);
-    }
-}
 
 // Quản lý toàn bộ các phiên đấu giá trong hệ thống
 // Chịu trách nghiệm tạo phiên mới, lưu trữ danh sách phiên, tìm kiếm phiên và điều phối các hành động từ người dùng

@@ -9,5 +9,8 @@
         <module name="AuctionSystem" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="AuctionSystem" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

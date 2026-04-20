@@ -8,17 +8,12 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.auction.model.base.Entity;
+import com.auction.model.exception.NotEnoughMoneyException;
 import com.auction.model.item.Item;
 import com.auction.model.user.Bidder;
 import com.auction.model.user.Seller;
-import com.auction.model.user.UserManager;
 import com.auction.model.enums.AuctionStatus;
 
-class placeBidFailedException extends Exception {
-    public placeBidFailedException(String msg) {
-        super(msg);
-    }
-}
 
 // Thêm class Antisnipping gia hạn thời gian
 

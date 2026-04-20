@@ -6,15 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.auction.model.enums.Role;
+import com.auction.model.exception.RegisteredFailException;
 import com.auction.model.item.Item;
-
-class RegisteredFailException extends Exception {
-    public RegisteredFailException(String msg) { super(msg); }
-}
-
-class ForgotPasswordException extends Exception {
-    public ForgotPasswordException(String msg) { super(msg); }
-}
 
 public class UserManager {
 

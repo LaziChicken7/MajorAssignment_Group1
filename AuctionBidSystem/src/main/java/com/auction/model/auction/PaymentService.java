@@ -1,15 +1,13 @@
 package com.auction.model.auction;
 
+import com.auction.model.exception.NotEnoughMoneyException;
 import com.auction.model.user.UserManager;
 
 import java.math.BigDecimal;
+import java.util.concurrent.locks.ReentrantLock;
 
 // Tạo một class NotEnoughMoneyException để ném ra ngoại lệ khi số tiền không đủ
-class NotEnoughMoneyException extends Exception {
-    public NotEnoughMoneyException(String msg) {
-        super(msg);
-    }
-}
+
 
 // Chịu trách nhiệm về việc payment (thanh toán)
 public abstract class PaymentService {
@@ -47,39 +45,53 @@ public abstract class PaymentService {
     // ------------------------------------------------------------------------------------
     // Chức năng đóng băng tiền
 
+    // THÊM: Khai báo ReentrantLock
+    private static final ReentrantLock lock = new ReentrantLock();
     // Đóng băng số tiền
     public static void FreezeMoney(String userId, BigDecimal amount) throws NotEnoughMoneyException {
+        lock.lock();
         try {
             subWalletMoney(userId, amount);
             addFreezeMoney(userId, amount);
         } catch (NotEnoughMoneyException e) {
             // Sửa trong controller sau
             System.err.println(e.getMessage());
+            lock.unlock();
             throw new NotEnoughMoneyException(e.getMessage());
+        } finally {
+            lock.unlock();
         }
     }
 
     // Dừng đóng băng tiền
     public static void unFreezeMoney(String userId, BigDecimal amount) throws NotEnoughMoneyException {
+        lock.lock();
         try {
             subFreezeMoney(userId, amount);
             addWalletMoney(userId, amount);
         } catch (NotEnoughMoneyException e) {
             // Sửa trong controller sau
             System.err.println(e.getMessage());
+            lock.unlock();
             throw new NotEnoughMoneyException(e.getMessage());
+        } finally {
+            lock.unlock();
         }
     }
 
     // Chuyển tiền đóng băng (đấu giá thành công)
     public static void transferMoney(String fromUserId, String toUserId, BigDecimal amount) throws NotEnoughMoneyException {
+        lock.lock();
         try {
             subFreezeMoney(fromUserId, amount);
             addWalletMoney(toUserId, amount);
         } catch (NotEnoughMoneyException e) {
             // Sửa trong controller sau
             System.err.println(e.getMessage());
+            lock.unlock();
             throw new NotEnoughMoneyException(e.getMessage());
+        } finally {
+            lock.unlock();
         }
     }
 }
