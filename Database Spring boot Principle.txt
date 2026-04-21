@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    
+    actor Client as Khách Hàng (Postman)
+    participant Ctrl as Controller
+    participant Svc as Service
+    participant Repo as Repository
+    participant DB as MySQL Database
+
+    Note over Client, Ctrl: Khách hàng gửi lên Username và Password
+    Client->>Ctrl: POST /api/login (Gửi file JSON)
+    
+    Note over Ctrl: Spring tự động biến file JSON<br/>thành object LoginRequest
+    Ctrl->>Svc: Nhờ bồi bàn gọi bếp trưởng:<br/>login(LoginRequest)
+    
+    Svc->>Repo: Bếp trưởng lấy Username ra và bảo thủ kho:<br/>findByUserName(userName)
+    
+    Repo->>DB: Thủ kho lục tìm trong tủ lạnh:<br/>SELECT * FROM users WHERE user_name = ...
+    DB-->>Repo: Trả về dòng dữ liệu trong bảng
+    
+    Note over Repo, Svc: Dữ liệu được gói thành Entity User<br/>(Bao gồm cả password, cccd...)
+    Repo-->>Svc: Trả về đối tượng Entity User
+    
+    Note over Svc: Bếp trưởng so sánh Password:<br/>1. Nếu sai -> Ném ra Exception (Lỗi)<br/>2. Nếu đúng -> Biến Entity User thành<br/>UserResponseDTO (Xóa pass, cccd đi)
+    
+    Svc-->>Ctrl: Trả về UserResponseDTO
+    
+    Note over Ctrl: Spring biến UserResponseDTO<br/>thành JSON lại
+    Ctrl-->>Client: Trả kết quả JSON cho Postman (Màu xanh lá 200 OK)
