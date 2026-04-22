@@ -1,13 +1,22 @@
 package org.auctionfx.demodatabase.dto.request;
 
+import jakarta.validation.constraints.Size;
+import org.auctionfx.demodatabase.exception.ErrorCode;
+
 import java.time.LocalDate;
 
 public class UserCreationRequest {
     private String id;
+
+    @Size(min = 3, message = "USERNAME_INVALID")
     private String username;
+
+    @Size(min = 8, message = "INVALID_PASSWORD")
     private String password;
     private String firstName;
     private String lastName;
+
+
     private LocalDate dateOfBirth;
 
     public String getId() {

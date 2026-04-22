@@ -3,6 +3,8 @@ package org.auctionfx.demodatabase.service;
 import org.auctionfx.demodatabase.dto.request.UserCreationRequest;
 import org.auctionfx.demodatabase.dto.request.UserUpdateRequest;
 import org.auctionfx.demodatabase.entity.User;
+import org.auctionfx.demodatabase.exception.AppException;
+import org.auctionfx.demodatabase.exception.ErrorCode;
 import org.auctionfx.demodatabase.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,10 @@ public class UserService {
     // Để tạo ra một cái Object request thì chúng ta cần package dto
     public User createUser(UserCreationRequest request) {
         User user = new User();
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
 
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());

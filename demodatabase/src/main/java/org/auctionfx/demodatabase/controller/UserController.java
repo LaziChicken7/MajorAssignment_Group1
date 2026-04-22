@@ -1,5 +1,7 @@
 package org.auctionfx.demodatabase.controller;
 
+import jakarta.validation.Valid;
+import org.auctionfx.demodatabase.dto.request.ApiResponse;
 import org.auctionfx.demodatabase.dto.request.UserCreationRequest;
 import org.auctionfx.demodatabase.dto.request.UserUpdateRequest;
 import org.auctionfx.demodatabase.entity.User;
@@ -18,8 +20,10 @@ public class UserController {
 
     // Create
     @PostMapping
-    User createUser(@RequestBody UserCreationRequest request) {
-        return userService.createUser(request);
+    ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.createUser(request));
+        return apiResponse;
     }
 
     // Read
