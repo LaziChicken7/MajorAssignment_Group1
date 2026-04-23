@@ -14,7 +14,7 @@
         <!--<Button text="Nạp tiền" styleClass="btn-success" />-->
         <Button text="Nạp tiền" styleClass="btn-success" onAction="#handleDeposit" />
 
-        <Button text="Rút tiền" styleClass="btn-danger" style="-fx-margin-left: 10px;" />
+        <Button text="Rút tiền" styleClass="btn-danger" onAction="#handleWithdraw" />
     </HBox>
 
     <!-- THẺ VISA & THÔNG TIN TÀI KHOẢN -->

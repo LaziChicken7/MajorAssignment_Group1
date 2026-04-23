@@ -107,6 +107,12 @@ public class MainController {
         closeSidebar();
     }
 
+    @FXML public void showNotification() {
+        loadView("/com/auction/view/Notification.fxml");
+        setActiveMenu(btnIconNotif, btnNavNotif);
+        closeSidebar();
+    }
+
     private void loadView(String fxmlPath) {
         try {
             URL url = getClass().getResource(fxmlPath);

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="20" style="-fx-background-color: transparent;">
+    <HBox alignment="CENTER_LEFT">
+        <Label text="&lt; Thông báo" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <Region HBox.hgrow="ALWAYS" />
+    </HBox>
+
+    <VBox spacing="15" VBox.vgrow="ALWAYS"
+          style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <padding>
+            <Insets top="30" right="20" bottom="30" left="20"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="15" styleClass="noti-item"
+              style="-fx-background-color: #f8f9fa; -fx-background-radius: 15; -fx-padding: 15;">
+            <Label text="Xác thực giao dịch: SP01 - Auction Item 01 - Giá tiền: 1.725.000VND"
+                   HBox.hgrow="ALWAYS" style="-fx-font-size: 16px;"/>
+
+            <HBox spacing="10">
+                <Button style="-fx-background-color: #00C853; -fx-text-fill: white; -fx-font-size: 18px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="✔" />
+                <Button style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-size: 18px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="✖" />
+                <Button style="-fx-background-color: #0A56D2; -fx-text-fill: white; -fx-font-size: 16px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="⋯" />
+            </HBox>
+        </HBox>
+
+        <HBox alignment="CENTER_LEFT" spacing="15" styleClass="noti-item"
+              style="-fx-background-color: #f8f9fa; -fx-background-radius: 15; -fx-padding: 15;">
+            <Label text="Sản phẩm đấu giá thành công: SP17 - Auction Item 17 - Giá tiền: 1..."
+                   HBox.hgrow="ALWAYS" style="-fx-font-size: 16px;"/>
+
+            <HBox spacing="10">
+                <Button style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-size: 18px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="☒" />
+                <Button style="-fx-background-color: #0A56D2; -fx-text-fill: white; -fx-font-size: 16px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="⋯" />
+            </HBox>
+        </HBox>
+    </VBox>
+</VBox>

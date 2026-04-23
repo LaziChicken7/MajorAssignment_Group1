@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -35,6 +36,13 @@ public class WalletController {
     @FXML
     public void handleWithdraw(ActionEvent event) {
         // Thực hiện rút tiền (Page 8)
-        System.out.println("Thực hiện Rút tiền...");
+        try {
+            Node withdrawView = FXMLLoader.load(getClass().getResource("/com/auction/view/WithdrawForm.fxml"));
+            // Tìm contentArea và setAll(withdrawView)
+            contentArea.getChildren().setAll(withdrawView);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Thực hiện Rút tiền...");
+        }
     }
 }

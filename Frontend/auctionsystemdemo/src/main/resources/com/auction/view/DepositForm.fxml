@@ -14,7 +14,7 @@
         <Insets top="20" right="40" bottom="20" left="40"/>
     </padding>
 
-    <Label text="Số tiền muốn nạp?" style="-fx-font-size: 28px; -fx-font-weight: bold;"/>
+    <Label text="Số tiền muốn nạp?" style="-fx-font-size: 25px; -fx-font-weight: bold;"/>
 
     <HBox alignment="CENTER" spacing="15">
         <TextField fx:id="amountField" style="-fx-font-size: 20px; -fx-background-radius: 15; -fx-padding: 10;"/>

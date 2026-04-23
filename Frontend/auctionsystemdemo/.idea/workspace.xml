@@ -4,11 +4,43 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="" />
+    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/NotificationController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/WithDrawController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Notification.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/WithDrawForm.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/WithDrawSuccess.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/DepositController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/DepositController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/WalletController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/WalletController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/DepositForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/DepositForm.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Main.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Wallet.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/DepositController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/controller/DepositController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/WalletController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/controller/WalletController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/DepositForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/DepositForm.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/Wallet.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/style.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo" value="3CeROncKaFhc4eHoiw5CI0UgTCf" />
+    </persistenceIdMap>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="FxmlFile" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
@@ -17,9 +49,9 @@
     <commands />
     <urls />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="3CeROncKaFhc4eHoiw5CI0UgTCf" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -35,7 +67,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "G:/My Drive/Github/MajorAssignment_Group1/Frontend/auctionsystemdemo/pom.xml",
+    "last_opened_file_path": "D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -57,8 +89,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.32098.37" />
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.32098.37" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
       </set>
     </attachedChunks>
   </component>
@@ -75,5 +106,13 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

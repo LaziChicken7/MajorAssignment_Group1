@@ -2,39 +2,38 @@ package com.auction.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
-import javafx.event.ActionEvent;
-import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javafx.event.ActionEvent;
 import java.io.IOException;
 
-public class DepositController {
+public class WithDrawController {
+
     @FXML
     private TextField amountField;
 
     @FXML
-    void handleConfirm(ActionEvent event) {
+    void handleWithdrawConfirm(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/DepositSuccess.fxml"));
+            // Kiểm tra xem đã nhập tiền chưa
+            System.out.println("Đang xử lý rút tiền: " + amountField.getText());
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/WithDrawSuccess.fxml"));
             Node successView = loader.load();
 
             Scene scene = ((Node) event.getSource()).getScene();
             Pane contentArea = (Pane) scene.lookup("#contentArea");
 
             if (contentArea != null) {
-                // Thay thế nội dung cũ (Form nạp tiền) bằng nội dung mới (Thông báo thành công)
                 contentArea.getChildren().setAll(successView);
-            } else {
-                System.err.println("Không tìm thấy vùng chứa #contentArea!");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     @FXML
     void handleBackToWallet(ActionEvent event) {
         try {

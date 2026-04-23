@@ -26,7 +26,7 @@
                 </VBox>
 
                 <VBox spacing="15" alignment="BOTTOM_CENTER">
-                    <Button fx:id="btnIconNotif" text="📩" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" />
+                    <Button fx:id="btnIconNotif" text="📩" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showNotification"/>
                     <Button fx:id="btnIconProfile" text="👤" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showProfile"/>
                 </VBox>
             </VBox>
@@ -65,7 +65,7 @@
             </VBox>
 
             <VBox spacing="10" alignment="BOTTOM_LEFT">
-                <Button fx:id="btnNavNotif" text="✉   Thông báo" styleClass="nav-btn" prefWidth="250" />
+                <Button fx:id="btnNavNotif" text="✉   Thông báo" styleClass="nav-btn" prefWidth="250" onAction="#showNotification"/>
                 <Button fx:id="btnNavProfile" text="👤   Pipodaucatmoi" styleClass="nav-btn" prefWidth="250" onAction="#showProfile"/>
             </VBox>
         </VBox>

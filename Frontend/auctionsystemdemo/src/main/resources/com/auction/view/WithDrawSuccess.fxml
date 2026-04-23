@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.WithDrawController"
+      alignment="CENTER" spacing="25" prefHeight="300" styleClass="card"
+      style="-fx-background-color: white; -fx-background-radius: 20;">
+
+    <StackPane>
+        <Circle radius="50" fill="#00C853"/>
+        <Label text="✔" textFill="white" style="-fx-font-size: 50px; -fx-font-weight: bold;"/>
+    </StackPane>
+
+    <Label text="Rút tiền thành công" style="-fx-font-size: 32px; -fx-font-weight: bold;"/>
+
+    <Button text="Quay lại" onAction="#handleBackToWallet"
+            style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-size: 20px;
+                   -fx-background-radius: 25; -fx-padding: 10 50; -fx-cursor: hand;"/>
+</VBox>
