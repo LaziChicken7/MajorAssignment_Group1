@@ -1,5 +1,7 @@
 package org.auctionfx.auctionbidsystemspringbootrework.entity.base;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
@@ -7,6 +9,7 @@ import jakarta.persistence.MappedSuperclass;
 public abstract class BaseEntity {
     // Đánh dấu ID là khóa chính
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID) // Trả lại quyền sinh ID ngầm cho Spring Boot
     protected String id;
 
     // GETTER

@@ -2,7 +2,9 @@ package org.auctionfx.auctionbidsystemspringbootrework.repository;
 
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -13,8 +15,21 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByCitizenId(String citizenId);
     boolean existsByNumberPhone(String numberPhone);
 
-    // THÊM DÒNG NÀY:
-    // Cắt 3 chữ cái đầu ("USR"), biến phần còn lại thành số nguyên (int) và tìm số Max
-    @Query("SELECT MAX(CAST(SUBSTRING(u.id, 4) AS int)) FROM User u")
-    Integer findMaxIdNumber();
+    User findByUserName(String userName); // Thêm hàm này để tìm User
+
+    // --- CÁC HÀM XỬ LÝ NÂNG CẤP ROLE ---
+
+    // 1. TÌM SỐ MAX CỦA userCode (Dựa vào chữ BID, SLR, hoặc ADM)
+    @Query(value = "SELECT MAX(CAST(SUBSTRING(user_code, 4) AS UNSIGNED)) FROM users WHERE user_code LIKE CONCAT(:prefix, '%')", nativeQuery = true)
+    Integer findMaxUserCodeNumber(@Param("prefix") String prefix);
+
+    // 2. CẬP NHẬT ROLE VÀ userCode CÙNG LÚC
+    @Modifying
+    @Query(value = "UPDATE users SET role = 'SELLER', user_code = :newCode WHERE id = :userId", nativeQuery = true)
+    void upgradeToSellerAndUpdateCode(@Param("userId") String userId, @Param("newCode") String newCode);
+
+    // 3. THÊM VÀO BẢNG SELLERS
+    @Modifying
+    @Query(value = "INSERT INTO sellers (id, rating) VALUES (:userId, 0.0)", nativeQuery = true)
+    void insertIntoSellersTable(@Param("userId") String userId);
 }

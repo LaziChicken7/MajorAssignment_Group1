@@ -1,11 +1,13 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserUpdateRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Admin;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
@@ -21,6 +23,9 @@ import static org.auctionfx.auctionbidsystemspringbootrework.enums.Role.*;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EntityManager entityManager; // Công cụ quản lý Cache của Spring Boot
 
     // CREATE
     // Request: Những thông tin cần thiết để tạo ra User
@@ -43,20 +48,28 @@ public class UserService {
 
         // 2. Factory Pattern
         User newUser;
+        String prefixCode = "";
         switch (request.getRole()) {
-            case ADMIN -> newUser = new Admin();
-            case SELLER -> newUser = new User();
-            case BIDDER -> newUser = new Bidder();
+            case ADMIN -> {
+                newUser = new Admin();
+                prefixCode = "ADM";
+            }
+            case SELLER -> {
+                newUser = new User();
+                prefixCode = "USR";
+            }
+            case BIDDER -> {
+                newUser = new Bidder();
+                prefixCode = "BID";
+            }
             default -> throw new IllegalStateException("Unexpected value: " + request.getRole());
         }
 
-        // ==========================================
-        // 3. LOGIC TẠO ID "USR1", "USR2" BẰNG TAY TẠI ĐÂY
-        // ==========================================
-        Integer maxId = userRepository.findMaxIdNumber();
-        int nextIdNumber = (maxId == null ? 0 : maxId) + 1; // Nếu DB trống (null) thì bắt đầu từ 1
-        newUser.setId("USR" + nextIdNumber);
-        // ==========================================
+        // 3. LOGIC TẠO MÃ HIỂN THỊ (USER CODE)
+        Integer maxId = userRepository.findMaxUserCodeNumber(prefixCode);
+        int nextIdNumber = (maxId == null ? 0 : maxId) + 1;
+        newUser.setUserCode(prefixCode + nextIdNumber); // Kết quả sẽ là BID1, SLR1...
+        // ----------------------------------------
 
         // 4. Set dữ liệu chung
         newUser.setUserName(request.getUserName());
@@ -70,6 +83,36 @@ public class UserService {
 
         // 5. Lưu xuống database
         return userRepository.save(newUser);
+    }
+
+    @Transactional
+    public String upgradeBidderToSeller(String userName) {
+        // 1. Lấy user từ DB lên
+        User user = userRepository.findByUserName(userName);
+
+        // 2. Kiểm tra điều kiện
+        if (user == null) {
+            throw new UserException(UserErrorCode.USER_NOT_FOUND);
+        }
+
+        switch (user.getRole()) {
+            case SELLER -> throw new UserException(UserErrorCode.USER_ALREADY_SELLER);
+            case ADMIN -> throw new UserException(UserErrorCode.USER_CONFLICT_UPGRADE);
+        }
+
+        // 3. LOGIC ĐỔI MÃ TỪ BID SANG SLR ---
+        Integer maxId = userRepository.findMaxUserCodeNumber("SLR");
+        int nextIdNumber = (maxId == null ? 0 : maxId) + 1;
+        String newSellerCode = "SLR" + nextIdNumber;
+
+        // 4. Chạy lệnh cập nhật xuống DB
+        userRepository.upgradeToSellerAndUpdateCode(user.getId(), newSellerCode);
+        userRepository.insertIntoSellersTable(user.getId());
+
+        // 5. Xóa cache của JPA để lần tới gọi findByUserName, nó sẽ load lại dữ liệu thành đối tượng class Seller.
+        entityManager.clear();
+
+        return "Upgrade successfully! Your new code is: " + newSellerCode;
     }
 
     // READ
@@ -105,11 +148,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
     // DELETE
     // Xóa người dùng
-    public void deleteUser(String userId) {
+    public String deleteUser(String userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserException(UserErrorCode.USER_NOT_FOUND);
+        }
         userRepository.deleteById(userId);
+        return "User deleted successfully!";
     }
 
     // MÃ HÓA VÀ GIẢI MÃ PASSWORD
@@ -131,3 +177,9 @@ public class UserService {
     }
 
 }
+
+/*
+Lưu ý: Trong Spring Boot, nó có một bộ nhớ đệm (Cache) gọi là EntityManager.
+Nếu bạn đổi database bằng SQL thuần, bộ nhớ đệm sẽ không biết, dẫn đến lúc lấy User ra nó vẫn nghĩ đó là Bidder.
+Ta phải dùng entityManager.clear() để "tẩy não" nó.
+ */

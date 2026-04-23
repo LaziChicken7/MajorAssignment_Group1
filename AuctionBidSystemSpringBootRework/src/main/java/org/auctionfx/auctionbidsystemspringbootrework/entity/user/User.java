@@ -12,8 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class User extends BaseEntity {
 
     // KHAI BÁO THUỘC TÍNH
+    @Column(unique = true, nullable = false)
+    protected String userCode; // THÊM CỘT NÀY ĐỂ LƯU "BID1", "SLR2"...
 
-    private static AtomicInteger idCounter = new AtomicInteger(0);
     @Column(unique = true, nullable = false)
     protected String userName;
 
@@ -34,6 +35,15 @@ public class User extends BaseEntity {
     protected Role role;
 
     // LẤY VÀ UPDATE THUỘC TÍNH
+
+
+    public String getUserCode() {
+        return userCode;
+    }
+
+    public void setUserCode(String userCode) {
+        this.userCode = userCode;
+    }
 
     public String getUserName() {
         return userName;

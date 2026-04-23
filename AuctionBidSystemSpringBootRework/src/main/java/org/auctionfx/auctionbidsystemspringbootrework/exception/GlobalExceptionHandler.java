@@ -27,4 +27,14 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
+
+    @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse> handlingException(Exception exception) {
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(999);
+        apiResponse.setMessage(exception.getMessage());
+
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
 }

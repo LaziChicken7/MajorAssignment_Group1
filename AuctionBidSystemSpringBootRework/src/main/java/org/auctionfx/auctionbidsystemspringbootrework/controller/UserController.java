@@ -39,7 +39,13 @@ public class UserController {
 
     // Delete
     @DeleteMapping("/admin/{userId}")
-    void deleteUser(@PathVariable("userId") String userId) {
-        userService.deleteUser(userId);
+    String deleteUser(@PathVariable("userId") String userId) {
+        return userService.deleteUser(userId);
+    }
+
+    // Upgrade to Seller
+    @PutMapping("/upgrade-to-seller/{userName}")
+    public String upgradeToSeller(@PathVariable String userName) {
+        return userService.upgradeBidderToSeller(userName);
     }
 }
