@@ -4,26 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/NotificationController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/WithDrawController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Notification.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/WithDrawForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/WithDrawSuccess.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/DepositController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/DepositController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/WalletController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/WalletController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/DepositForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/DepositForm.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Main.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Wallet.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/DepositController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/controller/DepositController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/WalletController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/controller/WalletController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/DepositForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/DepositForm.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/Wallet.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/style.css" afterDir="false" />
-    </list>
+    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,26 +38,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Unnamed.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.JavaFX",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Unnamed.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.JavaFX&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.auction.App" />
@@ -89,7 +70,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.32098.37" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.32098.37" />
       </set>
     </attachedChunks>
   </component>
@@ -101,6 +83,7 @@
       <option name="presentableId" value="Default" />
       <updated>1776744021651</updated>
       <workItem from="1776744022722" duration="1038000" />
+      <workItem from="1776989589271" duration="253000" />
     </task>
     <servers />
   </component>

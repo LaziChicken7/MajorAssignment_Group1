@@ -1,6 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.exception;
 
-public enum UserErrorCode {
+public enum ErrorCode {
     // ===========================================================================
     // REGISTER EXCEPTION
     INVALID_KEY(1001, "Invalid message key"),
@@ -15,15 +15,29 @@ public enum UserErrorCode {
     // ===========================================================================
     // USER EXCEPTION
     USER_NOT_FOUND(3001, "User not founded"),
+    USER_INVALID(3002, "User invalid or do not have bid permission"),
     // ===========================================================================
     // ROLE EXCEPTION
     USER_ALREADY_SELLER(4001, "User already seller"),
     USER_CONFLICT_UPGRADE(4999, "Can not upgrade to seller"),
     // ===========================================================================
-    UNCATEGORIZED_EXCEPTION(9999, "Something went wrong!"),
+    // PAYMENT EXCEPTION
+    NOT_ENOUGH_MONEY_ON_WALLET(5001, "Not enough money on wallet"),
+    NOT_ENOUGH_MONEY_IN_FROZEN(5002, "Not enough money in Frozen"),
+    CONDITION_ACCEPT_PAYMENT_INVALID(5003, "Condition accept payment invalid"),
+    // ===========================================================================
+    // AUCTION EXCEPTION
+    AUCTION_NOT_FOUND(6001, "Auction not founded"),
+    AUCTION_NOT_RUNNING(6002, "Auction not in running status"),
+    AUCTION_BIDDER_INVALID(6003, "Bidder can not bid own product"),
+    // ===========================================================================
+    // RUNTIME EXCEPTION
+    RUNTIME_EXCEPTION(89999, "Runtime exception"),
+    // ===========================================================================
+    UNCATEGORIZED_EXCEPTION(99999, "Something went wrong!"),
     ;
 
-    UserErrorCode(int code, String message) {
+    ErrorCode(int code, String message) {
         this.code = code;
         this.message = message;
     }

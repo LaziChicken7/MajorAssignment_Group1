@@ -1,0 +1,103 @@
+erDiagram
+    %% BẢNG KẾ THỪA TỪ USER
+    users {
+        VARCHAR(36) id PK "UUID"
+        VARCHAR(255) user_code UK "Mã hiển thị (BID1, SLR2...)"
+        VARCHAR(255) user_name UK "Tên đăng nhập"
+        VARCHAR(255) email UK
+        VARCHAR(255) citizen_id UK "CCCD"
+        VARCHAR(255) number_phone
+        VARCHAR(255) password
+        VARCHAR(255) full_name
+        VARCHAR(50) role "ENUM: ADMIN, BIDDER, SELLER"
+    }
+
+    admins {
+        VARCHAR(36) id PK,FK "Khóa ngoại trỏ đến users.id"
+        VARCHAR(255) department "Mặc định: General"
+    }
+
+    bidders {
+        VARCHAR(36) id PK,FK "Khóa ngoại trỏ đến users.id"
+        VARCHAR(255) address
+        VARCHAR(255) bank_account_number
+        DECIMAL money_on_wallet "Ví chính"
+        DECIMAL moneyin_frozen "Ví đóng băng"
+    }
+
+    sellers {
+        VARCHAR(36) id PK,FK "Khóa ngoại trỏ đến bidders.id"
+        DOUBLE rating
+    }
+
+    %% BẢNG KẾ THỪA TỪ ITEM
+    items {
+        VARCHAR(36) id PK "UUID"
+        VARCHAR(255) name
+        VARCHAR(255) description
+        DATETIME start_time
+        DECIMAL start_price
+        DECIMAL end_price
+        VARCHAR(36) seller_id FK "Người đăng bán"
+    }
+
+    arts {
+        VARCHAR(36) id PK,FK "Khóa ngoại trỏ đến items.id"
+        VARCHAR(255) name_author
+        INT creation_year
+    }
+
+    electronics {
+        VARCHAR(36) id PK,FK "Khóa ngoại trỏ đến items.id"
+        VARCHAR(255) brand
+        INT warranty_months
+    }
+
+    vehicles {
+        VARCHAR(36) id PK,FK "Khóa ngoại trỏ đến items.id"
+        VARCHAR(255) engine_type
+        INT mileage
+    }
+
+    %% BẢNG ĐẤU GIÁ VÀ GIAO DỊCH
+    auctions {
+        VARCHAR(36) id PK "UUID"
+        DATETIME start_time
+        DATETIME end_time
+        DECIMAL highest_bid "Giá cao nhất hiện tại"
+        VARCHAR(50) status "ENUM: OPEN, RUNNING..."
+        VARCHAR(36) item_id FK,UK "Món hàng (OneToOne)"
+        VARCHAR(36) seller_id FK "Người tạo phiên"
+        VARCHAR(36) winning_user_id FK "Người dẫn đầu/Thắng cuộc"
+    }
+
+    bid_transactions {
+        VARCHAR(36) id PK "UUID"
+        DECIMAL bid_amount "Mức giá đặt"
+        DATETIME bid_timestamp "Thời điểm đặt giá"
+        VARCHAR(36) bidder_id FK "Người đặt giá"
+        VARCHAR(36) auction_id FK "Thuộc phiên đấu giá nào"
+    }
+
+    %% ==========================================
+    %% QUAN HỆ KẾ THỪA (Inheritance)
+    %% ==========================================
+    users ||--o| admins : "kế thừa (JOINED)"
+    users ||--o| bidders : "kế thừa (JOINED)"
+    bidders ||--o| sellers : "kế thừa (JOINED)"
+
+    items ||--o| arts : "kế thừa (JOINED)"
+    items ||--o| electronics : "kế thừa (JOINED)"
+    items ||--o| vehicles : "kế thừa (JOINED)"
+
+    %% ==========================================
+    %% QUAN HỆ NGHIỆP VỤ (Business Logic Relationships)
+    %% ==========================================
+    sellers ||--o{ items : "đăng bán món hàng (1-N)"
+    
+    items ||--o| auctions : "được đấu giá (1-1)"
+    sellers ||--o{ auctions : "tạo ra phiên đấu giá (1-N)"
+    bidders ||--o{ auctions : "có thể thắng nhiều phiên (1-N)"
+    
+    auctions ||--o{ bid_transactions : "chứa các lượt đặt giá (1-N)"
+    bidders ||--o{ bid_transactions : "thực hiện lượt đặt giá (1-N)"

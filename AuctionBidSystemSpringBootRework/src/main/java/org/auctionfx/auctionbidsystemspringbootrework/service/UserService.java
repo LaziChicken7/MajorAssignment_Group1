@@ -7,17 +7,13 @@ import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserUpdateRequ
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Admin;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
-import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
-import org.auctionfx.auctionbidsystemspringbootrework.exception.UserErrorCode;
+import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-
-import static org.auctionfx.auctionbidsystemspringbootrework.enums.Role.*;
 
 @Service
 public class UserService {
@@ -34,16 +30,16 @@ public class UserService {
     public User createUser(UserCreationRequest request) {
         // 1. Kiểm tra trùng lặp
         if (userRepository.existsByUserName(request.getUserName())) {
-            throw new UserException(UserErrorCode.USERNAME_EXISTED);
+            throw new UserException(ErrorCode.USERNAME_EXISTED);
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new UserException(UserErrorCode.EMAIL_EXISTED);
+            throw new UserException(ErrorCode.EMAIL_EXISTED);
         }
         if (userRepository.existsByCitizenId(request.getCitizenId())) {
-            throw new UserException(UserErrorCode.CITIZEN_ID_EXISTED);
+            throw new UserException(ErrorCode.CITIZEN_ID_EXISTED);
         }
         if (userRepository.existsByNumberPhone(request.getNumberPhone())) {
-            throw new UserException(UserErrorCode.PHONE_NUMBER_EXISTED);
+            throw new UserException(ErrorCode.PHONE_NUMBER_EXISTED);
         }
 
         // 2. Factory Pattern
@@ -92,12 +88,12 @@ public class UserService {
 
         // 2. Kiểm tra điều kiện
         if (user == null) {
-            throw new UserException(UserErrorCode.USER_NOT_FOUND);
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
         }
 
         switch (user.getRole()) {
-            case SELLER -> throw new UserException(UserErrorCode.USER_ALREADY_SELLER);
-            case ADMIN -> throw new UserException(UserErrorCode.USER_CONFLICT_UPGRADE);
+            case SELLER -> throw new UserException(ErrorCode.USER_ALREADY_SELLER);
+            case ADMIN -> throw new UserException(ErrorCode.USER_CONFLICT_UPGRADE);
         }
 
         // 3. LOGIC ĐỔI MÃ TỪ BID SANG SLR ---
@@ -125,7 +121,7 @@ public class UserService {
     // Lấy thông tin của một người duy nhất
     public User getUser(String userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
     }
 
     // UPDATE
@@ -134,10 +130,10 @@ public class UserService {
         User user = getUser(userId);
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new UserException(UserErrorCode.EMAIL_EXISTED);
+            throw new UserException(ErrorCode.EMAIL_EXISTED);
         }
         if (userRepository.existsByNumberPhone(request.getNumberPhone())) {
-            throw new UserException(UserErrorCode.PHONE_NUMBER_EXISTED);
+            throw new UserException(ErrorCode.PHONE_NUMBER_EXISTED);
         }
 
         user.setFullName(request.getFullName());
@@ -152,7 +148,7 @@ public class UserService {
     // Xóa người dùng
     public String deleteUser(String userId) {
         if (!userRepository.existsById(userId)) {
-            throw new UserException(UserErrorCode.USER_NOT_FOUND);
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
         }
         userRepository.deleteById(userId);
         return "User deleted successfully!";
