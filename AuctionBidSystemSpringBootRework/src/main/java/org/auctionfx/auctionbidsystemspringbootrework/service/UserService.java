@@ -6,6 +6,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserCreationRe
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserUpdateRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Admin;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
@@ -50,19 +51,20 @@ public class UserService {
                 newUser = new Admin();
                 prefixCode = "ADM";
             }
-            case SELLER -> {
-                newUser = new User();
-                prefixCode = "USR";
-            }
             case BIDDER -> {
                 newUser = new Bidder();
                 prefixCode = "BID";
             }
+            case SELLER -> {
+                newUser = new Seller();
+                prefixCode = "SLR";
+            }
             default -> throw new IllegalStateException("Unexpected value: " + request.getRole());
         }
 
-        // 3. LOGIC TẠO MÃ HIỂN THỊ (USER CODE)
-        Integer maxId = userRepository.findMaxUserCodeNumber(prefixCode);
+        // 3. LOGIC TẠO MÃ HIỂN THỊ (USER CODE CHUNG TOÀN HỆ THỐNG)
+        // Không truyền prefixCode vào hàm tìm max nữa
+        Integer maxId = userRepository.findMaxUserCodeNumber();
         int nextIdNumber = (maxId == null ? 0 : maxId) + 1;
         newUser.setUserCode(prefixCode + nextIdNumber); // Kết quả sẽ là BID1, SLR1...
         // ----------------------------------------
@@ -83,10 +85,9 @@ public class UserService {
 
     @Transactional
     public String upgradeBidderToSeller(String userName) {
-        // 1. Lấy user từ DB lên
+        // 1. Lấy user từ DB lên (Lúc này Java vẫn coi đây là Bidder)
         User user = userRepository.findByUserName(userName);
 
-        // 2. Kiểm tra điều kiện
         if (user == null) {
             throw new UserException(ErrorCode.USER_NOT_FOUND);
         }
@@ -94,19 +95,35 @@ public class UserService {
         switch (user.getRole()) {
             case SELLER -> throw new UserException(ErrorCode.USER_ALREADY_SELLER);
             case ADMIN -> throw new UserException(ErrorCode.USER_CONFLICT_UPGRADE);
+            default -> { break; }
         }
 
-        // 3. LOGIC ĐỔI MÃ TỪ BID SANG SLR ---
-        Integer maxId = userRepository.findMaxUserCodeNumber("SLR");
-        int nextIdNumber = (maxId == null ? 0 : maxId) + 1;
-        String newSellerCode = "SLR" + nextIdNumber;
+        // 2. Sinh mã mới
+        String newSellerCode = "SLR" + user.getUserCode().substring(3);
 
-        // 4. Chạy lệnh cập nhật xuống DB
+        // 3. Chạy lệnh SQL can thiệp trực tiếp vào MySQL
         userRepository.upgradeToSellerAndUpdateCode(user.getId(), newSellerCode);
         userRepository.insertIntoSellersTable(user.getId());
 
-        // 5. Xóa cache của JPA để lần tới gọi findByUserName, nó sẽ load lại dữ liệu thành đối tượng class Seller.
+        // =========================================================
+        // 4. BƯỚC QUYẾT ĐỊNH: ĐỒNG BỘ LẠI ĐỐI TƯỢNG TRONG JAVA
+        // =========================================================
+
+        // Bắt buộc đẩy ngay các lệnh SQL ở trên xuống DB ngay tắp lự
+        entityManager.flush();
+
+        // Xóa sạch bộ nhớ đệm cũ (Xóa cái xác Bidder cũ đi)
         entityManager.clear();
+
+        // GỌI LẠI đối tượng từ DB lên.
+        // Lần này Spring Boot sẽ thấy dòng dữ liệu trong bảng 'sellers' và TỰ ĐỘNG khởi tạo nó là class SELLER.
+        User upgradedUser = userRepository.findById(user.getId()).orElse(null);
+
+        // Code test thử để in ra màn hình Console xem nó đã thực sự là Seller chưa:
+        if (upgradedUser instanceof Seller) {
+            System.out.println("Successfully: Java has been recognized that user is Bidder");
+            System.out.println("Seller rating now: " + ((Seller) upgradedUser).getRating());
+        }
 
         return "Upgrade successfully! Your new code is: " + newSellerCode;
     }

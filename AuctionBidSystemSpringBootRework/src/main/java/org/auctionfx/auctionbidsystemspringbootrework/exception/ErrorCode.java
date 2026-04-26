@@ -25,11 +25,18 @@ public enum ErrorCode {
     NOT_ENOUGH_MONEY_ON_WALLET(5001, "Not enough money on wallet"),
     NOT_ENOUGH_MONEY_IN_FROZEN(5002, "Not enough money in Frozen"),
     CONDITION_ACCEPT_PAYMENT_INVALID(5003, "Condition accept payment invalid"),
+    DEPOSIT_MONEY_INVALID(5004, "Deposit money must be more than zero"),
+    WITHDRAW_MONEY_INVALID(5005, "Withdraw money must be more than zero"),
     // ===========================================================================
     // AUCTION EXCEPTION
     AUCTION_NOT_FOUND(6001, "Auction not founded"),
     AUCTION_NOT_RUNNING(6002, "Auction not in running status"),
     AUCTION_BIDDER_INVALID(6003, "Bidder can not bid own product"),
+    // ===========================================================================
+    // ITEM CREATE EXCEPTION
+    SELLER_INVALID(7001, "User is not seller, can not create item"),
+    ITEM_INVALID(7002, "Invalid item type"),
+    ITEM_NOT_FOUND(7003, "Item not found"),
     // ===========================================================================
     // RUNTIME EXCEPTION
     RUNTIME_EXCEPTION(89999, "Runtime exception"),

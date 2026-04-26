@@ -1,6 +1,7 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ApiResponse;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.PlaceBidRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class AuctionController {
         return apiResponse;
     }
 
-    @PostMapping("/{auctionId}/start")
+    @PutMapping("/{auctionId}/start")
     public ApiResponse<String> startAuction(@PathVariable String auctionId) {
         auctionService.startAuction(auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
@@ -27,14 +28,15 @@ public class AuctionController {
         return apiResponse;
     }
 
-    @PostMapping("/{auctionId}/close")
+    @PutMapping("/{auctionId}/close")
     public ApiResponse<String> closeAuction(@PathVariable String auctionId) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(auctionService.closeAuction(auctionId));
+        apiResponse.setResult("Auction closed successfully!");
         return apiResponse;
     }
 
-    @PostMapping("/{auctionId}/accept-payment")
+    @PutMapping("/{auctionId}/accept-payment")
     public ApiResponse<String> acceptPayment(@PathVariable String auctionId) {
         auctionService.acceptPayment(auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
@@ -42,12 +44,17 @@ public class AuctionController {
         return apiResponse;
     }
 
-    @PostMapping("/{auctionId}/cancel")
+    @PutMapping("/{auctionId}/cancel")
     public ApiResponse<String> cancelAuction(@PathVariable String auctionId) {
         auctionService.cancelAuction(auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult("Auction cancelled successfully!");
         return apiResponse;
+    }
+
+    @PostMapping("/create")
+    public String createAuction(@RequestBody AuctionCreationRequest request) {
+        return auctionService.createAuction(request);
     }
 
 }

@@ -1,7 +1,9 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
+import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.BidTransaction;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.item.Item;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.AuctionStatus;
@@ -9,6 +11,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.exception.AuctionException
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.AuctionRepository;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.BidTransactionRepository;
+import org.auctionfx.auctionbidsystemspringbootrework.repository.ItemRepository;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,8 @@ public class AuctionService {
     private BidTransactionRepository bidTransactionRepository;
     @Autowired
     private PaymentService paymentService; // Gọi bếp phó (Payment) hỗ trợ
+    @Autowired
+    private ItemRepository itemRepository;
 
     // Cấu hình thuật toán Anti-Snipping
     private static final int SNIPING_THRESHOLD_SECONDS = 10; // Đấu giá trong 10s cuối
@@ -154,6 +159,23 @@ public class AuctionService {
 
         auction.setStatus(AuctionStatus.CANCELLED);
         auctionRepository.save(auction);
+    }
+
+    // 4. Tạo sản phẩm đấu giá
+    @Transactional(rollbackFor = Exception.class)
+    public String createAuction(AuctionCreationRequest request) {
+        Item item = itemRepository.findById(request.getItemId())
+                .orElseThrow(() -> new AuctionException(ErrorCode.ITEM_NOT_FOUND));
+
+        Auction auction = new Auction();
+        auction.setBidProduct(item);
+        auction.setSeller(item.getSeller());
+        auction.setStartTime(LocalDateTime.now());
+        auction.setEndTime(request.getEndTime());
+        auction.setHighestBid(item.getStartPrice()); // Giá khởi điểm
+
+        auctionRepository.save(auction);
+        return "Create Auction item successfully! ID: " + auction.getId();
     }
 }
 /*

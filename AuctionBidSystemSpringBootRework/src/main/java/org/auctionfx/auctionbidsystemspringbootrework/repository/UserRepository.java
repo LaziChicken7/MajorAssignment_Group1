@@ -19,9 +19,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     // --- CÁC HÀM XỬ LÝ NÂNG CẤP ROLE ---
 
-    // 1. TÌM SỐ MAX CỦA userCode (Dựa vào chữ BID, SLR, hoặc ADM)
-    @Query(value = "SELECT MAX(CAST(SUBSTRING(user_code, 4) AS UNSIGNED)) FROM users WHERE user_code LIKE CONCAT(:prefix, '%')", nativeQuery = true)
-    Integer findMaxUserCodeNumber(@Param("prefix") String prefix);
+    // 1. TÌM SỐ THỨ TỰ LỚN NHẤT CỦA TOÀN BỘ HỆ THỐNG
+    @Query(value = "SELECT MAX(CAST(SUBSTRING(user_code, 4) AS UNSIGNED)) FROM users", nativeQuery = true)
+    Integer findMaxUserCodeNumber(); // Không cần truyền tham số prefix vào nữa
 
     // 2. CẬP NHẬT ROLE VÀ userCode CÙNG LÚC
     @Modifying

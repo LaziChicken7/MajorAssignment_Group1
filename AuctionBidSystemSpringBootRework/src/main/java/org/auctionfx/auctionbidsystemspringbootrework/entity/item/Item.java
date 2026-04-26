@@ -3,6 +3,8 @@ package org.auctionfx.auctionbidsystemspringbootrework.entity.item;
 import jakarta.persistence.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.base.BaseEntity;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.ItemType;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,6 +24,9 @@ public class Item extends BaseEntity {
     @ManyToOne // MQH nhiều - một (nhiều item - một user)
     @JoinColumn(name = "seller_id") // Kết nối hai bảng thông qua khóa ngoài seller_id
     private Seller seller;
+
+    @Enumerated(EnumType.STRING) // Lưu chữ SELLER, BIDDER
+    protected ItemType itemType;
 
     // GETTER VÀ SETTER
 

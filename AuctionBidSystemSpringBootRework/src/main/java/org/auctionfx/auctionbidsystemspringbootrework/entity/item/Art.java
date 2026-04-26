@@ -10,11 +10,20 @@ public class Art extends Item {
     private int creationYear;
 
     // GETTER VÀ SETTER
+
     public String getNameAuthor() {
         return nameAuthor;
     }
 
     public void setNameAuthor(String nameAuthor) {
         this.nameAuthor = nameAuthor;
+    }
+
+    public int getCreationYear() {
+        return creationYear;
+    }
+
+    public void setCreationYear(int creationYear) {
+        this.creationYear = creationYear;
     }
 }

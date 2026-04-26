@@ -28,6 +28,15 @@ public class PaymentService {
         return (Bidder) user;
     }
 
+    // Hàm phụ trợ tìm Bidder bằng UserName (Dán đoạn này vào dưới cùng của class PaymentService)
+    private Bidder getBidderByUserName(String userName) {
+        User user = userRepository.findByUserName(userName);
+        if (!(user instanceof Bidder)) {
+            throw new RuntimeException("User not found or not have Wallet functionality!");
+        }
+        return (Bidder) user;
+    }
+
     // 1. Đóng băng tiền (Khi người dùng bấm Place Bid)
     // Trừ tiền ở Ví chính -> Cộng vào Ví đóng băng
     @Transactional(rollbackFor = Exception.class) // Nếu có lỗi xảy ra, toàn bộ tiền sẽ được rollback lại như cũ
@@ -83,5 +92,35 @@ public class PaymentService {
         userRepository.save(seller);
 
         return "Transfer Money successfully!";
+    }
+
+    // 4. Nạp tiền vào ví
+    @Transactional(rollbackFor = Exception.class)
+    public String deposit(String userName, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new PaymentException(ErrorCode.DEPOSIT_MONEY_INVALID);
+        }
+        Bidder bidder = getBidderByUserName(userName);
+        bidder.setMoneyOnWallet(bidder.getMoneyOnWallet().add(amount));
+        userRepository.save(bidder);
+
+        return "Deposit successfully! Money on wallet now is: " + bidder.getMoneyOnWallet();
+    }
+
+    // 5. Rút tiền vào ví
+    @Transactional(rollbackFor = Exception.class)
+    public String withdraw(String userName, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new PaymentException(ErrorCode.WITHDRAW_MONEY_INVALID);
+        }
+        Bidder bidder = getBidderByUserName(userName);
+        if (bidder.getMoneyOnWallet().compareTo(amount) < 0) {
+            throw new PaymentException(ErrorCode.NOT_ENOUGH_MONEY_ON_WALLET);
+        }
+
+        bidder.setMoneyOnWallet(bidder.getMoneyOnWallet().subtract(amount));
+        userRepository.save(bidder);
+
+        return "Withdraw successfully! Money on wallet now is: " + bidder.getMoneyOnWallet();
     }
 }
