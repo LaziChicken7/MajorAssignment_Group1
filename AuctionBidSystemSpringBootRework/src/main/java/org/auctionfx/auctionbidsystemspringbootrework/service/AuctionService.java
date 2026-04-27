@@ -149,13 +149,30 @@ public class AuctionService {
     }
 
     @Transactional
+    public void declinePayment(String auctionId) {
+        Auction auction = auctionRepository.findById(auctionId).orElseThrow();
+
+        if (auction.getStatus() != AuctionStatus.FINISHED || auction.getWinningUser() == null) {
+            throw new AuctionException(ErrorCode.CONDITION_ACCEPT_PAYMENT_INVALID);
+        }
+
+        // Trả lại tiền cho người bán
+        paymentService.unFreezeMoney(auction.getWinningUser().getId(), auction.getHighestBid());
+
+        auction.setStatus(AuctionStatus.CANCELLED);
+        auctionRepository.save(auction);
+    }
+
+    @Transactional
     public void cancelAuction(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
 
-        // Trả lại tiền cho người đang dẫn đầu (nếu có)
-        if (auction.getWinningUser() != null && auction.getStatus() == AuctionStatus.RUNNING) {
-            paymentService.unFreezeMoney(auction.getWinningUser().getId(), auction.getHighestBid());
+        if (auction.getStatus() != AuctionStatus.RUNNING || auction.getWinningUser() == null) {
+            throw new AuctionException(ErrorCode.CONDITION_CANCEL_AUCTION_INVALID);
         }
+
+        // Trả lại tiền cho người đang dẫn đầu (nếu có)
+        paymentService.unFreezeMoney(auction.getWinningUser().getId(), auction.getHighestBid());
 
         auction.setStatus(AuctionStatus.CANCELLED);
         auctionRepository.save(auction);

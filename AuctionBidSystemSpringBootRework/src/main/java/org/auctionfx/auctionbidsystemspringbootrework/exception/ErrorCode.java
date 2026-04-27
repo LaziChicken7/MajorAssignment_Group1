@@ -25,8 +25,10 @@ public enum ErrorCode {
     NOT_ENOUGH_MONEY_ON_WALLET(5001, "Not enough money on wallet"),
     NOT_ENOUGH_MONEY_IN_FROZEN(5002, "Not enough money in Frozen"),
     CONDITION_ACCEPT_PAYMENT_INVALID(5003, "Condition accept payment invalid"),
-    DEPOSIT_MONEY_INVALID(5004, "Deposit money must be more than zero"),
-    WITHDRAW_MONEY_INVALID(5005, "Withdraw money must be more than zero"),
+    CONDITION_DECLINE_PAYMENT_INVALID(5004, "Condition decline payment invalid"),
+    CONDITION_CANCEL_AUCTION_INVALID(5005, "Condition cancel auction invalid"),
+    DEPOSIT_MONEY_INVALID(5006, "Deposit money must be more than zero"),
+    WITHDRAW_MONEY_INVALID(5007, "Withdraw money must be more than zero"),
     // ===========================================================================
     // AUCTION EXCEPTION
     AUCTION_NOT_FOUND(6001, "Auction not founded"),

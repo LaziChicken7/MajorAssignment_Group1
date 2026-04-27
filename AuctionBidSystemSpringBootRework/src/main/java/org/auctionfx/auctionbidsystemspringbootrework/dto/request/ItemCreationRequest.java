@@ -5,7 +5,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.enums.ItemType;
 import java.math.BigDecimal;
 
 public class ItemCreationRequest {
-    private String sellerUsername;
+    private String sellerUserName;
     private String name;
     private String description;
     private BigDecimal startPrice;
@@ -22,12 +22,12 @@ public class ItemCreationRequest {
     // GETTER VÀ SETTER
 
 
-    public String getSellerUsername() {
-        return sellerUsername;
+    public String getSellerUserName() {
+        return sellerUserName;
     }
 
-    public void setSellerUsername(String sellerUsername) {
-        this.sellerUsername = sellerUsername;
+    public void setSellerUserName(String sellerUserName) {
+        this.sellerUserName = sellerUserName;
     }
 
     public String getName() {

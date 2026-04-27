@@ -23,7 +23,7 @@ public class ItemService {
     @Transactional
     public String createItem(ItemCreationRequest request) {
         // 1. Kiểm tra quyền của Seller
-        User user = userRepository.findByUserName(request.getSellerUsername());
+        User user = userRepository.findByUserName(request.getSellerUserName());
         if (user == null) {
             throw new ItemException(ErrorCode.USER_NOT_FOUND);
         }

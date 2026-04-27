@@ -1,9 +1,12 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
+import org.auctionfx.auctionbidsystemspringbootrework.dto.response.TransactionHistoryResponse;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
+import org.auctionfx.auctionbidsystemspringbootrework.repository.AuctionRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
-import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.PaymentException;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
@@ -12,11 +15,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
 
 @Service
 public class PaymentService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AuctionRepository auctionRepository;
 
     // Ép kiểu an toàn từ User sang Bidder
     private Bidder getBidder(String userId) {
@@ -122,5 +132,44 @@ public class PaymentService {
         userRepository.save(bidder);
 
         return "Withdraw successfully! Money on wallet now is: " + bidder.getMoneyOnWallet();
+    }
+
+    // 6. Đưa ra danh sách các sản phẩm đấu giá thành công hay thất bại của một user
+    // Hàm này sẽ trả về dữ liệu về cho VÍ TIỀN
+    public Map<String, Object> getMyWalletAndHistory(String userName) {
+        // 1. Lấy thông tin ví tiền
+        Bidder bidder = getBidderByUserName(userName);
+        Map<String, Object> responseData = new HashMap<>();
+
+        responseData.put("moneyOnWallet", bidder.getMoneyOnWallet());
+        responseData.put("moneyinFrozen", bidder.getMoneyinFrozen());
+
+        // 2. Lọc giao dịch thành công
+        List<Auction> wonAuctions = auctionRepository.findWonAuctions(userName);
+        List<TransactionHistoryResponse> successList = new ArrayList<>();
+        for (Auction auction : wonAuctions) {
+            successList.add(new TransactionHistoryResponse(
+                    auction.getBidProduct().getName(),
+                    auction.getHighestBid(),
+                    TransactionStatus.SUCCESS
+            ));
+        }
+
+        // 3. Lọc giao dịch thất bại
+        List<Auction> lostAuctions = auctionRepository.findLostAuctions(userName);
+        List<TransactionHistoryResponse> failedList = new ArrayList<>();
+        for (Auction auction : lostAuctions) {
+            failedList.add(new TransactionHistoryResponse(
+                    auction.getBidProduct().getName(),
+                    auction.getHighestBid(),
+                    TransactionStatus.FAILED
+            ));
+        }
+
+        // 4. Đóng gói tất cả trả về cho JavaFX
+        responseData.put("successTransaction", successList);
+        responseData.put("failedTransaction", failedList);
+
+        return responseData;
     }
 }

@@ -44,6 +44,14 @@ public class AuctionController {
         return apiResponse;
     }
 
+    @PutMapping("/{auctionId}/decline-payment")
+    public ApiResponse<String> declinePayment(@PathVariable String auctionId) {
+        auctionService.declinePayment(auctionId);
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult("Payment accepted and transferred successfully!");
+        return apiResponse;
+    }
+
     @PutMapping("/{auctionId}/cancel")
     public ApiResponse<String> cancelAuction(@PathVariable String auctionId) {
         auctionService.cancelAuction(auctionId);
