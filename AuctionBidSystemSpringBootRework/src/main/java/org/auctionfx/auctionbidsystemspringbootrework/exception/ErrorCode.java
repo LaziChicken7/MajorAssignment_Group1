@@ -16,6 +16,8 @@ public enum ErrorCode {
     // USER EXCEPTION
     USER_NOT_FOUND(3001, "User not founded"),
     USER_INVALID(3002, "User invalid or do not have bid permission"),
+    INVALID_RESET_TOKEN(3003, "The verification code is invalid or has expired!"),
+    USER_INFO_NOT_MATCH(3004, "Username and Email do not match!"),
     // ===========================================================================
     // ROLE EXCEPTION
     USER_ALREADY_SELLER(4001, "User already seller"),

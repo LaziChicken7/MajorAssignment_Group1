@@ -1,9 +1,7 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
 import jakarta.validation.Valid;
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ApiResponse;
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserCreationRequest;
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserUpdateRequest;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +46,21 @@ public class UserController {
     @PutMapping("/upgrade-to-seller/{userName}")
     public String upgradeToSeller(@PathVariable String userName) {
         return userService.upgradeBidderToSeller(userName);
+    }
+
+    // Quên mật khẩu
+    @PostMapping("/verify-reset-info")
+    public ApiResponse<String> verifyUserInfo(@RequestBody VerifyInfoRequest request) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        // API này sẽ trả về cái Mã bí mật
+        apiResponse.setResult(userService.verifyUserInfo(request));
+        return apiResponse;
+    }
+
+    @PutMapping("/reset-password")
+    public ApiResponse<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.resetPassword(request));
+        return apiResponse;
     }
 }

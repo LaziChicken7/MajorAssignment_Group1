@@ -2,8 +2,10 @@ package org.auctionfx.auctionbidsystemspringbootrework.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ResetPasswordRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserUpdateRequest;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.request.VerifyInfoRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Admin;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
@@ -15,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserService {
@@ -23,6 +28,9 @@ public class UserService {
 
     @Autowired
     private EntityManager entityManager; // Công cụ quản lý Cache của Spring Boot
+
+    // Khay chứa Mã bí mật (Key là Username, Value là Mã Token)
+    private final Map<String, String> resetTokens = new ConcurrentHashMap<>();
 
     // CREATE
     // Request: Những thông tin cần thiết để tạo ra User
@@ -126,6 +134,49 @@ public class UserService {
         }
 
         return "Upgrade successfully! Your new code is: " + newSellerCode;
+    }
+
+    // QUÊN MẬT KHẨU
+    // 1. Xác thực thông tin (trả về token)
+    public String verifyUserInfo(VerifyInfoRequest request) {
+        User user = userRepository.findByUserName(request.getUserName());
+
+        // Kiểm tra xem User có tồn tại không, Email và CCCD có khớp 100% không?
+        if (user == null ||
+                !user.getEmail().equals(request.getEmail()) ||
+                !user.getCitizenId().equals(request.getCitizenId())) {
+            throw new UserException(ErrorCode.USER_INFO_NOT_MATCH);
+        }
+
+        // Nếu khớp -> Tạo ra một UUID
+        String token = UUID.randomUUID().toString();
+
+        // Cất mã đó vào trong Map
+        resetTokens.put(user.getUserName(), token);
+
+        return token; // Trả mã này về cho Giao diện JavaFX/Postman
+    }
+
+    // 2. Tiến hành đổi mật khẩu
+    @Transactional
+    public String resetPassword(ResetPasswordRequest request) {
+        // Lấy cái mã bí mật trong Map ra kiểm tra
+        String savedToken = resetTokens.get(request.getUserName());
+
+        // Nếu mã không khớp hoặc mã không tồn tại -> Hacker đang cố vượt rào
+        if (savedToken == null || !savedToken.equals(request.getResetToken())) {
+            throw new UserException(ErrorCode.INVALID_RESET_TOKEN);
+        }
+
+        // Nếu đúng mã -> Đổi mật khẩu
+        User user = userRepository.findByUserName(request.getUserName());
+        user.setPassword(encodePassword(request.getNewPassword()));
+        userRepository.save(user);
+
+        // Đổi xong thì XÓA mã bí mật đó đi (Mỗi mã chỉ được dùng 1 lần)
+        resetTokens.remove(request.getUserName());
+
+        return "Password change successfully!";
     }
 
     // READ
