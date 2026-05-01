@@ -1,45 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.AddProductController"
+      spacing="20" style="-fx-background-color: transparent; -fx-padding: 20;">
 
-<VBox xmlns:fx="http://javafx.com/fxml" spacing="20" style="-fx-background-color: transparent;">
-    <Label text="&lt; Thêm sản phẩm" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+    <Label onMouseClicked="#goBack" text="&lt; Thêm sản phẩm" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
 
-    <HBox styleClass="card" spacing="30">
+    <HBox spacing="30" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 20;">
         <!-- Cột trái: Ảnh -->
         <VBox alignment="CENTER" spacing="15">
-            <StackPane styleClass="image-placeholder" prefWidth="200" prefHeight="200">
-                <Label text="🖼" style="-fx-font-size: 60px; -fx-text-fill: white;"/>
+            <StackPane prefWidth="200" prefHeight="200" style="-fx-border-color: #ddd; -fx-border-radius: 10; -fx-background-color: #f8f9fa;">
+                <!-- Đây là nơi hiện ảnh -->
+                <ImageView fx:id="productImage" fitWidth="190" fitHeight="190" pickOnBounds="true" preserveRatio="true" />
+                <!-- Icon mặc định sẽ ẩn đi khi có ảnh -->
+                <Label fx:id="lblPhotoIcon" text="🖼" style="-fx-font-size: 60px; -fx-text-fill: #ccc;"/>
             </StackPane>
-            <Button text="Tải ảnh lên" styleClass="btn-primary" />
+            <!-- Nút bấm tải ảnh -->
+            <Button onAction="#handleUploadImage" text="Tải ảnh lên" style="-fx-background-color: #004aad; -fx-text-fill: white; -fx-background-radius: 5;" />
         </VBox>
 
         <!-- Cột phải: Form nhập liệu -->
         <VBox spacing="15" HBox.hgrow="ALWAYS">
             <HBox spacing="20">
-                <TextField promptText="Mã sản phẩm" styleClass="input-field" prefWidth="150"/>
-                <TextField promptText="Tên sản phẩm" styleClass="input-field" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="txtProductId" promptText="Mã sản phẩm" prefWidth="150"/>
+                <TextField fx:id="txtProductName" promptText="Tên sản phẩm" HBox.hgrow="ALWAYS"/>
             </HBox>
-            <TextArea promptText="Mô tả sản phẩm" styleClass="input-field" prefRowCount="5" wrapText="true"/>
+            <TextArea fx:id="txtDescription" promptText="Mô tả sản phẩm" prefRowCount="5" wrapText="true"/>
 
             <HBox alignment="CENTER_LEFT" spacing="20">
-                <Label text="Số tiền đấu giá ban đầu:" prefWidth="150" style="-fx-font-weight: bold;"/>
-                <TextField promptText="Số tiền đấu giá" styleClass="input-field" HBox.hgrow="ALWAYS"/>
+                <Label text="Số tiền ban đầu:" prefWidth="150" style="-fx-font-weight: bold;"/>
+                <TextField fx:id="txtStartPrice" promptText="Số tiền đấu giá" HBox.hgrow="ALWAYS"/>
             </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <Label text="Thời gian bắt đầu:" prefWidth="150" style="-fx-font-weight: bold;"/>
-                <DatePicker styleClass="input-field" HBox.hgrow="ALWAYS"/>
-                <TextField promptText="06:50" styleClass="input-field" prefWidth="80"/>
-            </HBox>
+
             <HBox alignment="CENTER_LEFT" spacing="20">
                 <Label text="Thời gian kết thúc:" prefWidth="150" style="-fx-font-weight: bold;"/>
-                <DatePicker styleClass="input-field" HBox.hgrow="ALWAYS"/>
-                <TextField promptText="09:53" styleClass="input-field" prefWidth="80"/>
+                <DatePicker fx:id="dpEnd" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="txtEndTime" promptText="09:53" prefWidth="80"/>
             </HBox>
 
             <HBox alignment="CENTER">
-                <Button text="Xác nhận" styleClass="btn-primary" style="-fx-padding: 10 40;"/>
+                <Button onAction="#handleConfirmAdd" text="Xác nhận" style="-fx-background-color: #004aad; -fx-text-fill: white; -fx-padding: 10 40; -fx-background-radius: 20;"/>
             </HBox>
         </VBox>
     </HBox>

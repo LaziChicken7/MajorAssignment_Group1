@@ -22,7 +22,7 @@
                     <Button fx:id="btnIconHome" text="🏠" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showDashboard"/>
                     <Button fx:id="btnIconWallet" text="💰" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showWallet"/>
                     <Button fx:id="btnIconAuction" text="⚖" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showAuctionList"/>
-                    <Button fx:id="btnIconAdd" text="➕" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showAddProduct"/>
+                    <Button fx:id="btnIconAdd" text="➕" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#handleShowMyProducts"/>
                 </VBox>
 
                 <VBox spacing="15" alignment="BOTTOM_CENTER">
@@ -61,7 +61,7 @@
                 <Button fx:id="btnNavHome" text="🏠   Trang chủ" styleClass="nav-btn" prefWidth="250" onAction="#showDashboard"/>
                 <Button fx:id="btnNavWallet" text="💰   Ví tiền" styleClass="nav-btn" prefWidth="250" onAction="#showWallet"/>
                 <Button fx:id="btnNavAuction" text="⚖   Đấu giá" styleClass="nav-btn" prefWidth="250" onAction="#showAuctionList"/>
-                <Button fx:id="btnNavAdd" text="➕   Thêm sản phẩm" styleClass="nav-btn" prefWidth="250" onAction="#showAddProduct"/>
+                <Button fx:id="btnNavAdd" text="➕   Thêm sản phẩm" styleClass="nav-btn" prefWidth="250" onAction="#handleShowMyProducts"/>
             </VBox>
 
             <VBox spacing="10" alignment="BOTTOM_LEFT">

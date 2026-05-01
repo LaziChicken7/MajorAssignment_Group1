@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-radius: 10;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.AuctionItemController">
+    <VBox spacing="5" minWidth="150">
+        <HBox spacing="10">
+            <Label fx:id="lblId" text="SP1" style="-fx-font-weight: bold;" />
+            <Label fx:id="lblName" text="Auction Name 1" />
+        </HBox>
+        <!-- Cột trạng thái (Dành cho trang 'Sản phẩm của tôi') -->
+        <HBox fx:id="boxStatus" spacing="5" visible="false">
+            <Label text="Trạng thái:" style="-fx-font-size: 11;"/>
+            <Label fx:id="lblStatus" text="RUNNING" style="-fx-font-weight: bold;"/>
+        </HBox>
+    </VBox>
+
+    <Region HBox.hgrow="ALWAYS" />
+
+    <VBox alignment="CENTER_RIGHT" spacing="5">
+        <Label text="Giá hiện tại:" style="-fx-font-size: 11;"/>
+        <Label fx:id="lblPrice" text="1.273.000 VND" style="-fx-background-color: #004aad; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 15; -fx-font-weight: bold;" />
+    </VBox>
+
+    <VBox alignment="CENTER_RIGHT" spacing="5">
+        <Label text="Thời gian còn lại:" style="-fx-font-size: 11;"/>
+        <Label fx:id="lblTime" text="00:01:12" style="-fx-background-color: #ffbd59; -fx-padding: 5 15; -fx-background-radius: 15; -fx-font-weight: bold;" />
+    </VBox>
+</HBox>
