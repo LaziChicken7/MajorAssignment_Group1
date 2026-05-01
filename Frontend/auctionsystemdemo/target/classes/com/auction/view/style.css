@@ -282,3 +282,36 @@
 .btn-danger:hover {
     -fx-background-color: linear-gradient(to bottom, #FF5252, #FF0000);
 }
+
+/* ===== NÚT TRÒN THÔNG BÁO (HIỆU ỨNG ANIMATION) ===== */
+.btn-circle-success, .btn-circle-danger, .btn-circle-info {
+    -fx-text-fill: white;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-padding: 0;
+    -fx-background-radius: 50px;
+    -fx-cursor: hand;
+    -fx-transition: 0.2s; /* Làm mượt chuyển động */
+}
+
+/* Màu sắc mặc định */
+.btn-circle-success { -fx-background-color: #00C853; }
+.btn-circle-danger { -fx-background-color: #FF0000; }
+.btn-circle-info { -fx-background-color: #0A56D2; }
+
+/* --- HIỆU ỨNG HOVER (LƯỚT CHUỘT VÀO) --- */
+.btn-circle-success:hover, .btn-circle-danger:hover, .btn-circle-info:hover {
+    -fx-opacity: 0.85; /* Sáng lên một chút */
+}
+
+/* Đổi màu gradient nhẹ khi hover cho đồng bộ với nút Nạp/Rút tiền  */
+.btn-circle-success:hover { -fx-background-color: linear-gradient(to bottom, #00E676, #00C853); }
+.btn-circle-danger:hover { -fx-background-color: linear-gradient(to bottom, #FF5252, #FF0000); }
+.btn-circle-info:hover { -fx-background-color: linear-gradient(to bottom, #4285F4, #0A56D2); }
+
+/* --- HIỆU ỨNG PRESSED (KHI BẤM XUỐNG) --- */
+.btn-circle-success:pressed, .btn-circle-danger:pressed, .btn-circle-info:pressed {
+    -fx-scale-x: 0.9; /* Thu nhỏ tạo cảm giác lún */
+    -fx-scale-y: 0.9;
+    -fx-opacity: 1.0;
+}

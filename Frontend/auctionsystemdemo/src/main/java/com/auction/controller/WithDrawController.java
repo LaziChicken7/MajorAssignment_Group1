@@ -21,6 +21,10 @@ public class WithDrawController {
             System.out.println("Đang xử lý rút tiền: " + amountField.getText());
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/WithDrawSuccess.fxml"));
+
+            //Rút tiền thất bại
+            //FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/WithDrawFail.fxml"));
+
             Node successView = loader.load();
 
             Scene scene = ((Node) event.getSource()).getScene();

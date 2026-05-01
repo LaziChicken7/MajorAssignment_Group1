@@ -2,8 +2,12 @@ package com.auction.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
 
 public class HomeController {
 
@@ -64,6 +68,27 @@ public class HomeController {
 
     @FXML
     public void handleViewMoreNotifications(ActionEvent event) {
+
         System.out.println("Xem thêm thông báo...");
+        try {
+            // Tải giao diện Notification.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/Notification.fxml"));
+            Node notificationView = loader.load();
+
+            Button btn = (Button) event.getSource();
+
+            StackPane contentArea = (StackPane) btn.getScene().lookup("#contentArea");
+
+            if (contentArea != null) {
+                contentArea.getChildren().clear();
+                contentArea.getChildren().add(notificationView);
+            } else {
+                System.out.println("Lỗi: Không tìm thấy contentArea!");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Lỗi: Không thể tải file Notification.fxml");
+        }
     }
 }

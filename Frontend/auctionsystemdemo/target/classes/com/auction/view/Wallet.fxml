@@ -12,9 +12,10 @@
         <Label text="&lt; Ví tiền của tôi" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
         <Region HBox.hgrow="ALWAYS" />
         <!--<Button text="Nạp tiền" styleClass="btn-success" />-->
-        <Button text="Nạp tiền" styleClass="btn-success" onAction="#handleDeposit" />
-
-        <Button text="Rút tiền" styleClass="btn-danger" onAction="#handleWithdraw" />
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Button text="Nạp tiền" styleClass="btn-success" onAction="#handleDeposit" />
+            <Button text="Rút tiền" styleClass="btn-danger" onAction="#handleWithdraw" />
+        </HBox>
     </HBox>
 
     <!-- THẺ VISA & THÔNG TIN TÀI KHOẢN -->
@@ -48,7 +49,7 @@
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Giao dịch thành công" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button text="Xem thêm" styleClass="btn-primary" />
+                    <Button text="Xem thêm" styleClass="btn-primary" onAction="#handleSuccessfulTransaction"/>
                 </HBox>
                 <VBox styleClass="card" spacing="10">
                     <HBox alignment="CENTER_LEFT" styleClass="auction-row">
@@ -64,7 +65,7 @@
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Giao dịch ko thành công" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button text="Xem thêm" styleClass="btn-primary" />
+                    <Button text="Xem thêm" styleClass="btn-primary" onAction="#handleFailureTransaction"/>
                 </HBox>
                 <VBox styleClass="card" spacing="10">
                     <HBox alignment="CENTER_LEFT" styleClass="auction-row">
