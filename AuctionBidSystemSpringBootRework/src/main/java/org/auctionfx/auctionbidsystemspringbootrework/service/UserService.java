@@ -138,6 +138,7 @@ public class UserService {
 
     // QUÊN MẬT KHẨU
     // 1. Xác thực thông tin (trả về token)
+    @Transactional
     public String verifyUserInfo(VerifyInfoRequest request) {
         User user = userRepository.findByUserName(request.getUserName());
 

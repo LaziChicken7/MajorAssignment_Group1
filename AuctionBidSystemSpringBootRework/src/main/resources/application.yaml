@@ -8,7 +8,13 @@ spring:
     url: "jdbc:mysql://localhost:3306/AuctionBidSystemTest"
     username: root
     password: root
+
+  # THÊM ĐOẠN NÀY ĐỂ CHẠY FILE SCHEMA.SQL
+  sql:
+    init:
+      mode: never
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none # Giữ nguyên là 'none' để tắt Hibernate tự đẻ bảng
     show-sql: true

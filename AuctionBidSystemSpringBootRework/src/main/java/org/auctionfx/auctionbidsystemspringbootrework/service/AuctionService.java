@@ -4,15 +4,14 @@ import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreatio
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.BidTransaction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.item.Item;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.notification.Notification;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.AuctionStatus;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.NotificationType;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.AuctionException;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
-import org.auctionfx.auctionbidsystemspringbootrework.repository.AuctionRepository;
-import org.auctionfx.auctionbidsystemspringbootrework.repository.BidTransactionRepository;
-import org.auctionfx.auctionbidsystemspringbootrework.repository.ItemRepository;
-import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
+import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +22,12 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 public class AuctionService {
-    @Autowired
-    private AuctionRepository auctionRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private BidTransactionRepository bidTransactionRepository;
-    @Autowired
-    private PaymentService paymentService; // Gọi bếp phó (Payment) hỗ trợ
-    @Autowired
-    private ItemRepository itemRepository;
+    @Autowired private AuctionRepository auctionRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private BidTransactionRepository bidTransactionRepository;
+    @Autowired private PaymentService paymentService; // Gọi bếp phó (Payment) hỗ trợ
+    @Autowired private ItemRepository itemRepository;
+    @Autowired private NotificationRepository notificationRepository;
 
     // Cấu hình thuật toán Anti-Snipping
     private static final int SNIPING_THRESHOLD_SECONDS = 10; // Đấu giá trong 10s cuối
@@ -123,6 +118,17 @@ public class AuctionService {
         auctionRepository.save(auction);
 
         if (auction.getWinningUser() != null) {
+            // ============== CODE THÊM MỚI Ở ĐÂY ==============
+            Notification notif = new Notification();
+            notif.setUser(auction.getWinningUser()); // Gửi cho người thắng
+            notif.setAuction(auction);
+            notif.setType(NotificationType.PAYMENT_VERIFICATION);
+            // Cắt 4 ký tự ID SP (ví dụ ITEM -> IT) làm mã hiển thị SP01
+            notif.setTitle("Xác thực giao dịch: SP" + auction.getBidProduct().getId().substring(0, 4).toUpperCase());
+            notif.setDescription(auction.getBidProduct().getName() + " - Giá tiền: " + auction.getHighestBid() + " VND");
+
+            notificationRepository.save(notif);
+            // =================================================
             return "Session ended! Winner is: " + auction.getWinningUser().getFullName();
         }
         return "Session ended! No one winner";
