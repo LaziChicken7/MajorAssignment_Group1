@@ -12,4 +12,5 @@ module com.auction {
     // Export các package để có thể chạy được
     exports com.auction;
     exports com.auction.controller;
+
 }

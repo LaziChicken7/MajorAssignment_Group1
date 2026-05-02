@@ -1,128 +1,70 @@
 package com.auction.controller;
 
-import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.util.Duration;
-
-import java.net.URL;
+import java.io.IOException;
 
 public class MainController {
 
+    // Phải khớp với fx:id="contentArea" trong Main.fxml
     @FXML private StackPane contentArea;
-    @FXML private AnchorPane drawerOverlay;
-    @FXML private VBox expandedSidebar;
-
-    // Các nút bên Sidebar thu gọn
-    @FXML private Button btnIconHome, btnIconWallet, btnIconAuction, btnIconAdd, btnIconNotif, btnIconProfile;
-    // Các nút bên Sidebar mở rộng
-    @FXML private Button btnNavHome, btnNavWallet, btnNavAuction, btnNavAdd, btnNavNotif, btnNavProfile;
 
     @FXML
     public void initialize() {
-        showDashboard(); // Khi vừa bật app thì vào Trang chủ đầu tiên
+        // Khi mở app, hiển thị trang Dashboard đầu tiên
+        showDashboard();
     }
 
-    // ====== HÀM XỬ LÝ HIGHLIGHT MÀU NÚT ======
-    private void setActiveMenu(Button activeIcon, Button activeNav) {
-        // Danh sách tất cả các nút để tiện reset
-        Button[] allIcons = {btnIconHome, btnIconWallet, btnIconAuction, btnIconAdd, btnIconNotif, btnIconProfile};
-        Button[] allNavs = {btnNavHome, btnNavWallet, btnNavAuction, btnNavAdd, btnNavNotif, btnNavProfile};
-
-        // 1. Reset toàn bộ về trạng thái bình thường (trong suốt)
-        for (Button btn : allIcons) {
-            if (btn != null) {
-                btn.getStyleClass().remove("icon-btn-active");
-                if (!btn.getStyleClass().contains("icon-btn")) btn.getStyleClass().add("icon-btn");
-            }
-        }
-        for (Button btn : allNavs) {
-            if (btn != null) {
-                btn.getStyleClass().remove("nav-btn-active");
-                if (!btn.getStyleClass().contains("nav-btn")) btn.getStyleClass().add("nav-btn");
-            }
-        }
-
-        // 2. Add class active (Màu xanh đậm) cho nút vừa được chọn
-        if (activeIcon != null) {
-            activeIcon.getStyleClass().remove("icon-btn");
-            activeIcon.getStyleClass().add("icon-btn-active");
-        }
-        if (activeNav != null) {
-            activeNav.getStyleClass().remove("nav-btn");
-            activeNav.getStyleClass().add("nav-btn-active");
-        }
-    }
-
-    // ====== ANIMATION MỞ/ĐÓNG SIDEBAR ======
-    @FXML
-    public void openSidebar() {
-        drawerOverlay.setVisible(true);
-        TranslateTransition slide = new TranslateTransition(Duration.millis(300), expandedSidebar);
-        slide.setToX(280);
-        slide.play();
-    }
-
-    @FXML
-    public void closeSidebar() {
-        TranslateTransition slide = new TranslateTransition(Duration.millis(300), expandedSidebar);
-        slide.setToX(0);
-        slide.setOnFinished(e -> drawerOverlay.setVisible(false));
-        slide.play();
-    }
-
-    // ====== CÁC HÀM CHUYỂN TRANG ======
-    @FXML public void showDashboard() {
-        loadView("/com/auction/view/Dashboard.fxml");
-        setActiveMenu(btnIconHome, btnNavHome); // Gọi hàm tô đậm nút Home
-        closeSidebar();
-    }
-
-    @FXML public void showWallet() {
-        loadView("/com/auction/view/Wallet.fxml");
-        setActiveMenu(btnIconWallet, btnNavWallet); // Gọi hàm tô đậm nút Wallet
-        closeSidebar();
-    }
-
-    @FXML public void showAuctionList() {
-        loadView("/com/auction/view/AuctionList.fxml");
-        setActiveMenu(btnIconAuction, btnNavAuction);
-        closeSidebar();
-    }
-
-    @FXML public void showAddProduct() {
-        loadView("/com/auction/view/AddProduct.fxml");
-        setActiveMenu(btnIconAdd, btnNavAdd);
-        closeSidebar();
-    }
-
-    @FXML public void showProfile() {
-        loadView("/com/auction/view/Profile.fxml");
-        setActiveMenu(btnIconProfile, btnNavProfile);
-        closeSidebar();
-    }
-
-    @FXML public void showNotification() {
-        loadView("/com/auction/view/Notification.fxml");
-        setActiveMenu(btnIconNotif, btnNavNotif);
-        closeSidebar();
-    }
-
-    private void loadView(String fxmlPath) {
+    // Hàm nạp trang con vào vùng giữa
+    public void loadView(String fxmlPath) {
         try {
-            URL url = getClass().getResource(fxmlPath);
-            if (url == null) return;
-            FXMLLoader loader = new FXMLLoader(url);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Node view = loader.load();
-            contentArea.getChildren().clear();
-            contentArea.getChildren().add(view);
-        } catch (Exception e) {
+            if (contentArea != null) {
+                contentArea.getChildren().clear();
+                contentArea.getChildren().add(view);
+            }
+        } catch (IOException e) {
+            System.err.println("Không tìm thấy file FXML: " + fxmlPath);
             e.printStackTrace();
         }
     }
+
+    // ====== CÁC HÀM XỬ LÝ SỰ KIỆN TỪ SIDEBAR (SỬA LỖI CỦA BẠN TẠI ĐÂY) ======
+
+    @FXML
+    public void showDashboard() {
+        loadView("/com/auction/view/Dashboard.fxml");
+    }
+
+    @FXML
+    public void showAuctionList() {
+        loadView("/com/auction/view/AuctionList.fxml");
+    }
+
+    @FXML
+    public void handleShowMyProducts() {
+        loadView("/com/auction/view/MyAuctionList.fxml");
+    }
+
+    @FXML
+    public void showWallet() {
+        // Nếu chưa có file Wallet.fxml, hãy tạo file trống hoặc tạm thời comment loadView
+        loadView("/com/auction/view/Wallet.fxml");
+    }
+
+    @FXML
+    public void showProfile() {
+        loadView("/com/auction/view/Profile.fxml");
+    }
+
+    @FXML
+    public void showNotification() {
+        loadView("/com/auction/view/Notification.fxml");
+    }
+
+    @FXML public void openSidebar() {}
+    @FXML public void closeSidebar() {}
 }

@@ -12,7 +12,7 @@
             <children>
                 <!-- Header quay lại -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Button text="< Quay lại" onAction="#goBack" style="-fx-background-color: transparent; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    <Button text=" Quay lại" onAction="#goBack" style="-fx-background-color: transparent; -fx-font-weight: bold; -fx-cursor: hand;"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label text="Số dư: 144.250.000 VND" style="-fx-text-fill: #004aad; -fx-font-weight: bold;"/>
                 </HBox>

@@ -4,7 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="" />
+    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/AuctionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/AuctionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/model/AuctionItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/model/AuctionItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/AuctionDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/AuctionDetail.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/AuctionController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/controller/AuctionController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/MainController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/controller/MainController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/model/AuctionItem.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/model/AuctionItem.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/AuctionDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/AuctionDetail.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/Main.fxml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,14 +30,26 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="FxmlFile" />
+        <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Congchuacute&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/LaziChicken7/MajorAssignment_Group1.git&quot;,
+    &quot;accountId&quot;: &quot;3aa93ea1-1f6e-4f2c-b0a6-7ee8e3ae390e&quot;
+  }
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -48,7 +72,7 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Admin/Documents/GitHub/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -70,8 +94,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.32098.37" />
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.32098.37" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
       </set>
     </attachedChunks>
   </component>
