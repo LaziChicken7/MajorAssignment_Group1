@@ -1,6 +1,7 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ItemCreationRequest;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +15,11 @@ public class ItemController {
     @Autowired
     private ItemService itemService;
 
+    // Create Item
     @PostMapping("/create")
-    public String createItem(@RequestBody ItemCreationRequest request) {
-        return itemService.createItem(request);
+    public ApiResponse<String> createItem(@RequestBody ItemCreationRequest request) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(itemService.createItem(request));
+        return apiResponse;
     }
 }

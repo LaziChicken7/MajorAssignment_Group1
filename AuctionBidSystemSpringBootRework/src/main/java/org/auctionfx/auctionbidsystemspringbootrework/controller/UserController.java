@@ -2,6 +2,7 @@ package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
 import jakarta.validation.Valid;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,38 +18,53 @@ public class UserController {
 
     // Create
     @PostMapping("/register")
-    ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
+    public ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.createUser(request));
         return apiResponse;
     }
 
-    // Read
+    // Read - Danh sách User
     @GetMapping("/admin")
-    List<User> getUsers() { return userService.getUsers(); }
+    public ApiResponse<List<User>> getUsers() {
+        ApiResponse<List<User>> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.getUsers());
+        return apiResponse;
+    }
 
+    // Read - Lấy 1 User
     @GetMapping("/admin/{userId}")
-    User getUser(@PathVariable("userId") String userId) { return userService.getUser(userId); }
+    public ApiResponse<User> getUser(@PathVariable("userId") String userId) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.getUser(userId));
+        return apiResponse;
+    }
 
     // Update
     @PutMapping("/admin/{userId}")
-    User updateUser(@PathVariable("userId") String userId, @RequestBody @Valid UserUpdateRequest request) {
-        return userService.updateUser(userId, request);
+    public ApiResponse<User> updateUser(@PathVariable("userId") String userId, @RequestBody @Valid UserUpdateRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.updateUser(userId, request));
+        return apiResponse;
     }
 
     // Delete
     @DeleteMapping("/admin/{userId}")
-    String deleteUser(@PathVariable("userId") String userId) {
-        return userService.deleteUser(userId);
+    public ApiResponse<String> deleteUser(@PathVariable("userId") String userId) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.deleteUser(userId));
+        return apiResponse;
     }
 
     // Upgrade to Seller
     @PutMapping("/upgrade-to-seller/{userName}")
-    public String upgradeToSeller(@PathVariable String userName) {
-        return userService.upgradeBidderToSeller(userName);
+    public ApiResponse<String> upgradeToSeller(@PathVariable String userName) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.upgradeBidderToSeller(userName));
+        return apiResponse;
     }
 
-    // Quên mật khẩu
+    // Quên mật khẩu - Xác thực
     @PostMapping("/verify-reset-info")
     public ApiResponse<String> verifyUserInfo(@RequestBody VerifyInfoRequest request) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
@@ -57,6 +73,7 @@ public class UserController {
         return apiResponse;
     }
 
+    // Quên mật khẩu - Đổi pass
     @PutMapping("/reset-password")
     public ApiResponse<String> resetPassword(@RequestBody ResetPasswordRequest request) {
         ApiResponse<String> apiResponse = new ApiResponse<>();

@@ -1,6 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ApiResponse;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.PlaceBidRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.service.AuctionService;
@@ -61,8 +61,10 @@ public class AuctionController {
     }
 
     @PostMapping("/create")
-    public String createAuction(@RequestBody AuctionCreationRequest request) {
-        return auctionService.createAuction(request);
+    public ApiResponse<String> createAuction(@RequestBody AuctionCreationRequest request) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(auctionService.createAuction(request));
+        return apiResponse;
     }
 
 }

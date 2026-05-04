@@ -1,4 +1,4 @@
-package org.auctionfx.auctionbidsystemspringbootrework.dto.request;
+package org.auctionfx.auctionbidsystemspringbootrework.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

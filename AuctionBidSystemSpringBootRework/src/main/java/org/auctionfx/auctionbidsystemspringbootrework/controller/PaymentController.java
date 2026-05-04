@@ -1,6 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ApiResponse;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.PaymentRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +16,18 @@ public class PaymentController {
 
     // Nạp tiền
     @PostMapping("/deposit")
-    public String deposit(@RequestBody PaymentRequest request) {
-        return paymentService.deposit(request.getUserName(), request.getAmount());
+    public ApiResponse<String> deposit(@RequestBody PaymentRequest request) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(paymentService.deposit(request.getUserName(), request.getAmount()));
+        return apiResponse;
     }
 
     // Rút tiền
     @PostMapping("/withdraw")
-    public String withdraw(@RequestBody PaymentRequest request) {
-        return paymentService.withdraw(request.getUserName(), request.getAmount());
+    public ApiResponse<String> withdraw(@RequestBody PaymentRequest request) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(paymentService.withdraw(request.getUserName(), request.getAmount()));
+        return apiResponse;
     }
 
     // Trả về kết quả VÍ TIỀN cho JavaFX

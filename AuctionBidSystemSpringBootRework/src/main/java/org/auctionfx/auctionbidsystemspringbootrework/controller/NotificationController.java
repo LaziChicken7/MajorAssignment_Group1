@@ -1,6 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ApiResponse;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.NotificationResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
