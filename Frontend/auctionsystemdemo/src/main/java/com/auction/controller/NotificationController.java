@@ -29,7 +29,7 @@ public class NotificationController {
                     setGraphic(null);
                 } else {
                     try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/Notification.fxml"));
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/NotificationItem.fxml"));
                         setGraphic(loader.load());
                         ((NotificationItemController)loader.getController()).setData(item);
                     } catch (IOException e) { e.printStackTrace(); }
