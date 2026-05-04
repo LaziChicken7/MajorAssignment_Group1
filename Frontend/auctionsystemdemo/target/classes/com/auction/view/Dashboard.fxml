@@ -59,7 +59,7 @@
                 <Label text="Thông báo" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 <Label text="2" style="-fx-background-color: red; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-translate-x: 5;"/>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="Xem thêm" styleClass="btn-primary" />
+                <Button text="Xem thêm" styleClass="btn-primary" onAction="#handleViewMoreNotifications"/>
             </HBox>
             <VBox spacing="10">
                 <HBox styleClass="auction-row" alignment="CENTER_LEFT" spacing="10">

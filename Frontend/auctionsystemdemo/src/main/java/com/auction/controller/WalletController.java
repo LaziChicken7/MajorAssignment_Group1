@@ -45,4 +45,30 @@ public class WalletController {
             System.out.println("Thực hiện Rút tiền...");
         }
     }
+
+    @FXML
+    public void handleSuccessfulTransaction(ActionEvent event) {
+        try {
+            // Nạp giao diện SuccessfulTransaction.fxml vào contentArea thay vì mở stage mới
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/SuccessfulTransaction.fxml"));
+            Node successView = loader.load();
+
+            contentArea.getChildren().setAll(successView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleFailureTransaction(ActionEvent event) {
+        try {
+            // Nạp giao diện SuccessfulTransaction.fxml vào contentArea thay vì mở stage mới
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/FailureTransaction.fxml"));
+            Node successView = loader.load();
+
+            contentArea.getChildren().setAll(successView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

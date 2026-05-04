@@ -9,7 +9,7 @@
       spacing="20" style="-fx-background-color: transparent;">
 
     <HBox alignment="CENTER_LEFT">
-        <Label text="&lt; Nạp tiền" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <Label text="&lt; Rút tiền" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
         <Region HBox.hgrow="ALWAYS" />
     </HBox>
 
@@ -43,11 +43,14 @@
         </padding>
 
         <StackPane>
-            <Circle radius="50" fill="#00C853"/>
-            <Label text="✔" textFill="white" style="-fx-font-size: 50px; -fx-font-weight: bold;"/>
+            <Circle radius="50" fill="#FF0000"/>
+            <Label text="✖" textFill="white" style="-fx-font-size: 50px; -fx-font-weight: bold;"/>
         </StackPane>
 
-        <Label text="Rút tiền thành công" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #00C853;"/>
+        <VBox alignment="CENTER" spacing="5">
+            <Label text="Rút tiền thất bại" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #FF0000;"/>
+            <Label text="Số dư không đủ" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #555555;"/>
+        </VBox>
 
         <Button text="Quay lại" onAction="#handleBackToWallet"
                 style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-size: 20px;

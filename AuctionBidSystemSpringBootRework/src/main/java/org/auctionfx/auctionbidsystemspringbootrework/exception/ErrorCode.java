@@ -42,6 +42,12 @@ public enum ErrorCode {
     ITEM_INVALID(7002, "Invalid item type"),
     ITEM_NOT_FOUND(7003, "Item not found"),
     // ===========================================================================
+    // NOTIFICATION EXCEPTION
+    NOTIFICATION_NOT_FOUND(8001, "Notification not found"),
+    NOTIFICATION_DELETE_INVALID(8002, "Can not delete verification notification. User must be choose Accept or Decline"),
+    NOTIFICATION_ACCEPT_PAYMENT_INVALID(8003, "This notification not required to Accept payment"),
+    NOTIFICATION_DECLINE_PAYMENT_INVALID(8004, "This notification not required to Decline payment"),
+    // ===========================================================================
     // RUNTIME EXCEPTION
     RUNTIME_EXCEPTION(89999, "Runtime exception"),
     // ===========================================================================
