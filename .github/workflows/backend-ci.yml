@@ -43,10 +43,13 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: 3. Chạy Test (JUnit) và Đóng gói (Package)
+    - name: 3. Chạy Đóng gói (Package)
       run: mvn clean package
 
-    - name: 4. Lưu trữ file JAR (Artifact) để tải về
+    - name: 4. Chạy JUnit Test
+      run: mvn test
+
+    - name: 5. Lưu trữ file JAR (Artifact) để tải về
       if: success() 
       uses: actions/upload-artifact@v4
       with:
