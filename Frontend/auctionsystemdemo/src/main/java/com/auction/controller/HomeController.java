@@ -72,7 +72,7 @@ public class HomeController {
         System.out.println("Xem thêm thông báo...");
         try {
             // Tải giao diện Notification.fxml
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/Notification.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/NotificationItem.fxml"));
             Node notificationView = loader.load();
 
             Button btn = (Button) event.getSource();

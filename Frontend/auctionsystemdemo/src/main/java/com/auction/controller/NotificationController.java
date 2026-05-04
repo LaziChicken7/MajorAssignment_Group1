@@ -19,7 +19,7 @@ public class NotificationController {
     @FXML
     public void initialize() {
         // KẾT NỐI VỚI DỮ LIỆU THẬT
-        lvNotifications.setItems(NotificationService.getNotifications());
+        lvNotifications.setItems(com.auction.controller.NotificationService.getNotifications());
 
         lvNotifications.setCellFactory(param -> new ListCell<Notification>() {
             @Override
@@ -29,7 +29,7 @@ public class NotificationController {
                     setGraphic(null);
                 } else {
                     try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/NotificationItem.fxml"));
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/Notification.fxml"));
                         setGraphic(loader.load());
                         ((NotificationItemController)loader.getController()).setData(item);
                     } catch (IOException e) { e.printStackTrace(); }

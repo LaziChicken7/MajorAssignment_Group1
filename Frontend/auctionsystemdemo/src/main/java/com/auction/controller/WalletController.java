@@ -6,6 +6,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -16,7 +19,9 @@ import java.io.IOException;
 public class WalletController {
 
     @FXML
-    private VBox contentArea;
+    private VBox historySection;
+    @FXML
+    private VBox walletRoot;
 
     @FXML
     public void handleDeposit(ActionEvent event) {
@@ -25,7 +30,7 @@ public class WalletController {
             // 1. Tải cái form nạp tiền nhỏ
             Node depositForm = FXMLLoader.load(getClass().getResource("/com/auction/view/DepositForm.fxml"));
 
-            contentArea.getChildren().setAll(depositForm);
+            historySection.getChildren().setAll(depositForm);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,7 +44,7 @@ public class WalletController {
         try {
             Node withdrawView = FXMLLoader.load(getClass().getResource("/com/auction/view/WithdrawForm.fxml"));
             // Tìm contentArea và setAll(withdrawView)
-            contentArea.getChildren().setAll(withdrawView);
+            historySection.getChildren().setAll(withdrawView);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Thực hiện Rút tiền...");
@@ -49,11 +54,10 @@ public class WalletController {
     @FXML
     public void handleSuccessfulTransaction(ActionEvent event) {
         try {
-            // Nạp giao diện SuccessfulTransaction.fxml vào contentArea thay vì mở stage mới
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/SuccessfulTransaction.fxml"));
             Node successView = loader.load();
 
-            contentArea.getChildren().setAll(successView);
+            walletRoot.getChildren().setAll(successView);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,13 +66,39 @@ public class WalletController {
     @FXML
     public void handleFailureTransaction(ActionEvent event) {
         try {
-            // Nạp giao diện SuccessfulTransaction.fxml vào contentArea thay vì mở stage mới
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/FailureTransaction.fxml"));
             Node successView = loader.load();
 
-            contentArea.getChildren().setAll(successView);
+            walletRoot.getChildren().setAll(successView);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    // Ẩn số dư
+    @FXML
+    private TextField balanceField;
+
+    @FXML
+    private Label eyeIconText;
+
+    private boolean isBalanceVisible = false;
+    private final String ACTUAL_BALANCE = "17.125.000";
+
+    @FXML
+    public void toggleBalanceVisibility(MouseEvent event) {
+        isBalanceVisible = !isBalanceVisible;
+
+        if (isBalanceVisible) {
+            // Hiện số dư
+            balanceField.setText(ACTUAL_BALANCE + " VND");
+            eyeIconText.setText("Ẩn");
+            eyeIconText.setStyle("-fx-font-size: 16px; -fx-text-fill: #FF0000; -fx-font-weight: bold; -fx-cursor: hand;"); // Tùy chọn: Đổi màu chữ sang đỏ cho khác biệt
+        } else {
+            // Ẩn số dư
+            balanceField.setText("****** VND");
+            eyeIconText.setText("Hiện");
+            eyeIconText.setStyle("-fx-font-size: 16px; -fx-text-fill: #0A439D; -fx-font-weight: bold; -fx-cursor: hand;"); // Đổi lại màu xanh
         }
     }
 }

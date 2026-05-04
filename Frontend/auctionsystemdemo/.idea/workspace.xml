@@ -5,74 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/NotificationItemController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/NotificationListController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/RegisterController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/model/Notification.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/auction/model/NotificationService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/MyAuctionItem.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/NotificationItem.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/NotificationList.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Register.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auctions_data.dat" beforeDir="false" afterPath="$PROJECT_DIR$/auctions_data.dat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/AddProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/AddProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/AuctionDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/AuctionDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/AuctionItemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/AuctionItemController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/LoginController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/MainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/MyAuctionItemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/MyAuctionItemController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/MyAuctionListController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/MyAuctionListController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/HomeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/HomeController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/model/AuctionItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/model/AuctionItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/model/AuctionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/model/AuctionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/AddProduct.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/AddProduct.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/AuctionItem.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/AuctionItem.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/AuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/AuctionList.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Login.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Login.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Main.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Notification.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/App.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/AddProductController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/AuctionController$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/AuctionController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/AuctionDetailController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/AuctionItemController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/AuctionService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/DepositController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/HomeController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/LoginController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/MainController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/MyAuctionItemController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/MyAuctionListController$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/MyAuctionListController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/NotificationController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/ProductController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/ProfileController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/WalletController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/WithDrawController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/model/AuctionItem.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/model/User.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/AddProduct.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/AuctionDetail.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/AuctionItem.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/AuctionList.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Dashboard.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/DepositForm.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/DepositSuccess.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Home.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Login.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Main.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/MyAuctionList.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Notification.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Profile.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Wallet.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/WithDrawForm.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/WithDrawSuccess.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/style.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/module-info.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/TransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/TransactionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/controller/WalletController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/controller/WalletController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/FailureTransaction.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/FailureTransaction.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/SuccessfulTransaction.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/SuccessfulTransaction.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Wallet.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/controller/WalletController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/controller/WalletController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/SuccessfulTransaction.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/SuccessfulTransaction.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/Wallet.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,6 +26,9 @@
     <persistenceIdMap>
       <entry key="_D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo" value="3CeROncKaFhc4eHoiw5CI0UgTCf" />
     </persistenceIdMap>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="60" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -129,7 +75,7 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Admin/Documents/GitHub/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -151,7 +97,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
       </set>
     </attachedChunks>
   </component>
