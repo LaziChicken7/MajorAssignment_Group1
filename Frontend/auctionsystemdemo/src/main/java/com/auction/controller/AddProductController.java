@@ -53,8 +53,9 @@ public class AddProductController {
             double price = Double.parseDouble(priceRaw);
 
             // Tạo đối tượng mới và thêm vào Service (Kho chung)
-            AuctionItem newAuction = new AuctionItem(id, name, price, price, time, "RUNNING", txtDescription.getText());
+            AuctionItem newAuction = new AuctionItem(id, name, price, price, time, "RUNNING", txtDescription.getText(), true);
             com.auction.controller.AuctionService.addAuction(newAuction);
+            com.auction.controller.NotificationService.addNotification("Bạn vừa tạo sản phẩm mới: " + name, "ACTION");
 
             System.out.println("Đã thêm thành công sản phẩm từ bàn phím!");
 

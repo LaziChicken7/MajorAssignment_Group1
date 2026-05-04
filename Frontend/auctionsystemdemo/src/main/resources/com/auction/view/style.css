@@ -282,3 +282,52 @@
 .btn-danger:hover {
     -fx-background-color: linear-gradient(to bottom, #FF5252, #FF0000);
 }
+/* Nền xám nhạt cho toàn bộ trang để card màu trắng nổi lên */
+.root-container {
+    -fx-background-color: #f8f9fa;
+}
+
+/* Tùy chỉnh ListView: Xóa bỏ đường viền và nền mặc định */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 10 0 10 0; /* Khoảng cách giữa các dòng */
+}
+
+/* Thiết kế Card trắng bo góc và đổ bóng */
+.auction-card {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+/* Viên thuốc (Pill) cho giá tiền */
+.price-pill {
+    -fx-background-color: #004aad;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 5 20 5 20;
+    -fx-background-radius: 20;
+}
+
+/* Viên thuốc (Pill) cho thời gian */
+.time-pill {
+    -fx-background-color: #ffbd59;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 5 20 5 20;
+    -fx-background-radius: 20;
+}
+
+/* Label tiêu đề phụ */
+.label-small {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 11px;
+}

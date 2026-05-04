@@ -6,12 +6,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
 public class AuctionDetailController {
+    // Thêm txtDescription và productImage vào khai báo
     @FXML private Label lblId, lblName, lblTime, lblStartPrice, lblMyBid, lblCurrentPrice, lblConfirmAmount, lblBidStatus;
     @FXML private TextField txtBidAmount;
+    @FXML private TextArea txtDescription; // Ô mô tả sản phẩm
+    @FXML private ImageView productImage;   // Khung ảnh sản phẩm
     @FXML private VBox paneConfirm;
     @FXML private HBox toastSuccess, toastError;
     @FXML private Button btnBidAction;
@@ -22,49 +27,74 @@ public class AuctionDetailController {
         this.currentItem = item;
         updateUI();
 
-        // LOGIC: CHO ĐẤU GIÁ HAY KHÔNG
+        // LOGIC: KHÓA ĐẤU GIÁ NẾU ĐÃ KẾT THÚC
         boolean isFinished = "FINISHED".equals(item.getStatus()) || "SUCCESS".equals(item.getStatus());
-        if (isFinished || item.getTimeLeft().equals("00:00:00")) {
+        if (isFinished || "00:00:00".equals(item.getTimeLeft())) {
             btnBidAction.setDisable(true);
             btnBidAction.setText("Đã kết thúc");
             txtBidAmount.setDisable(true);
-            lblBidStatus.setText("Phiên đấu giá đã kết thúc.");
+            if (lblBidStatus != null) lblBidStatus.setText("Phiên đấu giá đã kết thúc.");
         }
     }
 
     private void updateUI() {
         if (currentItem == null) return;
+
+        // Đổ dữ liệu cơ bản
         lblId.setText(currentItem.getId());
         lblName.setText(currentItem.getName());
         lblTime.setText(currentItem.getTimeLeft());
         lblCurrentPrice.setText(String.format("%,.0f VND", currentItem.getCurrentPrice()));
         lblStartPrice.setText(String.format("%,.0f VND", currentItem.getStartPrice()));
         lblMyBid.setText(String.format("%,.0f VND", currentItem.getMyBid()));
+
+        // 1. HIỂN THỊ MÔ TẢ (Lỗi của bạn nằm ở đây)
+        if (txtDescription != null) {
+            txtDescription.setText(currentItem.getDescription());
+        }
+
+        // 2. HIỂN THỊ ẢNH (Nếu bạn đã code phần lưu ảnh ở AddProduct)
+        // Lưu ý: Nếu sp mới thêm từ form, bạn cần đảm bảo đường dẫn ảnh hợp lệ
+        /*
+        if (productImage != null && currentItem.getImagePath() != null) {
+            try {
+                productImage.setImage(new Image(currentItem.getImagePath()));
+            } catch (Exception e) {
+                System.out.println("Không load được ảnh sản phẩm.");
+            }
+        }
+        */
     }
 
     @FXML
     private void handleBidClick() {
         if (txtBidAmount.getText().isEmpty()) return;
         lblConfirmAmount.setText(txtBidAmount.getText() + " VND");
-        paneConfirm.setVisible(true); // Hiện Popup xác nhận (Hình 3)
+        paneConfirm.setVisible(true);
     }
 
     @FXML
     private void processConfirmBid() {
         try {
-            double bidValue = Double.parseDouble(txtBidAmount.getText().replace(".", ""));
+            // Xử lý giá tiền (Xóa dấu chấm nếu có)
+            double bidValue = Double.parseDouble(txtBidAmount.getText().replace(".", "").replace(",", ""));
             paneConfirm.setVisible(false);
 
             if (bidValue <= currentItem.getCurrentPrice()) {
-                showToast(toastError); // Thông báo ĐỎ (Hình 5)
+                showToast(toastError);
             } else {
                 currentItem.setCurrentPrice(bidValue);
                 currentItem.setMyBid(bidValue);
-                com.auction.controller.AuctionService.saveToFile(); // Lưu lại vào ổ cứng ngay
+                // Lưu lại vào file .dat ngay lập tức
+                com.auction.controller.AuctionService.saveToFile();
                 updateUI();
-                showToast(toastSuccess); // Thông báo XANH (Hình 4)
+                com.auction.controller.NotificationService.addNotification("Bạn vừa đặt giá " + txtBidAmount.getText() + " VND cho " + currentItem.getName(), "SUCCESS");
+                showToast(toastSuccess);
             }
-        } catch (Exception e) { paneConfirm.setVisible(false); }
+        } catch (Exception e) {
+            paneConfirm.setVisible(false);
+            System.out.println("Lỗi định dạng giá tiền.");
+        }
     }
 
     @FXML private void handleCancelPopup() { paneConfirm.setVisible(false); }
@@ -79,7 +109,6 @@ public class AuctionDetailController {
     @FXML
     private void goBack() {
         try {
-            // Load lại Main để giữ Sidebar
             Node view = FXMLLoader.load(getClass().getResource("/com/auction/view/AuctionList.fxml"));
             StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
             contentArea.getChildren().setAll(view);

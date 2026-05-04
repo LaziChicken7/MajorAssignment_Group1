@@ -1,45 +1,47 @@
 package com.auction.controller;
 
+import com.auction.model.Notification;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import javafx.event.ActionEvent;
+import java.io.IOException;
 
 public class NotificationController {
+    @FXML private ListView<Notification> lvNotifications;
+    @FXML private VBox panePopupDetail; // Khai báo cái lớp mờ popup
+    @FXML private Label lblPopupContent; // Khai báo nhãn nội dung trong popup
 
     @FXML
-    private Button backButton;
+    public void initialize() {
+        // KẾT NỐI VỚI DỮ LIỆU THẬT
+        lvNotifications.setItems(NotificationService.getNotifications());
 
-    @FXML
-    private VBox notificationContainer;
-
-    @FXML
-    void handleBackButton(ActionEvent event) {
-        System.out.println("Back button clicked");
+        lvNotifications.setCellFactory(param -> new ListCell<Notification>() {
+            @Override
+            protected void updateItem(Notification item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/NotificationItem.fxml"));
+                        setGraphic(loader.load());
+                        ((NotificationItemController)loader.getController()).setData(item);
+                    } catch (IOException e) { e.printStackTrace(); }
+                }
+            }
+        });
     }
 
     @FXML
-    void handleAcceptNotification(ActionEvent event) {
-        System.out.println("Notification accepted");
-    }
-
-    @FXML
-    void handleRejectNotification(ActionEvent event) {
-        System.out.println("Notification rejected");
-        // TODO: Process rejection
-    }
-
-    @FXML
-    void handleDeleteNotification(ActionEvent event) {
-        // Handle delete notification action
-        System.out.println("Notification deleted");
-        // TODO: Delete notification from list
-    }
-
-    @FXML
-    void handleMoreOptions(ActionEvent event) {
-        // Handle more options action
-        System.out.println("More options clicked");
-        // TODO: Show context menu or more options
+    public void closePopup() {
+        if (panePopupDetail != null) {
+            panePopupDetail.setVisible(false); // Ẩn popup đi
+        }
     }
 }

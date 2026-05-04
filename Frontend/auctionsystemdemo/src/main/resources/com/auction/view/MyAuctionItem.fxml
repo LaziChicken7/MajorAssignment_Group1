@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.MyAuctionItemController">
+    <children>
+        <GridPane hgap="15" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="50" />
+                <ColumnConstraints hgrow="ALWAYS" />
+                <ColumnConstraints halignment="RIGHT" minWidth="180" />
+            </columnConstraints>
+            <children>
+                <!-- Dòng 1: ID và Tên sản phẩm -->
+                <Label fx:id="lblId" style="-fx-font-weight: bold; -fx-font-size: 15;" text="SP000" GridPane.columnIndex="0" />
+                <Label fx:id="lblName" style="-fx-font-size: 15;" text="Tên sản phẩm mẫu" GridPane.columnIndex="1" />
+
+                <!-- Giá hiện tại bên phải -->
+                <HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="2">
+                    <children>
+                        <Label text="Giá hiện tại:" style="-fx-font-size: 12;"/>
+                        <Label fx:id="lblPrice" style="-fx-background-color: #004aad; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold;" text="0 VND" />
+                    </children>
+                </HBox>
+
+                <!-- Dòng 2: Trạng thái và Thời gian -->
+                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                    <children>
+                        <Label text="Trạng thái hiện tại:" style="-fx-font-size: 13; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblStatus" text="RUNNING" style="-fx-font-weight: bold;" />
+                    </children>
+                </HBox>
+
+                <HBox alignment="CENTER_RIGHT" spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="2">
+                    <children>
+                        <Label text="Thời gian còn lại:" style="-fx-font-size: 12;"/>
+                        <Label fx:id="lblTime" style="-fx-background-color: #ffbd59; -fx-text-fill: black; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold;" text="00:00:00" />
+                    </children>
+                </HBox>
+            </children>
+        </GridPane>
+    </children>
+    <padding>
+        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+    </padding>
+</VBox>

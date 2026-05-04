@@ -37,8 +37,9 @@
                 <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-header">
                     <TextField promptText="🔍 Tìm kiếm" styleClass="search-bar" prefWidth="500" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Label text="30/03/2026 22:19" textFill="white" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                </HBox>
+                    <!-- Trong Main.fxml -->
+                    <Label fx:id="lblSystemTime" text="00/00/0000 00:00:00"
+                           style="-fx-text-fill: white; -fx-font-size: 14;" />                </HBox>
                 <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS">
                     <padding><Insets top="20" right="30" bottom="20" left="30"/></padding>
                 </StackPane>

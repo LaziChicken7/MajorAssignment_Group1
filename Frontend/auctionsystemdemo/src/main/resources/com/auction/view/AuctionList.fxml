@@ -7,7 +7,7 @@
     <children>
         <HBox alignment="CENTER_LEFT" spacing="10.0">
             <children>
-                <Label style="-fx-font-size: 20; -fx-font-weight: bold;" text="&lt; Đấu giá" />
+                <Label style="-fx-font-size: 20; -fx-font-weight: bold;" text="Đấu giá" />
                 <Region HBox.hgrow="ALWAYS" />
                 <Label fx:id="lblBalance" style="-fx-text-fill: #004aad; -fx-font-weight: bold;" text="Số dư: 144.250.000 VND" />
             </children>
