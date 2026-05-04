@@ -1,0 +1,49 @@
+name: Spring Boot CI
+
+# Robot sẽ tự động chạy khi Push code lên nhánh main
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Thuê máy ảo Linux miễn phí
+
+    # Giả lập một Database MySQL để Spring Boot khởi động không bị lỗi
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: AuctionBidSystemTest
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: 1. Lấy code từ GitHub về máy ảo
+        uses: actions/checkout@v4
+
+      - name: 2. Cài đặt Java 25 (Khớp với project của bạn)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 3. Chạy Test (JUnit) và Đóng gói (Package)
+        # Lệnh này sẽ biên dịch code, chạy các file Test vừa viết, nếu PASS nó sẽ đóng gói thành file .jar
+        run: mvn clean package
+
+      - name: 4. Lưu trữ file JAR (Artifact) để tải về
+        if: success() # Chỉ lưu nếu bước Test phía trên thành công
+        uses: actions/upload-artifact@v4
+        with:
+          name: auction-backend-jar
+          path: target/*.jar
