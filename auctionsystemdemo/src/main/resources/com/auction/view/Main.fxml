@@ -1,51 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" stylesheets="@style.css" styleClass="main-background" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController">
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.MainController" stylesheets="@style.css" prefWidth="1200" prefHeight="700" styleClass="root-pane">
 
-    <!-- TOP BAR -->
-    <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="60.0" styleClass="top-bar">
-            <Region prefWidth="60.0" />
-            <HBox alignment="CENTER_LEFT" prefHeight="35.0" prefWidth="400.0" styleClass="search-box">
-                <Label text="🔍" textFill="#999999"><HBox.margin><Insets left="10.0" right="10.0"/></HBox.margin></Label>
-                <TextField promptText="Tìm kiếm" styleClass="search-field" HBox.hgrow="ALWAYS" />
-            </HBox>
-            <Region HBox.hgrow="ALWAYS" />
-            <Label text="30/03/2026 22:19" textFill="WHITE" />
-        </HBox>
-    </top>
+    <BorderPane>
+        <!-- SIDEBAR THU GỌN -->
+        <!-- SIDEBAR THU GỌN -->
+        <left>
+            <!-- Tăng prefWidth từ 90 lên 110 -->
+            <VBox styleClass="sidebar" prefWidth="110" spacing="15" alignment="TOP_CENTER">
+                <padding><Insets top="20" bottom="20"/></padding>
 
-    <!-- SIDE BAR CÓ THỂ TRƯỢT -->
-    <left>
-        <VBox fx:id="sideBar" prefWidth="80.0" styleClass="side-bar" alignment="TOP_CENTER" spacing="10">
-            <!-- Nút Hamburger -->
-            <Button fx:id="btnMenu" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-cursor: hand;" text="≡" />
+                <Button text="☰" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 28px; -fx-cursor: hand;" onAction="#openSidebar"/>
 
-            <Region prefHeight="20.0" />
+                <VBox spacing="15" VBox.vgrow="ALWAYS" alignment="TOP_CENTER">
+                    <padding><Insets top="20"/></padding>
+                    <!-- Tăng prefWidth và prefHeight từ 55 lên 65 -->
+                    <!-- Thêm -fx-padding: 0; để icon được căn giữa hoàn hảo và không bị ép viền -->
+                    <Button fx:id="btnIconHome" text="🏠" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showDashboard"/>
+                    <Button fx:id="btnIconWallet" text="💰" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showWallet"/>
+                    <Button fx:id="btnIconAuction" text="⚖" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showAuctionList"/>
+                    <Button fx:id="btnIconAdd" text="➕" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#handleShowMyProducts"/>
+                </VBox>
 
-            <!-- Các nút Menu -->
-            <Button fx:id="btnHome" onAction="#showHome" styleClass="nav-btn, nav-btn-active" text="🏠" prefWidth="250" prefHeight="50" />
-            <Button fx:id="btnWallet" onAction="#showWallet" styleClass="nav-btn" text="💼" prefWidth="250" prefHeight="50"/>
-            <Button fx:id="btnAuction" styleClass="nav-btn" text="⚖" prefWidth="250" prefHeight="50"/>
-            <Button fx:id="btnAdd" styleClass="nav-btn" text="⊕" prefWidth="250" prefHeight="50"/>
-
-            <Region VBox.vgrow="ALWAYS" />
-
-            <!-- User Info (ẩn khi thu gọn) -->
-            <VBox fx:id="userInfoBox" alignment="CENTER" spacing="10">
-                <Label fx:id="lblUserName" text="" textFill="WHITE" style="-fx-font-weight: bold;"/>
-                <Circle fill="WHITE" radius="15.0" />
+                <VBox spacing="15" alignment="BOTTOM_CENTER">
+                    <Button fx:id="btnIconNotif" text="📩" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showNotification"/>
+                    <Button fx:id="btnIconProfile" text="👤" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showProfile"/>
+                </VBox>
             </VBox>
-            <padding><Insets bottom="20.0" top="10.0"/></padding>
-        </VBox>
-    </left>
+        </left>
 
-    <!-- NỘI DUNG Ở GIỮA SẼ ĐƯỢC LOAD ĐỘNG BẰNG JAVA -->
-    <center>
-        <!-- Mặc định trống, Java sẽ nhét Dashboard.fxml vào đây -->
-    </center>
-</BorderPane>
+        <center>
+            <VBox>
+                <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-header">
+                    <TextField promptText="🔍 Tìm kiếm" styleClass="search-bar" prefWidth="500" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <!-- Trong Main.fxml -->
+                    <Label fx:id="lblSystemTime" text="00/00/0000 00:00:00"
+                           style="-fx-text-fill: white; -fx-font-size: 14;" />                </HBox>
+                <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS">
+                    <padding><Insets top="20" right="30" bottom="20" left="30"/></padding>
+                </StackPane>
+            </VBox>
+        </center>
+    </BorderPane>
+
+    <!-- SIDEBAR MỞ RỘNG (OVERLAY) -->
+    <AnchorPane fx:id="drawerOverlay" visible="false" style="-fx-background-color: rgba(0,0,0,0.4);">
+        <Button AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" style="-fx-background-color: transparent;" onAction="#closeSidebar"/>
+
+        <VBox fx:id="expandedSidebar" styleClass="sidebar-expanded" prefWidth="280" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-280">
+            <padding><Insets top="20" right="15" bottom="20" left="15"/></padding>
+            <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 30 10;">
+                <Button text="✕" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-cursor: hand; -fx-font-weight: bold;" onAction="#closeSidebar"/>
+            </HBox>
+
+            <VBox spacing="10" VBox.vgrow="ALWAYS">
+                <!-- Đã thêm fx:id -->
+                <Button fx:id="btnNavHome" text="🏠   Trang chủ" styleClass="nav-btn" prefWidth="250" onAction="#showDashboard"/>
+                <Button fx:id="btnNavWallet" text="💰   Ví tiền" styleClass="nav-btn" prefWidth="250" onAction="#showWallet"/>
+                <Button fx:id="btnNavAuction" text="⚖   Đấu giá" styleClass="nav-btn" prefWidth="250" onAction="#showAuctionList"/>
+                <Button fx:id="btnNavAdd" text="➕   Thêm sản phẩm" styleClass="nav-btn" prefWidth="250" onAction="#handleShowMyProducts"/>
+            </VBox>
+
+            <VBox spacing="10" alignment="BOTTOM_LEFT">
+                <Button fx:id="btnNavNotif" text="✉   Thông báo" styleClass="nav-btn" prefWidth="250" onAction="#showNotification"/>
+                <Button fx:id="btnNavProfile" text="👤   Pipodaucatmoi" styleClass="nav-btn" prefWidth="250" onAction="#showProfile"/>
+            </VBox>
+        </VBox>
+    </AnchorPane>
+</StackPane>

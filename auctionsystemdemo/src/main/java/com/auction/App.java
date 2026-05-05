@@ -1,40 +1,34 @@
 package com.auction;
 
-import java.io.IOException;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.net.URL;
+
 public class App extends Application {
 
-    private static Scene scene;
-
     @Override
-    public void start(Stage stage) throws IOException {
-        // ĐỔI DÒNG NÀY: Thay "view/Login" thành "view/Home"
-        // Thêm kích thước 1280x720 để màn hình hiển thị rộng rãi giống bản thiết kế
-        scene = new Scene(loadFXML("view/Login"), 1280, 720);
+    public void start(Stage primaryStage) throws Exception {
+        // SỬA DẤU CHẤM THÀNH DẤU GẠCH CHÉO Ở ĐÂY
+        URL fxmlLocation = getClass().getResource("/com/auction/view/Login.fxml");
 
-        stage.setTitle("Hệ Thống Đấu Giá Trực Tuyến");
-        stage.setScene(scene);
-        stage.centerOnScreen(); // Hiển thị cửa sổ ở giữa màn hình desktop
-        stage.show();
-    }
+        if (fxmlLocation == null) {
+            System.out.println("Lỗi: Không tìm thấy file Main.fxml. Hãy kiểm tra lại thư mục resources!");
+            return;
+        }
 
-    // Hàm tiện ích để đổi màn hình
-    public static void setRoot(String fxml) throws IOException {
-        scene.setRoot(loadFXML(fxml));
-    }
+        Parent root = FXMLLoader.load(fxmlLocation);
+        Scene scene = new Scene(root);
 
-    private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-        return fxmlLoader.load();
+        primaryStage.setTitle("Hệ thống đấu giá trực tuyến");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 }

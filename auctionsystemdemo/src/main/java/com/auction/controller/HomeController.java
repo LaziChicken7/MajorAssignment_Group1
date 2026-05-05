@@ -1,106 +1,94 @@
 package com.auction.controller;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import javafx.util.Duration;
+import javafx.scene.layout.StackPane;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
+public class HomeController {
 
-public class HomeController implements Initializable {
-
-    @FXML private BorderPane mainPane;
-    @FXML private VBox sideBar;
-    @FXML private Button btnHome, btnWallet, btnAuction, btnAdd;
-    @FXML private Label lblUserName;
-
-    private boolean isSidebarExpanded = false;
-    private final double SIDEBAR_MIN = 80.0;
-    private final double SIDEBAR_MAX = 250.0;
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Mặc định khi mở app lên là hiển thị Trang chủ
-        showHome();
-    }
-
-    // --- XỬ LÝ HIỆU ỨNG TRƯỢT SIDEBAR ---
     @FXML
-    private void toggleSidebar() {
-        Timeline timeline = new Timeline();
-        if (isSidebarExpanded) {
-            // Thu gọn lại
-            KeyValue kv = new KeyValue(sideBar.prefWidthProperty(), SIDEBAR_MIN);
-            KeyFrame kf = new KeyFrame(Duration.millis(200), kv);
-            timeline.getKeyFrames().add(kf);
-            timeline.setOnFinished(e -> updateMenuTexts(false));
-        } else {
-            // Mở rộng ra
-            updateMenuTexts(true);
-            KeyValue kv = new KeyValue(sideBar.prefWidthProperty(), SIDEBAR_MAX);
-            KeyFrame kf = new KeyFrame(Duration.millis(200), kv);
-            timeline.getKeyFrames().add(kf);
-        }
-        timeline.play();
-        isSidebarExpanded = !isSidebarExpanded;
-    }
+    private LineChart<String, Number> chartAuction;
 
-    private void updateMenuTexts(boolean expanded) {
-        if (expanded) {
-            btnHome.setText(" 🏠   Trang chủ");
-            btnWallet.setText(" 💼   Ví tiền");
-            btnAuction.setText(" ⚖   Đấu giá");
-            btnAdd.setText(" ⊕   Thêm sản phẩm");
-            lblUserName.setText("Pipodaucatmoi");
-        } else {
-            btnHome.setText("🏠");
-            btnWallet.setText("💼");
-            btnAuction.setText("⚖");
-            btnAdd.setText("⊕");
-            lblUserName.setText("");
-        }
-    }
-
-    // --- XỬ LÝ CHUYỂN TRANG ---
     @FXML
-    private void showHome() {
-        loadView("/com/auction/view/Dashboard.fxml");
-        setActiveButton(btnHome);
+    public void initialize() {
+        // Hàm này chạy ngay khi Dashboard vừa load xong
+        // Bạn có thể fetch dữ liệu biểu đồ hoặc danh sách SP nổi bật ở đây
+        System.out.println("Load dữ liệu trang Dashboard...");
+        
+        // Thêm dữ liệu cho chart
+        loadChartData();
+    }
+
+    private void loadChartData() {
+        if (chartAuction == null) return;
+        
+        // Tạo 3 series dữ liệu cho các sản phẩm đấu giá nổi bật
+        XYChart.Series<String, Number> series1 = new XYChart.Series<>();
+        series1.setName("Auction name 1");
+        series1.getData().addAll(
+            new XYChart.Data<>("2021", 12),
+            new XYChart.Data<>("2022", 15),
+            new XYChart.Data<>("2023", 18),
+            new XYChart.Data<>("2024", 22),
+            new XYChart.Data<>("2025", 25)
+        );
+
+        XYChart.Series<String, Number> series2 = new XYChart.Series<>();
+        series2.setName("Auction name 2");
+        series2.getData().addAll(
+            new XYChart.Data<>("2021", 10),
+            new XYChart.Data<>("2022", 13),
+            new XYChart.Data<>("2023", 16),
+            new XYChart.Data<>("2024", 20),
+            new XYChart.Data<>("2025", 24)
+        );
+
+        XYChart.Series<String, Number> series3 = new XYChart.Series<>();
+        series3.setName("Auction name 3");
+        series3.getData().addAll(
+            new XYChart.Data<>("2021", 9),
+            new XYChart.Data<>("2022", 12),
+            new XYChart.Data<>("2023", 14),
+            new XYChart.Data<>("2024", 17),
+            new XYChart.Data<>("2025", 20)
+        );
+
+        chartAuction.getData().addAll(series1, series2, series3);
     }
 
     @FXML
-    private void showWallet() {
-        loadView("/com/auction/view/Wallet.fxml");
-        setActiveButton(btnWallet);
+    public void handleViewMoreAuctions(ActionEvent event) {
+        System.out.println("Xem thêm sản phẩm nổi bật...");
     }
 
-    private void loadView(String fxmlPath) {
+    @FXML
+    public void handleViewMoreNotifications(ActionEvent event) {
+
+        System.out.println("Xem thêm thông báo...");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Node view = loader.load();
-            mainPane.setCenter(view); // Thay thế nội dung ở giữa
-        } catch (IOException e) {
+            // Tải giao diện Notification.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/NotificationItem.fxml"));
+            Node notificationView = loader.load();
+
+            Button btn = (Button) event.getSource();
+
+            StackPane contentArea = (StackPane) btn.getScene().lookup("#contentArea");
+
+            if (contentArea != null) {
+                contentArea.getChildren().clear();
+                contentArea.getChildren().add(notificationView);
+            } else {
+                System.out.println("Lỗi: Không tìm thấy contentArea!");
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Lỗi: Không thể tải file Notification.fxml");
         }
-    }
-
-    // Đổi màu style vạch trắng cho nút đang được chọn
-    private void setActiveButton(Button activeBtn) {
-        btnHome.getStyleClass().remove("nav-btn-active");
-        btnWallet.getStyleClass().remove("nav-btn-active");
-        btnAuction.getStyleClass().remove("nav-btn-active");
-        btnAdd.getStyleClass().remove("nav-btn-active");
-
-        activeBtn.getStyleClass().add("nav-btn-active");
     }
 }

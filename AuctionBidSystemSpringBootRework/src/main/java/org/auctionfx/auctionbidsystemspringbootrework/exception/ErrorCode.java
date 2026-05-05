@@ -13,40 +13,44 @@ public enum ErrorCode {
     USERNAME_INVALID(2001, "Username must be at least 4 characters and not blank"),
     PASSWORD_INVALID(2002, "Password must be at least 8 characters and not blank"),
     // ===========================================================================
+    // LOGIN EXCEPTION
+    USERNAME_NOT_FOUND(3001, "Username not found"),
+    PASSWORD_NOT_MATCH(3002, "Password not match"),
+    // ===========================================================================
     // USER EXCEPTION
-    USER_NOT_FOUND(3001, "User not founded"),
-    USER_INVALID(3002, "User invalid or do not have bid permission"),
-    INVALID_RESET_TOKEN(3003, "The verification code is invalid or has expired!"),
-    USER_INFO_NOT_MATCH(3004, "Username and Email do not match!"),
+    USER_NOT_FOUND(4001, "User not founded"),
+    USER_INVALID(4002, "User invalid or do not have bid permission"),
+    INVALID_RESET_TOKEN(4003, "The verification code is invalid or has expired!"),
+    USER_INFO_NOT_MATCH(4004, "Username and Email do not match!"),
     // ===========================================================================
     // ROLE EXCEPTION
-    USER_ALREADY_SELLER(4001, "User already seller"),
-    USER_CONFLICT_UPGRADE(4999, "Can not upgrade to seller"),
+    USER_ALREADY_SELLER(5001, "User already seller"),
+    USER_CONFLICT_UPGRADE(5999, "Can not upgrade to seller"),
     // ===========================================================================
     // PAYMENT EXCEPTION
-    NOT_ENOUGH_MONEY_ON_WALLET(5001, "Not enough money on wallet"),
-    NOT_ENOUGH_MONEY_IN_FROZEN(5002, "Not enough money in Frozen"),
-    CONDITION_ACCEPT_PAYMENT_INVALID(5003, "Condition accept payment invalid"),
-    CONDITION_DECLINE_PAYMENT_INVALID(5004, "Condition decline payment invalid"),
-    CONDITION_CANCEL_AUCTION_INVALID(5005, "Condition cancel auction invalid"),
-    DEPOSIT_MONEY_INVALID(5006, "Deposit money must be more than zero"),
-    WITHDRAW_MONEY_INVALID(5007, "Withdraw money must be more than zero"),
+    NOT_ENOUGH_MONEY_ON_WALLET(6001, "Not enough money on wallet"),
+    NOT_ENOUGH_MONEY_IN_FROZEN(6002, "Not enough money in Frozen"),
+    CONDITION_ACCEPT_PAYMENT_INVALID(6003, "Condition accept payment invalid"),
+    CONDITION_DECLINE_PAYMENT_INVALID(6004, "Condition decline payment invalid"),
+    CONDITION_CANCEL_AUCTION_INVALID(6005, "Condition cancel auction invalid"),
+    DEPOSIT_MONEY_INVALID(6006, "Deposit money must be more than zero"),
+    WITHDRAW_MONEY_INVALID(6007, "Withdraw money must be more than zero"),
     // ===========================================================================
     // AUCTION EXCEPTION
-    AUCTION_NOT_FOUND(6001, "Auction not founded"),
-    AUCTION_NOT_RUNNING(6002, "Auction not in running status"),
-    AUCTION_BIDDER_INVALID(6003, "Bidder can not bid own product"),
+    AUCTION_NOT_FOUND(7001, "Auction not founded"),
+    AUCTION_NOT_RUNNING(7002, "Auction not in running status"),
+    AUCTION_BIDDER_INVALID(7003, "Bidder can not bid own product"),
     // ===========================================================================
     // ITEM CREATE EXCEPTION
-    SELLER_INVALID(7001, "User is not seller, can not create item"),
-    ITEM_INVALID(7002, "Invalid item type"),
-    ITEM_NOT_FOUND(7003, "Item not found"),
+    SELLER_INVALID(8001, "User is not seller, can not create item"),
+    ITEM_INVALID(8002, "Invalid item type"),
+    ITEM_NOT_FOUND(8003, "Item not found"),
     // ===========================================================================
     // NOTIFICATION EXCEPTION
-    NOTIFICATION_NOT_FOUND(8001, "Notification not found"),
-    NOTIFICATION_DELETE_INVALID(8002, "Can not delete verification notification. User must be choose Accept or Decline"),
-    NOTIFICATION_ACCEPT_PAYMENT_INVALID(8003, "This notification not required to Accept payment"),
-    NOTIFICATION_DECLINE_PAYMENT_INVALID(8004, "This notification not required to Decline payment"),
+    NOTIFICATION_NOT_FOUND(9001, "Notification not found"),
+    NOTIFICATION_DELETE_INVALID(9002, "Can not delete verification notification. User must be choose Accept or Decline"),
+    NOTIFICATION_ACCEPT_PAYMENT_INVALID(9003, "This notification not required to Accept payment"),
+    NOTIFICATION_DECLINE_PAYMENT_INVALID(9004, "This notification not required to Decline payment"),
     // ===========================================================================
     // RUNTIME EXCEPTION
     RUNTIME_EXCEPTION(89999, "Runtime exception"),

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="15.0" style="-fx-padding: 20; -fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.AuctionController">
+    <children>
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <children>
+                <Label style="-fx-font-size: 20; -fx-font-weight: bold;" text="Đấu giá" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblBalance" style="-fx-text-fill: #004aad; -fx-font-weight: bold;" text="Số dư: 144.250.000 VND" />
+            </children>
+        </HBox>
+        <ListView fx:id="auctionListView" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS" />
+    </children>
+</VBox>

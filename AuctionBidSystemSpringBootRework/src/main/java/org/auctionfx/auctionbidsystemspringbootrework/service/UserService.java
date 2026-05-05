@@ -2,10 +2,7 @@ package org.auctionfx.auctionbidsystemspringbootrework.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ResetPasswordRequest;
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserCreationRequest;
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.UserUpdateRequest;
-import org.auctionfx.auctionbidsystemspringbootrework.dto.request.VerifyInfoRequest;
+import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Admin;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
@@ -89,6 +86,20 @@ public class UserService {
 
         // 5. Lưu xuống database
         return userRepository.save(newUser);
+    }
+
+    // Đăng nhập
+    @Transactional
+    public User login(LoginRequest request) {
+        User user = userRepository.findByUserName(request.getUserName());
+        if (user == null) {
+            throw new UserException(ErrorCode.USERNAME_NOT_FOUND);
+        }
+        // Kiểm tra mật khẩu (Sử dụng hàm mã hóa đang có sẵn trong file của bạn)
+        if (!user.getPassword().equals(encodePassword(request.getPassword()))) {
+            throw new UserException(ErrorCode.PASSWORD_NOT_MATCH); // Hoặc tạo mã lỗi WRONG_PASSWORD
+        }
+        return user;
     }
 
     @Transactional

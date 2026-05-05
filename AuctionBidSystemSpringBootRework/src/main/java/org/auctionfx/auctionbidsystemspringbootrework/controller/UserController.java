@@ -64,6 +64,14 @@ public class UserController {
         return apiResponse;
     }
 
+    // Đăng nhập
+    @PostMapping("/login")
+    public ApiResponse<User> login(@RequestBody LoginRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.login(request));
+        return apiResponse;
+    }
+
     // Quên mật khẩu - Xác thực
     @PostMapping("/verify-reset-info")
     public ApiResponse<String> verifyUserInfo(@RequestBody VerifyInfoRequest request) {

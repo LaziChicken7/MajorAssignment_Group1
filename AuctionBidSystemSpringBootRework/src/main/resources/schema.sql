@@ -1,10 +1,4 @@
 -- ==============================================================================
--- 0. TẠO VÀ CHỌN DATABASE
--- ==============================================================================
-CREATE DATABASE IF NOT EXISTS auctionbidsystemtest CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE auctionbidsystemtest;
-
--- ==============================================================================
 -- 1. XÓA BẢNG CŨ (Theo thứ tự ngược: Bảng con xóa trước, bảng cha xóa sau)
 -- ==============================================================================
 DROP TABLE IF EXISTS notifications;

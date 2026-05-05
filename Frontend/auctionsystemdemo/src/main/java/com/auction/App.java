@@ -21,7 +21,7 @@ public class App extends Application {
         }
 
         Parent root = FXMLLoader.load(fxmlLocation);
-        Scene scene = new Scene(root, 1200, 800);
+        Scene scene = new Scene(root);
 
         primaryStage.setTitle("Hệ thống đấu giá trực tuyến");
         primaryStage.setScene(scene);
