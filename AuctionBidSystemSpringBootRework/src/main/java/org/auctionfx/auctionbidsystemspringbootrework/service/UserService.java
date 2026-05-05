@@ -9,6 +9,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
+import org.auctionfx.auctionbidsystemspringbootrework.repository.BidderRepository;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class UserService {
 
     @Autowired
     private EntityManager entityManager; // Công cụ quản lý Cache của Spring Boot
+
+    @Autowired
+    private BidderRepository bidderRepository;
 
     // Khay chứa Mã bí mật (Key là Username, Value là Mã Token)
     private final Map<String, String> resetTokens = new ConcurrentHashMap<>();
@@ -57,11 +61,17 @@ public class UserService {
                 prefixCode = "ADM";
             }
             case BIDDER -> {
-                newUser = new Bidder();
+                Bidder bidder = new Bidder();
+                // Sinh số tài khoản rồi gán vào
+                bidder.setBankAccountNumber(generateUniqueBankAccountNumber());
+                newUser = bidder;
                 prefixCode = "BID";
             }
             case SELLER -> {
-                newUser = new Seller();
+                Seller seller = new Seller();
+                // Sinh số tài khoản rồi gán vào
+                seller.setBankAccountNumber(generateUniqueBankAccountNumber());
+                newUser = seller;
                 prefixCode = "SLR";
             }
             default -> throw new IllegalStateException("Unexpected value: " + request.getRole());
@@ -224,6 +234,30 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public User updateMyProfile(String userName, UserUpdateRequest request) {
+        User user = userRepository.findByUserName(userName);
+        if (user == null) {
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // Kiểm tra xem Email có bị trùng với người khác không
+        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+            throw new UserException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        // Cập nhật thông tin cơ bản
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+
+        // Nếu người dùng có nhập mật khẩu mới thì mới tiến hành đổi
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            user.setPassword(encodePassword(request.getPassword()));
+        }
+
+        return userRepository.save(user);
+    }
+
     // DELETE
     // Xóa người dùng
     public String deleteUser(String userId) {
@@ -232,6 +266,17 @@ public class UserService {
         }
         userRepository.deleteById(userId);
         return "User deleted successfully!";
+    }
+
+    // PROFILE
+    // Lấy thông tin Profile của người dùng
+    public User getUserByUserName(String userName) {
+        User user = userRepository.findByUserName(userName);
+        if (user == null) {
+            // Ném ra Exception chuẩn của hệ thống mà bạn đã cấu hình từ trước
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
+        return user;
     }
 
     // MÃ HÓA VÀ GIẢI MÃ PASSWORD
@@ -250,6 +295,16 @@ public class UserService {
             decoded.append((char) (c - 5));
         }
         return decoded.toString();
+    }
+
+    // Hàm sinh số tài khoản ngẫu nhiên 10 chữ số (Ví dụ: 1045628193)
+    private String generateUniqueBankAccountNumber() {
+        String accNo;
+        do {
+            long randomNum = 1000000000L + (long)(Math.random() * 8999999999L);
+            accNo = String.valueOf(randomNum);
+        } while (bidderRepository.existsByBankAccountNumber(accNo)); // Vòng lặp chạy lại nếu bị trùng
+        return accNo;
     }
 
 }

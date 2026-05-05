@@ -2,6 +2,7 @@ package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
 import jakarta.validation.Valid;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
+import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.service.UserService;
@@ -48,6 +49,14 @@ public class UserController {
         return apiResponse;
     }
 
+    // Cập nhật thông tin cá nhân (Dành cho User tự cập nhật)
+    @PutMapping("/profile/{userName}")
+    public ApiResponse<User> updateMyProfile(@PathVariable String userName, @RequestBody @Valid UserUpdateRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.updateMyProfile(userName, request));
+        return apiResponse;
+    }
+
     // Delete
     @DeleteMapping("/admin/{userId}")
     public ApiResponse<String> deleteUser(@PathVariable("userId") String userId) {
@@ -86,6 +95,14 @@ public class UserController {
     public ApiResponse<String> resetPassword(@RequestBody ResetPasswordRequest request) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.resetPassword(request));
+        return apiResponse;
+    }
+
+    // Lấy thông tin cá nhân bằng userName
+    @GetMapping("/profile/{userName}")
+    public ApiResponse<User> getMyProfile(@PathVariable String userName) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.getUserByUserName(userName));
         return apiResponse;
     }
 }
