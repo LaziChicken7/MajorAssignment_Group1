@@ -1,41 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" spacing="20" style="-fx-background-color: transparent;">
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.ProfileController" spacing="20" style="-fx-background-color: transparent;">
     <Label text="&lt; Profile của tôi" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
 
-    <HBox styleClass="card" spacing="40" alignment="CENTER_LEFT">
+    <HBox styleClass="card" spacing="40" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+
         <VBox alignment="CENTER" spacing="15">
-            <!-- Vòng tròn Avatar -->
             <StackPane style="-fx-background-color: black; -fx-background-radius: 100;" prefWidth="200" prefHeight="200">
                 <Label text="👤" style="-fx-font-size: 80px; -fx-text-fill: white;"/>
             </StackPane>
-            <Button text="Tải ảnh lên" styleClass="btn-primary" />
+            <Button text="Tải ảnh lên" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 25; -fx-font-weight: bold; -fx-cursor: hand;" />
         </VBox>
 
         <GridPane hgap="20" vgap="15" HBox.hgrow="ALWAYS">
+
             <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField text="pipodaucatmoi" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="400"/>
+            <TextField fx:id="txtUsername" editable="false" style="-fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="400"/>
 
             <Label text="Họ và tên:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField text="Phan Văn Tuyển" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <TextField fx:id="txtFullName" style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
             <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField text="pipodaucatmoi@gmail.com" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <TextField fx:id="txtEmail" style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
             <Label text="Số điện thoại:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField text="0962970867" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <TextField fx:id="txtPhone" editable="false" style="-fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
             <Label text="CCCD:" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField text="040207001111" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <TextField fx:id="txtCitizenId" editable="false" style="-fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
-            <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                <Button text="Xác nhận chỉnh sửa" style="-fx-background-color: #B0B0B0; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 8 20;" />
+            <!-- DÒNG MỚI: MẬT KHẨU -->
+            <Label text="Mật khẩu mới:" GridPane.columnIndex="0" GridPane.rowIndex="5" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            <PasswordField fx:id="txtPassword" promptText="Bỏ trống nếu không muốn đổi mật khẩu" style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+            <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                <Button text="Xác nhận chỉnh sửa" onAction="#handleUpdateProfile" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 10 20; -fx-cursor: hand;" />
             </HBox>
         </GridPane>
     </HBox>
+
     <HBox alignment="CENTER">
-        <Button text="Đăng xuất" styleClass="btn-danger" style="-fx-padding: 10 30;"/>
+        <Button text="Đăng xuất" onAction="#handleLogout" style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30; -fx-cursor: hand;"/>
     </HBox>
 </VBox>

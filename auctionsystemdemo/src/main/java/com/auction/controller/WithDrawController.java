@@ -1,37 +1,94 @@
 package com.auction.controller;
 
+import com.auction.model.ApiResponse;
+import com.auction.model.PaymentRequest;
+import com.auction.model.WalletDataResponse;
+import com.auction.util.ApiService;
+import com.auction.util.SessionManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
-import javafx.event.ActionEvent;
 import java.io.IOException;
 
 public class WithDrawController {
 
-    @FXML
-    private TextField amountField;
+    @FXML private TextField amountField;
+    @FXML private Label lblBankAccount;
+    @FXML private TextField balanceField;
+    @FXML private Label lblFrozenBalance;
 
     @FXML
-    void handleWithdrawConfirm(ActionEvent event) {
+    public void initialize() {
+        loadRealData();
+    }
+
+    private void loadRealData() {
+        if (SessionManager.userName == null || lblBankAccount == null) return;
+
+        ApiService.getAsync("/payments/" + SessionManager.userName + "/history")
+                .thenAccept(response -> {
+                    Platform.runLater(() -> {
+                        if (response.statusCode() == 200) {
+                            ApiResponse apiRes = ApiService.gson.fromJson(response.body(), ApiResponse.class);
+                            if (apiRes.code == 1000) {
+                                WalletDataResponse data = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
+                                lblBankAccount.setText(data.bankAccountNumber != null ? data.bankAccountNumber : "Chưa có");
+                                if (balanceField != null) balanceField.setText(formatMoney(data.moneyOnWallet));
+                                if (lblFrozenBalance != null) lblFrozenBalance.setText(formatMoney(data.moneyinFrozen));
+                            }
+                        }
+                    });
+                });
+    }
+
+    @FXML
+    public void handleWithdrawConfirm() {
+        if (amountField == null) return;
+        String amountStr = amountField.getText().replace(".", "").replace(",", "").trim();
+        if (amountStr.isEmpty()) { showAlert("Vui lòng nhập số tiền!"); return; }
+
         try {
-            // Kiểm tra xem đã nhập tiền chưa
-            System.out.println("Đang xử lý rút tiền: " + amountField.getText());
+            double amount = Double.parseDouble(amountStr);
+            if (amount <= 0) { showAlert("Số tiền rút phải lớn hơn 0!"); return; }
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/WithDrawSuccess.fxml"));
+            PaymentRequest request = new PaymentRequest(SessionManager.userName, amount);
 
-            //Rút tiền thất bại
-            //FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/WithDrawFail.fxml"));
+            ApiService.postAsync("/payments/withdraw", request).thenAccept(response -> {
+                Platform.runLater(() -> {
+                    if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                        ApiResponse apiResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
+                        if (apiResponse.code == 1000) {
+                            switchView("/com/auction/view/WithDrawSuccess.fxml");
+                        } else {
+                            switchView("/com/auction/view/WithDrawFail.fxml");
+                        }
+                    } else {
+                        switchView("/com/auction/view/WithDrawFail.fxml");
+                    }
+                });
+            }).exceptionally(ex -> {
+                Platform.runLater(() -> showAlert("Mất kết nối đến máy chủ!"));
+                return null;
+            });
+        } catch (NumberFormatException e) {
+            showAlert("Số tiền không hợp lệ! Vui lòng chỉ nhập số.");
+        }
+    }
 
-            Node successView = loader.load();
-
-            Scene scene = ((Node) event.getSource()).getScene();
-            Pane contentArea = (Pane) scene.lookup("#contentArea");
-
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(successView);
+    private void switchView(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Node view = loader.load();
+            if (lblBankAccount != null && lblBankAccount.getScene() != null) {
+                Pane contentArea = (Pane) lblBankAccount.getScene().lookup("#contentArea");
+                if (contentArea != null) {
+                    contentArea.getChildren().setAll(view);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,28 +96,24 @@ public class WithDrawController {
     }
 
     @FXML
-    void handleBackToWallet(ActionEvent event) {
-        try {
-            Node walletView = FXMLLoader.load(getClass().getResource("/com/auction/view/Wallet.fxml"));
-            Scene scene = ((Node) event.getSource()).getScene();
-            Pane contentArea = (Pane) scene.lookup("#contentArea");
-
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(walletView);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void handleBackToWallet() {
+        switchView("/com/auction/view/Wallet.fxml");
     }
 
     @FXML
-    void handleCancel(ActionEvent event) {
-        // Nếu đang hiện trong contentArea, chỉ cần load lại Wallet
-        handleBackToWallet(event);
+    public void handleCancel() {
+        handleBackToWallet();
     }
 
-    @FXML
-    void handleBack(ActionEvent event) {
-        handleBackToWallet(event);
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Thông báo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private String formatMoney(double amount) {
+        return String.format("%,.0f", amount).replace(",", ".") + " VND";
     }
 }

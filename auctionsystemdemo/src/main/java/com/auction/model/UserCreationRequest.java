@@ -7,6 +7,10 @@ public class UserCreationRequest {
     public String password;
     public String role;
 
+    // Thêm 2 trường mới khớp y hệt tên biến bên Spring Boot
+    public String numberPhone;
+    public String citizenId;
+
     public String getFullName() {
         return fullName;
     }
@@ -45,5 +49,21 @@ public class UserCreationRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getNumberPhone() {
+        return numberPhone;
+    }
+
+    public void setNumberPhone(String numberPhone) {
+        this.numberPhone = numberPhone;
+    }
+
+    public String getCitizenId() {
+        return citizenId;
+    }
+
+    public void setCitizenId(String citizenId) {
+        this.citizenId = citizenId;
     }
 }

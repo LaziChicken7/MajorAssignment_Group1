@@ -17,7 +17,8 @@ import java.io.IOException;
 
 public class RegisterController {
 
-    @FXML private TextField txtFullName, txtEmail, txtUsername;
+    // Thêm 2 trường mới là txtPhoneNumber và txtCitizenId
+    @FXML private TextField txtFullName, txtEmail, txtUsername, txtPhoneNumber, txtCitizenId;
     @FXML private PasswordField txtPassword, txtConfirmPassword;
 
     @FXML
@@ -25,10 +26,13 @@ public class RegisterController {
         String fullName = txtFullName.getText().trim();
         String email = txtEmail.getText().trim();
         String user = txtUsername.getText().trim();
+        String phone = txtPhoneNumber.getText().trim();     // Lấy Số điện thoại
+        String citizenId = txtCitizenId.getText().trim();   // Lấy CCCD
         String pass = txtPassword.getText();
         String confirmPass = txtConfirmPassword.getText();
 
-        if (fullName.isEmpty() || user.isEmpty() || pass.isEmpty() || email.isEmpty()) {
+        // Cập nhật điều kiện kiểm tra rỗng
+        if (fullName.isEmpty() || user.isEmpty() || pass.isEmpty() || email.isEmpty() || phone.isEmpty() || citizenId.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin!");
             return;
         }
@@ -38,13 +42,15 @@ public class RegisterController {
             return;
         }
 
-        // Đóng gói dữ liệu
+        // Đóng gói dữ liệu gửi lên Spring Boot
         UserCreationRequest request = new UserCreationRequest();
         request.fullName = fullName;
         request.email = email;
         request.userName = user;
+        request.numberPhone = phone;       // Gắn vào request
+        request.citizenId = citizenId;     // Gắn vào request
         request.password = pass;
-        request.role = "BIDDER"; // Mặc định ai tạo nick cũng là người mua
+        request.role = "BIDDER";           // Mặc định tạo tài khoản là BIDDER
 
         // Gọi API của Spring Boot
         ApiService.postAsync("/users/register", request)
@@ -54,28 +60,26 @@ public class RegisterController {
                         if (response.statusCode() >= 200 && response.statusCode() < 300) {
                             ApiResponse apiResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
                             if (apiResponse.code == 1000) {
-                                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đăng ký thành công!");
+                                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đăng ký thành công tài khoản: " + user);
                                 goToLogin();
                             } else {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi từ Backend", apiResponse.message);
                             }
                         }
-                        // Nếu thất bại (404, 400, 500...)
+                        // Nếu thất bại (400, 500...)
                         else {
                             try {
-                                // Cố gắng đọc lỗi dạng JSON chuẩn của mình trước
                                 ApiResponse errResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
                                 showAlert(Alert.AlertType.ERROR, "Lỗi đăng ký", errResponse.message);
                             } catch (Exception e) {
-                                // NẾU KHÔNG PHẢI JSON CHUẨN (Ví dụ 404 Not Found), IN THẲNG RAW TEXT RA MÀN HÌNH
-                                System.out.println("Lỗi thô từ Server: " + response.body()); // In ra console để debug
+                                System.out.println("Lỗi thô từ Server: " + response.body());
                                 showAlert(Alert.AlertType.ERROR, "Lỗi kết nối (Mã " + response.statusCode() + ")", "Chi tiết lỗi:\n" + response.body());
                             }
                         }
                     });
                 })
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể kết nối đến máy chủ!"));
+                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể kết nối đến máy chủ Spring Boot!"));
                     return null;
                 });
     }
@@ -96,16 +100,15 @@ public class RegisterController {
         alert.setTitle(title);
         alert.setHeaderText(null);
 
-        // Nếu nội dung lỗi quá dài (như mã HTML), cho nó vào một khung TextArea to để dễ cuộn và copy
         if (content != null && content.length() > 100) {
             javafx.scene.control.TextArea textArea = new javafx.scene.control.TextArea(content);
-            textArea.setEditable(false); // Không cho sửa
-            textArea.setWrapText(true);  // Tự động xuống dòng
+            textArea.setEditable(false);
+            textArea.setWrapText(true);
             textArea.setMaxWidth(Double.MAX_VALUE);
             textArea.setMaxHeight(Double.MAX_VALUE);
 
             alert.getDialogPane().setContent(textArea);
-            alert.getDialogPane().setPrefSize(600, 400); // Kích thước to ra (Rộng 600, Cao 400)
+            alert.getDialogPane().setPrefSize(600, 400);
         } else {
             alert.setContentText(content);
         }

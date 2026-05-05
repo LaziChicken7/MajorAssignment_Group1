@@ -4,9 +4,9 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
-<HBox prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.RegisterController">
+<HBox prefHeight="750.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.RegisterController">
     <children>
-        <!-- BÊN TRÁI: PANEL THƯƠNG HIỆU (Đồng bộ với Login) -->
+        <!-- BÊN TRÁI: PANEL THƯƠNG HIỆU -->
         <VBox alignment="CENTER" prefWidth="350.0" spacing="20.0" style="-fx-background-color: #0A439D;">
             <children>
                 <Label text="Hệ thống đấu giá trực tuyến" textFill="white">
@@ -17,11 +17,12 @@
         </VBox>
 
         <!-- BÊN PHẢI: FORM ĐĂNG KÝ -->
-        <VBox alignment="CENTER" prefWidth="550.0" spacing="15.0" style="-fx-background-color: white;">
+        <VBox alignment="CENTER" prefWidth="550.0" spacing="12.0" style="-fx-background-color: white;">
             <padding><Insets left="60.0" right="60.0" /></padding>
             <children>
                 <Label text="Tạo tài khoản mới">
                     <font><Font name="System Bold" size="28.0" /></font>
+                    <VBox.margin><Insets bottom="10.0" /></VBox.margin>
                 </Label>
 
                 <VBox spacing="5.0">
@@ -35,6 +36,22 @@
                     <children>
                         <Label text="Email" />
                         <TextField fx:id="txtEmail" prefHeight="35.0" promptText="example@gmail.com" style="-fx-background-radius: 8;" />
+                    </children>
+                </VBox>
+
+                <!-- THÊM Ô SỐ ĐIỆN THOẠI -->
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Số điện thoại" />
+                        <TextField fx:id="txtPhoneNumber" prefHeight="35.0" promptText="Nhập số điện thoại..." style="-fx-background-radius: 8;" />
+                    </children>
+                </VBox>
+
+                <!-- THÊM Ô CCCD -->
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Số CCCD" />
+                        <TextField fx:id="txtCitizenId" prefHeight="35.0" promptText="Nhập số Căn cước công dân..." style="-fx-background-radius: 8;" />
                     </children>
                 </VBox>
 
