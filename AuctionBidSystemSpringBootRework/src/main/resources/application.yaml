@@ -5,14 +5,14 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:mysql://localhost:3306/AuctionBidSystemTest"
+    url: "jdbc:mysql://localhost:3306/auctionbidsystemtest?createDatabaseIfNotExist=true"
     username: root
     password: root
 
   # THÊM ĐOẠN NÀY ĐỂ CHẠY FILE SCHEMA.SQL
   sql:
     init:
-      mode: never
+      mode: always
 
   jpa:
     hibernate:
