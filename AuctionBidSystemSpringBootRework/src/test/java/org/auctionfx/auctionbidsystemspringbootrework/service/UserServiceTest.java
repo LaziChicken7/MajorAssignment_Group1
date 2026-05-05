@@ -6,6 +6,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
+import org.auctionfx.auctionbidsystemspringbootrework.repository.BidderRepository;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +21,15 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class) // Báo cho Java biết ta sẽ sử dụng Diễn viên đóng thế (Mock)
 class UserServiceTest {
+
     @Mock
-    private UserRepository userRepository; // Tạo ra một "Thủ kho giả" (không nối vào MySQL)
+    private UserRepository userRepository; // Tạo ra một "Thủ kho giả" cho User (không nối vào MySQL)
+
+    @Mock
+    private BidderRepository bidderRepository; // MỚI THÊM: Tạo "Thủ kho giả" cho Bidder để check Số tài khoản
 
     @InjectMocks
-    private UserService userService; // Nhét Thủ kho giả vào Bếp trưởng UserService để test
+    private UserService userService; // Nhét các Thủ kho giả vào Bếp trưởng UserService để test
 
     // Kịch bản 1: Tạo tài khoản thành công
     @Test
@@ -38,12 +43,15 @@ class UserServiceTest {
         request.setCitizenId("001");
         request.setRole(Role.BIDDER);
 
-        // 2. Dạy thủ kho cách trả lời
+        // 2. Dạy thủ kho User cách trả lời
         // Khi Service hỏi: "Tên này tồn tại chưa", Thủ kho phải trả lời chưa (false)
         when(userRepository.existsByUserName(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.existsByCitizenId(anyString())).thenReturn(false);
         when(userRepository.existsByNumberPhone(anyString())).thenReturn(false);
+
+        // Dạy thủ kho Bidder cách trả lời: Báo "false" (Chưa trùng) khi sinh số tài khoản ngẫu nhiên
+        when(bidderRepository.existsByBankAccountNumber(anyString())).thenReturn(false);
 
         // Trả về số đếm lớn nhất hiện tại là 5 (Để xem tạo ra có ra BID6 không)
         when(userRepository.findMaxUserCodeNumber()).thenReturn(5);
@@ -59,6 +67,11 @@ class UserServiceTest {
         assertEquals("test_user", result.getUserName()); // Tên phải khớp
         assertEquals("BID6", result.getUserCode()); // UserCode phải tự động thành BID6
         assertInstanceOf(Bidder.class, result); // Đối tượng phải sinh ra đúng Bidder
+
+        // MỚI THÊM: Kiểm tra Số tài khoản có được sinh ra và đúng 10 số hay không
+        Bidder bidder = (Bidder) result;
+        assertNotNull(bidder.getBankAccountNumber()); // Không được phép Null
+        assertEquals(10, bidder.getBankAccountNumber().length()); // Phải đủ 10 số
     }
 
     // Kịch bản 2: Test báo lỗi khi trùng tên đăng nhập
