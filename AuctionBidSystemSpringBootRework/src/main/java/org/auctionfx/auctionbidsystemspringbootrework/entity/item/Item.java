@@ -77,4 +77,12 @@ public class Item extends BaseEntity {
     public void setSeller(Seller seller) {
         this.seller = seller;
     }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
+    }
 }

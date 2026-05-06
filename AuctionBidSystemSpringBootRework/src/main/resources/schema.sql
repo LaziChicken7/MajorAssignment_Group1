@@ -66,6 +66,7 @@ CREATE TABLE items (
                        start_price DECIMAL(19, 2) NOT NULL,
                        end_price DECIMAL(19, 2),
                        start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+                       item_type VARCHAR(50) NOT NULL, -- <<< ĐÃ BỔ SUNG CỘT NÀY Ở ĐÂY <<<
                        seller_id VARCHAR(36) NOT NULL,
                        CONSTRAINT fk_item_seller FOREIGN KEY (seller_id) REFERENCES sellers(id)
 );

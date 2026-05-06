@@ -3,9 +3,12 @@ package org.auctionfx.auctionbidsystemspringbootrework.controller;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.PlaceBidRequest;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auctions")
@@ -65,6 +68,14 @@ public class AuctionController {
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(auctionService.createAuction(request));
         return apiResponse;
+    }
+
+    // API Lấy danh sách đấu giá
+    @GetMapping
+    public ApiResponse<List<Auction>> getAllAuctions() {
+        ApiResponse<List<Auction>> response = new ApiResponse<>();
+        response.setResult(auctionService.getAllAuctions());
+        return response;
     }
 
 }

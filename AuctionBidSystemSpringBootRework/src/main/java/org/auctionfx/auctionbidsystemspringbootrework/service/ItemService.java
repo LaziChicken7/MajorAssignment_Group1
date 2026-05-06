@@ -60,6 +60,9 @@ public class ItemService {
         item.setStartPrice(request.getStartPrice());
         item.setSeller((Seller) user);
 
+        // BẠN CẦN BỔ SUNG DÒNG NÀY ĐỂ DATABASE LƯU ĐƯỢC CHỮ "VEHICLE", "ART"...
+        item.setItemType(request.getItemType());
+
         itemRepository.save(item);
         return "Create item successfully, Item id is: " + item.getId();
     }

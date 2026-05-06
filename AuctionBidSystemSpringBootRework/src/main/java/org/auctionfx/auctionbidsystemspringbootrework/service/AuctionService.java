@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Service
 public class AuctionService {
@@ -199,6 +200,11 @@ public class AuctionService {
 
         auctionRepository.save(auction);
         return "Create Auction item successfully! ID: " + auction.getId();
+    }
+
+    // Lấy danh sách tất cả các phiên đấu giá
+    public List<Auction> getAllAuctions() {
+        return auctionRepository.findAll();
     }
 }
 /*

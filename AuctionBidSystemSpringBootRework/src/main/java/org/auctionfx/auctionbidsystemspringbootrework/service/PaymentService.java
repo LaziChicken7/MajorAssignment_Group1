@@ -141,6 +141,8 @@ public class PaymentService {
         Bidder bidder = getBidderByUserName(userName);
         Map<String, Object> responseData = new HashMap<>();
 
+        // PHẢI CÓ DÒNG NÀY ĐỂ GỬI VỀ JAVAFX
+        responseData.put("bankAccountNumber", bidder.getBankAccountNumber());
         responseData.put("moneyOnWallet", bidder.getMoneyOnWallet());
         responseData.put("moneyinFrozen", bidder.getMoneyinFrozen());
 
