@@ -24,6 +24,19 @@
                     <font><Font name="System Bold" size="24.0" /></font>
                 </Label>
 
+                <!-- TRƯỜNG NHẬP IP SERVER VÀ NÚT ÁP DỤNG -->
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Địa chỉ Server (IP/Domain)" textFill="#555555"/>
+                        <HBox spacing="10.0">
+                            <children>
+                                <TextField fx:id="txtServerIp" prefHeight="40.0" promptText="VD: http://192.168.1.10:8080/auction" style="-fx-background-radius: 10;" HBox.hgrow="ALWAYS" />
+                                <Button onAction="#handleApplyIp" prefHeight="40.0" prefWidth="90.0" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;" text="Áp dụng" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
                 <VBox spacing="5.0">
                     <children>
                         <Label text="Tên đăng nhập" />

@@ -18,11 +18,42 @@ import java.io.IOException;
 
 public class LoginController {
 
+    @FXML private TextField txtServerIp;
     @FXML private TextField txtUsername;
     @FXML private PasswordField txtPassword;
 
+    // Tự động load IP hiện tại khi mở màn hình Đăng nhập
+    @FXML
+    public void initialize() {
+        txtServerIp.setText(ApiService.BASE_URL);
+    }
+
+    // Xử lý khi bấm nút "Áp dụng" IP
+    @FXML
+    private void handleApplyIp() {
+        String serverIp = txtServerIp.getText().trim();
+        if (!serverIp.isEmpty()) {
+            if (serverIp.endsWith("/")) {
+                serverIp = serverIp.substring(0, serverIp.length() - 1);
+            }
+            ApiService.BASE_URL = serverIp;
+            showAlert(Alert.AlertType.INFORMATION, "Cấu hình thành công", "Hệ thống sẽ kết nối đến IP:\n" + ApiService.BASE_URL);
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập địa chỉ IP của Server!");
+        }
+    }
+
     @FXML
     private void handleLogin() {
+        // Cập nhật ngầm IP một lần nữa phòng trường hợp người dùng gõ IP nhưng quên bấm "Áp dụng"
+        String serverIp = txtServerIp.getText().trim();
+        if (!serverIp.isEmpty()) {
+            if (serverIp.endsWith("/")) {
+                serverIp = serverIp.substring(0, serverIp.length() - 1);
+            }
+            ApiService.BASE_URL = serverIp;
+        }
+
         String user = txtUsername.getText().trim();
         String pass = txtPassword.getText();
 
@@ -63,7 +94,7 @@ public class LoginController {
                     });
                 })
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể kết nối đến Spring Boot!"));
+                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể kết nối đến Server:\n" + ApiService.BASE_URL));
                     return null;
                 });
     }
