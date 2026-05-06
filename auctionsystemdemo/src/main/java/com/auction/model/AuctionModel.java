@@ -6,6 +6,7 @@ public class AuctionModel {
     public String id;
     public double highestBid;
     public String status;
+    public String startTime; // THÊM DÒNG NÀY (BẮT BUỘC)
     public String endTime;
     public ItemModel bidProduct;
     public SellerModel seller;

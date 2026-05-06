@@ -3,11 +3,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?> <!-- ĐÃ IMPORT SVGPATH -->
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.WithDrawController" spacing="20" style="-fx-background-color: transparent;">
 
+    <!-- HEADER ĐÃ ĐƯỢC CHUẨN HÓA -->
     <HBox alignment="CENTER_LEFT">
-        <Label text="&lt; Rút tiền" onMouseClicked="#handleBackToWallet" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#handleBackToWallet">
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label text="Rút tiền" styleClass="back-title" />
+        </HBox>
         <Region HBox.hgrow="ALWAYS" />
     </HBox>
 

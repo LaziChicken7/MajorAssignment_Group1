@@ -6,19 +6,19 @@
 }
 
 .root-pane, .root-container {
-    -fx-background-color: #F4F7FC; /* Màu nền xám nhạt của app */
+    -fx-background-color: #F4F7FC;
 }
 
 /* =========================================
    2. SIDEBAR & KHUNG HEADER
    ========================================= */
 .sidebar {
-    -fx-background-color: #2D509E; /* Màu nền xanh của Sidebar thu gọn */
+    -fx-background-color: #2D509E;
 }
 
 .sidebar-expanded {
     -fx-background-color: #2D509E;
-    -fx-background-radius: 0 25 25 0; /* Bo tròn góc trên/dưới bên phải */
+    -fx-background-radius: 0 25 25 0;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 5, 0);
 }
 
@@ -45,15 +45,11 @@
     -fx-font-size: 24px;
     -fx-cursor: hand;
     -fx-alignment: center;
-    -fx-background-radius: 35; /* THÊM DÒNG NÀY: Để đảm bảo luôn là hình tròn kể cả khi hover */
+    -fx-background-radius: 35;
 }
-
 .icon-btn:hover {
     -fx-background-color: rgba(255, 255, 255, 0.1);
-    /* Sẽ tự động kế thừa bán kính tròn 35 từ .icon-btn ở trên */
 }
-
-/* Bôi đậm: Hình tròn hoàn hảo */
 .icon-btn.active-menu-btn {
     -fx-background-color: #1A3266;
     -fx-background-radius: 35;
@@ -71,12 +67,9 @@
     -fx-cursor: hand;
     -fx-background-radius: 25;
 }
-
 .nav-btn:hover {
     -fx-background-color: rgba(255, 255, 255, 0.1);
 }
-
-/* Bôi đậm: Dạng viên thuốc */
 .nav-btn.active-menu-btn {
     -fx-background-color: #1A3266;
     -fx-font-weight: bold;
@@ -130,17 +123,6 @@
 .btn-danger:hover { -fx-background-color: linear-gradient(to bottom, #FF5252, #FF0000); }
 .btn-danger:pressed { -fx-scale-x: 0.95; -fx-scale-y: 0.95; }
 
-.btn-outline {
-    -fx-background-color: transparent;
-    -fx-border-color: #0A439D;
-    -fx-border-radius: 20;
-    -fx-border-width: 2;
-    -fx-text-fill: #0A439D;
-    -fx-font-weight: bold;
-    -fx-padding: 6 18 6 18;
-    -fx-cursor: hand;
-}
-
 /* =========================================
    7. LIST VÀ CÁC DÒNG ĐẤU GIÁ
    ========================================= */
@@ -148,21 +130,18 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
-
 .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 10 0 10 0;
 }
-
 .auction-row {
     -fx-background-color: #F8F9FB;
     -fx-background-radius: 25;
     -fx-padding: 10 20 10 20;
 }
-
 .auction-title { -fx-font-size: 16px; -fx-font-weight: bold; }
 
-.auction-price, .price-pill {
+.auction-price {
     -fx-background-color: #004aad;
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -170,8 +149,7 @@
     -fx-padding: 5 20 5 20;
     -fx-background-radius: 20;
 }
-
-.auction-time, .time-pill {
+.auction-time {
     -fx-background-color: #ffbd59;
     -fx-text-fill: #333;
     -fx-font-weight: bold;
@@ -180,77 +158,252 @@
     -fx-background-radius: 20;
 }
 
-.label-small {
-    -fx-text-fill: #7f8c8d;
-    -fx-font-size: 11px;
-}
-
 /* =========================================
-   8. FORM & INPUT
+   8. CUSTOM COMBOBOX POPUP (MENU THẢ XUỐNG)
    ========================================= */
-.input-field {
-    -fx-background-color: transparent;
-    -fx-border-color: #A0A0A0;
-    -fx-border-radius: 5;
-    -fx-padding: 8 10 8 10;
-    -fx-font-size: 14px;
-}
-
-.input-field:focused {
-    -fx-border-color: #0A439D;
-    -fx-border-width: 2;
-}
-
-.image-placeholder {
-    -fx-background-color: black;
-    -fx-background-radius: 10;
-    -fx-min-width: 200px;
-    -fx-min-height: 200px;
-}
-
-/* =========================================
-   9. CUSTOM COMBOBOX POPUP (BO TRÒN ĐỒNG BỘ)
-   ========================================= */
-
-/* 1. Bo tròn khung xổ xuống (Popup) và tạo khoảng hở (padding) */
 .combo-box-popup .list-view {
     -fx-background-color: white;
-    -fx-background-radius: 12;     /* Bo tròn các góc của khung ngoài */
+    -fx-background-radius: 12;
     -fx-border-radius: 12;
-    -fx-border-color: #ecf0f1;     /* Viền xám rất nhạt */
-    -fx-padding: 6;                /* RẤT QUAN TRỌNG: Đẩy các item vào giữa, không cho dính sát mép */
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 5); /* Đổ bóng mềm */
+    -fx-border-color: #ecf0f1;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 5);
 }
-
-/* 2. Cấu hình từng dòng chữ bên trong (ListCell) */
 .combo-box-popup .list-cell {
     -fx-text-fill: #333333;
-    -fx-padding: 8 15;             /* Khoảng cách chữ bên trong mỗi item */
+    -fx-padding: 8 15;
     -fx-font-size: 14px;
-    -fx-background-color: transparent; /* Mặc định trong suốt để nhìn thấy nền trắng của khung */
-    -fx-background-radius: 8;      /* Bo tròn khi có màu nền (Làm thành hình viên thuốc) */
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
 }
-
-/* 3. Khi di chuột qua các mục chưa chọn (Hover) */
 .combo-box-popup .list-cell:hover {
-    -fx-background-color: #f1f2f6; /* Hiện màu xám nhạt bo tròn */
+    -fx-background-color: #f1f2f6;
     -fx-text-fill: #333333;
 }
-
-/* 4. Khi mục đó đang được chọn (Selected) */
 .combo-box-popup .list-cell:filled:selected {
-    -fx-background-color: #3b5998; /* Màu xanh dương chủ đạo */
-    -fx-text-fill: white;          /* Chữ màu trắng */
-}
-
-/* 5. Khi di chuột qua mục ĐANG CHỌN */
-.combo-box-popup .list-cell:filled:selected:hover {
-    -fx-background-color: #2d4373; /* Màu xanh đậm hơn một chút */
+    -fx-background-color: #3b5998;
     -fx-text-fill: white;
 }
-
-/* Ẩn thanh cuộn (ScrollBar) nếu không cần thiết để UI sạch sẽ hơn */
+.combo-box-popup .list-cell:filled:selected:hover {
+    -fx-background-color: #2d4373;
+    -fx-text-fill: white;
+}
 .combo-box-popup .scroll-bar:vertical {
     -fx-opacity: 0;
     -fx-pref-width: 0;
+}
+
+/* =========================================
+   9. DATEPICKER (LỊCH BO TRÒN - KHÔNG VIỀN)
+   ========================================= */
+.date-picker-popup {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 5);
+    -fx-padding: 5;
+}
+.date-picker-popup .month-year-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+.date-picker-popup .day-name-cell {
+    -fx-font-weight: bold;
+    -fx-text-fill: #95a5a6;
+    -fx-padding: 10 5 10 5;
+}
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-background-radius: 20;
+    -fx-padding: 8;
+    -fx-font-size: 14px;
+}
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: #f1f2f6;
+    -fx-text-fill: #0A439D;
+    -fx-cursor: hand;
+}
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #0A439D;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.date-picker-popup .day-cell:today {
+    -fx-border-color: #0A439D;
+    -fx-border-radius: 20;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #0A439D;
+    -fx-font-weight: bold;
+}
+
+.custom-date-picker .arrow-button {
+    -fx-background-color: transparent;
+}
+.custom-date-picker .arrow-button:hover {
+    -fx-background-color: transparent;
+}
+.custom-date-picker > .text-field {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-background-radius: 10;
+    -fx-padding: 10 15;
+    -fx-font-size: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 3);
+}
+.custom-date-picker > .text-field:focused {
+    -fx-border-color: #0A439D;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.2), 10, 0, 0, 3);
+}
+
+/* =========================================
+   10. Ô NHẬP LIỆU HIỆN ĐẠI (3D BÓNG MỜ NỔI)
+   ========================================= */
+.modern-input {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-background-radius: 10;
+    -fx-padding: 12 15;
+    -fx-font-size: 15px;
+    -fx-text-fill: #333333;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 3);
+}
+.modern-input-small {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-font-size: 15px;
+    -fx-text-fill: #333333;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 3);
+}
+.modern-text-area {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 3);
+}
+.modern-text-area .scroll-pane,
+.modern-text-area .scroll-pane .viewport,
+.modern-text-area .scroll-pane .content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+}
+.modern-combo-box {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 3);
+}
+.modern-combo-box .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-size: 15px;
+    -fx-padding: 5 10;
+}
+.modern-combo-box .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 15 0 0;
+}
+.modern-input:focused,
+.modern-text-area:focused,
+.modern-combo-box:focused {
+    -fx-border-color: #0A439D;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.2), 10, 0, 0, 3);
+}
+.modern-input-small:focused {
+    -fx-border-color: #0A439D;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.2), 10, 0, 0, 3);
+}
+
+/* =========================================
+   11. CUSTOM SCROLLBAR (THANH CUỘN ẨN)
+   ========================================= */
+.list-view .scroll-bar:vertical,
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+}
+.list-view .scroll-bar:vertical .track,
+.scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.list-view .scroll-bar:vertical .increment-button,
+.list-view .scroll-bar:vertical .decrement-button,
+.scroll-pane .scroll-bar:vertical .increment-button,
+.scroll-pane .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-height: 0;
+    -fx-padding: 0;
+}
+.list-view .scroll-bar:vertical .increment-arrow,
+.list-view .scroll-bar:vertical .decrement-arrow,
+.scroll-pane .scroll-bar:vertical .increment-arrow,
+.scroll-pane .scroll-bar:vertical .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+.list-view .scroll-bar:vertical .thumb,
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+}
+.list-view:hover .scroll-bar:vertical .thumb,
+.scroll-pane:hover .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(149, 165, 166, 0.5);
+}
+.list-view .scroll-bar:vertical .thumb:hover,
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #3b5998;
+}
+
+/* =========================================
+   14. NÚT QUAY LẠI VÀ TIÊU ĐỀ TRANG
+   ========================================= */
+
+/* A. Dành cho Tiêu đề CÓ chức năng Quay Lại (Có hover như Ảnh 3) */
+.back-btn-container {
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+}
+.back-btn-container:hover .back-icon {
+    -fx-stroke: #2c3e50; /* Đổi màu mũi tên thành đen đậm khi trỏ chuột */
+}
+
+/* B. Dành cho Tiêu đề Trang chính (Không quay lại, mờ tĩnh như Ảnh 2) */
+.title-container {
+    -fx-alignment: center-left;
+    /* Không có cursor hand và không có hiệu ứng hover */
+}
+
+/* Cài đặt chung cho Biểu tượng và Chữ */
+.back-icon {
+    -fx-stroke: #95a5a6; /* Mặc định xám mờ */
+    -fx-stroke-width: 4;
+    -fx-stroke-line-cap: round; /* Bo tròn 2 mút mũi tên */
+    -fx-stroke-line-join: round; /* Bo tròn đỉnh */
+    -fx-fill: transparent;
+}
+
+.back-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333; /* Chữ luôn cố định màu đen đậm */
+    -fx-padding: 0 0 0 10;
 }

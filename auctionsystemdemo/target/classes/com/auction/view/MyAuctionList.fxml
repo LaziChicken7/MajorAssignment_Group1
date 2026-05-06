@@ -1,34 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.MyAuctionListController"
-      spacing="20" style="-fx-background-color: transparent;">
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.MyAuctionListController" spacing="20" style="-fx-background-color: transparent;">
 
-    <!-- HEADER -->
     <HBox alignment="CENTER_LEFT">
-
-        <Label text="&lt; Sản phẩm của tôi" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand; -fx-text-fill: #333333;"/>
-
+        <HBox spacing="5" styleClass="title-container">
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label text="Sản phẩm của tôi" styleClass="back-title" />
+        </HBox>
         <Region HBox.hgrow="ALWAYS" />
 
-        <!-- Nhóm các nút thao tác bên phải -->
         <HBox spacing="15" alignment="CENTER_LEFT">
-            <!-- Nút Thêm sản phẩm màu xanh lá -->
             <Button text="➕ Thêm sản phẩm" onAction="#goToAddProduct" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-size: 14px;"/>
-
             <Button text="🔄 Làm mới" onAction="#loadData" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-size: 14px;"/>
 
-            <!-- Khung Số dư -->
             <HBox alignment="CENTER" spacing="8" style="-fx-background-color: #3b5998; -fx-background-radius: 20; -fx-padding: 6 20;">
                 <Label text="Số dư:" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px;"/>
                 <Label fx:id="lblBalance" text="Đang tải..." style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px;"/>
             </HBox>
         </HBox>
-
     </HBox>
 
-    <!-- DANH SÁCH -->
     <ListView fx:id="myAuctionListView" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS" />
 
 </VBox>

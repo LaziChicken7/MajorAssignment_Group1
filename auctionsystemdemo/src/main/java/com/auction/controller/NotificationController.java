@@ -10,8 +10,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -21,8 +25,17 @@ public class NotificationController {
 
     @FXML private ListView<NotificationModel> lvNotifications;
 
+    // --- CÁC THÀNH PHẦN CỦA POPUP ---
+    @FXML private StackPane popupOverlay;
+    @FXML private Label lblPopupTitle, lblPopupDesc, lblPopupTime;
+    @FXML private Button btnPopupAccept, btnPopupDecline, btnPopupDelete, btnPopupClose;
+
+    // Biến lưu trữ thông báo đang được click mở Popup
+    private NotificationModel selectedNotification;
+
     @FXML
     public void initialize() {
+        // Render từng dòng thông báo
         lvNotifications.setCellFactory(param -> new ListCell<NotificationModel>() {
             @Override
             protected void updateItem(NotificationModel item, boolean empty) {
@@ -36,12 +49,19 @@ public class NotificationController {
                         setGraphic(loader.load());
 
                         NotificationItemController controller = loader.getController();
-                        // Truyền dữ liệu và truyền cả Hàm loadData() để Item có thể gọi Load lại trang
                         controller.setData(item, () -> loadData());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
+            }
+        });
+
+        // BẮT SỰ KIỆN CLICK VÀO 1 DÒNG ĐỂ MỞ POPUP
+        lvNotifications.setOnMouseClicked(event -> {
+            NotificationModel clickedItem = lvNotifications.getSelectionModel().getSelectedItem();
+            if (clickedItem != null) {
+                openPopup(clickedItem);
             }
         });
 
@@ -66,5 +86,84 @@ public class NotificationController {
                 }
             });
         });
+    }
+
+    // ==========================================
+    // LOGIC ĐIỀU KHIỂN POPUP
+    // ==========================================
+
+    private void openPopup(NotificationModel item) {
+        this.selectedNotification = item;
+
+        // Cập nhật dữ liệu lên Popup
+        lblPopupTitle.setText(item.title);
+        lblPopupDesc.setText(item.description);
+        lblPopupTime.setText(item.createdAt != null ? item.createdAt.replace("T", " ") : "");
+        // Ẩn/Hiện nút bấm theo phân loại
+        if ("PAYMENT_VERIFICATION".equals(item.type)) {
+            // Yêu cầu xác thực -> Có Xác nhận, Từ chối, Đóng (Ẩn Xóa)
+            btnPopupAccept.setVisible(true); btnPopupAccept.setManaged(true);
+            btnPopupDecline.setVisible(true); btnPopupDecline.setManaged(true);
+            btnPopupDelete.setVisible(false); btnPopupDelete.setManaged(false);
+
+            btnPopupClose.setVisible(true); btnPopupClose.setManaged(true);
+        } else {
+            // Thông báo thường -> Có Xóa, Đóng (Ẩn Xác nhận, Từ chối)
+            btnPopupAccept.setVisible(false); btnPopupAccept.setManaged(false);
+            btnPopupDecline.setVisible(false); btnPopupDecline.setManaged(false);
+            btnPopupDelete.setVisible(true); btnPopupDelete.setManaged(true);
+
+            btnPopupClose.setVisible(true); btnPopupClose.setManaged(true);
+        }
+
+        popupOverlay.setVisible(true);
+    }
+
+    @FXML
+    private void closePopup() {
+        popupOverlay.setVisible(false);
+        selectedNotification = null;
+    }
+
+    // Xử lý khi ấn nút Xác nhận trên Popup
+    @FXML
+    private void handlePopupAccept() {
+        if (selectedNotification == null) return;
+        ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/accept", null)
+                .thenAccept(res -> handleResponse(res.statusCode(), "Xác nhận thanh toán thành công!"));
+    }
+
+    // Xử lý khi ấn nút Từ chối trên Popup
+    @FXML
+    private void handlePopupDecline() {
+        if (selectedNotification == null) return;
+        ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/decline", null)
+                .thenAccept(res -> handleResponse(res.statusCode(), "Đã từ chối thanh toán!"));
+    }
+
+    // Xử lý khi ấn nút Xóa trên Popup
+    @FXML
+    private void handlePopupDelete() {
+        if (selectedNotification == null) return;
+        ApiService.deleteAsync("/notifications/" + selectedNotification.notificationId)
+                .thenAccept(res -> handleResponse(res.statusCode(), "Đã xóa thông báo!"));
+    }
+
+    private void handleResponse(int statusCode, String successMsg) {
+        Platform.runLater(() -> {
+            closePopup(); // Đóng popup sau khi bấm xong
+            if (statusCode >= 200 && statusCode < 300) {
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", successMsg);
+                loadData(); // Load lại danh sách
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Thao tác thất bại! Mã lỗi: " + statusCode);
+            }
+        });
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String msg) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
+        alert.showAndWait();
     }
 }

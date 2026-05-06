@@ -2,16 +2,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-
+<?import javafx.scene.shape.SVGPath?>
 
 <VBox fx:id="walletRoot" xmlns:fx="http://javafx.com/fxml"
-          fx:controller="com.auction.controller.WalletController"
-          spacing="20" style="-fx-background-color: transparent;">
+      fx:controller="com.auction.controller.WalletController"
+      spacing="20" style="-fx-background-color: transparent;">
 
+    <!-- HEADER ĐÃ ĐƯỢC CHUẨN HÓA (Dùng title-container vì là trang chính) -->
     <HBox alignment="CENTER_LEFT">
-        <Label text="&lt; Ví tiền của tôi" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <HBox spacing="5" styleClass="title-container">
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label text="Ví tiền của tôi" styleClass="back-title" />
+        </HBox>
         <Region HBox.hgrow="ALWAYS" />
-        <!--<Button text="Nạp tiền" styleClass="btn-success" />-->
         <HBox spacing="15" alignment="CENTER_LEFT">
             <Button text="Nạp tiền" styleClass="btn-success" onAction="#handleDeposit" />
             <Button text="Rút tiền" styleClass="btn-danger" onAction="#handleWithdraw" />
@@ -20,33 +23,25 @@
 
     <!-- THẺ VISA & THÔNG TIN TÀI KHOẢN -->
     <HBox styleClass="card" spacing="30" alignment="CENTER_LEFT">
-        <!-- Thẻ VISA xanh -->
         <AnchorPane style="-fx-background-color: #0A439D; -fx-background-radius: 15;" prefWidth="350" prefHeight="200">
             <Label text="VISA" AnchorPane.bottomAnchor="15" AnchorPane.rightAnchor="20" textFill="white" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
         </AnchorPane>
 
-        <!-- Thông tin số dư -->
         <VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
             <HBox spacing="10">
                 <Label text="Số tài khoản:" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-
-                <!-- SỬA DÒNG DƯỚI ĐÂY -->
                 <Label fx:id="lblBankAccount" text="Đang tải..." style="-fx-font-size: 20px; -fx-text-fill: #333;"/>
-
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="Số dư" style="-fx-font-size: 18px; -fx-font-weight: bold;" prefWidth="150"/>
-
                 <TextField fx:id="balanceField" text="****** VND" editable="false"
                            style="-fx-background-radius: 20; -fx-font-size: 16px; -fx-alignment: center;" prefWidth="210"/>
-
                 <Label fx:id="eyeIconText" text="Hiện"
                        style="-fx-font-size: 16px; -fx-text-fill: #0A439D; -fx-font-weight: bold; -fx-cursor: hand;"
                        onMouseClicked="#toggleBalanceVisibility"/>
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="Số dư đóng băng" style="-fx-font-size: 18px; -fx-font-weight: bold;" prefWidth="150"/>
-                <!-- Gắn thêm fx:id="lblFrozenBalance" vào đây -->
                 <Label fx:id="lblFrozenBalance" text="0 VND" styleClass="auction-price" style="-fx-font-size: 16px;" prefWidth="250" alignment="CENTER"/>
             </HBox>
         </VBox>
@@ -55,30 +50,22 @@
     <!-- LỊCH SỬ GIAO DỊCH -->
     <VBox fx:id="historySection" spacing="20" VBox.vgrow="ALWAYS">
         <HBox spacing="20" VBox.vgrow="ALWAYS">
-            <!-- Cột Giao dịch thành công -->
             <VBox spacing="15" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Giao dịch thành công" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                     <Region HBox.hgrow="ALWAYS" />
                     <Button text="Xem thêm" styleClass="btn-primary" onAction="#handleSuccessfulTransaction"/>
                 </HBox>
-                <!-- Gắn thêm fx:id="vboxSuccess" vào VBox này và xóa dữ liệu cứng bên trong đi -->
-                <VBox fx:id="vboxSuccess" styleClass="card" spacing="10">
-                    <!-- Java sẽ tự động sinh dữ liệu nhét vào đây -->
-                </VBox>
+                <VBox fx:id="vboxSuccess" styleClass="card" spacing="10" />
             </VBox>
 
-            <!-- Cột Giao dịch không thành công -->
             <VBox spacing="15" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Giao dịch ko thành công" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                     <Region HBox.hgrow="ALWAYS" />
                     <Button text="Xem thêm" styleClass="btn-primary" onAction="#handleFailureTransaction"/>
                 </HBox>
-                <!-- Gắn thêm fx:id="vboxFailed" vào VBox này và xóa dữ liệu cứng bên trong đi -->
-                <VBox fx:id="vboxFailed" styleClass="card" spacing="10">
-                    <!-- Java sẽ tự động sinh dữ liệu nhét vào đây -->
-                </VBox>
+                <VBox fx:id="vboxFailed" styleClass="card" spacing="10" />
             </VBox>
         </HBox>
     </VBox>

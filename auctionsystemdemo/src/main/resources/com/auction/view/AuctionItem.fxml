@@ -28,8 +28,8 @@
         <Region HBox.hgrow="ALWAYS"/>
 
         <HBox spacing="15" alignment="CENTER_RIGHT">
-            <Label text="Thời gian còn lại:" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #000;"/>
-            <!-- Viên thuốc thời gian (Màu sẽ do Java quyết định) -->
+            <!-- Đã thêm fx:id="lblTimeTitle" -->
+            <Label fx:id="lblTimeTitle" text="Thời gian còn lại:" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #000;"/>
             <Label fx:id="lblTime" text="00:00:00" style="-fx-padding: 6 20; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;"/>
         </HBox>
     </HBox>

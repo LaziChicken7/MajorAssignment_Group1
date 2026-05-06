@@ -30,6 +30,7 @@ public class AuctionDetailController {
     @FXML private HBox toastSuccess, toastError;
     @FXML private Label lblToastErrorMsg;
     @FXML private Button btnBidAction;
+    @FXML private Label lblTimeTitle; // Thêm nhãn này
 
     private AuctionModel currentItem;
     private Timeline timeline;
@@ -80,48 +81,50 @@ public class AuctionDetailController {
         lblCurrentPrice.setText(String.format("%,.0f VND", currentItem.highestBid).replace(",", "."));
 
         double myHighestBid = currentItem.getMyHighestBid(SessionManager.userName);
-        if (lblMyBid != null) {
-            lblMyBid.setText(String.format("%,.0f VND", myHighestBid).replace(",", "."));
-        }
+        if (lblMyBid != null) lblMyBid.setText(String.format("%,.0f VND", myHighestBid).replace(",", "."));
 
-        // --- XÁC ĐỊNH MÀU SẮC DỰA VÀO TRẠNG THÁI ---
         String baseColor;
         switch (currentItem.status) {
-            case "RUNNING": baseColor = "#f39c12"; break; // Cam
-            case "OPEN": baseColor = "#3498db"; break; // Xanh dương
+            case "RUNNING": baseColor = "#f39c12"; break;
+            case "OPEN": baseColor = "#3498db"; break;
             case "FINISHED":
-            case "PAID": baseColor = "#2ecc71"; break; // Xanh lá
-            case "CANCELLED": baseColor = "#e74c3c"; break; // Đỏ
-            default: baseColor = "#95a5a6"; break; // Xám
+            case "PAID": baseColor = "#2ecc71"; break;
+            case "CANCELLED": baseColor = "#e74c3c"; break;
+            default: baseColor = "#95a5a6"; break;
+        }
+
+        if (lblTimeTitle != null) {
+            if ("OPEN".equals(currentItem.status)) lblTimeTitle.setText("Sắp bắt đầu sau:");
+            else if ("RUNNING".equals(currentItem.status)) lblTimeTitle.setText("Thời gian còn lại:");
+            else lblTimeTitle.setText("Thời gian:");
         }
 
         if (timeline != null) timeline.stop();
 
-        if (currentItem.endTime != null && ("RUNNING".equals(currentItem.status) || "OPEN".equals(currentItem.status))) {
+        if (("RUNNING".equals(currentItem.status) && currentItem.endTime != null) || ("OPEN".equals(currentItem.status) && currentItem.startTime != null)) {
             try {
-                String timeStr = currentItem.endTime.contains("T") ? currentItem.endTime : currentItem.endTime.replace(" ", "T");
-                LocalDateTime endTime = LocalDateTime.parse(timeStr);
+                String targetTimeStr = "OPEN".equals(currentItem.status) ? currentItem.startTime : currentItem.endTime;
+                targetTimeStr = targetTimeStr.contains("T") ? targetTimeStr : targetTimeStr.replace(" ", "T");
+                LocalDateTime targetTime = LocalDateTime.parse(targetTimeStr);
 
                 timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
                     LocalDateTime now = LocalDateTime.now();
 
-                    if (now.isAfter(endTime)) {
+                    if (now.isAfter(targetTime)) {
                         lblTime.setText("00:00:00");
                         lblTime.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
                         timeline.stop();
-
                         btnBidAction.setDisable(true);
                         btnBidAction.setText("Đã kết thúc");
                         txtBidAmount.setDisable(true);
                     } else {
-                        java.time.Duration duration = java.time.Duration.between(now, endTime);
+                        java.time.Duration duration = java.time.Duration.between(now, targetTime);
                         long hours = duration.toHours();
                         long minutes = duration.toMinutesPart();
                         long seconds = duration.toSecondsPart();
 
                         lblTime.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 
-                        // Nếu là RUNNING và sắp hết giờ -> Báo đỏ. Còn lại -> Theo màu baseColor
                         if ("RUNNING".equals(currentItem.status) && hours == 0 && minutes < 10) {
                             lblTime.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
                         } else {

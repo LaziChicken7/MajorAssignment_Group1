@@ -11,62 +11,53 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TransactionController {
 
-    // 2 Container để chứa dữ liệu
     @FXML private VBox successContainer;
     @FXML private VBox failedContainer;
 
     @FXML
     public void initialize() {
-        // Gọi API khi vừa mở trang
         loadTransactionData();
     }
 
     private void loadTransactionData() {
-        String userName = SessionManager.userName;
-        if (userName == null) return;
+        if (SessionManager.userName == null) return;
 
-        ApiService.getAsync("/payments/" + userName + "/history")
-                .thenAccept(response -> {
-                    Platform.runLater(() -> {
-                        if (response.statusCode() == 200) {
-                            ApiResponse apiResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
-                            if (apiResponse.code == 1000) {
-                                WalletDataResponse walletData = ApiService.gson.fromJson(apiResponse.result, WalletDataResponse.class);
+        ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(response -> {
+            Platform.runLater(() -> {
+                try {
+                    if (response.statusCode() == 200) {
+                        ApiResponse apiResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
+                        if (apiResponse.code == 1000) {
+                            WalletDataResponse walletData = ApiService.gson.fromJson(apiResponse.result, WalletDataResponse.class);
 
-                                // Nếu đang mở trang Thành công
-                                if (successContainer != null) {
-                                    renderList(walletData.successTransaction, successContainer, true);
-                                }
-                                // Nếu đang mở trang Thất bại
-                                if (failedContainer != null) {
-                                    renderList(walletData.failedTransaction, failedContainer, false);
-                                }
+                            if (successContainer != null) {
+                                renderList(walletData.successTransaction, successContainer);
+                            }
+                            if (failedContainer != null) {
+                                renderList(walletData.failedTransaction, failedContainer);
                             }
                         }
-                    });
-                })
-                .exceptionally(ex -> {
-                    Platform.runLater(() -> System.out.println("Lỗi kết nối máy chủ!"));
-                    return null;
-                });
+                    }
+                } catch (Exception e) {
+                    System.out.println("Lỗi parse JSON trong Transaction: " + e.getMessage());
+                }
+            });
+        });
     }
 
-    // Hàm dùng Java để vẽ UI (thay cho FXML)
-    private void renderList(List<TransactionHistoryResponse> list, VBox container, boolean isSuccess) {
+    private void renderList(List<TransactionHistoryResponse> list, VBox container) {
         container.getChildren().clear();
 
         if (list == null || list.isEmpty()) {
@@ -76,24 +67,39 @@ public class TransactionController {
             return;
         }
 
-        String colorHex = isSuccess ? "#00C853" : "#FF0000";
-        String statusText = isSuccess ? "Giao dịch thành công" : "Giao dịch không thành công";
-
         for (int i = 0; i < list.size(); i++) {
             TransactionHistoryResponse tx = list.get(i);
 
-            // 1. Khung ngoài cùng của 1 item
+            // Chống Null
+            String status = tx.status != null ? tx.status : "FAILED";
+            String itemName = tx.itemName != null ? tx.itemName : "Sản phẩm ẩn";
+
+            String colorHex;
+            String statusText;
+
+            if ("SUCCESS".equals(status)) {
+                colorHex = "#00C853";
+                statusText = "Giao dịch thành công";
+            } else if ("CANCELLED".equals(status)) {
+                colorHex = "#e74c3c";
+                statusText = "Đã từ chối / Hủy giao dịch";
+            } else {
+                colorHex = "#FF0000";
+                statusText = "Trượt đấu giá";
+            }
+
             VBox card = new VBox(15);
             card.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 15; -fx-padding: 20;");
 
-            // 2. Dòng 1: Tên sản phẩm & Giá tiền
             HBox headerBox = new HBox(15);
             headerBox.setAlignment(Pos.CENTER_LEFT);
 
-            Label lblId = new Label("SP0" + (i + 1)); // Tạm tạo ID ảo vì API chưa trả về ID
+            // SỬA ĐOẠN NÀY: Cắt lấy 4 ký tự đầu của itemId (Giống hệt trang Đấu giá)
+            String shortId = tx.itemId != null && tx.itemId.length() >= 4 ? tx.itemId.substring(0, 4).toUpperCase() : "N/A";
+            Label lblId = new Label("SP" + shortId);
             lblId.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;");
 
-            Label lblName = new Label(tx.itemName);
+            Label lblName = new Label(itemName);
             lblName.setStyle("-fx-font-size: 18px; -fx-text-fill: #333333;");
 
             Region spacer = new Region();
@@ -104,36 +110,26 @@ public class TransactionController {
 
             headerBox.getChildren().addAll(lblId, lblName, spacer, lblAmount);
 
-            // 3. Dòng 2: Hình ảnh & Chi tiết
             HBox detailBox = new HBox(20);
             detailBox.setAlignment(Pos.CENTER_LEFT);
 
-            // Khung ảnh trống
             VBox imagePlaceholder = new VBox();
             imagePlaceholder.setPrefSize(100, 90);
             imagePlaceholder.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-radius: 10;");
 
-            // Cột thông tin chữ
             VBox infoColumn = new VBox(8);
             infoColumn.setStyle("-fx-font-size: 15px;");
 
             infoColumn.getChildren().addAll(
-                    createDetailRow("Ngày ghi nhận:", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))),
-                    createDetailRow("Địa chỉ giao hàng:", "Chưa cập nhật (Lấy từ User Profile)"),
+                    createDetailRow("Ngày ghi nhận:", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), "#333333"),
+                    createDetailRow("Địa chỉ giao hàng:", "Chưa cập nhật (Lấy từ Profile)", "#333333"),
                     createDetailRow("Trạng thái:", statusText, colorHex)
             );
 
             detailBox.getChildren().addAll(imagePlaceholder, infoColumn);
-
-            // Ép tất cả vào card
             card.getChildren().addAll(headerBox, detailBox);
             container.getChildren().add(card);
         }
-    }
-
-    // Hàm hỗ trợ tạo 1 dòng (Label: Label)
-    private HBox createDetailRow(String title, String value) {
-        return createDetailRow(title, value, "#333333");
     }
 
     private HBox createDetailRow(String title, String value, String valueColor) {
@@ -143,7 +139,7 @@ public class TransactionController {
         lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #333333;");
 
         Label lblValue = new Label(value);
-        lblValue.setStyle("-fx-text-fill: " + valueColor + "; " + (valueColor.equals("#333333") ? "" : "-fx-font-weight: bold;"));
+        lblValue.setStyle("-fx-text-fill: " + valueColor + "; " + ("#333333".equals(valueColor) ? "" : "-fx-font-weight: bold;"));
 
         row.getChildren().addAll(lblTitle, lblValue);
         return row;
@@ -154,17 +150,16 @@ public class TransactionController {
     }
 
     @FXML
-    public void handleBackToWallet(MouseEvent event) {
+    public void handleBackToWallet(javafx.scene.input.MouseEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/Wallet.fxml"));
-            Node walletView = loader.load();
+            Node view = loader.load();
             Node source = (Node) event.getSource();
-            Pane mainDisplay = (Pane) source.getScene().lookup("#contentArea");
-
-            if (mainDisplay != null) {
-                mainDisplay.getChildren().setAll(walletView);
+            Pane contentArea = (Pane) source.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(view);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

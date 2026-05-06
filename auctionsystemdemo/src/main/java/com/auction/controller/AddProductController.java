@@ -23,15 +23,16 @@ public class AddProductController {
     @FXML private ImageView productImage;
     @FXML private Label lblPhotoIcon;
     @FXML private TextField txtProductName, txtStartPrice;
-    @FXML private TextField txtStartTime, txtEndTime;
     @FXML private TextArea txtDescription;
-    @FXML private DatePicker dpStartDate, dpEndDate;
 
-    // Các thành phần động mới thêm
+    // Các ô nhập Thời gian đã được chia nhỏ
+    @FXML private DatePicker dpStartDate, dpEndDate;
+    @FXML private TextField txtStartHour, txtStartMinute, txtStartSecond;
+    @FXML private TextField txtEndHour, txtEndMinute, txtEndSecond;
+
+    // Các thành phần động
     @FXML private ComboBox<String> cbItemType;
     @FXML private VBox vboxArt, vboxElectronic, vboxVehicle;
-
-    // Các ô nhập liệu phụ
     @FXML private TextField txtAuthor, txtYear;
     @FXML private TextField txtBrand, txtWarranty;
     @FXML private TextField txtEngine, txtMileage;
@@ -46,26 +47,21 @@ public class AddProductController {
             return;
         }
 
-        // 1. Cài đặt ComboBox
         cbItemType.getItems().addAll("Tác phẩm Nghệ thuật (ART)", "Đồ Điện tử (ELECTRONIC)", "Phương tiện (VEHICLE)");
-        cbItemType.getSelectionModel().selectFirst(); // Chọn mặc định cái đầu tiên
+        cbItemType.getSelectionModel().selectFirst();
 
-        // 2. Lắng nghe thay đổi để ẩn/hiện form
         cbItemType.valueProperty().addListener((observable, oldValue, newValue) -> {
             updateDynamicForm(newValue);
         });
 
-        // Kích hoạt form lần đầu tiên
         updateDynamicForm(cbItemType.getValue());
     }
 
     private void updateDynamicForm(String selectedType) {
-        // Tắt hết
         vboxArt.setVisible(false); vboxArt.setManaged(false);
         vboxElectronic.setVisible(false); vboxElectronic.setManaged(false);
         vboxVehicle.setVisible(false); vboxVehicle.setManaged(false);
 
-        // Bật cái tương ứng
         if (selectedType.contains("ART")) {
             vboxArt.setVisible(true); vboxArt.setManaged(true);
         } else if (selectedType.contains("ELECTRONIC")) {
@@ -86,28 +82,42 @@ public class AddProductController {
         }
     }
 
+    // Hàm tiện ích: Đảm bảo format số luôn có 2 chữ số (VD: 9 -> 09)
+    private String formatTimePart(String timePart) {
+        timePart = timePart.trim();
+        if (timePart.isEmpty()) return "00";
+        if (timePart.length() == 1) return "0" + timePart;
+        return timePart;
+    }
+
     @FXML
     private void handleConfirmAdd() {
         try {
             String name = txtProductName.getText().trim();
             String desc = txtDescription.getText().trim();
             String priceStr = txtStartPrice.getText().replace(".", "").replace(",", "").trim();
-            String timeStartStr = txtStartTime.getText().trim();
-            String timeEndStr = txtEndTime.getText().trim();
 
-            if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || dpStartDate.getValue() == null || dpEndDate.getValue() == null || timeStartStr.isEmpty() || timeEndStr.isEmpty()) {
+            if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || dpStartDate.getValue() == null || dpEndDate.getValue() == null) {
                 showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin Tên, Giá, Ngày Giờ!");
                 return;
             }
 
             double startPrice = Double.parseDouble(priceStr);
 
-            if (timeStartStr.length() == 5) timeStartStr += ":00";
-            if (timeEndStr.length() == 5) timeEndStr += ":00";
-            String formattedStartTime = dpStartDate.getValue().toString() + "T" + timeStartStr;
-            String formattedEndTime = dpEndDate.getValue().toString() + "T" + timeEndStr;
+            // Gộp chuỗi thời gian (Giờ:Phút:Giây)
+            String startTimeStr = formatTimePart(txtStartHour.getText()) + ":" +
+                    formatTimePart(txtStartMinute.getText()) + ":" +
+                    formatTimePart(txtStartSecond.getText());
 
-            // BƯỚC 1: LẤY DỮ LIỆU ĐỘNG CHO ITEM
+            String endTimeStr = formatTimePart(txtEndHour.getText()) + ":" +
+                    formatTimePart(txtEndMinute.getText()) + ":" +
+                    formatTimePart(txtEndSecond.getText());
+
+            // Format Giờ gửi lên Spring Boot (VD: 2026-12-31T23:59:59)
+            String formattedStartTime = dpStartDate.getValue().toString() + "T" + startTimeStr;
+            String formattedEndTime = dpEndDate.getValue().toString() + "T" + endTimeStr;
+
+            // BƯỚC 1: TẠO ITEM
             ItemCreationRequest itemReq = new ItemCreationRequest();
             itemReq.sellerUserName = SessionManager.userName;
             itemReq.name = name;
@@ -118,18 +128,18 @@ public class AddProductController {
             if (typeStr.contains("ART")) {
                 itemReq.itemType = "ART";
                 itemReq.nameAuthor = txtAuthor.getText().trim();
-                itemReq.creationYear = txtYear.getText().isEmpty() ? 0 : Integer.parseInt(txtYear.getText().trim());
+                itemReq.creationYear = txtYear.getText().isEmpty() ? null : Integer.parseInt(txtYear.getText().trim());
             } else if (typeStr.contains("ELECTRONIC")) {
                 itemReq.itemType = "ELECTRONIC";
                 itemReq.brand = txtBrand.getText().trim();
-                itemReq.warrantyMonths = txtWarranty.getText().isEmpty() ? 0 : Integer.parseInt(txtWarranty.getText().trim());
+                itemReq.warrantyMonths = txtWarranty.getText().isEmpty() ? null : Integer.parseInt(txtWarranty.getText().trim());
             } else if (typeStr.contains("VEHICLE")) {
                 itemReq.itemType = "VEHICLE";
                 itemReq.engineType = txtEngine.getText().trim();
-                itemReq.mileage = txtMileage.getText().isEmpty() ? 0 : Integer.parseInt(txtMileage.getText().trim());
+                itemReq.mileage = txtMileage.getText().isEmpty() ? null : Integer.parseInt(txtMileage.getText().trim());
             }
 
-            // GỌI API LÊN SÀN
+            // GỌI API
             ApiService.postAsync("/items/create", itemReq).thenAccept(res1 -> {
                 Platform.runLater(() -> {
                     if (res1.statusCode() == 200) {
