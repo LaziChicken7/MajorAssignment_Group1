@@ -6,6 +6,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.item.Item;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.AuctionStatus;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,6 +27,10 @@ public class Auction extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private AuctionStatus status = AuctionStatus.OPEN;
+
+    // THÊM TRƯỜNG NÀY ĐỂ QUẢN LÝ GIAO DỊCH
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus transactionStatus;
 
     // MQH một một với khóa ngoài item_id
     @OneToOne
@@ -106,5 +111,13 @@ public class Auction extends BaseEntity {
 
     public void setBidTransactions(List<BidTransaction> bidTransactions) {
         this.bidTransactions = bidTransactions;
+    }
+
+    public TransactionStatus getTransactionStatus() {
+        return transactionStatus;
+    }
+
+    public void setTransactionStatus(TransactionStatus transactionStatus) {
+        this.transactionStatus = transactionStatus;
     }
 }

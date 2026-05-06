@@ -9,6 +9,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.AuctionStatus;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.NotificationType;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.AuctionException;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
@@ -117,21 +118,23 @@ public class AuctionService {
     public String closeAuction(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
         auction.setStatus(AuctionStatus.FINISHED);
-        auctionRepository.save(auction);
 
         if (auction.getWinningUser() != null) {
-            // ============== CODE THÊM MỚI Ở ĐÂY ==============
             Notification notif = new Notification();
-            notif.setUser(auction.getWinningUser()); // Gửi cho người thắng
+            notif.setUser(auction.getWinningUser());
             notif.setAuction(auction);
             notif.setType(NotificationType.PAYMENT_VERIFICATION);
-            // Cắt 4 ký tự ID SP (ví dụ ITEM -> IT) làm mã hiển thị SP01
             notif.setTitle("Xác thực giao dịch: SP" + auction.getBidProduct().getId().substring(0, 4).toUpperCase());
             notif.setDescription(auction.getBidProduct().getName() + " - Giá tiền: " + auction.getHighestBid() + " VND");
-
             notificationRepository.save(notif);
-            // =================================================
+
+            // LƯU Ý: Ở đây CHƯA gán transactionStatus vội vì còn chờ user Xác nhận/Từ chối thanh toán
+            auctionRepository.save(auction);
             return "Session ended! Winner is: " + auction.getWinningUser().getFullName();
+        } else {
+            // NẾU KHÔNG CÓ AI THẮNG -> GIAO DỊCH CHẮC CHẮN THẤT BẠI
+            auction.setTransactionStatus(TransactionStatus.FAILED);
+            auctionRepository.save(auction);
         }
         return "Session ended! No one winner";
     }
@@ -140,34 +143,28 @@ public class AuctionService {
     @Transactional
     public void acceptPayment(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
-
         if (auction.getStatus() != AuctionStatus.FINISHED || auction.getWinningUser() == null) {
             throw new AuctionException(ErrorCode.CONDITION_ACCEPT_PAYMENT_INVALID);
         }
-
-        // Chuyển tiền từ người mua sang người bán
-        paymentService.transferMoney(
-                auction.getWinningUser().getId(),
-                auction.getSeller().getId(),
-                auction.getHighestBid()
-        );
+        paymentService.transferMoney(auction.getWinningUser().getId(), auction.getSeller().getId(), auction.getHighestBid());
 
         auction.setStatus(AuctionStatus.PAID);
+        // GÁN SUCCESS KHI THANH TOÁN THÀNH CÔNG
+        auction.setTransactionStatus(TransactionStatus.SUCCESS);
         auctionRepository.save(auction);
     }
 
     @Transactional
     public void declinePayment(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
-
         if (auction.getStatus() != AuctionStatus.FINISHED || auction.getWinningUser() == null) {
             throw new AuctionException(ErrorCode.CONDITION_ACCEPT_PAYMENT_INVALID);
         }
-
-        // Trả lại tiền cho người bán
         paymentService.unFreezeMoney(auction.getWinningUser().getId(), auction.getHighestBid());
 
         auction.setStatus(AuctionStatus.CANCELLED);
+        // GÁN FAILED KHI TỪ CHỐI THANH TOÁN
+        auction.setTransactionStatus(TransactionStatus.FAILED);
         auctionRepository.save(auction);
     }
 

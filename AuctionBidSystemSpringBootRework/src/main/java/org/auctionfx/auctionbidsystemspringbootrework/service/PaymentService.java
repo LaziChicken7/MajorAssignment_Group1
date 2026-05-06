@@ -137,38 +137,37 @@ public class PaymentService {
     // 6. Đưa ra danh sách các sản phẩm đấu giá thành công hay thất bại của một user
     // Hàm này sẽ trả về dữ liệu về cho VÍ TIỀN
     public Map<String, Object> getMyWalletAndHistory(String userName) {
-        // 1. Lấy thông tin ví tiền
         Bidder bidder = getBidderByUserName(userName);
         Map<String, Object> responseData = new HashMap<>();
 
-        // PHẢI CÓ DÒNG NÀY ĐỂ GỬI VỀ JAVAFX
         responseData.put("bankAccountNumber", bidder.getBankAccountNumber());
         responseData.put("moneyOnWallet", bidder.getMoneyOnWallet());
         responseData.put("moneyinFrozen", bidder.getMoneyinFrozen());
 
         // 2. Lọc giao dịch thành công
-        List<Auction> wonAuctions = auctionRepository.findWonAuctions(userName);
+        List<Auction> wonAuctions = auctionRepository.findWonAuctions(userName, TransactionStatus.SUCCESS);
         List<TransactionHistoryResponse> successList = new ArrayList<>();
         for (Auction auction : wonAuctions) {
             successList.add(new TransactionHistoryResponse(
+                    auction.getBidProduct().getId(), // THÊM DÒNG NÀY
                     auction.getBidProduct().getName(),
                     auction.getHighestBid(),
-                    TransactionStatus.SUCCESS
+                    auction.getTransactionStatus()
             ));
         }
 
         // 3. Lọc giao dịch thất bại
-        List<Auction> lostAuctions = auctionRepository.findLostAuctions(userName);
+        List<Auction> lostAuctions = auctionRepository.findLostAuctions(userName, TransactionStatus.FAILED);
         List<TransactionHistoryResponse> failedList = new ArrayList<>();
         for (Auction auction : lostAuctions) {
             failedList.add(new TransactionHistoryResponse(
+                    auction.getBidProduct().getId(), // THÊM DÒNG NÀY
                     auction.getBidProduct().getName(),
                     auction.getHighestBid(),
-                    TransactionStatus.FAILED
+                    auction.getTransactionStatus() != null ? auction.getTransactionStatus() : TransactionStatus.FAILED
             ));
         }
 
-        // 4. Đóng gói tất cả trả về cho JavaFX
         responseData.put("successTransaction", successList);
         responseData.put("failedTransaction", failedList);
 

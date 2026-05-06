@@ -66,7 +66,7 @@ CREATE TABLE items (
                        start_price DECIMAL(19, 2) NOT NULL,
                        end_price DECIMAL(19, 2),
                        start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-                       item_type VARCHAR(50) NOT NULL, -- <<< ĐÃ BỔ SUNG CỘT NÀY Ở ĐÂY <<<
+                       item_type VARCHAR(50) NOT NULL,
                        seller_id VARCHAR(36) NOT NULL,
                        CONSTRAINT fk_item_seller FOREIGN KEY (seller_id) REFERENCES sellers(id)
 );
@@ -104,6 +104,7 @@ CREATE TABLE auctions (
                           end_time DATETIME,
                           highest_bid DECIMAL(19, 2),
                           status VARCHAR(50) DEFAULT 'OPEN',
+                          transaction_status VARCHAR(50) DEFAULT NULL, -- <<< ĐÃ BỔ SUNG CỘT NÀY Ở ĐÂY <<<
                           item_id VARCHAR(36) UNIQUE NOT NULL, -- OneToOne: Một món hàng chỉ 1 phiên
                           seller_id VARCHAR(36) NOT NULL,
                           winning_user_id VARCHAR(36),
