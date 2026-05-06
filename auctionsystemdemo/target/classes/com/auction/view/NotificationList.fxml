@@ -2,29 +2,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.NotificationController">
-    <!-- LỚP DƯỚI: DANH SÁCH THÔNG BÁO -->
-    <VBox spacing="20" style="-fx-padding: 30; -fx-background-color: #f4f4f4;">
-        <Label text="Thông báo" style="-fx-font-size: 20; -fx-font-weight: bold;" />
-        <VBox styleClass="card" VBox.vgrow="ALWAYS">
-            <ListView fx:id="lvNotifications" VBox.vgrow="ALWAYS" />
-        </VBox>
-    </VBox>
+<!-- Đã bỏ prefHeight, prefWidth và -fx-padding cứng để nó co giãn theo vùng Content giống Wallet -->
+<VBox spacing="20" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.NotificationController">
 
-    <!-- LỚP TRÊN: POPUP CHI TIẾT (Mặc định ẩn visible="false") -->
-    <VBox fx:id="panePopupDetail" alignment="CENTER" visible="false" style="-fx-background-color: rgba(0,0,0,0.3);">
-        <VBox alignment="TOP_LEFT" spacing="30" maxWidth="700" maxHeight="450"
-              style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 8);">
+    <!-- HEADER: Đã nhóm nút làm mới vào HBox con, xài style nút bấm quy chuẩn -->
+    <HBox alignment="CENTER_LEFT">
+        <Label text="&lt; Thông báo" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-cursor: hand;"/>
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Button text="🔄 Làm mới" onAction="#loadData" styleClass="btn-primary" style="-fx-background-radius: 20; -fx-padding: 8 20; -fx-font-size: 14px;"/>
+        </HBox>
+    </HBox>
 
-            <Label fx:id="lblPopupContent" wrapText="true" style="-fx-font-size: 18; -fx-text-fill: #333;"
-                   text="Sản phẩm đấu giá thành công: SP17 - Auction Item 17 - Giá tiền: 12.725.000 VND" />
+    <!-- DANH SÁCH THÔNG BÁO -->
+    <ListView fx:id="lvNotifications" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS" />
 
-            <Region VBox.vgrow="ALWAYS" />
-
-            <HBox alignment="CENTER">
-                <Button text="Đóng" onAction="#closePopup"
-                        style="-fx-background-color: #004aad; -fx-text-fill: white; -fx-font-size: 16; -fx-font-weight: bold; -fx-padding: 10 50; -fx-background-radius: 25; -fx-cursor: hand;"/>
-            </HBox>
-        </VBox>
-    </VBox>
-</StackPane>
+</VBox>

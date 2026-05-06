@@ -5,7 +5,7 @@
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.AuctionController"
       spacing="20" style="-fx-background-color: transparent;">
 
-    <!-- HEADER: Cấu trúc đẩy 2 bên y hệt Wallet.fxml -->
+    <!-- HEADER: Cấu trúc đẩy 2 bên -->
     <HBox alignment="CENTER_LEFT">
 
         <!-- BÊN TRÁI: Tiêu đề -->
@@ -14,7 +14,7 @@
         <!-- Ở GIỮA: Khoảng trống đẩy dạt mọi thứ sang 2 lề -->
         <Region HBox.hgrow="ALWAYS" />
 
-        <!-- BÊN PHẢI: Nhóm nút Làm mới và Số dư (Tương đương nút Nạp/Rút bên Wallet) -->
+        <!-- BÊN PHẢI: Nhóm nút Làm mới và Số dư -->
         <HBox spacing="15" alignment="CENTER_LEFT">
 
             <Button text="🔄 Làm mới" onAction="#loadData" styleClass="btn-primary" style="-fx-background-radius: 20; -fx-padding: 8 20; -fx-font-size: 14px;"/>
@@ -26,6 +26,21 @@
             </HBox>
 
         </HBox>
+    </HBox>
+
+    <!-- THANH CÔNG CỤ: Lọc và Sắp xếp -->
+    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 10 20; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+        <Label text="Lọc trạng thái:" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;"/>
+
+        <!-- Đã thêm padding 2 10 và tăng width lên 200 -->
+        <ComboBox fx:id="cbFilter" prefWidth="200" style="-fx-background-color: #f1f2f6; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 2 10;"/>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Label text="Sắp xếp thời gian:" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;"/>
+
+        <!-- Đã thêm padding 2 10 và tăng width lên 240 -->
+        <ComboBox fx:id="cbSort" prefWidth="240" style="-fx-background-color: #f1f2f6; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 2 10;"/>
     </HBox>
 
     <!-- DANH SÁCH -->

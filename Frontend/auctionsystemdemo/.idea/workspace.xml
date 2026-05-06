@@ -5,9 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../AuctionBidSystemSpringBootRework/src/main/java/org/auctionfx/auctionbidsystemspringbootrework/AuctionBidSystemSpringBootReworkApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../AuctionBidSystemSpringBootRework/src/main/java/org/auctionfx/auctionbidsystemspringbootrework/AuctionBidSystemSpringBootReworkApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../AuctionBidSystemSpringBootRework/src/main/java/org/auctionfx/auctionbidsystemspringbootrework/dto/request/AuctionCreationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../AuctionBidSystemSpringBootRework/src/main/java/org/auctionfx/auctionbidsystemspringbootrework/dto/request/AuctionCreationRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../AuctionBidSystemSpringBootRework/src/main/java/org/auctionfx/auctionbidsystemspringbootrework/service/AuctionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../AuctionBidSystemSpringBootRework/src/main/java/org/auctionfx/auctionbidsystemspringbootrework/service/AuctionService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/auction/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/auction/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/App.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AddProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AddProductController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AuctionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AuctionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/MyAuctionItemController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/MyAuctionListController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/MyAuctionListController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AddProduct.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AddProduct.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionList.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/MyAuctionItem.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/MyAuctionItem.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/MyAuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/MyAuctionList.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AddProductController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AddProductController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionController$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionController$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionController$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionController$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionItemController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionItemController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionListController$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionListController$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionListController$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionListController$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionListController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/MyAuctionListController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AddProduct.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AddProduct.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionList.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/MyAuctionItem.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/MyAuctionItem.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,27 +79,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Unnamed.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.JavaFX&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Unnamed.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "G:/My Drive/Github/MajorAssignment_Group1/Frontend/auctionsystemdemo",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.JavaFX",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.auction.App" />
@@ -107,6 +129,7 @@
       <workItem from="1777910713217" duration="145000" />
       <workItem from="1777910877123" duration="53000" />
       <workItem from="1777910994612" duration="159000" />
+      <workItem from="1778054077373" duration="1285000" />
     </task>
     <servers />
   </component>

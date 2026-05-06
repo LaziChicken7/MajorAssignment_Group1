@@ -1,6 +1,11 @@
 package com.auction.controller;
 
-import com.auction.model.AuctionItem;
+import com.auction.model.ApiResponse;
+import com.auction.model.AuctionCreationRequest;
+import com.auction.model.ItemCreationRequest;
+import com.auction.util.ApiService;
+import com.auction.util.SessionManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -8,62 +13,156 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+
 import java.io.File;
-import java.io.IOException;
 
 public class AddProductController {
 
     @FXML private ImageView productImage;
-    @FXML private Label lblIcon; // Icon 🖼 ẩn đi khi có ảnh
-    @FXML private TextField txtProductId, txtProductName, txtStartPrice, txtEndTime;
+    @FXML private Label lblPhotoIcon;
+    @FXML private TextField txtProductName, txtStartPrice;
+    @FXML private TextField txtStartTime, txtEndTime;
     @FXML private TextArea txtDescription;
-    @FXML private DatePicker dpEnd;
+    @FXML private DatePicker dpStartDate, dpEndDate;
 
-    // 1. XỬ LÝ TẢI ẢNH
+    // Các thành phần động mới thêm
+    @FXML private ComboBox<String> cbItemType;
+    @FXML private VBox vboxArt, vboxElectronic, vboxVehicle;
+
+    // Các ô nhập liệu phụ
+    @FXML private TextField txtAuthor, txtYear;
+    @FXML private TextField txtBrand, txtWarranty;
+    @FXML private TextField txtEngine, txtMileage;
+
     @FXML
-    private void handleUploadImage() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Chọn ảnh sản phẩm");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+    public void initialize() {
+        if (!"SELLER".equals(SessionManager.role)) {
+            Platform.runLater(() -> {
+                showAlert(Alert.AlertType.ERROR, "Từ chối", "Chỉ SELLER mới được phép đưa sản phẩm lên sàn!");
+                goBack();
+            });
+            return;
+        }
 
-        File file = fileChooser.showOpenDialog(txtProductId.getScene().getWindow());
-        if (file != null) {
-            Image image = new Image(file.toURI().toString());
-            productImage.setImage(image);
-            lblIcon.setVisible(false); // Ẩn icon mặc định đi
+        // 1. Cài đặt ComboBox
+        cbItemType.getItems().addAll("Tác phẩm Nghệ thuật (ART)", "Đồ Điện tử (ELECTRONIC)", "Phương tiện (VEHICLE)");
+        cbItemType.getSelectionModel().selectFirst(); // Chọn mặc định cái đầu tiên
+
+        // 2. Lắng nghe thay đổi để ẩn/hiện form
+        cbItemType.valueProperty().addListener((observable, oldValue, newValue) -> {
+            updateDynamicForm(newValue);
+        });
+
+        // Kích hoạt form lần đầu tiên
+        updateDynamicForm(cbItemType.getValue());
+    }
+
+    private void updateDynamicForm(String selectedType) {
+        // Tắt hết
+        vboxArt.setVisible(false); vboxArt.setManaged(false);
+        vboxElectronic.setVisible(false); vboxElectronic.setManaged(false);
+        vboxVehicle.setVisible(false); vboxVehicle.setManaged(false);
+
+        // Bật cái tương ứng
+        if (selectedType.contains("ART")) {
+            vboxArt.setVisible(true); vboxArt.setManaged(true);
+        } else if (selectedType.contains("ELECTRONIC")) {
+            vboxElectronic.setVisible(true); vboxElectronic.setManaged(true);
+        } else if (selectedType.contains("VEHICLE")) {
+            vboxVehicle.setVisible(true); vboxVehicle.setManaged(true);
         }
     }
 
-    // 2. XỬ LÝ XÁC NHẬN (THÊM SP VÀO LIST)
+    @FXML
+    private void handleUploadImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
+        File file = fileChooser.showOpenDialog(txtProductName.getScene().getWindow());
+        if (file != null) {
+            productImage.setImage(new Image(file.toURI().toString()));
+            lblPhotoIcon.setVisible(false);
+        }
+    }
+
     @FXML
     private void handleConfirmAdd() {
         try {
-            // Lấy dữ liệu từ TextField
-            String id = txtProductId.getText();
-            String name = txtProductName.getText();
-            String priceRaw = txtStartPrice.getText().replace(".", "").replace(",", "");
-            String time = txtEndTime.getText().isEmpty() ? "24:00:00" : txtEndTime.getText();
+            String name = txtProductName.getText().trim();
+            String desc = txtDescription.getText().trim();
+            String priceStr = txtStartPrice.getText().replace(".", "").replace(",", "").trim();
+            String timeStartStr = txtStartTime.getText().trim();
+            String timeEndStr = txtEndTime.getText().trim();
 
-            if (id.isEmpty() || name.isEmpty() || priceRaw.isEmpty()) {
-                System.err.println("Vui lòng nhập đủ thông tin!");
+            if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || dpStartDate.getValue() == null || dpEndDate.getValue() == null || timeStartStr.isEmpty() || timeEndStr.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin Tên, Giá, Ngày Giờ!");
                 return;
             }
 
-            double price = Double.parseDouble(priceRaw);
+            double startPrice = Double.parseDouble(priceStr);
 
-            // Tạo đối tượng mới và thêm vào Service (Kho chung)
-            AuctionItem newAuction = new AuctionItem(id, name, price, price, time, "RUNNING", txtDescription.getText(), true);
-            com.auction.controller.AuctionService.addAuction(newAuction);
-            com.auction.controller.NotificationService.addNotification("Bạn vừa tạo sản phẩm mới: " + name, "ACTION");
+            if (timeStartStr.length() == 5) timeStartStr += ":00";
+            if (timeEndStr.length() == 5) timeEndStr += ":00";
+            String formattedStartTime = dpStartDate.getValue().toString() + "T" + timeStartStr;
+            String formattedEndTime = dpEndDate.getValue().toString() + "T" + timeEndStr;
 
-            System.out.println("Đã thêm thành công sản phẩm từ bàn phím!");
+            // BƯỚC 1: LẤY DỮ LIỆU ĐỘNG CHO ITEM
+            ItemCreationRequest itemReq = new ItemCreationRequest();
+            itemReq.sellerUserName = SessionManager.userName;
+            itemReq.name = name;
+            itemReq.description = desc;
+            itemReq.startPrice = startPrice;
 
-            // Tự động quay về danh sách sau khi thêm
-            goBack();
+            String typeStr = cbItemType.getValue();
+            if (typeStr.contains("ART")) {
+                itemReq.itemType = "ART";
+                itemReq.nameAuthor = txtAuthor.getText().trim();
+                itemReq.creationYear = txtYear.getText().isEmpty() ? 0 : Integer.parseInt(txtYear.getText().trim());
+            } else if (typeStr.contains("ELECTRONIC")) {
+                itemReq.itemType = "ELECTRONIC";
+                itemReq.brand = txtBrand.getText().trim();
+                itemReq.warrantyMonths = txtWarranty.getText().isEmpty() ? 0 : Integer.parseInt(txtWarranty.getText().trim());
+            } else if (typeStr.contains("VEHICLE")) {
+                itemReq.itemType = "VEHICLE";
+                itemReq.engineType = txtEngine.getText().trim();
+                itemReq.mileage = txtMileage.getText().isEmpty() ? 0 : Integer.parseInt(txtMileage.getText().trim());
+            }
+
+            // GỌI API LÊN SÀN
+            ApiService.postAsync("/items/create", itemReq).thenAccept(res1 -> {
+                Platform.runLater(() -> {
+                    if (res1.statusCode() == 200) {
+                        ApiResponse apiRes1 = ApiService.gson.fromJson(res1.body(), ApiResponse.class);
+                        if (apiRes1.code == 1000) {
+
+                            String resStr = apiRes1.result.getAsString();
+                            String itemId = resStr.substring(resStr.lastIndexOf(":") + 2).trim();
+
+                            AuctionCreationRequest aucReq = new AuctionCreationRequest(itemId, formattedStartTime, formattedEndTime);
+
+                            ApiService.postAsync("/auctions/create", aucReq).thenAccept(res2 -> {
+                                Platform.runLater(() -> {
+                                    if (res2.statusCode() == 200) {
+                                        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã tạo sản phẩm và lên lịch đấu giá thành công!");
+                                        goBack();
+                                    } else {
+                                        showAlert(Alert.AlertType.ERROR, "Lỗi tạo Phiên", "Tạo sản phẩm thành công nhưng không thể lên lịch.");
+                                    }
+                                });
+                            });
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Lỗi máy chủ", "Mã lỗi: " + res1.statusCode());
+                    }
+                });
+            }).exceptionally(ex -> {
+                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể gọi tới máy chủ."));
+                return null;
+            });
 
         } catch (NumberFormatException e) {
-            System.err.println("Giá tiền phải là số!");
+            showAlert(Alert.AlertType.ERROR, "Lỗi nhập liệu", "Giá tiền, Năm, Số Km, Bảo hành... chỉ được nhập bằng số.");
         }
     }
 
@@ -72,12 +171,14 @@ public class AddProductController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/MyAuctionList.fxml"));
             Node view = loader.load();
-            // Tìm contentArea để thay thế giao diện giữa mà không mất Sidebar
-            StackPane contentArea = (StackPane) txtProductId.getScene().lookup("#contentArea");
-            contentArea.getChildren().clear();
-            contentArea.getChildren().add(view);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            StackPane contentArea = (StackPane) txtProductName.getScene().lookup("#contentArea");
+            if (contentArea != null) contentArea.getChildren().setAll(view);
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String msg) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
+        alert.showAndWait();
     }
 }
