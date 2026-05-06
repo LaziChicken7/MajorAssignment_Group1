@@ -2,41 +2,35 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="10" styleClass="auction-card" stylesheets="@../style/style.css"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.AuctionItemController">
-    <children>
-        <!-- Dòng 1: ID, Tên và Giá hiện tại -->
-        <HBox alignment="CENTER_LEFT">
-            <children>
-                <HBox spacing="10" minWidth="200">
-                    <children>
-                        <Label fx:id="lblId" text="SP1" style="-fx-font-weight: bold; -fx-font-size: 15;" />
-                        <Label fx:id="lblName" text="Tên sản phẩm" style="-fx-font-size: 15;" />
-                    </children>
-                </HBox>
-                <Region HBox.hgrow="ALWAYS" />
-                <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Label text="Giá hiện tại:" style="-fx-font-size: 12; -fx-text-fill: #7f8c8d;"/>
-                    <Label fx:id="lblPrice" text="0 VND" styleClass="price-pill" />
-                </HBox>
-            </children>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.AuctionItemController"
+      spacing="20" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+
+    <!-- Dòng 1: ID, Tên và Trạng thái -->
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label fx:id="lblId" text="SP1" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #000;"/>
+        <Label fx:id="lblName" text="Auction Name" style="-fx-font-size: 18px; -fx-text-fill: #333;"/>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <!-- Bổ sung hiển thị trạng thái ở góc phải -->
+        <Label text="Trạng thái:" style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;"/>
+        <Label fx:id="lblStatus" text="Đang tải..." style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <!-- Dòng 2: Giá và Thời gian -->
+    <HBox alignment="CENTER_LEFT">
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Label text="Giá hiện tại:" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #000;"/>
+            <!-- Viên thuốc xanh dương -->
+            <Label fx:id="lblPrice" text="0 VND" style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-padding: 6 25; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;"/>
         </HBox>
 
-        <!-- Dòng 2: Trạng thái và Thời gian còn lại -->
-        <HBox alignment="CENTER_LEFT">
-            <children>
-                <HBox spacing="5">
-                    <children>
-                        <Label text="Trạng thái hiện tại:" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #95a5a6;" />
-                        <Label fx:id="lblStatus" text="RUNNING" style="-fx-font-weight: bold;" />
-                    </children>
-                </HBox>
-                <Region HBox.hgrow="ALWAYS" />
-                <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Label text="Thời gian còn lại:" style="-fx-font-size: 12; -fx-text-fill: #7f8c8d;"/>
-                    <Label fx:id="lblTime" text="00:00:00" styleClass="time-pill" />
-                </HBox>
-            </children>
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <HBox spacing="15" alignment="CENTER_RIGHT">
+            <Label text="Thời gian còn lại:" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #000;"/>
+            <!-- Viên thuốc thời gian (Màu sẽ do Java quyết định) -->
+            <Label fx:id="lblTime" text="00:00:00" style="-fx-padding: 6 20; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;"/>
         </HBox>
-    </children>
+    </HBox>
 </VBox>

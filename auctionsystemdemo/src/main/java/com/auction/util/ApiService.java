@@ -9,7 +9,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class ApiService {
     // Đổi link này nếu Spring Boot của bạn dùng port khác hoặc có context-path
-    private static final String BASE_URL = "http://localhost:8080/auction";
+    public static String BASE_URL = "http://localhost:8080/auction";
+
     private static final HttpClient client = HttpClient.newHttpClient();
     public static final Gson gson = new Gson();
 

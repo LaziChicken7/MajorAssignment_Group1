@@ -6,29 +6,23 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ScrollPane?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
+<!-- THẺ GỐC Y HỆT WALLET (Đã xóa padding thừa) -->
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.auction.controller.TransactionController"
-      spacing="20"
-      style="-fx-background-color: transparent; -fx-padding: 25;">
+      spacing="20" style="-fx-background-color: transparent;">
 
-    <HBox alignment="CENTER_LEFT" spacing="15">
-        <Label text="&lt; Giao dịch không thành công"
-               style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-cursor: hand;"
-               onMouseClicked="#handleBackToWallet" />
+    <HBox alignment="CENTER_LEFT">
+        <Label text="&lt; Giao dịch không thành công" onMouseClicked="#handleBackToWallet"
+               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;" />
         <Region HBox.hgrow="ALWAYS" />
     </HBox>
 
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                style="-fx-background: transparent; -fx-background-color: transparent;"
+                style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"
                 VBox.vgrow="ALWAYS">
         <content>
-            <VBox style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 10, 0, 0, 5); -fx-padding: 30;">
-
-                <!-- Bác sĩ JavaFX sẽ "bơm" dữ liệu thật vào cái hộp này -->
-                <VBox fx:id="failedContainer" spacing="20" />
-
-            </VBox>
+            <!-- Sử dụng styleClass="card" chuẩn của hệ thống -->
+            <VBox fx:id="failedContainer" spacing="15" styleClass="card" />
         </content>
     </ScrollPane>
 </VBox>

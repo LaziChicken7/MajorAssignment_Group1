@@ -1,35 +1,36 @@
 package com.auction.controller;
 
-import com.auction.model.AuctionItem;
+import com.auction.model.ApiResponse;
+import com.auction.model.AuctionModel;
+import com.auction.util.ApiService;
+import com.auction.util.SessionManager;
+import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.StackPane;
+
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MyAuctionListController {
-    @FXML private ListView<AuctionItem> myAuctionListView;
+
+    // Đã đổi toàn bộ sang AuctionModel
+    @FXML private ListView<AuctionModel> myAuctionListView;
 
     @FXML
     public void initialize() {
-        // 1. KẾT NỐI DỮ LIỆU
-        myAuctionListView.setItems(com.auction.controller.AuctionService.getMyAuctions());
-
-        // 2. THÊM SỰ KIỆN CLICK CHUỘT (Để vào xem chi tiết) - BẠN ĐANG THIẾU CÁI NÀY
-        myAuctionListView.setOnMouseClicked(event -> {
-            AuctionItem selected = myAuctionListView.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                System.out.println(">>> Đang mở chi tiết sp: " + selected.getName());
-                showProductDetail(selected);
-            }
-        });
-
-        // 3. ĐỊNH DẠNG HIỂN THỊ TỪNG DÒNG (CellFactory)
-        myAuctionListView.setCellFactory(param -> new ListCell<AuctionItem>() {
+        // 1. ĐỊNH DẠNG HIỂN THỊ TỪNG DÒNG
+        myAuctionListView.setCellFactory(param -> new ListCell<AuctionModel>() {
             @Override
-            protected void updateItem(AuctionItem item, boolean empty) {
+            protected void updateItem(AuctionModel item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
@@ -37,10 +38,6 @@ public class MyAuctionListController {
                 } else {
                     try {
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/MyAuctionItem.fxml"));
-                        if (loader.getLocation() == null) {
-                            System.err.println(">>> LỖI: Không thấy file MyAuctionItem.fxml!");
-                            return;
-                        }
                         setGraphic(loader.load());
 
                         // Lấy controller của dòng đó để nạp dữ liệu
@@ -52,10 +49,47 @@ public class MyAuctionListController {
                 }
             }
         });
+
+        // 2. SỰ KIỆN CLICK CHUỘT
+        myAuctionListView.setOnMouseClicked(event -> {
+            AuctionModel selected = myAuctionListView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showProductDetail(selected);
+            }
+        });
+
+        // 3. GỌI API LẤY DỮ LIỆU
+        loadDataFromApi();
     }
 
-    // HÀM MỚI: CHUYỂN SANG TRANG CHI TIẾT
-    private void showProductDetail(AuctionItem item) {
+    private void loadDataFromApi() {
+        String currentUser = SessionManager.userName;
+        if (currentUser == null) return;
+
+        // Gọi API lấy TẤT CẢ sản phẩm
+        ApiService.getAsync("/auctions").thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() == 200) {
+                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        Type listType = new TypeToken<List<AuctionModel>>(){}.getType();
+                        List<AuctionModel> allAuctions = ApiService.gson.fromJson(apiRes.result, listType);
+
+                        // LỌC RA NHỮNG SẢN PHẨM MÀ SELLER CHÍNH LÀ MÌNH
+                        List<AuctionModel> myAuctions = allAuctions.stream()
+                                .filter(a -> a.seller != null && currentUser.equals(a.seller.userName))
+                                .collect(Collectors.toList());
+
+                        ObservableList<AuctionModel> observableList = FXCollections.observableArrayList(myAuctions);
+                        myAuctionListView.setItems(observableList);
+                    }
+                }
+            });
+        });
+    }
+
+    // Đã đổi tham số truyền vào thành AuctionModel (HẾT LỖI Ở ĐÂY)
+    private void showProductDetail(AuctionModel item) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/AuctionDetail.fxml"));
             Node view = loader.load();
@@ -70,7 +104,6 @@ public class MyAuctionListController {
                 contentArea.getChildren().setAll(view);
             }
         } catch (IOException e) {
-            System.err.println(">>> LỖI LOAD TRANG CHI TIẾT: " + e.getMessage());
             e.printStackTrace();
         }
     }

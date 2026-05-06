@@ -1,117 +1,229 @@
 package com.auction.controller;
 
-import com.auction.model.AuctionItem;
+import com.auction.model.ApiResponse;
+import com.auction.model.AuctionModel;
+import com.auction.model.PlaceBidRequest;
+import com.auction.model.WalletDataResponse;
+import com.auction.util.ApiService;
+import com.auction.util.SessionManager;
+import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
 public class AuctionDetailController {
-    // Thêm txtDescription và productImage vào khai báo
-    @FXML private Label lblId, lblName, lblTime, lblStartPrice, lblMyBid, lblCurrentPrice, lblConfirmAmount, lblBidStatus;
+
+    @FXML private Label lblId, lblName, lblTime, lblStartPrice, lblCurrentPrice, lblConfirmAmount, lblBalance;
+    @FXML private Label lblMyBid;
     @FXML private TextField txtBidAmount;
-    @FXML private TextArea txtDescription; // Ô mô tả sản phẩm
-    @FXML private ImageView productImage;   // Khung ảnh sản phẩm
+    @FXML private TextArea txtDescription;
     @FXML private VBox paneConfirm;
     @FXML private HBox toastSuccess, toastError;
+    @FXML private Label lblToastErrorMsg;
     @FXML private Button btnBidAction;
 
-    private AuctionItem currentItem;
+    private AuctionModel currentItem;
+    private Timeline timeline;
 
-    public void setAuctionData(AuctionItem item) {
+    public void setAuctionData(AuctionModel item) {
         this.currentItem = item;
         updateUI();
+        loadBalance();
 
-        // LOGIC: KHÓA ĐẤU GIÁ NẾU ĐÃ KẾT THÚC
-        boolean isFinished = "FINISHED".equals(item.getStatus()) || "SUCCESS".equals(item.getStatus());
-        if (isFinished || "00:00:00".equals(item.getTimeLeft())) {
+        if ("RUNNING".equals(item.status)) {
+            btnBidAction.setDisable(false);
+            btnBidAction.setText("Đấu giá");
+            txtBidAmount.setDisable(false);
+        } else if ("OPEN".equals(item.status)) {
+            btnBidAction.setDisable(true);
+            btnBidAction.setText("Chưa đến phiên");
+            txtBidAmount.setDisable(true);
+        } else {
             btnBidAction.setDisable(true);
             btnBidAction.setText("Đã kết thúc");
             txtBidAmount.setDisable(true);
-            if (lblBidStatus != null) lblBidStatus.setText("Phiên đấu giá đã kết thúc.");
         }
+    }
+
+    private void loadBalance() {
+        if (SessionManager.userName == null) return;
+        ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() == 200) {
+                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
+                        if (lblBalance != null) {
+                            lblBalance.setText(String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", "."));
+                        }
+                    }
+                }
+            });
+        });
     }
 
     private void updateUI() {
         if (currentItem == null) return;
 
-        // Đổ dữ liệu cơ bản
-        lblId.setText(currentItem.getId());
-        lblName.setText(currentItem.getName());
-        lblTime.setText(currentItem.getTimeLeft());
-        lblCurrentPrice.setText(String.format("%,.0f VND", currentItem.getCurrentPrice()));
-        lblStartPrice.setText(String.format("%,.0f VND", currentItem.getStartPrice()));
-        lblMyBid.setText(String.format("%,.0f VND", currentItem.getMyBid()));
+        lblId.setText("SP: " + currentItem.bidProduct.id.substring(0, 4).toUpperCase());
+        lblName.setText(currentItem.bidProduct.name);
+        lblStartPrice.setText(String.format("%,.0f VND", currentItem.bidProduct.startPrice).replace(",", "."));
+        lblCurrentPrice.setText(String.format("%,.0f VND", currentItem.highestBid).replace(",", "."));
 
-        // 1. HIỂN THỊ MÔ TẢ (Lỗi của bạn nằm ở đây)
-        if (txtDescription != null) {
-            txtDescription.setText(currentItem.getDescription());
+        double myHighestBid = currentItem.getMyHighestBid(SessionManager.userName);
+        if (lblMyBid != null) {
+            lblMyBid.setText(String.format("%,.0f VND", myHighestBid).replace(",", "."));
         }
 
-        // 2. HIỂN THỊ ẢNH (Nếu bạn đã code phần lưu ảnh ở AddProduct)
-        // Lưu ý: Nếu sp mới thêm từ form, bạn cần đảm bảo đường dẫn ảnh hợp lệ
-        /*
-        if (productImage != null && currentItem.getImagePath() != null) {
+        // --- XÁC ĐỊNH MÀU SẮC DỰA VÀO TRẠNG THÁI ---
+        String baseColor;
+        switch (currentItem.status) {
+            case "RUNNING": baseColor = "#f39c12"; break; // Cam
+            case "OPEN": baseColor = "#3498db"; break; // Xanh dương
+            case "FINISHED":
+            case "PAID": baseColor = "#2ecc71"; break; // Xanh lá
+            case "CANCELLED": baseColor = "#e74c3c"; break; // Đỏ
+            default: baseColor = "#95a5a6"; break; // Xám
+        }
+
+        if (timeline != null) timeline.stop();
+
+        if (currentItem.endTime != null && ("RUNNING".equals(currentItem.status) || "OPEN".equals(currentItem.status))) {
             try {
-                productImage.setImage(new Image(currentItem.getImagePath()));
-            } catch (Exception e) {
-                System.out.println("Không load được ảnh sản phẩm.");
+                String timeStr = currentItem.endTime.contains("T") ? currentItem.endTime : currentItem.endTime.replace(" ", "T");
+                LocalDateTime endTime = LocalDateTime.parse(timeStr);
+
+                timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+                    LocalDateTime now = LocalDateTime.now();
+
+                    if (now.isAfter(endTime)) {
+                        lblTime.setText("00:00:00");
+                        lblTime.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
+                        timeline.stop();
+
+                        btnBidAction.setDisable(true);
+                        btnBidAction.setText("Đã kết thúc");
+                        txtBidAmount.setDisable(true);
+                    } else {
+                        java.time.Duration duration = java.time.Duration.between(now, endTime);
+                        long hours = duration.toHours();
+                        long minutes = duration.toMinutesPart();
+                        long seconds = duration.toSecondsPart();
+
+                        lblTime.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+
+                        // Nếu là RUNNING và sắp hết giờ -> Báo đỏ. Còn lại -> Theo màu baseColor
+                        if ("RUNNING".equals(currentItem.status) && hours == 0 && minutes < 10) {
+                            lblTime.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
+                        } else {
+                            lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
+                        }
+                    }
+                }));
+                timeline.setCycleCount(Timeline.INDEFINITE);
+                timeline.play();
+            } catch (Exception ex) {
+                lblTime.setText("Lỗi giờ");
             }
+        } else {
+            lblTime.setText("00:00:00");
+            lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
         }
-        */
+
+        if (txtDescription != null) txtDescription.setText(currentItem.bidProduct.description);
     }
 
     @FXML
     private void handleBidClick() {
-        if (txtBidAmount.getText().isEmpty()) return;
-        lblConfirmAmount.setText(txtBidAmount.getText() + " VND");
-        paneConfirm.setVisible(true);
+        String amountStr = txtBidAmount.getText().replace(".", "").replace(",", "").trim();
+        if (amountStr.isEmpty()) return;
+        try {
+            double bidValue = Double.parseDouble(amountStr);
+            if (bidValue <= currentItem.highestBid) {
+                showToastError("Giá phải lớn hơn giá hiện tại!");
+                return;
+            }
+            lblConfirmAmount.setText(String.format("%,.0f VND", bidValue).replace(",", "."));
+            paneConfirm.setVisible(true);
+        } catch (Exception e) {
+            showToastError("Số tiền không hợp lệ!");
+        }
     }
 
     @FXML
     private void processConfirmBid() {
-        try {
-            // Xử lý giá tiền (Xóa dấu chấm nếu có)
-            double bidValue = Double.parseDouble(txtBidAmount.getText().replace(".", "").replace(",", ""));
-            paneConfirm.setVisible(false);
+        paneConfirm.setVisible(false);
+        double bidValue = Double.parseDouble(txtBidAmount.getText().replace(".", "").replace(",", "").trim());
 
-            if (bidValue <= currentItem.getCurrentPrice()) {
-                showToast(toastError);
-            } else {
-                currentItem.setCurrentPrice(bidValue);
-                currentItem.setMyBid(bidValue);
-                // Lưu lại vào file .dat ngay lập tức
-                com.auction.controller.AuctionService.saveToFile();
-                updateUI();
-                com.auction.controller.NotificationService.addNotification("Bạn vừa đặt giá " + txtBidAmount.getText() + " VND cho " + currentItem.getName(), "SUCCESS");
-                showToast(toastSuccess);
-            }
-        } catch (Exception e) {
-            paneConfirm.setVisible(false);
-            System.out.println("Lỗi định dạng giá tiền.");
-        }
+        PlaceBidRequest request = new PlaceBidRequest(SessionManager.userName, bidValue);
+
+        ApiService.postAsync("/auctions/" + currentItem.id + "/place-bid", request).thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        currentItem.highestBid = bidValue;
+                        if (currentItem.bidTransactions == null) currentItem.bidTransactions = new ArrayList<>();
+                        AuctionModel.BidTransactionModel newTx = new AuctionModel.BidTransactionModel();
+                        newTx.bidAmount = bidValue;
+                        newTx.bidder = new AuctionModel.BidderModel();
+                        newTx.bidder.userName = SessionManager.userName;
+                        currentItem.bidTransactions.add(newTx);
+
+                        updateUI();
+                        loadBalance();
+                        showToastSuccess();
+                    } else {
+                        showToastError(apiRes.message);
+                    }
+                } else {
+                    try {
+                        ApiResponse errRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                        showToastError(errRes.message);
+                    } catch (Exception e) {
+                        showToastError("Lỗi hệ thống: " + res.statusCode());
+                    }
+                }
+            });
+        }).exceptionally(ex -> {
+            Platform.runLater(() -> showToastError("Mất kết nối máy chủ!"));
+            return null;
+        });
     }
 
     @FXML private void handleCancelPopup() { paneConfirm.setVisible(false); }
 
-    private void showToast(HBox toast) {
-        toast.setVisible(true);
-        PauseTransition delay = new PauseTransition(Duration.seconds(2));
-        delay.setOnFinished(e -> toast.setVisible(false));
+    private void showToastSuccess() {
+        toastSuccess.setVisible(true);
+        PauseTransition delay = new PauseTransition(Duration.seconds(2.5));
+        delay.setOnFinished(e -> toastSuccess.setVisible(false));
+        delay.play();
+    }
+
+    private void showToastError(String msg) {
+        if(lblToastErrorMsg != null) lblToastErrorMsg.setText(msg);
+        toastError.setVisible(true);
+        PauseTransition delay = new PauseTransition(Duration.seconds(2.5));
+        delay.setOnFinished(e -> toastError.setVisible(false));
         delay.play();
     }
 
     @FXML
     private void goBack() {
+        if (timeline != null) timeline.stop();
         try {
             Node view = FXMLLoader.load(getClass().getResource("/com/auction/view/AuctionList.fxml"));
             StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
-            contentArea.getChildren().setAll(view);
+            if(contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) { e.printStackTrace(); }
     }
 }
