@@ -13,6 +13,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.exception.AuctionException
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -194,7 +195,8 @@ public class AuctionService {
         Auction auction = new Auction();
         auction.setBidProduct(item);
         auction.setSeller(item.getSeller());
-        auction.setStartTime(LocalDateTime.now());
+        // SỬA DÒNG NÀY: Lấy thời gian bắt đầu từ Request thay vì now()
+        auction.setStartTime(request.getStartTime());
         auction.setEndTime(request.getEndTime());
         auction.setHighestBid(item.getStartPrice()); // Giá khởi điểm
 
@@ -205,6 +207,26 @@ public class AuctionService {
     // Lấy danh sách tất cả các phiên đấu giá
     public List<Auction> getAllAuctions() {
         return auctionRepository.findAll();
+    }
+
+    // Tự động quét Auction
+    @Scheduled(fixedRate = 1000) // Cứ 1 giây quét 1 lần
+    @Transactional
+    public void autoUpdateAuctionStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Auction> allAuctions = auctionRepository.findAll();
+
+        for (Auction auction : allAuctions) {
+            // Đến giờ bắt đầu -> Đổi thành RUNNING
+            if (auction.getStatus() == AuctionStatus.OPEN && now.isAfter(auction.getStartTime())) {
+                auction.setStatus(AuctionStatus.RUNNING);
+                auctionRepository.save(auction);
+            }
+            // Đến giờ kết thúc -> Đổi thành FINISHED (Và gửi thông báo nếu muốn)
+            if (auction.getStatus() == AuctionStatus.RUNNING && now.isAfter(auction.getEndTime())) {
+                closeAuction(auction.getId());
+            }
+        }
     }
 }
 /*

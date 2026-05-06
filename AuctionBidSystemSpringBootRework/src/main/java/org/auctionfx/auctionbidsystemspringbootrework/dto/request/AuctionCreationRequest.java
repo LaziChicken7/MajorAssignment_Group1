@@ -4,7 +4,8 @@ import java.time.LocalDateTime;
 
 public class AuctionCreationRequest {
     private String itemId;
-    private LocalDateTime endTime;  // Chỉ cần gửi thời gian kết thúc, thời gian bắt đầu sẽ tự lấy lúc tạo
+    private LocalDateTime startTime; // THÊM DÒNG NÀY
+    private LocalDateTime endTime;
 
     // GETTER VÀ SETTER
 
@@ -14,6 +15,14 @@ public class AuctionCreationRequest {
 
     public void setItemId(String itemId) {
         this.itemId = itemId;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 
     public LocalDateTime getEndTime() {

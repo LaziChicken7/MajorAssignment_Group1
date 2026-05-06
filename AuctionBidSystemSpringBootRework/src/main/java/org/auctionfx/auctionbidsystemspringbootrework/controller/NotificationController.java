@@ -15,10 +15,10 @@ public class NotificationController {
 
     // Lấy danh sách thông báo của một user
     @GetMapping("/{userName}")
-    public List<NotificationResponse> getNotifications(@PathVariable String userName) {
+    public ApiResponse<List<NotificationResponse>> getNotifications(@PathVariable String userName) {
         ApiResponse<List<NotificationResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(notificationService.getMyNotifications(userName));
-        return apiResponse.getResult();
+        return apiResponse;
     }
 
     // Nút thùng rác (Xóa thông báo)
