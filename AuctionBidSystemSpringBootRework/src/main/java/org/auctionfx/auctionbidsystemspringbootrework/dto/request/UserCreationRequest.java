@@ -10,6 +10,7 @@ public class UserCreationRequest {
     @Size(min = 4, message = "USERNAME_INVALID")
     private String userName;
 
+    @NotBlank(message = "PASSWORD_INVALID")
     @Size(min = 8, message = "PASSWORD_INVALID")
     private String password;
 
