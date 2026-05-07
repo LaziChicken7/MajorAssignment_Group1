@@ -43,7 +43,6 @@ jobs:
 
     - name: 4. Build & Đóng gói JavaFX (Auction Bid System)
       run: |
-        # Đổi lại tên thư mục JavaFX cho khớp với tên repo của bạn
         cd auctionsystemdemo 
         
         # Build và lấy toàn bộ thư viện phụ thuộc (lib)
@@ -57,9 +56,9 @@ jobs:
         Copy-Item -Path "target\$mainJarFile" -Destination build_exe\
         if (Test-Path "target\libs") { Copy-Item -Path "target\libs\*" -Destination build_exe\ }
         
-        # Dùng JPackage để tạo file cài đặt .exe (Tắt Console để chỉ hiện Giao diện App)
+        # Dùng JPackage để tạo file cài đặt .exe (Tắt Console, CHỈ ĐỊNH RÕ MAIN CLASS LÀ com.auction.App)
         # Sinh ra file: output\Auction Bid System-1.0.exe
-        jpackage --type exe --dest output --name "Auction Bid System" --app-version 1.0 --input build_exe --main-jar $mainJarFile --win-shortcut --win-menu
+        jpackage --type exe --dest output --name "Auction Bid System" --app-version 1.0 --input build_exe --main-jar $mainJarFile --win-shortcut --win-menu --main-class com.auction.App
 
     - name: 5. Đẩy 2 file EXE lên mục Releases của GitHub
       # Chỉ đẩy lên Release nếu đây là sự kiện PUSH vào nhánh main
