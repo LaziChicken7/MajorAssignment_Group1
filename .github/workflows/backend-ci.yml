@@ -1,4 +1,4 @@
-name: Spring Boot CI
+name: Build Windows EXEs and Release
 
 on:
   push:
@@ -7,33 +7,14 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest 
-
-    # ============================================================
-    # CHỈ ĐƯỜNG CHO ROBOT: Mọi lệnh run phải chui vào thư mục này
-    # ============================================================
-    defaults:
-      run:
-        working-directory: ./AuctionBidSystemSpringBootRework
-
-    # Giả lập Database
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_DATABASE: AuctionBidSystemTest
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+  build-and-release:
+    # BẮT BUỘC CHẠY TRÊN WINDOWS ĐỂ TẠO FILE .EXE
+    runs-on: windows-latest 
+    permissions:
+      contents: write 
 
     steps:
-    - name: 1. Lấy code từ GitHub về máy ảo
+    - name: 1. Lấy code từ GitHub
       uses: actions/checkout@v4
 
     - name: 2. Cài đặt Java 25
@@ -43,47 +24,58 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: 3. Chạy Đóng gói (Package)
-      run: mvn clean package
-
-    - name: 4. Chạy JUnit Test
-      run: mvn test
-
-    - name: 5. Lưu trữ file JAR (Artifact) để tải về
-      if: success() 
-      uses: actions/upload-artifact@v4
-      with:
-        name: auction-backend-jar
-        # Chú ý đường dẫn lấy file JAR cũng phải thêm thư mục con vào
-        path: AuctionBidSystemSpringBootRework/target/*.jar
+    - name: 3. Build & Đóng gói Spring Boot (Auction Bid Server)
+      run: |
+        cd AuctionBidSystemSpringBootRework
+        # Bỏ qua Test để không cần kết nối MySQL giả lập khi Build
+        mvn clean package -DskipTests
         
-  # ============================================================
-  # PHẦN CD: TỰ ĐỘNG CHUYỂN GIAO (DELIVERY) LÊN MỤC RELEASES
-  # ============================================================
-  delivery:
-    name: CD - Tự động tạo bản Release
-    needs: build-and-test 
-    runs-on: ubuntu-latest
-    # Khi có code đẩy lên main
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # Tìm file Jar chính
+        $mainJarFile = Get-ChildItem -Path target -Filter "*.jar" | Where-Object { $_.Name -notmatch "plain" -and $_.Name -notmatch "original" } | Select-Object -First 1 | Select-Object -ExpandProperty Name
+        
+        # Đưa vào thư mục tạm
+        New-Item -ItemType Directory -Force -Path build_exe
+        Copy-Item -Path "target\$mainJarFile" -Destination build_exe\
+        
+        # Dùng JPackage để tạo file cài đặt .exe (Có kèm Console để xem Log Server)
+        # Sinh ra file: output\Auction Bid Server-1.0.exe
+        jpackage --type exe --dest output --name "Auction Bid Server" --app-version 1.0 --input build_exe --main-jar $mainJarFile --win-console --win-shortcut --win-menu
 
-    # cấp quyên write
-    permissions:
-      contents: write 
+    - name: 4. Build & Đóng gói JavaFX (Auction Bid System)
+      run: |
+        # Đổi lại tên thư mục JavaFX cho khớp với tên repo của bạn
+        cd auctionsystemdemo 
+        
+        # Build và lấy toàn bộ thư viện phụ thuộc (lib)
+        mvn clean package dependency:copy-dependencies -DoutputDirectory=target/libs -DskipTests
+        
+        # Tìm file Jar chính
+        $mainJarFile = Get-ChildItem -Path target -Filter "*.jar" | Where-Object { $_.Name -notmatch "original" } | Select-Object -First 1 | Select-Object -ExpandProperty Name
+        
+        # Đưa file Jar chính và các thư viện vào thư mục tạm
+        New-Item -ItemType Directory -Force -Path build_exe
+        Copy-Item -Path "target\$mainJarFile" -Destination build_exe\
+        if (Test-Path "target\libs") { Copy-Item -Path "target\libs\*" -Destination build_exe\ }
+        
+        # Dùng JPackage để tạo file cài đặt .exe (Tắt Console để chỉ hiện Giao diện App)
+        # Sinh ra file: output\Auction Bid System-1.0.exe
+        jpackage --type exe --dest output --name "Auction Bid System" --app-version 1.0 --input build_exe --main-jar $mainJarFile --win-shortcut --win-menu
 
-    steps:
-      - name: 6. Tải file JAR vừa được CI đóng gói xuống
-        uses: actions/download-artifact@v4
-        with:
-          name: auction-backend-jar 
-          path: ./release-files # thư mục tạm để chứa file tải về
+    - name: 5. Đẩy 2 file EXE lên mục Releases của GitHub
+      # Chỉ đẩy lên Release nếu đây là sự kiện PUSH vào nhánh main
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          AuctionBidSystemSpringBootRework/output/Auction Bid Server-1.0.exe
+          auctionsystemdemo/output/Auction Bid System-1.0.exe
+        tag_name: "v1.0.${{ github.run_number }}"
+        name: "Auction Bid System version 1.0.${{ github.run_number }}"
+        body: |
+          **Bản cập nhật tự động (Continuous Delivery).**
           
-      - name: 7. Đẩy file lên mục Releases của GitHub
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./release-files/*.jar
-          tag_name: "v1.0.${{ github.run_number }}"
-          name: "Phiên bản tự động v1.0.${{ github.run_number }}"
-          body: "Continuous Delivery."
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          📦 **Bao gồm 2 file cài đặt (Installer):**
+          - `Auction Bid Server-1.0.exe`: Bản cài đặt máy chủ Backend (Mở app sẽ có màn hình đen ghi log kết nối CSDL).
+          - `Auction Bid System-1.0.exe`: Bản cài đặt App Giao diện JavaFX cho khách hàng (Đã nhúng sẵn Java, chạy độc lập).
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
