@@ -56,3 +56,34 @@ jobs:
         name: auction-backend-jar
         # Chú ý đường dẫn lấy file JAR cũng phải thêm thư mục con vào
         path: AuctionBidSystemSpringBootRework/target/*.jar
+        
+  # ============================================================
+  # PHẦN CD: TỰ ĐỘNG CHUYỂN GIAO (DELIVERY) LÊN MỤC RELEASES
+  # ============================================================
+  delivery:
+    name: CD - Tự động tạo bản Release
+    needs: build-and-test 
+    runs-on: ubuntu-latest
+    # Khi có code đẩy lên main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    # cấp quyên write
+    permissions:
+      contents: write 
+
+    steps:
+      - name: 6. Tải file JAR vừa được CI đóng gói xuống
+        uses: actions/download-artifact@v4
+        with:
+          name: auction-backend-jar 
+          path: ./release-files # thư mục tạm để chứa file tải về
+          
+      - name: 7. Đẩy file lên mục Releases của GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./release-files/*.jar
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "Phiên bản tự động v1.0.${{ github.run_number }}"
+          body: "Continuous Delivery."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
