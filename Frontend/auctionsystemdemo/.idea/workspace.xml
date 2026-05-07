@@ -4,55 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AddProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AddProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AuctionDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AuctionDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AuctionItemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/AuctionItemController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/controller/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/model/AuctionModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/java/com/auction/model/AuctionModel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AddProduct.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AddProduct.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionDetail.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionItem.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionItem.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/AuctionList.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/DepositForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/DepositForm.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/DepositSuccess.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/DepositSuccess.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/FailureTransaction.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/FailureTransaction.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/MyAuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/MyAuctionList.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/NotificationList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/NotificationList.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/Profile.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/Profile.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/StartAuction.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/SuccessfulTransaction.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/SuccessfulTransaction.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/Wallet.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/WithDrawFail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/WithDrawFail.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/WithDrawForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/WithDrawForm.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/WithDrawSuccess.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/WithDrawSuccess.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/src/main/resources/com/auction/view/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AddProductController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AddProductController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionDetailController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionDetailController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionItemController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/controller/AuctionItemController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$BidTransactionModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$BidTransactionModel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$BidderModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$BidderModel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$ItemModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$ItemModel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$SellerModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel$SellerModel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/model/AuctionModel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AddProduct.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AddProduct.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionDetail.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionItem.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionItem.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/AuctionList.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/DepositForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/DepositForm.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/DepositSuccess.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/DepositSuccess.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/FailureTransaction.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/FailureTransaction.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/MyAuctionList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/MyAuctionList.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/NotificationList.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/NotificationList.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/Profile.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/Profile.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/StartAuction.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/SuccessfulTransaction.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/SuccessfulTransaction.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/Wallet.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/Wallet.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/WithDrawFail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/WithDrawFail.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/WithDrawForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/WithDrawForm.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/WithDrawSuccess.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/WithDrawSuccess.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../auctionsystemdemo/target/classes/com/auction/view/style.css" afterDir="false" />
-    </list>
+    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -153,6 +105,7 @@
       <workItem from="1777910994612" duration="159000" />
       <workItem from="1778054077373" duration="1285000" />
       <workItem from="1778080525483" duration="3000" />
+      <workItem from="1778085588910" duration="10000" />
     </task>
     <servers />
   </component>

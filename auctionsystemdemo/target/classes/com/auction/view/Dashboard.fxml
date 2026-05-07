@@ -1,91 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.chart.*?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.HomeController" spacing="20" style="-fx-background-color: transparent;">
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.HomeController"
+      spacing="20" style="-fx-background-color: transparent;">
 
-    <!-- KHU VỰC SẢN PHẨM NỔI BẬT -->
-    <VBox styleClass="card" spacing="15">
+    <VBox spacing="15" styleClass="card">
         <HBox alignment="CENTER_LEFT">
-            <Label text="Sản phẩm nổi bật" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Label text="Sản phẩm nổi bật" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
             <Region HBox.hgrow="ALWAYS" />
-            <Button text="Xem thêm" styleClass="btn-primary" />
+            <Button text="Xem tất cả" onAction="#goToAuctionList" styleClass="btn-primary" style="-fx-background-radius: 20; -fx-padding: 8 20;"/>
         </HBox>
 
-        <!-- Danh sách Item -->
-         <VBox spacing="10">
-             <!-- Row 1 -->
-             <HBox styleClass="auction-row" alignment="CENTER_LEFT" spacing="20">
-                 <Label text="SP1" prefWidth="50" styleClass="auction-title"/>
-                 <Label text="Auction Name 1" prefWidth="300" styleClass="auction-title"/>
-                 <Region HBox.hgrow="ALWAYS" />
-                 <Label text="1.273.000 VND" styleClass="auction-price" />
-                 <Label text="00:01:12" styleClass="auction-time" />
-             </HBox>
-             <!-- Row 2 -->
-             <HBox styleClass="auction-row" alignment="CENTER_LEFT" spacing="20">
-                 <Label text="SP2" prefWidth="50" styleClass="auction-title"/>
-                 <Label text="Auction Name 2" prefWidth="300" styleClass="auction-title"/>
-                 <Region HBox.hgrow="ALWAYS" />
-                 <Label text="184.000 VND" styleClass="auction-price" />
-                 <Label text="00:07:36" styleClass="auction-time" />
-             </HBox>
-             <!-- Row 3 -->
-             <HBox styleClass="auction-row" alignment="CENTER_LEFT" spacing="20">
-                 <Label text="SP3" prefWidth="50" styleClass="auction-title"/>
-                 <Label text="Auction Name 3" prefWidth="300" styleClass="auction-title"/>
-                 <Region HBox.hgrow="ALWAYS" />
-                 <Label text="764.000 VND" styleClass="auction-price" />
-                 <Label text="01:25:33" styleClass="auction-time" />
-             </HBox>
-             <!-- Row 4 -->
-             <HBox styleClass="auction-row" alignment="CENTER_LEFT" spacing="20">
-                 <Label text="SP4" prefWidth="50" styleClass="auction-title"/>
-                 <Label text="Auction Name 4" prefWidth="300" styleClass="auction-title"/>
-                 <Region HBox.hgrow="ALWAYS" />
-                 <Label text="35.442.000 VND" styleClass="auction-price" />
-                 <Label text="21:12:35" styleClass="auction-time" />
-             </HBox>
-         </VBox>
+        <VBox fx:id="vboxFeaturedAuctions" spacing="10">
+            <Label text="Đang tải dữ liệu..." style="-fx-text-fill: #888; -fx-font-style: italic;"/>
+        </VBox>
     </VBox>
 
-    <!-- KHU VỰC BÊN DƯỚI: THÔNG BÁO & BIỂU ĐỒ -->
-    <HBox spacing="20" VBox.vgrow="ALWAYS">
-        <!-- Thông báo -->
-        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="15" prefWidth="400">
+    <HBox spacing="25" VBox.vgrow="ALWAYS">
+
+        <VBox HBox.hgrow="ALWAYS" spacing="15" prefWidth="400" styleClass="card">
             <HBox alignment="CENTER_LEFT">
-                <Label text="Thông báo" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-                <Label text="2" style="-fx-background-color: red; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-translate-x: 5;"/>
+                <Label text="Thông báo mới" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+                <Label fx:id="lblNotifCount" text="0" visible="false" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-translate-x: 5; -fx-font-weight: bold;"/>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="Xem thêm" styleClass="btn-primary" onAction="#handleViewMoreNotifications"/>
+                <Button text="Chi tiết" onAction="#handleViewMoreNotifications" styleClass="btn-primary" style="-fx-background-radius: 20; -fx-padding: 6 15;"/>
             </HBox>
-            <VBox spacing="10">
-                <HBox styleClass="auction-row" alignment="CENTER_LEFT" spacing="10">
-                    <Label text="Xác thực giao dịch: SP01..." style="-fx-font-size: 14px;"/>
-                    <Region HBox.hgrow="ALWAYS" />
-                    <!-- Icon buttons -->
-                    <Button style="-fx-background-color: #00C853; -fx-text-fill: white; -fx-font-size: 18px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="✔" />
-                    <Button style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-size: 18px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="✖" />
-                    <Button style="-fx-background-color: #0A56D2; -fx-text-fill: white; -fx-font-size: 16px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="⋯" />
-                </HBox>
-                <HBox styleClass="auction-row" alignment="CENTER_LEFT" spacing="10">
-                    <Label text="Sản phẩm đấu giá thành..." style="-fx-font-size: 14px;"/>
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Button style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-size: 18px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="☒" />
-                    <Button style="-fx-background-color: #0A56D2; -fx-text-fill: white; -fx-font-size: 16px; -fx-min-width: 25; -fx-min-height: 25; -fx-padding: 0; -fx-background-radius: 50;" text="⋯" />
-                </HBox>
+
+            <VBox fx:id="vboxNotifications" spacing="15">
+                <Label text="Đang tải dữ liệu..." style="-fx-text-fill: #888; -fx-font-style: italic;"/>
             </VBox>
         </VBox>
 
-        <!-- Biểu đồ -->
-         <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="15">
-             <Label text="Biểu đồ" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-             <LineChart createSymbols="false" VBox.vgrow="ALWAYS" fx:id="chartAuction">
-                 <xAxis><CategoryAxis label="Năm" /></xAxis>
-                 <yAxis><NumberAxis label="Giá trị" /></yAxis>
-             </LineChart>
-         </VBox>
+        <VBox HBox.hgrow="ALWAYS" spacing="15" styleClass="card">
+            <Label text="Thống kê Tăng trưởng (VND)" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+            <LineChart createSymbols="true" VBox.vgrow="ALWAYS" fx:id="chartAuction">
+                <xAxis><CategoryAxis label="Mã Sản phẩm" /></xAxis>
+                <yAxis><NumberAxis label="Giá (VND)" /></yAxis>
+            </LineChart>
+        </VBox>
+
     </HBox>
+
 </VBox>
