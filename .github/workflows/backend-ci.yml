@@ -13,54 +13,55 @@ jobs:
       contents: write 
 
     steps:
-    - name: 1. Lấy code từ GitHub
+    - name: 1. Checkout code
       uses: actions/checkout@v4
 
-    - name: 2. Cài đặt Java 21 LTS (Bản ổn định nhất)
+    - name: 2. Setup Java 21 LTS
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
 
-    - name: 3. Build & Đóng gói Spring Boot (Auction Bid Server)
+    - name: 3. Build & Package Spring Boot (Auction Bid Server)
       run: |
         cd AuctionBidSystemSpringBootRework
         mvn clean package -DskipTests
         
-        $mainJarFile = Get-ChildItem -Path target -Filter "*.jar" | Where-Object { $_.Name -notmatch "plain" -and $_.Name -notmatch "original" } | Select-Object -First 1 | Select-Object -ExpandProperty Name
-        
         New-Item -ItemType Directory -Force -Path build_exe
-        Copy-Item -Path "target\$mainJarFile" -Destination build_exe\
         
-        jpackage --type app-image --dest output --name "Auction Bid Server" --app-version 0.2.5 --input build_exe --main-jar $mainJarFile --win-console
+        # Trích xuất và đổi tên file JAR thành tên cố định (server.jar)
+        $jarFile = Get-ChildItem -Path target\*.jar -Exclude *plain*,*original* | Select-Object -First 1
+        Copy-Item -Path $jarFile.FullName -Destination "build_exe\server.jar"
+        
+        jpackage --type app-image --dest output --name "Auction Bid Server" --app-version 0.2.5 --input build_exe --main-jar server.jar --win-console
         
         $batContent = "@echo off`r`n`"Auction Bid Server.exe`"`r`npause"
         Set-Content -Path "output\Auction Bid Server\Run-Debug.bat" -Value $batContent -Encoding ASCII
         
         Compress-Archive -Path "output\Auction Bid Server" -DestinationPath "Auction-Bid-Server-0.2.5-Portable.zip"
 
-    - name: 4. Build & Đóng gói JavaFX (Auction Bid System)
+    - name: 4. Build & Package JavaFX (Auction Bid System)
       run: |
         cd auctionsystemdemo 
         mvn clean package dependency:copy-dependencies -DoutputDirectory=target/libs -DskipTests
         
-        $mainJarFile = Get-ChildItem -Path target -Filter "*.jar" | Where-Object { $_.Name -notmatch "original" } | Select-Object -First 1 | Select-Object -ExpandProperty Name
-        
         New-Item -ItemType Directory -Force -Path build_exe
-        Copy-Item -Path "target\$mainJarFile" -Destination build_exe\
+        
+        # Trích xuất và đổi tên file JAR thành tên cố định (client.jar)
+        $jarFile = Get-ChildItem -Path target\*.jar -Exclude *plain*,*original* | Select-Object -First 1
+        Copy-Item -Path $jarFile.FullName -Destination "build_exe\client.jar"
+        
         if (Test-Path "target\libs") { Copy-Item -Path "target\libs" -Destination build_exe -Recurse }
         
-        # SỬA LỖI ĐÓNG GÓI JAVAFX CHUẨN MODULE (Có sử dụng module-info.java)
-        # Giữ lại --win-console để lỡ có lỗi ta còn đọc được
-        jpackage --type app-image --dest output --name "Auction Bid System" --app-version 0.1.3 --module-path "build_exe\libs;build_exe\$mainJarFile" --module com.auction/com.auction.App --win-console
+        jpackage --type app-image --dest output --name "Auction Bid System" --app-version 0.1.3 --module-path "build_exe\libs;build_exe\client.jar" --module com.auction/com.auction.App --win-console
         
         $batContent = "@echo off`r`n`"Auction Bid System.exe`"`r`npause"
         Set-Content -Path "output\Auction Bid System\Run-Debug.bat" -Value $batContent -Encoding ASCII
         
         Compress-Archive -Path "output\Auction Bid System" -DestinationPath "Auction-Bid-System-0.1.3-Portable.zip"
 
-    - name: 5. Đẩy Releases
+    - name: 5. Upload Releases
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
