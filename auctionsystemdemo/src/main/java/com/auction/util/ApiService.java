@@ -20,6 +20,7 @@ public class ApiService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
                 .header("Content-Type", "application/json")
+                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
@@ -29,6 +30,7 @@ public class ApiService {
     public static CompletableFuture<HttpResponse<String>> getAsync(String endpoint) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
+                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
                 .GET()
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
@@ -44,6 +46,7 @@ public class ApiService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
                 .header("Content-Type", "application/json")
+                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
                 .PUT(publisher)
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
@@ -53,6 +56,7 @@ public class ApiService {
     public static CompletableFuture<HttpResponse<String>> deleteAsync(String endpoint) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
+                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
                 .DELETE()
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
