@@ -28,11 +28,21 @@ jobs:
         cd AuctionBidSystemSpringBootRework
         mvn clean package -DskipTests
         
+        Write-Host "=== DANH SACH FILE TRONG THU MUC TARGET (SERVER) ==="
+        Get-ChildItem -Path target
+        
         New-Item -ItemType Directory -Force -Path build_exe
         
-        # Trích xuất và đổi tên file JAR thành tên cố định (server.jar)
-        $jarFile = Get-ChildItem -Path target\*.jar -Exclude *plain*,*original* | Select-Object -First 1
-        Copy-Item -Path $jarFile.FullName -Destination "build_exe\server.jar"
+        # Tìm file .jar hoặc .war (Bỏ qua các file plain/original)
+        $appFile = Get-ChildItem -Path target | Where-Object { ($_.Extension -eq ".jar" -or $_.Extension -eq ".war") -and $_.Name -notmatch "plain" -and $_.Name -notmatch "original" } | Select-Object -First 1
+        
+        if ($null -eq $appFile) {
+            Write-Error "Khong tim thay bat ky file .jar hay .war nao trong thu muc target!"
+            exit 1
+        }
+        
+        Write-Host "Da tim thay file: $($appFile.FullName)"
+        Copy-Item -Path $appFile.FullName -Destination "build_exe\server.jar"
         
         jpackage --type app-image --dest output --name "Auction Bid Server" --app-version 0.2.5 --input build_exe --main-jar server.jar --win-console
         
@@ -46,11 +56,21 @@ jobs:
         cd auctionsystemdemo 
         mvn clean package dependency:copy-dependencies -DoutputDirectory=target/libs -DskipTests
         
+        Write-Host "=== DANH SACH FILE TRONG THU MUC TARGET (CLIENT JAVAFX) ==="
+        Get-ChildItem -Path target
+        
         New-Item -ItemType Directory -Force -Path build_exe
         
-        # Trích xuất và đổi tên file JAR thành tên cố định (client.jar)
-        $jarFile = Get-ChildItem -Path target\*.jar -Exclude *plain*,*original* | Select-Object -First 1
-        Copy-Item -Path $jarFile.FullName -Destination "build_exe\client.jar"
+        # Tìm file .jar của JavaFX
+        $appFile = Get-ChildItem -Path target | Where-Object { $_.Extension -eq ".jar" -and $_.Name -notmatch "plain" -and $_.Name -notmatch "original" } | Select-Object -First 1
+        
+        if ($null -eq $appFile) {
+            Write-Error "Khong tim thay bat ky file .jar nao trong thu muc target!"
+            exit 1
+        }
+        
+        Write-Host "Da tim thay file: $($appFile.FullName)"
+        Copy-Item -Path $appFile.FullName -Destination "build_exe\client.jar"
         
         if (Test-Path "target\libs") { Copy-Item -Path "target\libs" -Destination build_exe -Recurse }
         
