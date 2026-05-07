@@ -58,10 +58,11 @@ public class UserController {
     }
 
     // Delete
-    @DeleteMapping("/admin/{userId}")
-    public ApiResponse<String> deleteUser(@PathVariable("userId") String userId) {
+    @DeleteMapping("/admin/{userName}")
+    public ApiResponse<String> deleteUser(@PathVariable("userName") String userName) {
+        User user = userService.getUserByUserName(userName);
         ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.deleteUser(userId));
+        apiResponse.setResult(userService.deleteUser(user.getId()));
         return apiResponse;
     }
 
@@ -107,10 +108,10 @@ public class UserController {
     }
 
     // Nút Khóa / Mở khóa tài khoản
-    @PutMapping("/admin/{userId}/ban")
-    public ApiResponse<String> toggleBanUser(@PathVariable("userId") String userId) {
+    @PutMapping("/admin/{userName}/ban")
+    public ApiResponse<String> toggleBanUser(@PathVariable("userName") String userName) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.toggleBanUser(userId));
+        apiResponse.setResult(userService.toggleBanUser(userName));
         return apiResponse;
     }
 }

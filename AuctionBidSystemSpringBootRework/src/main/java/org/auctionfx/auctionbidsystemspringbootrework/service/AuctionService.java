@@ -12,6 +12,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.enums.NotificationType;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.AuctionException;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
+import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -60,6 +61,9 @@ public class AuctionService {
         }
         if (bidTimestamp.isAfter(auction.getEndTime())) {
             throw new AuctionException(ErrorCode.AUCTION_NOT_RUNNING);
+        }
+        if (bidder.isBanned()) {
+            throw new UserException(ErrorCode.USER_BANNED);
         }
         if (bidAmount.compareTo(auction.getHighestBid()) <= 0) {
             throw new RuntimeException("Money must be higher than now (" + auction.getHighestBid() + ")");

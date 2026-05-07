@@ -23,6 +23,7 @@ public enum ErrorCode {
     INVALID_RESET_TOKEN(4003, "The verification code is invalid or has expired!"),
     USER_INFO_NOT_MATCH(4004, "Username and Email do not match!"),
     BAN_USER_INVALID(4005, "Can not ban Admin"),
+    USER_BANNED(4006, "User banned! Please contact to Admin!"),
     // ===========================================================================
     // ROLE EXCEPTION
     USER_ALREADY_SELLER(5001, "User already seller"),

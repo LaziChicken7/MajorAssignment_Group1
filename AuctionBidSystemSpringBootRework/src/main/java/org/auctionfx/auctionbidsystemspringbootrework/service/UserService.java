@@ -106,6 +106,12 @@ public class UserService {
         if (user == null) {
             throw new UserException(ErrorCode.USERNAME_NOT_FOUND);
         }
+
+        // Kiểm tra xem tài khoản có bị ban không
+        if (user.isBanned()) {
+            throw new UserException(ErrorCode.USER_BANNED);
+        }
+
         // Kiểm tra mật khẩu (Sử dụng hàm mã hóa đang có sẵn trong file của bạn)
         if (!user.getPassword().equals(encodePassword(request.getPassword()))) {
             throw new UserException(ErrorCode.PASSWORD_NOT_MATCH); // Hoặc tạo mã lỗi WRONG_PASSWORD
@@ -309,9 +315,13 @@ public class UserService {
     }
 
     @Transactional
-    public String toggleBanUser(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+    public String toggleBanUser(String userName) {
+        // TÌM THEO userName THAY VÌ id
+        User user = userRepository.findByUserName(userName);
+
+        if (user == null) {
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
 
         if (user.getRole() == Role.ADMIN) {
             throw new UserException(ErrorCode.BAN_USER_INVALID);
