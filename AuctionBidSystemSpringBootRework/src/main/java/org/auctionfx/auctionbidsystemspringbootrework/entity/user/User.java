@@ -34,6 +34,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING) // Lưu chữ SELLER, BIDDER
     protected Role role;
 
+    // THÊM TRƯỜNG NÀY ĐỂ QUẢN LÝ BAN USER
+    protected boolean isBanned = false;
+
     // LẤY VÀ UPDATE THUỘC TÍNH
 
 
@@ -99,5 +102,13 @@ public class User extends BaseEntity {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public boolean isBanned() {
+        return isBanned;
+    }
+
+    public void setBanned(boolean banned) {
+        isBanned = banned;
     }
 }

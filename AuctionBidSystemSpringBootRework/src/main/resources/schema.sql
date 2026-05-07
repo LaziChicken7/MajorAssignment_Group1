@@ -27,7 +27,8 @@ CREATE TABLE users (
                        email VARCHAR(100) UNIQUE,
                        number_phone VARCHAR(20) UNIQUE,
                        citizen_id VARCHAR(50) UNIQUE,
-                       role VARCHAR(20) NOT NULL
+                       role VARCHAR(20) NOT NULL,
+                       is_banned BOOLEAN DEFAULT FALSE
 );
 
 -- Kế thừa User
@@ -104,8 +105,8 @@ CREATE TABLE auctions (
                           end_time DATETIME,
                           highest_bid DECIMAL(19, 2),
                           status VARCHAR(50) DEFAULT 'OPEN',
-                          transaction_status VARCHAR(50) DEFAULT NULL, -- <<< ĐÃ BỔ SUNG CỘT NÀY Ở ĐÂY <<<
-                          item_id VARCHAR(36) UNIQUE NOT NULL, -- OneToOne: Một món hàng chỉ 1 phiên
+                          transaction_status VARCHAR(50) DEFAULT NULL,
+                          item_id VARCHAR(36) UNIQUE NOT NULL,
                           seller_id VARCHAR(36) NOT NULL,
                           winning_user_id VARCHAR(36),
                           CONSTRAINT fk_auction_item FOREIGN KEY (item_id) REFERENCES items(id),

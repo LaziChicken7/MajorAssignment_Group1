@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class ItemService {
     @Autowired private ItemRepository itemRepository;
@@ -65,5 +67,9 @@ public class ItemService {
 
         itemRepository.save(item);
         return "Create item successfully, Item id is: " + item.getId();
+    }
+
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
     }
 }

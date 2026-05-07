@@ -105,4 +105,12 @@ public class UserController {
         apiResponse.setResult(userService.getUserByUserName(userName));
         return apiResponse;
     }
+
+    // Nút Khóa / Mở khóa tài khoản
+    @PutMapping("/admin/{userId}/ban")
+    public ApiResponse<String> toggleBanUser(@PathVariable("userId") String userId) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.toggleBanUser(userId));
+        return apiResponse;
+    }
 }

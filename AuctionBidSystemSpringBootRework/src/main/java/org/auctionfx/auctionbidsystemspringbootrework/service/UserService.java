@@ -7,6 +7,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Admin;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.BidderRepository;
@@ -305,6 +306,20 @@ public class UserService {
             accNo = String.valueOf(randomNum);
         } while (bidderRepository.existsByBankAccountNumber(accNo)); // Vòng lặp chạy lại nếu bị trùng
         return accNo;
+    }
+
+    @Transactional
+    public String toggleBanUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole() == Role.ADMIN) {
+            throw new UserException(ErrorCode.BAN_USER_INVALID);
+        }
+
+        user.setBanned(!user.isBanned()); // Đảo ngược trạng thái
+        userRepository.save(user);
+        return user.isBanned() ? "User has been banned!" : "User has been unbanned!";
     }
 
 }
