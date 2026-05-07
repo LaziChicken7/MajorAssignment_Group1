@@ -159,38 +159,34 @@
 }
 
 /* =========================================
-   8. CUSTOM COMBOBOX POPUP (MENU THẢ XUỐNG)
+   8. CUSTOM COMBOBOX POPUP (GIỐNG ẢNH BẠN GỬI)
    ========================================= */
 .combo-box-popup .list-view {
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-border-radius: 12;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
     -fx-border-color: #ecf0f1;
-    -fx-padding: 6;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 5);
+    -fx-padding: 5; /* Tạo khoảng trống giữa mép popup và các lựa chọn */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 3);
 }
 .combo-box-popup .list-cell {
     -fx-text-fill: #333333;
     -fx-padding: 8 15;
     -fx-font-size: 14px;
     -fx-background-color: transparent;
-    -fx-background-radius: 8;
+    -fx-background-radius: 5; /* Bo tròn nhẹ từng lựa chọn bên trong */
 }
 .combo-box-popup .list-cell:hover {
-    -fx-background-color: #f1f2f6;
+    -fx-background-color: #f1f2f6; /* Màu xám nhạt khi lướt chuột qua */
     -fx-text-fill: #333333;
 }
 .combo-box-popup .list-cell:filled:selected {
-    -fx-background-color: #3b5998;
+    -fx-background-color: #3b5998; /* Màu xanh y hệt hình ảnh của bạn */
     -fx-text-fill: white;
 }
 .combo-box-popup .list-cell:filled:selected:hover {
     -fx-background-color: #2d4373;
     -fx-text-fill: white;
-}
-.combo-box-popup .scroll-bar:vertical {
-    -fx-opacity: 0;
-    -fx-pref-width: 0;
 }
 
 /* =========================================
@@ -426,4 +422,198 @@
     -fx-font-weight: bold;
     -fx-text-fill: #333333; /* Chữ luôn cố định màu đen đậm */
     -fx-padding: 0 0 0 10;
+}
+
+/* =========================================
+   14. CUSTOM TABPANE (MENU CHUYỂN TAB DẠNG VIÊN THUỐC)
+   ========================================= */
+.tab-pane {
+    -fx-background-color: transparent;
+}
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-opacity: 0;
+}
+.tab-pane .tab-header-area {
+    -fx-padding: 10 0 20 0; /* Cách bảng một khoảng hở 20px */
+}
+.tab-pane .tab-header-area .headers-region {
+    -fx-spacing: 15; /* Khoảng cách rời rạc giữa các tab */
+}
+.tab-pane .tab {
+    -fx-background-color: #C1C6CF; /* Màu xám của Tab không chọn */
+    -fx-background-radius: 25; /* Bo tròn hoàn toàn */
+    -fx-padding: 8 25 8 25;
+    -fx-cursor: hand;
+    -fx-background-insets: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.tab-pane .tab:hover {
+    -fx-background-color: #A9B2BF;
+}
+.tab-pane .tab:selected {
+    -fx-background-color: #3b5998; /* Màu xanh đậm của Tab đang chọn */
+}
+.tab-pane .tab .tab-label {
+    -fx-text-fill: white; /* Toàn bộ chữ đều màu trắng giống ảnh */
+    -fx-font-size: 16px;
+    -fx-font-weight: normal; /* Không in đậm */
+}
+.tab-pane *.tab-header-area *.control-buttons-tab {
+    -fx-padding: 0;
+}
+
+/* =========================================
+   15. CUSTOM TABLEVIEW (BẢNG DỮ LIỆU) VÀ CÁC NÚT VIÊN THUỐC
+   ========================================= */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-background-radius: 0 10 10 10; /* Bo góc cho cả bảng */
+}
+.table-view .placeholder .label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #95a5a6;
+    -fx-font-style: italic;
+}
+.table-view .column-header-background {
+    -fx-background-color: #F4F7FC;
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-size: 45px;
+    -fx-border-width: 0;
+}
+.table-view .column-header .label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 10;
+}
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #F0F0F0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 55px;
+}
+.table-row-cell:odd {
+    -fx-background-color: #FAFCFF;
+}
+.table-row-cell:hover {
+    -fx-background-color: #F1F4F9;
+}
+.table-row-cell:selected {
+    -fx-background-color: #3b5998; /* Màu nền xanh đậm y hệt ảnh */
+    -fx-table-cell-border-color: transparent;
+}
+.table-cell {
+    -fx-text-fill: #333333;
+    -fx-font-size: 15px;
+    -fx-padding: 0 0 0 10;
+    -fx-alignment: center-left;
+    -fx-border-width: 0;
+}
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: white; /* Chữ biến thành màu trắng khi được chọn */
+    -fx-font-weight: normal; /* Không in đậm */
+}
+.table-row-cell:focused {
+    -fx-background-color: #3b5998; /* Đồng bộ màu khi bị click focus */
+}
+.table-row-cell:focused {
+    -fx-background-color: #E3F2FD;
+}
+
+/* Thanh cuộn cho TableView (Mỏng và ẩn, đồng bộ với ScrollPane) */
+.table-view .virtual-flow .scroll-bar:vertical,
+.table-view .virtual-flow .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+    -fx-pref-height: 8;
+}
+.table-view .virtual-flow .scroll-bar:vertical .track,
+.table-view .virtual-flow .scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.table-view .virtual-flow .scroll-bar .thumb {
+    -fx-background-color: rgba(149, 165, 166, 0.4);
+    -fx-background-radius: 10;
+}
+.table-view .virtual-flow .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(149, 165, 166, 0.8);
+}
+.table-view .virtual-flow .scroll-bar .thumb:pressed {
+    -fx-background-color: #3b5998;
+}
+
+/* =========================================
+   16. ĐỒNG BỘ SCROLLBAR VỚI APP CHUNG
+   ========================================= */
+.scroll-pane-table .scroll-bar:vertical,
+.scroll-pane-table .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8; /* Bằng với thanh cuộn trong TableView */
+    -fx-pref-height: 8;
+}
+.scroll-pane-table .scroll-bar:vertical .track,
+.scroll-pane-table .scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.scroll-pane-table .scroll-bar .thumb {
+    -fx-background-color: rgba(149, 165, 166, 0.4);
+    -fx-background-radius: 10;
+}
+.scroll-pane-table .scroll-bar:hover .thumb {
+    -fx-background-color: rgba(149, 165, 166, 0.8);
+}
+.scroll-pane-table .scroll-bar:pressed .thumb {
+    -fx-background-color: #3b5998;
+}
+
+/* =========================================
+   17. STYLE CHO CÁC NÚT VIÊN THUỐC (PILL-SHAPE)
+   ========================================= */
+.btn-pill-refresh { /* Nút refresh */
+    -fx-background-color: #0A439D;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20;
+}
+.btn-pill-refresh:hover { -fx-background-color: #1A56B8; }
+
+/* Áp dụng cho các nút Khóa/Mở, Xóa, Up Seller */
+.table-cell .button {
+    -fx-background-radius: 20; /* Bo tròn góc */
+    -fx-padding: 5 15; /* Tăng padding cho nút mập hơn */
+    -fx-font-weight: bold;
+    -fx-font-size: 13px; /* Giảm font size 1px cho vừa vặn */
+    -fx-cursor: hand;
+    -fx-text-fill: white;
+}
+
+/* Style riêng cho từng loại nút */
+.table-cell .button[text="Khóa/Mở"] { -fx-background-color: #f39c12; }
+.table-cell .button[text="Khóa/Mở"]:hover { -fx-background-color: #d35400; }
+
+.table-cell .button[text="Xóa"] { -fx-background-color: #e74c3c; }
+.table-cell .button[text="Xóa"]:hover { -fx-background-color: #c0392b; }
+
+.table-cell .button[text="Up Seller"] { -fx-background-color: #2ecc71; }
+.table-cell .button[text="Up Seller"]:hover { -fx-background-color: #27ae60; }
+
+/* Style riêng cho nút "Lịch sử Bid" trong bảng Auction */
+.table-cell .button[text="Lịch sử Bid"] {
+    -fx-background-color: #3b5998;
+}
+.table-cell .button[text="Lịch sử Bid"]:hover {
+    -fx-background-color: #2d4373;
 }

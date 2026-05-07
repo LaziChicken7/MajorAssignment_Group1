@@ -13,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -28,10 +29,29 @@ public class ProfileController {
     @FXML private TextField txtCitizenId;
     @FXML private PasswordField txtPassword; // Nơi nhập mật khẩu mới
 
+    // ...
+    @FXML private Button btnAdminControl; // THÊM DÒNG NÀY
+
     @FXML
     public void initialize() {
-        // Tự động lấy dữ liệu từ Spring Boot khi vừa mở màn hình Profile
         loadUserData();
+
+        // KIỂM TRA QUYỀN ADMIN ĐỂ HIỆN NÚT
+        if ("ADMIN".equals(SessionManager.role)) {
+            btnAdminControl.setVisible(true);
+            btnAdminControl.setManaged(true);
+        }
+    }
+
+    // THÊM HÀM CHUYỂN TRANG ADMIN NÀY:
+    @FXML
+    public void handleOpenAdminControl(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/AdminDashboard.fxml"));
+            javafx.scene.Node view = loader.load();
+            javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) txtUsername.getScene().lookup("#contentArea");
+            if (contentArea != null) contentArea.getChildren().setAll(view);
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     // ==========================================

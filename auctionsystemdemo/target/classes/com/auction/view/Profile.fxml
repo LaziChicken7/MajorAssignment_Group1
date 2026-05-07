@@ -43,7 +43,11 @@
         </GridPane>
     </HBox>
 
-    <HBox alignment="CENTER">
+    <!-- HBox bọc 2 nút lại với nhau -->
+    <HBox alignment="CENTER" spacing="20">
+        <!-- Nút Trung tâm điều khiển (Mặc định ẩn) -->
+        <Button fx:id="btnAdminControl" text="⚙ Trung tâm điều khiển" visible="false" managed="false" onAction="#handleOpenAdminControl" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30; -fx-cursor: hand;"/>
+
         <Button text="Đăng xuất" onAction="#handleLogout" style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30; -fx-cursor: hand;"/>
     </HBox>
 </VBox>
