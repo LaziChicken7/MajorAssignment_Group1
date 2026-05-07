@@ -160,7 +160,7 @@ public class AdminController {
         colUsername.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().userName));
         colUserFullName.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().fullName));
         colUserRole.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().role));
-        colUserStatus.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().isBanned ? "Bị khóa" : "Hoạt động"));
+        colUserStatus.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().banned ? "Bị khóa" : "Hoạt động"));
 
         colUserActions.setCellFactory(param -> new TableCell<>() {
             // Đổi text cho giống 100% trong ảnh
@@ -223,7 +223,8 @@ public class AdminController {
     }
 
     private void toggleBanUser(UserModel user) {
-        ApiService.putAsync("/users/admin/" + user.id + "/ban", null).thenAccept(res -> {
+        // Gọi API sử dụng user.userName
+        ApiService.putAsync("/users/admin/" + user.userName + "/ban", null).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() >= 200 && res.statusCode() < 300) {
                     loadUsers(); // Tải lại danh sách để cập nhật trạng thái
@@ -238,7 +239,8 @@ public class AdminController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Bạn chắc chắn muốn xóa người dùng " + user.userName + "?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
-                ApiService.deleteAsync("/users/admin/" + user.id).thenAccept(res -> {
+                // Gọi API sử dụng user.userName
+                ApiService.deleteAsync("/users/admin/" + user.userName).thenAccept(res -> {
                     Platform.runLater(() -> {
                         if (res.statusCode() >= 200 && res.statusCode() < 300) {
                             loadUsers(); // Tải lại danh sách sau khi xóa

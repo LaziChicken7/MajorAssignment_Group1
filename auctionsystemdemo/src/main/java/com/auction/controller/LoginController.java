@@ -45,7 +45,6 @@ public class LoginController {
 
     @FXML
     private void handleLogin() {
-        // Cập nhật ngầm IP một lần nữa phòng trường hợp người dùng gõ IP nhưng quên bấm "Áp dụng"
         String serverIp = txtServerIp.getText().trim();
         if (!serverIp.isEmpty()) {
             if (serverIp.endsWith("/")) {
@@ -86,7 +85,14 @@ public class LoginController {
                         } else {
                             try {
                                 ApiResponse errResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
-                                showAlert(Alert.AlertType.ERROR, "Lỗi đăng nhập", errResponse.message);
+
+                                // BẮT ĐÍCH DANH MÃ LỖI 4006 NẾU TÀI KHOẢN BỊ BAN
+                                if (errResponse.code == 4006) {
+                                    showAlert(Alert.AlertType.ERROR, "TÀI KHOẢN BỊ KHÓA", errResponse.message);
+                                } else {
+                                    showAlert(Alert.AlertType.ERROR, "Lỗi đăng nhập", errResponse.message);
+                                }
+
                             } catch (Exception e) {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Tài khoản hoặc mật khẩu không chính xác!");
                             }

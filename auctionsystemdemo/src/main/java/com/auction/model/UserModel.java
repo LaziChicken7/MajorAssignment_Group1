@@ -6,5 +6,5 @@ public class UserModel {
     public String userName;
     public String fullName;
     public String role;
-    public boolean isBanned;
+    public boolean banned;
 }
