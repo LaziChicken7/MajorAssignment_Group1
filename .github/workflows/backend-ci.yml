@@ -59,7 +59,7 @@ jobs:
         if (Test-Path "target\libs") { Copy-Item -Path "target\libs\*" -Destination build_exe\ }
         
         # Dùng JPackage tạo thư mục app-image (chỉ định rõ main-class)
-        jpackage --type app-image --dest output --name "Auction Bid System" --app-version 0.1.3 --input build_exe --main-jar $mainJarFile --main-class com.auction.App
+        jpackage --type app-image --dest output --name "Auction Bid System" --app-version 0.1.3 --input build_exe --main-jar $mainJarFile --main-class com.auction.App --win-console
         
         # Nén thư mục thành file ZIP Portable
         Compress-Archive -Path "output\Auction Bid System" -DestinationPath "Auction-Bid-System-0.1.3-Portable.zip"
