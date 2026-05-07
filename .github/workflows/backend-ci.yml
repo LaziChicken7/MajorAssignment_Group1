@@ -26,14 +26,22 @@ jobs:
     - name: 3. Build & Package Spring Boot (Auction Bid Server)
       run: |
         cd AuctionBidSystemSpringBootRework
+        
+        Write-Host "=== DANG BUILD SERVER BENG MAVEN ==="
         mvn clean package -DskipTests
+        
+        # Bắt lỗi: Nếu lệnh mvn ở trên thất bại, dừng ngay lập tức
+        if ($LASTEXITCODE -ne 0) { 
+            Write-Error "Loi: Maven khong the build Server. Vui long xem log cua Maven phia tren!"
+            exit $LASTEXITCODE 
+        }
         
         Write-Host "=== DANH SACH FILE TRONG THU MUC TARGET (SERVER) ==="
         Get-ChildItem -Path target
         
         New-Item -ItemType Directory -Force -Path build_exe
         
-        # Tìm file .jar hoặc .war (Bỏ qua các file plain/original)
+        # Tìm file .jar hoặc .war
         $appFile = Get-ChildItem -Path target | Where-Object { ($_.Extension -eq ".jar" -or $_.Extension -eq ".war") -and $_.Name -notmatch "plain" -and $_.Name -notmatch "original" } | Select-Object -First 1
         
         if ($null -eq $appFile) {
@@ -54,7 +62,15 @@ jobs:
     - name: 4. Build & Package JavaFX (Auction Bid System)
       run: |
         cd auctionsystemdemo 
+        
+        Write-Host "=== DANG BUILD CLIENT BENG MAVEN ==="
         mvn clean package dependency:copy-dependencies -DoutputDirectory=target/libs -DskipTests
+        
+        # Bắt lỗi: Nếu lệnh mvn ở trên thất bại, dừng ngay lập tức
+        if ($LASTEXITCODE -ne 0) { 
+            Write-Error "Loi: Maven khong the build JavaFX Client. Vui long xem log cua Maven phia tren!"
+            exit $LASTEXITCODE 
+        }
         
         Write-Host "=== DANH SACH FILE TRONG THU MUC TARGET (CLIENT JAVAFX) ==="
         Get-ChildItem -Path target
