@@ -118,25 +118,44 @@ public class AuctionService {
     public String closeAuction(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
         auction.setStatus(AuctionStatus.FINISHED);
+        String shortId = auction.getBidProduct().getId().substring(0, 4).toUpperCase();
 
         if (auction.getWinningUser() != null) {
-            Notification notif = new Notification();
-            notif.setUser(auction.getWinningUser());
-            notif.setAuction(auction);
-            notif.setType(NotificationType.PAYMENT_VERIFICATION);
-            notif.setTitle("Xác thực giao dịch: SP" + auction.getBidProduct().getId().substring(0, 4).toUpperCase());
-            notif.setDescription(auction.getBidProduct().getName() + " - Giá tiền: " + auction.getHighestBid() + " VND");
-            notificationRepository.save(notif);
+            // 1. Thông báo cho người mua xác thực thanh toán
+            Notification winnerNotif = new Notification();
+            winnerNotif.setUser(auction.getWinningUser());
+            winnerNotif.setAuction(auction);
+            winnerNotif.setType(NotificationType.PAYMENT_VERIFICATION);
+            winnerNotif.setTitle("Xác thực giao dịch: SP" + shortId);
+            winnerNotif.setDescription(auction.getBidProduct().getName() + " - Giá tiền: " + auction.getHighestBid() + " VND");
+            notificationRepository.save(winnerNotif);
 
-            // LƯU Ý: Ở đây CHƯA gán transactionStatus vội vì còn chờ user Xác nhận/Từ chối thanh toán
+            // 2. BỔ SUNG: Thông báo cho Người bán (Biết đã có người thắng)
+            Notification sellerNotif = new Notification();
+            sellerNotif.setUser(auction.getSeller());
+            sellerNotif.setAuction(auction);
+            sellerNotif.setType(NotificationType.AUCTION_SUCCESS); // Cứ coi là thông báo thông tin
+            sellerNotif.setTitle("Phiên đấu giá kết thúc: SP" + shortId);
+            sellerNotif.setDescription("Người thắng: " + auction.getWinningUser().getFullName() + " với giá " + auction.getHighestBid() + " VND. Đang chờ người mua xác thực thanh toán.");
+            notificationRepository.save(sellerNotif);
+
             auctionRepository.save(auction);
             return "Session ended! Winner is: " + auction.getWinningUser().getFullName();
         } else {
-            // NẾU KHÔNG CÓ AI THẮNG -> GIAO DỊCH CHẮC CHẮN THẤT BẠI
             auction.setTransactionStatus(TransactionStatus.FAILED);
+
+            // 3. BỔ SUNG: Thông báo cho Người bán (Báo ế / Không ai mua)
+            Notification sellerFailNotif = new Notification();
+            sellerFailNotif.setUser(auction.getSeller());
+            sellerFailNotif.setAuction(auction);
+            sellerFailNotif.setType(NotificationType.AUCTION_FAILED);
+            sellerFailNotif.setTitle("Phiên đấu giá kết thúc: SP" + shortId);
+            sellerFailNotif.setDescription("Sản phẩm " + auction.getBidProduct().getName() + " đã hết thời gian nhưng không có ai tham gia trả giá.");
+            notificationRepository.save(sellerFailNotif);
+
             auctionRepository.save(auction);
+            return "Session ended! No one winner";
         }
-        return "Session ended! No one winner";
     }
 
     // 3. Chấp nhận trả tiền và từ chối trả tiền
