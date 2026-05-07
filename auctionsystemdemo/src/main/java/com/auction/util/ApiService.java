@@ -8,35 +8,37 @@ import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
 
 public class ApiService {
-    // Đổi link này nếu Spring Boot của bạn dùng port khác hoặc có context-path
     public static String BASE_URL = "http://localhost:8080/auction";
 
-    private static final HttpClient client = HttpClient.newHttpClient();
+    // ĐÃ NÂNG CẤP: Bật tính năng theo dõi chuyển hướng (Follow Redirects)
+    private static final HttpClient client = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.ALWAYS)
+            .build();
+
     public static final Gson gson = new Gson();
 
-    // 1. GỬI DỮ LIỆU LÊN (Dùng cho Đăng nhập, Đăng ký, Nạp tiền...)
     public static <T> CompletableFuture<HttpResponse<String>> postAsync(String endpoint, T body) {
         String jsonBody = gson.toJson(body);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
                 .header("Content-Type", "application/json")
-                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
+                .header("User-Agent", "JavaFX-Client/1.0") // BẮT BUỘC: Khai báo danh tính để không bị Ngrok coi là bot
+                .header("ngrok-skip-browser-warning", "true")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    // 2. LẤY DỮ LIỆU VỀ (Dùng cho xem Profile, xem Danh sách sản phẩm...)
     public static CompletableFuture<HttpResponse<String>> getAsync(String endpoint) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
-                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
+                .header("User-Agent", "JavaFX-Client/1.0")
+                .header("ngrok-skip-browser-warning", "true")
                 .GET()
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    // 3. CẬP NHẬT DỮ LIỆU (Dùng cho Đổi mật khẩu, Cập nhật Profile...)
     public static <T> CompletableFuture<HttpResponse<String>> putAsync(String endpoint, T body) {
         String jsonBody = body != null ? gson.toJson(body) : "";
         HttpRequest.BodyPublisher publisher = body != null ?
@@ -46,17 +48,18 @@ public class ApiService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
                 .header("Content-Type", "application/json")
-                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
+                .header("User-Agent", "JavaFX-Client/1.0")
+                .header("ngrok-skip-browser-warning", "true")
                 .PUT(publisher)
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    // 4. XÓA DỮ LIỆU
     public static CompletableFuture<HttpResponse<String>> deleteAsync(String endpoint) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + endpoint))
-                .header("ngrok-skip-browser-warning", "true") // Bỏ qua trang cảnh báo của ngrok
+                .header("User-Agent", "JavaFX-Client/1.0")
+                .header("ngrok-skip-browser-warning", "true")
                 .DELETE()
                 .build();
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
