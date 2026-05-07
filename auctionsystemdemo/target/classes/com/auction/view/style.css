@@ -440,19 +440,28 @@
     -fx-spacing: 15; /* Khoảng cách rời rạc giữa các tab */
 }
 .tab-pane .tab {
-    -fx-background-color: #C1C6CF; /* Màu xám của Tab không chọn */
-    -fx-background-radius: 25; /* Bo tròn hoàn toàn */
-    -fx-padding: 8 25 8 25;
+    -fx-background-color: #C1C6CF;
+    -fx-background-radius: 25;
+
+    /* 1. Đẩy màu nền lùi lại 15px ở bên phải để tạo khoảng trống (gap) */
+    -fx-background-insets: 0 15 0 0;
+
+    /* 2. Padding trái là 25, Padding phải phải tăng lên thành 40 (25 + 15) để chữ vẫn nằm chính giữa viên thuốc */
+    -fx-padding: 8 40 8 25;
+
     -fx-cursor: hand;
-    -fx-background-insets: 0;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
+
 .tab-pane .tab:hover {
     -fx-background-color: #A9B2BF;
+    -fx-background-insets: 0 15 0 0; /* Bắt buộc giữ lại insets để không bị giật khung hình */
 }
+
 .tab-pane .tab:selected {
-    -fx-background-color: #3b5998; /* Màu xanh đậm của Tab đang chọn */
+    -fx-background-color: #3b5998;
+    -fx-background-insets: 0 15 0 0; /* Bắt buộc giữ lại insets để không bị giật khung hình */
 }
 .tab-pane .tab .tab-label {
     -fx-text-fill: white; /* Toàn bộ chữ đều màu trắng giống ảnh */
