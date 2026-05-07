@@ -374,7 +374,27 @@
 }
 
 /* =========================================
-   14. NÚT QUAY LẠI VÀ TIÊU ĐỀ TRANG
+   12. CUSTOM PROGRESS BAR (THANH THỐNG KÊ)
+   ========================================= */
+.modern-progress-bar {
+    -fx-pref-height: 12px; /* Độ dày của thanh */
+}
+
+.modern-progress-bar > .track {
+    -fx-background-color: #E8ECEF; /* Màu nền xám nhạt */
+    -fx-background-radius: 10;     /* Bo tròn nền */
+    -fx-background-insets: 0;      /* XÓA VIỀN ĐEN MẶC ĐỊNH */
+    -fx-border-color: transparent;
+}
+
+.modern-progress-bar > .bar {
+    -fx-background-color: linear-gradient(to right, #2ecc71, #27ae60); /* Màu xanh lá có đổ bóng nhẹ */
+    -fx-background-radius: 10;     /* Bo tròn thanh chạy */
+    -fx-background-insets: 0;
+}
+
+/* =========================================
+   13. NÚT QUAY LẠI VÀ TIÊU ĐỀ TRANG
    ========================================= */
 
 /* A. Dành cho Tiêu đề CÓ chức năng Quay Lại (Có hover như Ảnh 3) */
