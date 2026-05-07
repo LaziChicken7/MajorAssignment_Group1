@@ -22,13 +22,11 @@ public class LoginController {
     @FXML private TextField txtUsername;
     @FXML private PasswordField txtPassword;
 
-    // Tự động load IP hiện tại khi mở màn hình Đăng nhập
     @FXML
     public void initialize() {
         txtServerIp.setText(ApiService.BASE_URL);
     }
 
-    // Xử lý khi bấm nút "Áp dụng" IP
     @FXML
     private void handleApplyIp() {
         String serverIp = txtServerIp.getText().trim();
@@ -63,15 +61,12 @@ public class LoginController {
 
         LoginRequest request = new LoginRequest(user, pass);
 
-        // Gửi API đến Spring Boot
         ApiService.postAsync("/users/login", request)
                 .thenAccept(response -> {
                     Platform.runLater(() -> {
                         if (response.statusCode() == 200) {
                             ApiResponse apiResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
                             if (apiResponse.code == 1000) {
-
-                                // Lấy thông tin User từ mục "result" trả về
                                 var resultObj = apiResponse.result.getAsJsonObject();
                                 SessionManager.userName = resultObj.get("userName").getAsString();
                                 SessionManager.fullName = resultObj.get("fullName") != null && !resultObj.get("fullName").isJsonNull() ? resultObj.get("fullName").getAsString() : "Người dùng";
@@ -85,14 +80,11 @@ public class LoginController {
                         } else {
                             try {
                                 ApiResponse errResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
-
-                                // BẮT ĐÍCH DANH MÃ LỖI 4006 NẾU TÀI KHOẢN BỊ BAN
                                 if (errResponse.code == 4006) {
                                     showAlert(Alert.AlertType.ERROR, "TÀI KHOẢN BỊ KHÓA", errResponse.message);
                                 } else {
                                     showAlert(Alert.AlertType.ERROR, "Lỗi đăng nhập", errResponse.message);
                                 }
-
                             } catch (Exception e) {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Tài khoản hoặc mật khẩu không chính xác!");
                             }

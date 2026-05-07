@@ -3,50 +3,95 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
+<?import java.net.URL?>
 
-<HBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.LoginController">
+<HBox prefHeight="600.0" prefWidth="950.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.LoginController">
+    <!-- Link file CSS của bạn vào đây -->
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+
     <children>
-        <!-- BÊN TRÁI: PANEL THƯƠNG HIỆU -->
-        <VBox alignment="CENTER" prefWidth="400.0" spacing="20.0" style="-fx-background-color: #0A439D;">
+        <!-- BÊN TRÁI: PANEL THƯƠNG HIỆU (Sử dụng màu sidebar để tạo độ sâu) -->
+        <VBox alignment="CENTER" prefWidth="450.0" spacing="30.0" styleClass="sidebar" HBox.hgrow="ALWAYS">
             <children>
-                <Label text="Hệ thống đấu giá trực tuyến" textFill="white">
-                    <font><Font name="System Bold" size="28.0" /></font>
-                </Label>
-                <Label text="Minh bạch - An toàn - Hiệu quả" textFill="white" />
+                <VBox alignment="CENTER" spacing="10.0">
+                    <children>
+                        <!-- Icon giả lập hoặc Logo -->
+                        <Label text="⚖" textFill="white" style="-fx-font-size: 80;">
+                            <font><Font name="System Bold" size="80.0" /></font>
+                        </Label>
+                        <Label text="AUCTION PRO" textFill="white" style="-fx-letter-spacing: 5;">
+                            <font><Font name="Segoe UI Black" size="32.0" /></font>
+                        </Label>
+                        <Separator maxWidth="150" opacity="0.3" />
+                        <Label text="Hệ thống đấu giá trực tuyến" textFill="white">
+                            <font><Font name="Segoe UI Semibold" size="18.0" /></font>
+                        </Label>
+                    </children>
+                </VBox>
+
+                <VBox alignment="CENTER" spacing="5.0">
+                    <children>
+                        <Label text="Minh bạch - An toàn - Hiệu quả" textFill="#b2c7e6">
+                            <font><Font name="Segoe UI Italic" size="14.0" /></font>
+                        </Label>
+                    </children>
+                </VBox>
             </children>
         </VBox>
 
         <!-- BÊN PHẢI: FORM ĐĂNG NHẬP -->
-        <VBox alignment="CENTER" prefWidth="500.0" spacing="25.0" style="-fx-background-color: white;">
-            <padding><Insets left="50.0" right="50.0" /></padding>
+        <StackPane prefWidth="500.0" HBox.hgrow="ALWAYS">
+            <padding><Insets left="40.0" right="40.0" /></padding>
             <children>
-                <Label text="Chào mừng quay trở lại!">
-                    <font><Font name="System Bold" size="24.0" /></font>
-                </Label>
-
-                <VBox spacing="5.0">
+                <!-- Dùng class 'card' từ CSS của bạn để tạo hiệu ứng nổi và bo góc -->
+                <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="400.0" spacing="25.0" styleClass="card">
                     <children>
-                        <Label text="Tên đăng nhập" />
-                        <TextField fx:id="txtUsername" prefHeight="40.0" promptText="Nhập tên đăng nhập..." style="-fx-background-radius: 10;" />
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label text="Chào mừng quay trở lại!">
+                                    <font><Font name="Segoe UI Bold" size="26.0" /></font>
+                                </Label>
+                                <Label text="Vui lòng đăng nhập để tiếp tục" textFill="#7f8c8d" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label text="Tên đăng nhập" style="-fx-font-weight: bold;" />
+                                <!-- Dùng class 'input-field' từ CSS -->
+                                <TextField fx:id="txtUsername" prefHeight="45.0" promptText="Nhập tên đăng nhập..." styleClass="input-field" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label text="Mật khẩu" style="-fx-font-weight: bold;" />
+                                <!-- Dùng class 'input-field' từ CSS -->
+                                <PasswordField fx:id="txtPassword" prefHeight="45.0" promptText="Nhập mật khẩu..." styleClass="input-field" />
+                            </children>
+                        </VBox>
+
+                        <HBox alignment="CENTER_RIGHT">
+                            <Hyperlink text="Quên mật khẩu?" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12;" />
+                        </HBox>
+
+                        <!-- Dùng class 'btn-primary' từ CSS -->
+                        <Button fx:id="btnLogin" maxWidth="Infinity" onAction="#handleLogin" prefHeight="50.0" styleClass="btn-primary" text="ĐĂNG NHẬP" />
+
+                        <HBox alignment="CENTER" spacing="5.0">
+                            <children>
+                                <Label text="Chưa có tài khoản?" />
+                                <Hyperlink text="Đăng ký ngay" onAction="#goToRegister" style="-fx-text-fill: #0A439D; -fx-font-weight: bold;" />
+                            </children>
+                        </HBox>
                     </children>
+                    <padding>
+                        <Insets bottom="40.0" left="30.0" right="30.0" top="40.0" />
+                    </padding>
                 </VBox>
-
-                <VBox spacing="5.0">
-                    <children>
-                        <Label text="Mật khẩu" />
-                        <PasswordField fx:id="txtPassword" prefHeight="40.0" promptText="Nhập mật khẩu..." style="-fx-background-radius: 10;" />
-                    </children>
-                </VBox>
-
-                <Button maxWidth="Infinity" onAction="#handleLogin" prefHeight="45.0" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;" text="ĐĂNG NHẬP" />
-
-                <HBox alignment="CENTER" spacing="5.0">
-                    <children>
-                        <Label text="Chưa có tài khoản?" />
-                        <Hyperlink text="Đăng ký ngay" style="-fx-text-fill: #0A439D;" onAction="#goToRegister" />
-                    </children>
-                </HBox>
             </children>
-        </VBox>
+        </StackPane>
     </children>
 </HBox>

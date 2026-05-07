@@ -15,6 +15,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -29,7 +30,8 @@ import java.util.List;
 public class MainController {
 
     @FXML private StackPane contentArea;
-    @FXML private Label lblSystemTime;
+    @FXML private Label lblTime;
+    @FXML private Label lblDate;
 
     @FXML private AnchorPane drawerOverlay;
     @FXML private VBox expandedSidebar;
@@ -76,13 +78,27 @@ public class MainController {
     }
 
     private void startClock() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        // Định dạng Giờ và Ngày (Tiếng Việt)
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy", new java.util.Locale("vi", "VN"));
+
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
-            if (lblSystemTime != null) lblSystemTime.setText(LocalDateTime.now().format(formatter));
+            LocalDateTime now = LocalDateTime.now();
+
+            if (lblTime != null) {
+                lblTime.setText(now.format(timeFormatter));
+            }
+
+            if (lblDate != null) {
+                String dateStr = now.format(dateFormatter);
+                lblDate.setText(dateStr.substring(0, 1).toUpperCase() + dateStr.substring(1));
+            }
         }), new KeyFrame(Duration.seconds(1)));
+
         clock.setCycleCount(Timeline.INDEFINITE);
         clock.play();
     }
+
 
     public void loadView(String fxmlPath) {
         try {

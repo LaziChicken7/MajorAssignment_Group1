@@ -10,11 +10,11 @@
 
         <HBox fx:id="boxAction" spacing="10" alignment="CENTER_RIGHT">
             <!-- Nút tròn Check (Xanh) -->
-            <Button fx:id="btnAccept" text="✔" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand;"/>
+            <Button fx:id="btnAccept" text="✔" style="-fx-background-color: #00C853; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand;"/>
             <!-- Nút tròn X (Đỏ) -->
-            <Button fx:id="btnReject" text="✘" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand;"/>
+            <Button fx:id="btnReject" text="✖" style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand;"/>
             <!-- Nút tròn More (Xanh biển) -->
-            <Button fx:id="btnDetail" text="..." style="-fx-background-color: #004aad; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand;"/>
+            <Button fx:id="btnDetail" text="⋯" style="-fx-background-color: #0A56D2; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand;"/>
         </HBox>
     </children>
 </HBox>

@@ -79,7 +79,7 @@ public class RegisterController {
                     });
                 })
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể kết nối đến máy chủ Spring Boot!"));
+                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể kết nối đến máy chủ Spring Boot ở địa chỉ:\n" + ApiService.BASE_URL));
                     return null;
                 });
     }

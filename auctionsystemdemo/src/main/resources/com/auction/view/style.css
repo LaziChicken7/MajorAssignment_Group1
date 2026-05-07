@@ -626,3 +626,42 @@
 .table-cell .button[text="Lịch sử Bid"]:hover {
     -fx-background-color: #2d4373;
 }
+
+
+//TIME
+/* Container bao quanh */
+.clock-container {
+    -fx-background-color: rgba(255, 255, 255, 0.08); /* Tạo nền trắng cực mờ */
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255, 255, 255, 0.15); /* Viền mảnh trắng mờ */
+    -fx-border-radius: 12;
+    -fx-padding: 8 15 8 15;
+}
+
+/* Chữ Giờ: To, đậm, rõ ràng */
+.clock-time {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-line-spacing: -5px;
+}
+
+/* Chữ Ngày: Nhỏ hơn, màu nhạt hơn để tạo chiều sâu */
+.clock-date {
+    -fx-font-size: 12px;
+    -fx-text-fill: #D1D8E0; /* Màu xám xanh nhạt */
+    -fx-font-weight: normal;
+}
+
+/* Vòng tròn bao quanh icon */
+.clock-icon-bg {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-min-width: 38px;
+    -fx-max-width: 38px;
+    -fx-min-height: 38px;
+    -fx-max-height: 38px;
+    -fx-background-radius: 50; /* Bo tròn tuyệt đối */
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-radius: 50;
+}

@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="" />
+    <list default="true" id="5d67a0ca-1893-4048-9bb8-25d38dece759" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Login.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Login.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/NotificationItem.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/NotificationItem.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/auction/view/Register.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/auction/view/Register.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Login.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/Login.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/NotificationItem.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/NotificationItem.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/auction/view/Register.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/auction/view/Register.fxml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -64,7 +72,7 @@
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;G:/My Drive/Github/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/TIN HOC/java/MajorAssignment_Group1/Frontend/auctionsystemdemo&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -86,8 +94,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.32098.37" />
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.32098.37" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
       </set>
     </attachedChunks>
   </component>

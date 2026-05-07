@@ -7,7 +7,6 @@
 
     <BorderPane>
         <!-- SIDEBAR THU GỌN -->
-        <!-- SIDEBAR THU GỌN -->
         <left>
             <!-- Tăng prefWidth từ 90 lên 110 -->
             <VBox styleClass="sidebar" prefWidth="110" spacing="15" alignment="TOP_CENTER">
@@ -38,8 +37,14 @@
                     <TextField promptText="🔍 Tìm kiếm" styleClass="search-bar" prefWidth="500" />
                     <Region HBox.hgrow="ALWAYS" />
                     <!-- Trong Main.fxml -->
-                    <Label fx:id="lblSystemTime" text="00/00/0000 00:00:00"
-                           style="-fx-text-fill: white; -fx-font-size: 14;" />                </HBox>
+                    <VBox alignment="CENTER_RIGHT" spacing="-2.0">
+                        <children>
+                            <Label fx:id="lblTime" text="18:13:39" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" />
+
+                            <Label fx:id="lblDate" text="Thứ Năm, 07/05/2026" style="-fx-text-fill: #e2e8f0; -fx-font-size: 14px;" />
+                        </children>
+                    </VBox>
+                </HBox>
                 <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS">
                     <padding><Insets top="20" right="30" bottom="20" left="30"/></padding>
                 </StackPane>
