@@ -221,6 +221,11 @@ public class UserService {
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
     }
 
+    // Save user (dùng cho update avatar cho nhanh, không cần dài như update)
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
     // UPDATE
     // Cập nhật thông tin người dùng
     public User updateUser(String userId, UserUpdateRequest request) {
