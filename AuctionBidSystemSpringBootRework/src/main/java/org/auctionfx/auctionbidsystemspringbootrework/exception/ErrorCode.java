@@ -42,6 +42,7 @@ public enum ErrorCode {
     AUCTION_NOT_FOUND(7001, "Auction not founded"),
     AUCTION_NOT_RUNNING(7002, "Auction not in running status"),
     AUCTION_BIDDER_INVALID(7003, "Bidder can not bid own product"),
+    BARCHART_CONNECT_FAILURE(7004, "Failed to extract chart data"),
     // ===========================================================================
     // ITEM CREATE EXCEPTION
     SELLER_INVALID(8001, "User is not seller, can not create item"),

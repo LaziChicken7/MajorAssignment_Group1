@@ -249,7 +249,7 @@ public class AuctionService {
             return chartData;
         } catch (Exception e) {
             // Bắt lỗi hệ thống 
-            throw new RuntimeException("Kết nối thất bại : " + e.getMessage());
+            throw new AuctionException(ErrorCode.BARCHART_CONNECT_FAILURE);
         }
     }
 

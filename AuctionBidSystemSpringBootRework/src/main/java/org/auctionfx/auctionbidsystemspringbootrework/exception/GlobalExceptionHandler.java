@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.exception;
 
+import java.io.IOException;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -61,6 +62,16 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage(exception.getMessage());
 
         return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    @ExceptionHandler(value = IOException.class)
+    ResponseEntity<ApiResponse> handlingIOException(IOException exception) {
+        ApiResponse apiResponse = new ApiResponse();
+        
+        apiResponse.setCode(500); 
+        apiResponse.setMessage(exception.getMessage());
+        
+        return ResponseEntity.status(500).body(apiResponse);
     }
 
     @ExceptionHandler(value = Exception.class)
