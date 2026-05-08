@@ -35,7 +35,7 @@ public class User extends BaseEntity {
     protected Role role;
 
     @Column(name = "avatar_url", length = 700)
-    protected String avatarUrl;
+    protected String avatarUrl = "/images/avatar/default-avatarmacdinh.png";
 
     // THÊM TRƯỜNG NÀY ĐỂ QUẢN LÝ BAN USER
     protected boolean isBanned = false;

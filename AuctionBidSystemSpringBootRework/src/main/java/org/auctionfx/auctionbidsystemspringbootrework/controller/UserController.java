@@ -1,6 +1,8 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
 import jakarta.validation.Valid;
+
+import org.apache.catalina.connector.Response;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
@@ -169,4 +171,26 @@ public class UserController {
         apiResponse.setResult("Avatar uploaded successfully: " + fileUrl);
         return apiResponse;
     }
+
+    // Gỡ avatar ( đưa về avatar mặc định)
+    @DeleteMapping("/{userName}/avatar")
+    public ApiResponse<String> removeAvatar(@PathVariable String userName) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+
+        // lấy user từ database 
+        User user = userService.getUserByUserName(userName);
+
+        // Ép nó về link mặc định ban đầu 
+        user.setAvatarUrl("/images/avatar/default-avatarmacdinh.png");
+
+        // Dùng hàm lưu nhanh user 
+        userService.saveUser(user);
+
+        apiResponse.setCode(1000);
+        apiResponse.setMessage("deleted avatar successfully");
+        apiResponse.setResult(user.getAvatarUrl());
+
+        return apiResponse;
+    }
+    
 }

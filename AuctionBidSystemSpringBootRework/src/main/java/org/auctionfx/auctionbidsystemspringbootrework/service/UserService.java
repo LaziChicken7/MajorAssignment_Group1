@@ -95,7 +95,10 @@ public class UserService {
         newUser.setCitizenId(request.getCitizenId());
         newUser.setRole(request.getRole());
 
-        // 5. Lưu xuống database
+        // 5.Set avatar mặc định cho tất cả user mới
+        newUser.setAvatarUrl("/images/avatar/default-avatarmacdinh.png");
+
+        // 6. Lưu xuống database
         return userRepository.save(newUser);
     }
 
