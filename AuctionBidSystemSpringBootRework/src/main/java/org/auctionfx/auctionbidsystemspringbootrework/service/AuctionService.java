@@ -229,6 +229,30 @@ public class AuctionService {
         return auctionRepository.findAll();
     }
 
+    // API Lấy dữ liệu biểu đồ giá theo thời gian thực
+    public List<BidTransaction> getPriceChart(String auctionId) {
+
+        // Nếu ID truyền lên bị rỗng hoặc null
+        if (auctionId == null || auctionId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Auction ID không hợp lệ");
+        }
+
+        // Kiểm tra xem phiên đấu giá có tồn tại thực sự trong DB không
+        if (!auctionRepository.existsById(auctionId)) { throw new AuctionException(ErrorCode.AUCTION_NOT_FOUND); }
+
+        try {
+            // lấy danh sách, sắp theo thời gian cũ đến mới
+            List<BidTransaction> chartData = bidTransactionRepository.findByAuctionIdOrderByBidTimestampAsc(auctionId);
+
+            // trả về mảng rỗng nếu chưa có ai bid
+            if (chartData == null) { return new ArrayList<>(); }
+            return chartData;
+        } catch (Exception e) {
+            // Bắt lỗi hệ thống 
+            throw new RuntimeException("Kết nối thất bại : " + e.getMessage());
+        }
+    }
+
     // Tự động quét Auction
     @Scheduled(fixedRate = 1000) // Cứ 1 giây quét 1 lần
     @Transactional

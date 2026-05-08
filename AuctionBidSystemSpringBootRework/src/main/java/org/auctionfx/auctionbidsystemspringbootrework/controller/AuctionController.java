@@ -4,6 +4,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.PlaceBidRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.BidTransaction;
 import org.auctionfx.auctionbidsystemspringbootrework.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -75,6 +76,17 @@ public class AuctionController {
     public ApiResponse<List<Auction>> getAllAuctions() {
         ApiResponse<List<Auction>> response = new ApiResponse<>();
         response.setResult(auctionService.getAllAuctions());
+        return response;
+    }
+
+    // API Lấy dữ liệu biểu đồ giá theo thời gian thực
+    @GetMapping("/{auctionId}/price-chart")
+    public ApiResponse<List<BidTransaction>> getPriceChart(@PathVariable String auctionId) {
+        ApiResponse<List<BidTransaction>> response = new ApiResponse<>();
+        try {
+            List<BidTransaction> chartData = auctionService.getPriceChart(auctionId);
+            response.setResult(chartData);
+        } catch (Exception e) { throw e;}
         return response;
     }
 
