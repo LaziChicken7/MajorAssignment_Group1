@@ -8,8 +8,14 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -112,6 +118,55 @@ public class UserController {
     public ApiResponse<String> toggleBanUser(@PathVariable("userName") String userName) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.toggleBanUser(userName));
+        return apiResponse;
+    }
+
+    // Upload avatar cho User
+    @PostMapping("/{userName}/avatar")
+    public ApiResponse<String> uploadAvatar(@PathVariable String userName, @RequestParam("file") MultipartFile file) throws IOException {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+
+        // Kiểm tra file 
+        if (file == null || file.isEmpty()) {
+            throw new IOException("No file uploaded or file is empty");
+        }
+
+        // Kiểm tra user có tồn tại trong database không
+        User user = userService.getUserByUserName(userName);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        // Tạo thư mục uploads nếu chưa có
+        String uploadDir = "uploads/";
+        File dir = new File(uploadDir);
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IOException("Could not create upload directory");
+        }
+
+        // Lấy tên file gốc và phần mở rộng<png, jpg, etc.>
+        String originalFileName = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFileName != null && originalFileName.contains(".")) {
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        }
+
+        // Tạo tên file mới ngẫu nhiên để tránh trùng lặp
+        String newFileName = UUID.randomUUID().toString() + fileExtension;
+
+        // Đường dẫn đầy đủ để lưu file
+        Path filePath = Paths.get(uploadDir + newFileName);
+        Files.write(filePath, file.getBytes());
+
+        // Tạo URL truy cập file
+        String fileUrl = "/uploads/" + newFileName;
+
+        // Cập nhật avatarUrl trong database cho user này
+        user.setAvatarUrl(fileUrl);
+        userService.saveUser(user);
+
+        // Trả về message thành công
+        apiResponse.setResult("Avatar uploaded successfully: " + fileUrl);
         return apiResponse;
     }
 }
