@@ -1,8 +1,8 @@
 package org.auctionfx.auctionbidsystemspringbootrework.dto.request;
 
 import org.auctionfx.auctionbidsystemspringbootrework.enums.ItemType;
-
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ItemCreationRequest {
     private String sellerUserName;
@@ -18,9 +18,9 @@ public class ItemCreationRequest {
     private int warrantyMonths;
     private String engineType;
     private int mileage;
+    private List<String> imageUrls; 
 
     // GETTER VÀ SETTER
-
 
     public String getSellerUserName() {
         return sellerUserName;
@@ -108,5 +108,13 @@ public class ItemCreationRequest {
 
     public void setMileage(int mileage) {
         this.mileage = mileage;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
     }
 }

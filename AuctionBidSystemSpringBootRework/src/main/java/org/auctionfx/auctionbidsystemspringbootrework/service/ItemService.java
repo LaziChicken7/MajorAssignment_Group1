@@ -65,6 +65,11 @@ public class ItemService {
         // BẠN CẦN BỔ SUNG DÒNG NÀY ĐỂ DATABASE LƯU ĐƯỢC CHỮ "VEHICLE", "ART"...
         item.setItemType(request.getItemType());
 
+        // Cập nhật danh sách ảnh cho Item nếu có 
+        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+            item.setImageUrls(request.getImageUrls());
+        }
+
         itemRepository.save(item);
         return "Create item successfully, Item id is: " + item.getId();
     }

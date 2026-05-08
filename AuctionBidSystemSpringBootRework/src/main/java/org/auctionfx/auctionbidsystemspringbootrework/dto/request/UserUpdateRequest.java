@@ -13,6 +13,7 @@ public class UserUpdateRequest {
 
     private String email;
     private String numberPhone;
+    private String avatarUrl;
 
     public String getPassword() {
         return password;
@@ -44,5 +45,13 @@ public class UserUpdateRequest {
 
     public void setNumberPhone(String numberPhone) {
         this.numberPhone = numberPhone;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

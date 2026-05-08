@@ -34,11 +34,14 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING) // Lưu chữ SELLER, BIDDER
     protected Role role;
 
+    @Column(name = "avatar_url", length = 700)
+    protected String avatarUrl;
+
     // THÊM TRƯỜNG NÀY ĐỂ QUẢN LÝ BAN USER
     protected boolean isBanned = false;
+    
 
     // LẤY VÀ UPDATE THUỘC TÍNH
-
 
     public String getUserCode() {
         return userCode;
@@ -110,5 +113,13 @@ public class User extends BaseEntity {
 
     public void setBanned(boolean banned) {
         isBanned = banned;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

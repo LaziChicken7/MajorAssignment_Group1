@@ -237,6 +237,9 @@ public class UserService {
         user.setPassword(encodePassword(request.getPassword()));
         user.setEmail(request.getEmail());
         user.setNumberPhone(request.getNumberPhone());
+        if (request.getAvatarUrl() != null && !request.getAvatarUrl().isBlank()) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
 
         return userRepository.save(user);
     }
@@ -256,6 +259,9 @@ public class UserService {
         // Cập nhật thông tin cơ bản
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
+        if (request.getAvatarUrl() != null && !request.getAvatarUrl().isBlank()) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
 
         // Nếu người dùng có nhập mật khẩu mới thì mới tiến hành đổi
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {

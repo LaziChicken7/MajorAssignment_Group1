@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.base.BaseEntity;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.ItemType;
-import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "items")
@@ -27,6 +27,11 @@ public class Item extends BaseEntity {
 
     @Enumerated(EnumType.STRING) // Lưu chữ SELLER, BIDDER
     protected ItemType itemType;
+
+    
+    // sinh ra một bảng phụ lưu URL ảnh, liên kết Item qua item_id
+    @ElementCollection
+    private List<String> imageUrls = new ArrayList<>();
 
     // GETTER VÀ SETTER
 
@@ -84,5 +89,13 @@ public class Item extends BaseEntity {
 
     public void setItemType(ItemType itemType) {
         this.itemType = itemType;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
     }
 }
