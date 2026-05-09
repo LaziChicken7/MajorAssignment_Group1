@@ -6,6 +6,7 @@ import com.auction.model.ItemCreationRequest;
 import com.auction.util.ApiService;
 import com.auction.util.SessionManager;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -37,8 +38,15 @@ public class AddProductController {
     @FXML private TextField txtBrand, txtWarranty;
     @FXML private TextField txtEngine, txtMileage;
 
+    @FXML private CheckBox chkAgree;
+    @FXML private Button btnSubmit;
+
     @FXML
     public void initialize() {
+        if (btnSubmit != null && chkAgree != null) {
+            btnSubmit.disableProperty().bind(chkAgree.selectedProperty().not());
+        }
+
         if (!"SELLER".equals(SessionManager.role)) {
             Platform.runLater(() -> {
                 showAlert(Alert.AlertType.ERROR, "Từ chối", "Chỉ SELLER mới được phép đưa sản phẩm lên sàn!");
@@ -92,16 +100,58 @@ public class AddProductController {
 
     @FXML
     private void handleConfirmAdd() {
-        try {
-            String name = txtProductName.getText().trim();
-            String desc = txtDescription.getText().trim();
-            String priceStr = txtStartPrice.getText().replace(".", "").replace(",", "").trim();
+        // 1. Lấy dữ liệu cơ bản để validate trước khi hiện Popup
+        String name = txtProductName.getText().trim();
+        String desc = txtDescription.getText().trim();
+        String priceStr = txtStartPrice.getText().replace(".", "").replace(",", "").trim();
 
-            if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || dpStartDate.getValue() == null || dpEndDate.getValue() == null) {
-                showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin Tên, Giá, Ngày Giờ!");
-                return;
+        // Kiểm tra rỗng: Đảm bảo điền đủ mới cho xem Hợp đồng
+        if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || dpStartDate.getValue() == null || dpEndDate.getValue() == null) {
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin Tên, Giá, Ngày Giờ!");
+            return;
+        }
+
+        // 2. Tạo Popup Hợp đồng
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Điều khoản và Dịch vụ");
+        dialog.setHeaderText("HỢP ĐỒNG ĐĂNG BÁN SẢN PHẨM ĐẤU GIÁ");
+
+        TextArea textArea = new TextArea(getContractText());
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefSize(600, 400);
+
+        CheckBox chkPopupAgree = new CheckBox("Tôi xác nhận đã đọc và đồng ý với các điều khoản");
+        chkPopupAgree.setStyle("-fx-font-size: 12px; -fx-padding: 10 0 0 0; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        VBox dialogContent = new VBox(10);
+        dialogContent.getChildren().addAll(textArea, chkPopupAgree);
+        dialog.getDialogPane().setContent(dialogContent);
+
+        // Thêm nút Đồng ý và Hủy
+        ButtonType btnTypeAgree = new ButtonType("Đồng ý", ButtonBar.ButtonData.OK_DONE);
+        ButtonType btnTypeCancel = new ButtonType("Hủy", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnTypeAgree, btnTypeCancel);
+
+        // Khóa nút Đồng ý mặc định
+        Node agreeButton = dialog.getDialogPane().lookupButton(btnTypeAgree);
+        agreeButton.setDisable(true);
+
+        // Tick Checkbox để mở khóa nút Đồng ý
+        chkPopupAgree.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            agreeButton.setDisable(!newValue);
+        });
+
+        // 3. Hiển thị Popup. Nếu user bấm Đồng ý -> Chạy hàm xử lý gọi API
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == btnTypeAgree) {
+                processActualSubmission(name, desc, priceStr);
             }
+        });
+    }
 
+    private void processActualSubmission(String name, String desc, String priceStr) {
+        try {
             double startPrice = Double.parseDouble(priceStr);
 
             // Gộp chuỗi thời gian (Giờ:Phút:Giây)
@@ -175,6 +225,31 @@ public class AddProductController {
             showAlert(Alert.AlertType.ERROR, "Lỗi nhập liệu", "Giá tiền, Năm, Số Km, Bảo hành... chỉ được nhập bằng số.");
         }
     }
+
+    private String getContractText() {
+        return "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                + "Độc lập - Tự do - Hạnh phúc\n\n"
+                + "ĐIỀU KHOẢN VÀ DỊCH VỤ DÀNH CHO NGƯỜI BÁN (SELLER AGREEMENT)\n\n"
+                + "Chào mừng bạn đến với Hệ thống Đấu giá Trực tuyến. Bằng việc đăng bán sản phẩm trên nền tảng của chúng tôi, bạn (sau đây gọi là \"Người Bán\") đồng ý tuân thủ toàn bộ các điều khoản và điều kiện dưới đây:\n\n"
+                + "ĐIỀU 1: TÍNH TRUNG THỰC VÀ NGUỒN GỐC SẢN PHẨM\n"
+                + "1.1. Người Bán cam kết chịu trách nhiệm 100% trước pháp luật về tính hợp pháp, nguồn gốc xuất xứ và quyền sở hữu hợp pháp của tài sản/sản phẩm được đưa lên đấu giá.\n"
+                + "1.2. Nghiêm cấm mọi hành vi đăng bán hàng giả, hàng nhái, hàng cấm, hàng vi phạm sở hữu trí tuệ hoặc tài sản đang có tranh chấp.\n"
+                + "1.3. Hình ảnh và mô tả sản phẩm phải phản ánh chính xác tình trạng thực tế của tài sản. Mọi hư hỏng (nếu có) phải được mô tả minh bạch.\n\n"
+                + "ĐIỀU 2: TRÁCH NHIỆM TRONG QUÁ TRÌNH ĐẤU GIÁ\n"
+                + "2.1. Sau khi sản phẩm được hệ thống phê duyệt và bắt đầu phiên đấu giá, Người Bán không được quyền tự ý hủy bỏ phiên đấu giá trừ trường hợp bất khả kháng có sự đồng ý của Ban Quản Trị.\n"
+                + "2.2. Người bán không được phép sử dụng tài khoản phụ hoặc nhờ người thân tham gia "
+                + "đẩy giá (shill bidding) dưới mọi hình thức. Nếu hệ thống phát hiện, tài sản sẽ bị hủy đấu giá và tài khoản Người Bán sẽ bị khóa vĩnh viễn.\n\n"
+                + "ĐIỀU 3: PHÍ DỊCH VỤ VÀ THANH TOÁN\n"
+                + "3.1. Nền tảng sẽ thu một khoản phí dịch vụ là X% (tùy thuộc vào danh mục sản phẩm) trên tổng giá trị giao dịch thành công (Giá chốt cuối cùng).\n"
+                + "3.2. Tiền thu được từ người mua (sau khi trừ phí dịch vụ) sẽ được chuyển vào ví điện tử của Người Bán trên hệ thống trong vòng 3-5 ngày làm việc kể từ khi người mua xác nhận đã nhận hàng thành công.\n\n"
+                + "ĐIỀU 4: BÀN GIAO SẢN PHẨM\n"
+                + "4.1. Sau khi phiên đấu giá kết thúc và người mua hoàn tất thanh toán, Người Bán có trách nhiệm đóng gói cẩn thận và giao hàng trong vòng 48 giờ.\n"
+                + "4.2. Mọi rủi ro trong quá trình vận chuyển do lỗi đóng gói kém chất lượng sẽ do Người Bán hoàn toàn chịu trách nhiệm bồi thường.\n\n"
+                + "ĐIỀU 5: XỬ LÝ VI PHẠM\n"
+                + "5.1. Vi phạm bất kỳ điều khoản nào trên đây sẽ dẫn đến việc đình chỉ tài khoản, đóng băng số dư trong ví tạm thời để giải quyết tranh chấp, và trong trường hợp nghiêm trọng, hồ sơ sẽ được chuyển giao cho cơ quan chức năng có thẩm quyền.\n\n"
+                + "Bằng việc đánh dấu vào ô \"Tôi đã đọc và đồng ý\", bạn xác nhận đã hiểu rõ và cam kết thi hành nghiêm túc bản thỏa thuận này.";
+    }
+
 
     @FXML
     private void goBack() {

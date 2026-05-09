@@ -19,7 +19,7 @@
                         <Label text="⚖" textFill="white">
                             <font><Font name="System Bold" size="80.0" /></font>
                         </Label>
-                        <Label text="AUCTION PRO" textFill="white">
+                        <Label text="AUCTION SYSTEM" textFill="white">
                             <font><Font name="Segoe UI Black" size="32.0" /></font>
                         </Label>
                         <Separator maxWidth="150" opacity="0.3" />

@@ -75,7 +75,8 @@ public class HomeController {
 
                                 if (i < topAuctions.size()) {
                                     AuctionModel a = topAuctions.get(i);
-                                    row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 15; -fx-padding: 10 25; -fx-min-height: 55;");
+
+                                    row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 15; -fx-padding: 10 25; -fx-min-height: 55; -fx-cursor: hand;");
 
                                     String shortId = a.bidProduct != null && a.bidProduct.id.length() >= 4
                                             ? a.bidProduct.id.substring(0, 4).toUpperCase() : "N/A";
@@ -126,6 +127,27 @@ public class HomeController {
                                             }
                                         });
                                     }
+
+                                    // SỬA: Bắt sự kiện click vào dòng sản phẩm để mở màn hình chi tiết
+                                    row.setOnMouseClicked(event -> {
+                                        try {
+                                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/AuctionDetail.fxml"));
+                                            Node view = loader.load();
+
+                                            AuctionDetailController detailController = loader.getController();
+
+                                            // Truyền thẳng object AuctionModel (biến 'a') vào hàm có sẵn
+                                            detailController.setAuctionData(a);
+
+                                            Pane contentArea = (Pane) row.getScene().lookup("#contentArea");
+                                            if (contentArea != null) {
+                                                contentArea.getChildren().setAll(view);
+                                            }
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                            System.out.println("Lỗi khi mở trang chi tiết sản phẩm!");
+                                        }
+                                    });
 
                                     row.getChildren().addAll(lblId, lblName, spacer, lblPrice, lblTimePrefix, lblTime);
 
