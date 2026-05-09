@@ -34,8 +34,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING) // Lưu chữ SELLER, BIDDER
     protected Role role;
 
+    // SỬA DÒNG NÀY: Chuyển thành URL để client có thể gọi qua WebConfig
     @Column(name = "avatar_url", length = 700)
-    protected String avatarUrl = "/images/avatar/default-avatarmacdinh.png";
+    protected String avatarUrl = "/uploads/images/avatar/avatarmacdinh.png";
 
     // THÊM TRƯỜNG NÀY ĐỂ QUẢN LÝ BAN USER
     protected boolean isBanned = false;
