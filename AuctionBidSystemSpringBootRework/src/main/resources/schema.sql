@@ -4,6 +4,7 @@
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS bid_transactions;
 DROP TABLE IF EXISTS auctions;
+DROP TABLE IF EXISTS item_image_urls; -- Thêm bảng phụ của Item (chứa List imageUrls)
 DROP TABLE IF EXISTS arts;
 DROP TABLE IF EXISTS electronics;
 DROP TABLE IF EXISTS vehicles;
@@ -28,6 +29,7 @@ CREATE TABLE users (
                        number_phone VARCHAR(20) UNIQUE,
                        citizen_id VARCHAR(50) UNIQUE,
                        role VARCHAR(20) NOT NULL,
+                       avatar_url VARCHAR(700) DEFAULT '/images/avatar/default-avatarmacdinh.png', -- Đã bổ sung trường avatar_url
                        is_banned BOOLEAN DEFAULT FALSE
 );
 
@@ -70,6 +72,13 @@ CREATE TABLE items (
                        item_type VARCHAR(50) NOT NULL,
                        seller_id VARCHAR(36) NOT NULL,
                        CONSTRAINT fk_item_seller FOREIGN KEY (seller_id) REFERENCES sellers(id)
+);
+
+-- Bảng phụ lưu List<String> imageUrls của Item (Do @ElementCollection tạo ra)
+CREATE TABLE item_image_urls (
+                                 item_id VARCHAR(36) NOT NULL,
+                                 image_urls VARCHAR(255),
+                                 CONSTRAINT fk_item_images FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
 -- Các bảng con kế thừa Item
