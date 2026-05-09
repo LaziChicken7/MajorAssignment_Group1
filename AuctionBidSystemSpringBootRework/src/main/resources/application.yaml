@@ -13,7 +13,7 @@ spring:
   # ĐOẠN NÀY ĐỂ CHẠY FILE SCHEMA.SQL
   sql:
     init:
-      mode: none
+      mode: never
 
   jpa:
     hibernate:
