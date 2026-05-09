@@ -29,4 +29,15 @@ public class ItemController {
         apiResponse.setResult(itemService.getAllItems());
         return apiResponse;
     }
+
+    // Endpoint cho Admin hủy sản phẩm
+    // Lấy itemId từ path, lý do hủy (reason) từ request body
+    @PutMapping("/cancel/{itemId}")
+    public ApiResponse<String> cancelItemByAdmin(
+            @PathVariable String itemId,
+            @RequestBody org.auctionfx.auctionbidsystemspringbootrework.dto.request.ItemCancellationRequest request) {
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(itemService.cancelItemByAdmin(itemId, request));
+        return apiResponse;
+    }
 }

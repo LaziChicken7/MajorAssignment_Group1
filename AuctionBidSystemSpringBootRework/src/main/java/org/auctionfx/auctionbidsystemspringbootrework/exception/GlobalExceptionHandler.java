@@ -74,6 +74,46 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(500).body(apiResponse);
     }
 
+    // THÊM: Xử lý ItemException
+    @ExceptionHandler(value = ItemException.class)
+    ResponseEntity<ApiResponse> handlingItemException(ItemException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    // THÊM: Xử lý AuctionException
+    @ExceptionHandler(value = AuctionException.class)
+    ResponseEntity<ApiResponse> handlingAuctionException(AuctionException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    // THÊM: Xử lý PaymentException
+    @ExceptionHandler(value = PaymentException.class)
+    ResponseEntity<ApiResponse> handlingPaymentException(PaymentException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    // THÊM: Xử lý NotificationException
+    @ExceptionHandler(value = NotificationException.class)
+    ResponseEntity<ApiResponse> handlingNotificationException(NotificationException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> handlingException(Exception exception) {
         ApiResponse apiResponse = new ApiResponse();

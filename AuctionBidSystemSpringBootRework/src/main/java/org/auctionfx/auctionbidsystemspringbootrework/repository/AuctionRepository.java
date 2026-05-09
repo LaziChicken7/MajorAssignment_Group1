@@ -1,6 +1,7 @@
 package org.auctionfx.auctionbidsystemspringbootrework.repository;
 
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.item.Item;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AuctionRepository extends JpaRepository<Auction, String> {
@@ -24,4 +26,7 @@ public interface AuctionRepository extends JpaRepository<Auction, String> {
             "AND a.transactionStatus IS NOT NULL " +
             "AND (a.winningUser IS NULL OR a.winningUser.userName != :userName OR a.transactionStatus = :failedStatus)")
     List<Auction> findLostAuctions(@Param("userName") String userName, @Param("failedStatus") TransactionStatus failedStatus);
+
+    // 3. TÌM AUCTION THEO PRODUCT
+    Optional<Auction> findByBidProduct(Item item);
 }

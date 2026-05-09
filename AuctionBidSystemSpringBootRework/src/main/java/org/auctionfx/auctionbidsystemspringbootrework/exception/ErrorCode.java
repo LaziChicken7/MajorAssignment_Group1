@@ -12,6 +12,7 @@ public enum ErrorCode {
     // INVALID EXCEPTION
     USERNAME_INVALID(2001, "Username must be at least 4 characters and not blank"),
     PASSWORD_INVALID(2002, "Password must be at least 8 characters and not blank"),
+    REASON_INVALID(2003, "Reason must not be blank"),
     // ===========================================================================
     // LOGIN EXCEPTION
     USERNAME_NOT_FOUND(3001, "Username not found"),

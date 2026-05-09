@@ -1,7 +1,9 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.NotificationResponse;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.notification.Notification;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.NotificationType;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.NotificationException;
@@ -122,5 +124,20 @@ public class NotificationService {
         notificationRepository.delete(oldNotif);
 
         return "Decline payment successfully!";
+    }
+
+    
+    // Tạo notification mới <-> nguyên tắc DRY
+    @Transactional
+    public Notification createNotification(User user, Auction auction, NotificationType type, String title, String description) {
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setAuction(auction);
+        notification.setType(type);
+        notification.setTitle(title);
+        notification.setDescription(description);
+        notification.setRead(false);
+
+        return notificationRepository.save(notification);
     }
 }
