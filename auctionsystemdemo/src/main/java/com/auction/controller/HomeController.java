@@ -171,6 +171,12 @@ public class HomeController {
                                     double percent = startPrice == 0 ? 0 : (growthAmount / startPrice) * 100;
                                     double progress = startPrice == 0 ? 0 : Math.min(growthAmount / startPrice, 1.0);
 
+                                    // ========================================================
+                                    // LOGIC ĐỔI MÀU VÀ THÊM MŨI TÊN NẾU > 100%
+                                    // ========================================================
+                                    String colorHex = (percent > 100) ? "#e74c3c" : "#2ecc71"; // Đỏ nếu vượt 100%, Xanh nếu <= 100%
+                                    String percentText = (percent > 100) ? String.format("+%.1f%% ↑", percent) : String.format("+%.1f%%", percent);
+
                                     VBox statBox = new VBox(8);
                                     statBox.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 10; -fx-padding: 12 15;");
 
@@ -179,8 +185,10 @@ public class HomeController {
                                     lblStatName.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #333;");
                                     Region statSpacer = new Region();
                                     HBox.setHgrow(statSpacer, Priority.ALWAYS);
+
+                                    // Đổi màu Label số tiền
                                     Label lblGrowth = new Label(String.format("+%,.0f VND", growthAmount).replace(",", "."));
-                                    lblGrowth.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #2ecc71;");
+                                    lblGrowth.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: " + colorHex + ";");
                                     header.getChildren().addAll(lblStatName, statSpacer, lblGrowth);
 
                                     HBox barRow = new HBox(10);
@@ -193,11 +201,15 @@ public class HomeController {
                                     ProgressBar pb = new ProgressBar(progress);
                                     pb.setMaxWidth(Double.MAX_VALUE);
                                     HBox.setHgrow(pb, Priority.ALWAYS);
-                                    pb.getStyleClass().add("modern-progress-bar");
 
-                                    Label lblPercent = new Label(String.format("+%.1f%%", percent));
-                                    lblPercent.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #2ecc71;");
-                                    lblPercent.setPrefWidth(60);
+                                    // Thay đổi Class CSS của thanh ProgressBar tùy theo %
+                                    pb.getStyleClass().removeAll("modern-progress-bar", "progress-alert", "progress-normal");
+                                    pb.getStyleClass().add(percent > 100 ? "progress-alert" : "progress-normal");
+
+                                    // Đổi màu Label phần trăm
+                                    Label lblPercent = new Label(percentText);
+                                    lblPercent.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: " + colorHex + ";");
+                                    lblPercent.setPrefWidth(70); // Tăng thêm 10px để đủ chỗ chứa dấu mũi tên
                                     lblPercent.setAlignment(Pos.CENTER_RIGHT);
 
                                     barRow.getChildren().addAll(lblStart, pb, lblPercent);
@@ -261,9 +273,12 @@ public class HomeController {
                                 Label lblDesc = new Label(n.description);
                                 lblDesc.setStyle("-fx-font-size: 13px; -fx-text-fill: #666;");
                                 lblDesc.setWrapText(true);
-                                lblDesc.setMaxWidth(220);
+                                lblDesc.setMaxWidth(Double.MAX_VALUE);
 
+                                // SỬA Ở ĐÂY: Cho phép chữ kéo dài tối đa thay vì bị khóa ở 220px
+                                lblDesc.setMaxWidth(Double.MAX_VALUE);
                                 textVBox.getChildren().addAll(lblTitle, lblDesc);
+                                HBox.setHgrow(textVBox, Priority.ALWAYS);
 
                                 Region spacer = new Region();
                                 HBox.setHgrow(spacer, Priority.ALWAYS);

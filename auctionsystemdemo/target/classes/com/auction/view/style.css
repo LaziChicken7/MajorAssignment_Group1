@@ -628,7 +628,6 @@
 }
 
 
-//TIME
 /* Container bao quanh */
 .clock-container {
     -fx-background-color: rgba(255, 255, 255, 0.08); /* Tạo nền trắng cực mờ */
@@ -664,4 +663,34 @@
     -fx-background-radius: 50; /* Bo tròn tuyệt đối */
     -fx-border-color: rgba(255, 255, 255, 0.3);
     -fx-border-radius: 50;
+}
+
+/* =========================================
+   18. CUSTOM PROGRESS BAR (THANH THỐNG KÊ ĐỘNG)
+   ========================================= */
+.progress-normal, .progress-alert {
+    -fx-pref-height: 12px;
+}
+
+/* Nền xám dùng chung cho cả 2 loại thanh */
+.progress-normal > .track,
+.progress-alert > .track {
+    -fx-background-color: #E8ECEF;
+    -fx-background-radius: 10;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+}
+
+/* Thanh màu Xanh (Bình thường <= 100%) */
+.progress-normal > .bar {
+    -fx-background-color: linear-gradient(to right, #2ecc71, #27ae60);
+    -fx-background-radius: 10;
+    -fx-background-insets: 0;
+}
+
+/* Thanh màu Đỏ (Vượt mức > 100%) */
+.progress-alert > .bar {
+    -fx-background-color: linear-gradient(to right, #ff7675, #d63031);
+    -fx-background-radius: 10;
+    -fx-background-insets: 0;
 }

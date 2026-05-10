@@ -84,15 +84,28 @@ public class AddProductController {
     @FXML
     private void handleUploadImage() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Ảnh", "*.png", "*.jpg"));
-        
-        // Dùng showOpenMultipleDialog để cho phép bôi đen chọn nhiều ảnh
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Ảnh", "*.png", "*.jpg", "*.jpeg"));
+
         java.util.List<File> files = fileChooser.showOpenMultipleDialog(txtProductName.getScene().getWindow());
-        
+
         if (files != null && !files.isEmpty()) {
+
+            // ==========================================================
+            // FIX: KIỂM TRA DUNG LƯỢNG ẢNH TRƯỚC KHI CHO VÀO LIST
+            // ==========================================================
+            long maxFileSize = 5 * 1024 * 1024; // Giới hạn 5MB cho mỗi ảnh
+            for (File f : files) {
+                if (f.length() > maxFileSize) {
+                    showAlert(Alert.AlertType.WARNING, "Ảnh quá lớn",
+                            "Bức ảnh '" + f.getName() + "' nặng hơn 5MB.\nVui lòng chọn ảnh nhẹ hơn để tải lên!");
+                    return; // Chặn luôn, không load ảnh lên màn hình nữa
+                }
+            }
+
+            // Nếu qua ải kiểm tra dung lượng thì mới add vào list
             selectedFiles.addAll(files);
             imagePreviewBox.getChildren().clear(); // Xóa ảnh cũ trên màn hình
-            
+
             // Vòng lặp vẽ từng cái ảnh nhỏ nhỏ xếp cạnh nhau
             for (File f : selectedFiles) {
                 ImageView imgView = new ImageView(new javafx.scene.image.Image(f.toURI().toString()));
@@ -115,49 +128,99 @@ public class AddProductController {
 
     @FXML
     private void handleConfirmAdd() {
-        // 1. Lấy dữ liệu cơ bản để validate trước khi hiện Popup
+        // 1. Lấy dữ liệu cơ bản để validate
         String name = txtProductName.getText().trim();
         String desc = txtDescription.getText().trim();
         String priceStr = txtStartPrice.getText().replace(".", "").replace(",", "").trim();
 
-        // Kiểm tra rỗng: Đảm bảo điền đủ mới cho xem Hợp đồng
         if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || dpStartDate.getValue() == null || dpEndDate.getValue() == null) {
             showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin Tên, Giá, Ngày Giờ!");
             return;
         }
 
-        // 2. Tạo Popup Hợp đồng
+        // 2. Tạo Popup Hợp đồng hiện đại
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Điều khoản và Dịch vụ");
-        dialog.setHeaderText("HỢP ĐỒNG ĐĂNG BÁN SẢN PHẨM ĐẤU GIÁ");
 
-        TextArea textArea = new TextArea(getContractText());
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        textArea.setPrefSize(600, 400);
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.setStyle("-fx-background-color: white; -fx-font-family: 'Segoe UI', Arial, sans-serif;");
 
-        CheckBox chkPopupAgree = new CheckBox("Tôi xác nhận đã đọc và đồng ý với các điều khoản");
-        chkPopupAgree.setStyle("-fx-font-size: 12px; -fx-padding: 10 0 0 0; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-cursor: hand;");
+        // ========================================================
+        // FIX LỖI THANH CUỘN: Lấy CSS từ cả Scene và Root Node
+        // ========================================================
+        if (txtProductName.getScene() != null) {
+            // 1. Lấy CSS nếu nó được gắn ở Scene
+            dialogPane.getStylesheets().addAll(txtProductName.getScene().getStylesheets());
 
-        VBox dialogContent = new VBox(10);
-        dialogContent.getChildren().addAll(textArea, chkPopupAgree);
-        dialog.getDialogPane().setContent(dialogContent);
+            // 2. Lấy CSS nếu nó được khai báo trực tiếp trong file FXML (Root Node)
+            javafx.scene.Parent root = txtProductName.getScene().getRoot();
+            if (root != null) {
+                dialogPane.getStylesheets().addAll(root.getStylesheets());
+            }
+        }
 
-        // Thêm nút Đồng ý và Hủy
+        // Tiêu đề của Dialog
+        Label lblTitle = new Label("HỢP ĐỒNG ĐĂNG BÁN SẢN PHẨM");
+        lblTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0A439D;");
+        lblTitle.setMaxWidth(Double.MAX_VALUE);
+        lblTitle.setAlignment(javafx.geometry.Pos.CENTER);
+
+        // Nội dung hợp đồng
+        Label lblContent = new Label(getContractText());
+        lblContent.setWrapText(true);
+        lblContent.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-line-spacing: 6px; -fx-padding: 10 15 10 10;");
+        lblContent.setMaxWidth(560);
+
+        // Bọc nội dung vào ScrollPane
+        ScrollPane scrollPane = new ScrollPane(lblContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefSize(600, 350);
+
+        // Tắt thanh cuộn ngang (chỉ giữ thanh cuộn dọc)
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        // Gán class CSS "scroll-pane-table" (Tương ứng Mục 16 trong file CSS của bạn)
+        scrollPane.getStyleClass().add("scroll-pane-table");
+
+        // Xóa viền đen của ScrollPane
+        scrollPane.setStyle("-fx-background: white; -fx-background-color: white; -fx-border-color: #ecf0f1; -fx-border-radius: 10; -fx-background-radius: 10;");
+
+        // Checkbox xác nhận
+        CheckBox chkPopupAgree = new CheckBox("Tôi xác nhận đã đọc và đồng ý với các điều khoản dịch vụ");
+        chkPopupAgree.setStyle("-fx-font-size: 15px; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 10 0 0 0;");
+
+        // Gom nhóm layout
+        VBox dialogContent = new VBox(15);
+        dialogContent.setStyle("-fx-padding: 20;");
+        dialogContent.getChildren().addAll(lblTitle, scrollPane, chkPopupAgree);
+        dialogPane.setContent(dialogContent);
+
+        // 3. Thêm nút Đồng ý và Hủy
         ButtonType btnTypeAgree = new ButtonType("Đồng ý", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnTypeCancel = new ButtonType("Hủy", ButtonBar.ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().addAll(btnTypeAgree, btnTypeCancel);
+        dialogPane.getButtonTypes().addAll(btnTypeAgree, btnTypeCancel);
 
-        // Khóa nút Đồng ý mặc định
-        Node agreeButton = dialog.getDialogPane().lookupButton(btnTypeAgree);
-        agreeButton.setDisable(true);
+        // 4. CUSTOM CSS CHO NÚT HÌNH VIÊN THUỐC
+        Button btnAgree = (Button) dialogPane.lookupButton(btnTypeAgree);
+        Button btnCancel = (Button) dialogPane.lookupButton(btnTypeCancel);
 
-        // Tick Checkbox để mở khóa nút Đồng ý
+        btnCancel.setStyle("-fx-background-color: #f1f2f6; -fx-text-fill: #57606f; -fx-background-radius: 25; -fx-padding: 10 30; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        String disableStyle = "-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 10 30; -fx-font-size: 14px; -fx-font-weight: bold;";
+        String enableStyle = "-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 10 30; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(10,67,157,0.4), 8, 0, 0, 3);";
+
+        btnAgree.setStyle(disableStyle);
+        btnAgree.setDisable(true);
+
         chkPopupAgree.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            agreeButton.setDisable(!newValue);
+            btnAgree.setDisable(!newValue);
+            btnAgree.setStyle(newValue ? enableStyle : disableStyle);
         });
 
-        // 3. Hiển thị Popup. Nếu user bấm Đồng ý -> Chạy hàm xử lý gọi API
+        dialog.setHeaderText(null);
+        dialog.setGraphic(null);
+
+        // 5. Hiển thị Popup và xử lý kết quả
         dialog.showAndWait().ifPresent(response -> {
             if (response == btnTypeAgree) {
                 processActualSubmission(name, desc, priceStr);
@@ -232,6 +295,7 @@ public class AddProductController {
     }
 
     // HÀM 2: Gắn ảnh vào Item đã tạo
+    // HÀM 2: Gắn ảnh vào Item đã tạo
     private void uploadImagesToServer(String itemId, String formattedStartTime, String formattedEndTime) {
         new Thread(() -> {
             try {
@@ -243,29 +307,68 @@ public class AddProductController {
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
+                // =========================================================
+                // FIX 1: QUAN TRỌNG - THÊM TOKEN XÁC THỰC VÀO HEADER
+                // (Nếu biến lưu token của bạn trong SessionManager tên khác, hãy sửa lại chữ "token" nhé)
+                // =========================================================
+                try {
+                    // Giả sử token được lưu ở biến SessionManager.token
+                    // Nếu bạn lưu ở biến khác (VD: SessionManager.jwt, SessionManager.accessToken) thì đổi lại
+                    if (SessionManager.token != null && !SessionManager.token.isEmpty()) {
+                        conn.setRequestProperty("Authorization", "Bearer " + SessionManager.token);
+                    }
+                } catch (Exception ignored) {
+                    // Bỏ qua nếu SessionManager không có thuộc tính token
+                }
+
                 java.io.OutputStream out = conn.getOutputStream();
                 java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.OutputStreamWriter(out, "UTF-8"), true);
 
                 for (File file : selectedFiles) {
-                    writer.append("--" + boundary).append("\r\n");
-                    writer.append("Content-Disposition: form-data; name=\"files\"; filename=\"" + file.getName() + "\"").append("\r\n");
-                    writer.append("Content-Type: " + java.nio.file.Files.probeContentType(file.toPath())).append("\r\n\r\n");
+                    writer.append("--").append(boundary).append("\r\n");
+                    writer.append("Content-Disposition: form-data; name=\"files\"; filename=\"").append(file.getName()).append("\"\r\n");
+
+                    // =========================================================
+                    // FIX 2: BẮT LỖI NULL CONTENT-TYPE CỦA WINDOWS
+                    // =========================================================
+                    String contentType = java.nio.file.Files.probeContentType(file.toPath());
+                    if (contentType == null) {
+                        contentType = "image/jpeg"; // Mặc định nếu HĐH không tự nhận diện được ảnh
+                    }
+                    writer.append("Content-Type: ").append(contentType).append("\r\n\r\n");
                     writer.flush();
+
+                    // Copy file đẩy lên server
                     java.nio.file.Files.copy(file.toPath(), out);
                     out.flush();
                     writer.append("\r\n").flush();
                 }
-                writer.append("--" + boundary + "--\r\n").flush();
+                writer.append("--").append(boundary).append("--\r\n").flush();
 
-                // Đợi upload xong thì sang BƯỚC C: Tạo phiên đấu giá
+                // Đợi upload xong thì kiểm tra kết quả
                 int code = conn.getResponseCode();
-                if(code >= 200 && code < 300) {
+                System.out.println("API Upload Image Response Code: " + code); // IN RA CONSOLE ĐỂ KIỂM TRA
+
+                if (code >= 200 && code < 300) {
+                    // THÀNH CÔNG -> Chuyển sang Bước C: Tạo phiên đấu giá
                     createAuctionForData(itemId, formattedStartTime, formattedEndTime);
                 } else {
-                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi Upload", "Không thể tải ảnh, nhưng sản phẩm đã được tạo."));
+                    // Đọc chi tiết nguyên nhân lỗi từ Server
+                    java.io.InputStream errStream = conn.getErrorStream();
+                    String errorMessage = "Lỗi không xác định";
+                    if (errStream != null) {
+                        java.util.Scanner s = new java.util.Scanner(errStream).useDelimiter("\\A");
+                        errorMessage = s.hasNext() ? s.next() : "";
+                        System.out.println("Chi tiết lỗi từ Server: " + errorMessage);
+                    }
+
+                    // Hiển thị mã lỗi lên Dialog cho bạn dễ biết
+                    final String errorTitle = "Mã lỗi: " + code;
+                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi Upload", "Không thể tải ảnh (" + errorTitle + ").\nSản phẩm đã tạo thành công nhưng không có ảnh."));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi kết nối", "Đứt mạng hoặc server từ chối kết nối khi tải ảnh."));
             }
         }).start();
     }
@@ -292,9 +395,7 @@ public class AddProductController {
     }
 
     private String getContractText() {
-        return "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
-                + "Độc lập - Tự do - Hạnh phúc\n\n"
-                + "ĐIỀU KHOẢN VÀ DỊCH VỤ DÀNH CHO NGƯỜI BÁN (SELLER AGREEMENT)\n\n"
+        return "ĐIỀU KHOẢN VÀ DỊCH VỤ DÀNH CHO NGƯỜI BÁN (SELLER AGREEMENT)\n\n"
                 + "Chào mừng bạn đến với Hệ thống Đấu giá Trực tuyến. Bằng việc đăng bán sản phẩm trên nền tảng của chúng tôi, bạn (sau đây gọi là \"Người Bán\") đồng ý tuân thủ toàn bộ các điều khoản và điều kiện dưới đây:\n\n"
                 + "ĐIỀU 1: TÍNH TRUNG THỰC VÀ NGUỒN GỐC SẢN PHẨM\n"
                 + "1.1. Người Bán cam kết chịu trách nhiệm 100% trước pháp luật về tính hợp pháp, nguồn gốc xuất xứ và quyền sở hữu hợp pháp của tài sản/sản phẩm được đưa lên đấu giá.\n"

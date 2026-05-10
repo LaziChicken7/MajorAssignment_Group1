@@ -31,15 +31,18 @@ public class AuctionController {
 
     @FXML private ListView<AuctionModel> auctionListView;
     @FXML private Label lblBalance;
+    @FXML private Label eyeIconText; // Nút Ẩn/Hiện
     @FXML private ComboBox<String> cbFilter;
     @FXML private ComboBox<String> cbSort;
 
-    // List gốc để lưu trữ toàn bộ dữ liệu tải về từ API
     private List<AuctionModel> allAuctions = new ArrayList<>();
+
+    // --- BIẾN TRẠNG THÁI ẨN/HIỆN TIỀN ---
+    private String realBalanceText = "0 VND";
+    private boolean isHidden = true; // Mặc định vào app là giấu tiền
 
     @FXML
     public void initialize() {
-        // Cấu hình ComboBox Lọc (Khớp hoàn toàn với Enum AuctionStatus ở Backend)
         cbFilter.setItems(FXCollections.observableArrayList(
                 "Tất cả trạng thái",
                 "Sắp diễn ra (OPEN)",
@@ -50,19 +53,16 @@ public class AuctionController {
         ));
         cbFilter.setValue("Đang diễn ra (RUNNING)");
 
-        // Cấu hình ComboBox Sắp xếp
         cbSort.setItems(FXCollections.observableArrayList(
                 "Mặc định",
                 "Kết thúc sớm nhất (Tăng dần)",
                 "Kết thúc muộn nhất (Giảm dần)"
         ));
-        cbSort.setValue("Mặc định");
+        cbSort.setValue("Kết thúc sớm nhất (Tăng dần)");
 
-        // Bắt sự kiện khi người dùng thay đổi lựa chọn
         cbFilter.setOnAction(e -> applyFilterAndSort());
         cbSort.setOnAction(e -> applyFilterAndSort());
 
-        // Cấu hình cách hiển thị từng dòng trong ListView
         auctionListView.setCellFactory(param -> new ListCell<AuctionModel>() {
             @Override
             protected void updateItem(AuctionModel item, boolean empty) {
@@ -80,7 +80,6 @@ public class AuctionController {
             }
         });
 
-        // Bắt sự kiện Click vào 1 sản phẩm
         auctionListView.setOnMouseClicked(event -> {
             AuctionModel selected = auctionListView.getSelectionModel().getSelectedItem();
             if (selected != null) showDetail(selected);
@@ -91,7 +90,7 @@ public class AuctionController {
 
     @FXML
     public void loadData() {
-        // 1. Load Số dư ví
+        // 1. Lấy số dư ví (Có xử lý ẩn/hiện)
         if (SessionManager.userName != null) {
             ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(res -> {
                 Platform.runLater(() -> {
@@ -99,14 +98,23 @@ public class AuctionController {
                         ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                         if (apiRes.code == 1000) {
                             WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
-                            lblBalance.setText(String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", "."));
+
+                            // Lưu số tiền thật vào biến
+                            realBalanceText = String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", ".");
+
+                            // Cập nhật giao diện tùy theo trạng thái đang khóa hay mở
+                            if (isHidden) {
+                                lblBalance.setText("****** VND");
+                            } else {
+                                lblBalance.setText(realBalanceText);
+                            }
                         }
                     }
                 });
             });
         }
 
-        // 2. Load Danh sách đấu giá
+        // 2. Lấy danh sách đấu giá
         ApiService.getAsync("/auctions").thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -114,8 +122,6 @@ public class AuctionController {
                     if (apiRes.code == 1000) {
                         Type listType = new TypeToken<List<AuctionModel>>(){}.getType();
                         allAuctions = ApiService.gson.fromJson(apiRes.result, listType);
-
-                        // Áp dụng bộ lọc và sắp xếp ngay sau khi load xong data
                         applyFilterAndSort();
                     }
                 }
@@ -123,54 +129,47 @@ public class AuctionController {
         });
     }
 
+    // --- HÀM XỬ LÝ CLICK NÚT HIỆN/ẨN ---
+    @FXML
+    public void toggleBalanceVisibility() {
+        isHidden = !isHidden; // Đảo trạng thái
+        if (isHidden) {
+            lblBalance.setText("****** VND");
+            eyeIconText.setText("Hiện");
+        } else {
+            lblBalance.setText(realBalanceText);
+            eyeIconText.setText("Ẩn");
+        }
+    }
+
     private void applyFilterAndSort() {
         if (allAuctions == null || allAuctions.isEmpty()) return;
-
         Stream<AuctionModel> stream = allAuctions.stream();
 
-        // XỬ LÝ LỌC (Filter theo 5 trạng thái)
         String filterValue = cbFilter.getValue();
         if (filterValue != null && !filterValue.equals("Tất cả trạng thái")) {
-            if (filterValue.contains("OPEN")) {
-                stream = stream.filter(a -> "OPEN".equals(a.status));
-            } else if (filterValue.contains("RUNNING")) {
-                stream = stream.filter(a -> "RUNNING".equals(a.status));
-            } else if (filterValue.contains("FINISHED")) {
-                stream = stream.filter(a -> "FINISHED".equals(a.status));
-            } else if (filterValue.contains("PAID")) {
-                stream = stream.filter(a -> "PAID".equals(a.status));
-            } else if (filterValue.contains("CANCELLED")) {
-                stream = stream.filter(a -> "CANCELLED".equals(a.status));
-            }
+            if (filterValue.contains("OPEN")) stream = stream.filter(a -> "OPEN".equals(a.status));
+            else if (filterValue.contains("RUNNING")) stream = stream.filter(a -> "RUNNING".equals(a.status));
+            else if (filterValue.contains("FINISHED")) stream = stream.filter(a -> "FINISHED".equals(a.status));
+            else if (filterValue.contains("PAID")) stream = stream.filter(a -> "PAID".equals(a.status));
+            else if (filterValue.contains("CANCELLED")) stream = stream.filter(a -> "CANCELLED".equals(a.status));
         }
 
-        // XỬ LÝ SẮP XẾP (Sort)
         String sortValue = cbSort.getValue();
         if ("Kết thúc sớm nhất (Tăng dần)".equals(sortValue) || "Kết thúc muộn nhất (Giảm dần)".equals(sortValue)) {
             stream = stream.sorted((a1, a2) -> {
                 try {
-                    // Xử lý chuỗi thời gian an toàn
                     String timeStr1 = (a1.endTime != null) ? a1.endTime.replace(" ", "T") : "9999-12-31T23:59:59";
                     String timeStr2 = (a2.endTime != null) ? a2.endTime.replace(" ", "T") : "9999-12-31T23:59:59";
-
                     LocalDateTime t1 = LocalDateTime.parse(timeStr1);
                     LocalDateTime t2 = LocalDateTime.parse(timeStr2);
-
-                    if ("Kết thúc sớm nhất (Tăng dần)".equals(sortValue)) {
-                        return t1.compareTo(t2);
-                    } else {
-                        return t2.compareTo(t1);
-                    }
-                } catch (DateTimeParseException e) {
-                    return 0; // Bỏ qua nếu parse lỗi
-                }
+                    return "Kết thúc sớm nhất (Tăng dần)".equals(sortValue) ? t1.compareTo(t2) : t2.compareTo(t1);
+                } catch (DateTimeParseException e) { return 0; }
             });
         }
 
-        // Đẩy list đã xử lý vào giao diện
         List<AuctionModel> filteredList = stream.collect(Collectors.toList());
-        ObservableList<AuctionModel> observableList = FXCollections.observableArrayList(filteredList);
-        auctionListView.setItems(observableList);
+        auctionListView.setItems(FXCollections.observableArrayList(filteredList));
     }
 
     private void showDetail(AuctionModel item) {
