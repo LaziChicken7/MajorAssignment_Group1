@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -57,14 +58,14 @@ public class HomeController {
                             Type listType = new TypeToken<List<AuctionModel>>() {}.getType();
                             List<AuctionModel> allAuctions = ApiService.gson.fromJson(apiRes.result, listType);
 
-                            // 1. Lọc sản phẩm cho khu vực "Sản phẩm nổi bật" (Sắp xếp theo GIÁ)
+                            // 1. "Sản phẩm nổi bật": Sắp xếp theo GIÁ THẦU cao nhất
                             List<AuctionModel> featuredAuctions = allAuctions.stream()
                                     .filter(a -> "RUNNING".equals(a.status) || "OPEN".equals(a.status))
                                     .sorted((a1, a2) -> Double.compare(a2.highestBid, a1.highestBid))
                                     .limit(4)
                                     .collect(Collectors.toList());
 
-                            // 2. Lọc sản phẩm cho khu vực "Thống kê" (Sắp xếp theo PHẦN TRĂM %)
+                            // 2. "Thống kê": Sắp xếp theo TỶ LỆ PHẦN TRĂM (%) tăng trưởng
                             List<AuctionModel> growthStats = allAuctions.stream()
                                     .filter(a -> "RUNNING".equals(a.status) || "OPEN".equals(a.status))
                                     .sorted((a1, a2) -> {
@@ -72,7 +73,7 @@ public class HomeController {
                                         double p1 = (s1 == 0) ? 0 : (a1.highestBid - s1) / s1;
                                         double s2 = (a2.bidProduct != null) ? a2.bidProduct.startPrice : 0;
                                         double p2 = (s2 == 0) ? 0 : (a2.highestBid - s2) / s2;
-                                        return Double.compare(p2, p1); // Sắp xếp % giảm dần
+                                        return Double.compare(p2, p1); // Giảm dần theo %
                                     })
                                     .limit(4)
                                     .collect(Collectors.toList());
@@ -109,11 +110,7 @@ public class HomeController {
                                     lblPrice.setStyle("-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 20; -fx-font-weight: bold; -fx-font-size: 15px;");
 
                                     String baseColor = "OPEN".equals(a.status) ? "#3498db" : "#f39c12";
-                                    String prefixText = "OPEN".equals(a.status) ? "Sắp bắt đầu sau:" : "Thời gian còn lại:";
                                     String targetTimeStr = "OPEN".equals(a.status) ? a.startTime : a.endTime;
-
-                                    Label lblTimePrefix = new Label(prefixText);
-                                    lblTimePrefix.setStyle("-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;");
 
                                     Label lblTime = new Label("00:00:00");
                                     lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 20; -fx-font-weight: bold; -fx-font-size: 15px;");
@@ -128,11 +125,8 @@ public class HomeController {
                                                 lblTime.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 20; -fx-font-weight: bold; -fx-font-size: 15px;");
                                             } else {
                                                 java.time.Duration duration = java.time.Duration.between(now, targetTime);
-                                                long hours = duration.toHours();
-                                                long minutes = duration.toMinutesPart();
-                                                long seconds = duration.toSecondsPart();
-                                                lblTime.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
-                                                if ("RUNNING".equals(a.status) && hours == 0 && minutes < 10) {
+                                                lblTime.setText(String.format("%02d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart()));
+                                                if ("RUNNING".equals(a.status) && duration.toHours() == 0 && duration.toMinutesPart() < 10) {
                                                     lblTime.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 20; -fx-font-weight: bold; -fx-font-size: 15px;");
                                                 }
                                             }
@@ -143,36 +137,28 @@ public class HomeController {
                                         try {
                                             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/AuctionDetail.fxml"));
                                             Node view = loader.load();
-                                            AuctionDetailController detailController = loader.getController();
-                                            detailController.setAuctionData(a);
+                                            ((AuctionDetailController)loader.getController()).setAuctionData(a);
                                             Pane contentArea = (Pane) row.getScene().lookup("#contentArea");
                                             if (contentArea != null) contentArea.getChildren().setAll(view);
                                         } catch (IOException e) { e.printStackTrace(); }
                                     });
-
-                                    row.getChildren().addAll(lblId, lblName, spacer, lblPrice, lblTimePrefix, lblTime);
+                                    row.getChildren().addAll(lblId, lblName, spacer, lblPrice, lblTime);
                                 } else {
                                     row.setStyle("-fx-background-color: transparent; -fx-min-height: 55;");
                                 }
                                 vboxFeaturedAuctions.getChildren().add(row);
                             }
 
-                            // HIỂN THỊ KHU VỰC THỐNG KÊ TĂNG TRƯỞNG
+                            // HIỂN THỊ KHU VỰC THỐNG KÊ TĂNG TRƯỞNG (ĐÃ SỬA MÀU VÀ MŨI TÊN)
                             if (growthStats.isEmpty()) {
-                                Label emptyLbl = new Label("Chưa có dữ liệu thống kê.");
-                                emptyLbl.setStyle("-fx-text-fill: #888; -fx-font-style: italic; -fx-font-size: 15px;");
-                                vboxStatistics.getChildren().add(emptyLbl);
+                                vboxStatistics.getChildren().add(new Label("Chưa có dữ liệu thống kê."));
                             } else {
                                 for (AuctionModel a : growthStats) {
                                     String name = a.bidProduct != null ? a.bidProduct.name : "Sản phẩm ẩn";
                                     double startPrice = a.bidProduct != null ? a.bidProduct.startPrice : 0;
-                                    double currentPrice = a.highestBid;
+                                    double growthAmount = a.highestBid - startPrice;
+                                    double percent = (startPrice == 0) ? 0 : (growthAmount / startPrice) * 100;
 
-                                    double growthAmount = currentPrice - startPrice;
-                                    double percent = startPrice == 0 ? 0 : (growthAmount / startPrice) * 100;
-                                    double progress = startPrice == 0 ? 0 : Math.min(growthAmount / startPrice, 1.0);
-
-                                    // LOGIC MÀU SẮC VÀ MŨI TÊN KHI > 100%
                                     String statusColor = (percent > 100) ? "#e74c3c" : "#2ecc71";
                                     String arrow = (percent > 100) ? " ↑" : "";
 
@@ -190,17 +176,15 @@ public class HomeController {
 
                                     HBox barRow = new HBox(10);
                                     barRow.setAlignment(Pos.CENTER_LEFT);
-
                                     Label lblStart = new Label(String.format("Từ: %,.0f", startPrice).replace(",", "."));
                                     lblStart.setStyle("-fx-font-size: 13px; -fx-text-fill: #7f8c8d;");
-                                    lblStart.setPrefWidth(110);
+                                    lblStart.setPrefWidth(100);
 
-                                    ProgressBar pb = new ProgressBar(progress);
+                                    ProgressBar pb = new ProgressBar(Math.min(percent / 100.0, 1.0));
                                     pb.setMaxWidth(Double.MAX_VALUE);
                                     HBox.setHgrow(pb, Priority.ALWAYS);
-                                    // Áp dụng class để tròn và set màu accent
                                     pb.getStyleClass().setAll("progress-bar", "modern-progress-bar");
-                                    pb.setStyle("-fx-accent: " + statusColor + ";");
+                                    pb.setStyle("-fx-accent: " + statusColor + "; -fx-background-insets: 0;");
 
                                     Label lblPercentValue = new Label(String.format("+%.1f%%%s", percent, arrow));
                                     lblPercentValue.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: " + statusColor + ";");
@@ -222,9 +206,7 @@ public class HomeController {
                             }
                         }
                     }
-                } catch (Exception e) {
-                    System.out.println("Lỗi parse JSON ở Dashboard: " + e.getMessage());
-                }
+                } catch (Exception e) { e.printStackTrace(); }
             });
         });
     }
@@ -240,61 +222,38 @@ public class HomeController {
                             Type listType = new TypeToken<List<NotificationModel>>() {}.getType();
                             List<NotificationModel> allNotifs = ApiService.gson.fromJson(apiRes.result, listType);
 
-                            long unreadCount = allNotifs.stream().filter(n -> !n.isRead).count();
-                            lblNotifCount.setText(unreadCount > 9 ? "9+" : String.valueOf(unreadCount));
-                            lblNotifCount.setVisible(unreadCount > 0);
+                            long unread = allNotifs.stream().filter(n -> !n.isRead).count();
+                            lblNotifCount.setText(unread > 9 ? "9+" : String.valueOf(unread));
+                            lblNotifCount.setVisible(unread > 0);
 
                             vboxNotifications.getChildren().clear();
-
-                            if (allNotifs.isEmpty()) {
-                                Label lbl = new Label("Không có thông báo nào mới.");
-                                lbl.setStyle("-fx-font-style: italic; -fx-text-fill: #888; -fx-font-size: 15px;");
-                                vboxNotifications.getChildren().add(lbl);
-                                return;
-                            }
-
                             int limit = Math.min(allNotifs.size(), 2);
                             for (int i = 0; i < limit; i++) {
                                 NotificationModel n = allNotifs.get(i);
                                 HBox row = new HBox(15);
                                 row.setAlignment(Pos.CENTER_LEFT);
-                                row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 10; -fx-padding: 15;");
+                                row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 12; -fx-padding: 20; -fx-min-height: 100;");
 
-                                VBox textVBox = new VBox(5);
+                                VBox textVBox = new VBox(8);
+                                // SỬA: Cho chữ chiếm hết chiều ngang khung
+                                HBox.setHgrow(textVBox, Priority.ALWAYS);
+
                                 Label lblTitle = new Label(n.title);
-                                lblTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #333;");
+                                lblTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 17px; -fx-text-fill: #333;");
 
                                 Label lblDesc = new Label(n.description);
-                                lblDesc.setStyle("-fx-font-size: 13px; -fx-text-fill: #666;");
+                                lblDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
                                 lblDesc.setWrapText(true);
-                                lblDesc.setMaxWidth(220);
+                                // SỬA: Bỏ giới hạn chiều rộng 220, để chữ dài thoải mái
+                                lblDesc.setMaxWidth(Double.MAX_VALUE);
 
                                 textVBox.getChildren().addAll(lblTitle, lblDesc);
 
-                                Region spacer = new Region();
-                                HBox.setHgrow(spacer, Priority.ALWAYS);
+                                Button btnDelete = new Button("🗑");
+                                btnDelete.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35; -fx-cursor: hand;");
+                                btnDelete.setOnAction(e -> processNotificationAction(n.notificationId, "delete"));
 
-                                HBox actionBox = new HBox(5);
-                                actionBox.setAlignment(Pos.CENTER_RIGHT);
-
-                                if ("PAYMENT_VERIFICATION".equals(n.type)) {
-                                    Button btnAccept = new Button("✔");
-                                    btnAccept.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand; -fx-font-weight: bold;");
-                                    btnAccept.setOnAction(e -> processNotificationAction(n.notificationId, "accept"));
-
-                                    Button btnDecline = new Button("✖");
-                                    btnDecline.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand; -fx-font-weight: bold;");
-                                    btnDecline.setOnAction(e -> processNotificationAction(n.notificationId, "decline"));
-
-                                    actionBox.getChildren().addAll(btnAccept, btnDecline);
-                                } else {
-                                    Button btnDelete = new Button("🗑");
-                                    btnDelete.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand; -fx-font-weight: bold;");
-                                    btnDelete.setOnAction(e -> processNotificationAction(n.notificationId, "delete"));
-                                    actionBox.getChildren().add(btnDelete);
-                                }
-
-                                row.getChildren().addAll(textVBox, spacer, actionBox);
+                                row.getChildren().addAll(textVBox, btnDelete);
                                 vboxNotifications.getChildren().add(row);
                             }
                         }
@@ -305,34 +264,8 @@ public class HomeController {
     }
 
     private void processNotificationAction(String notifId, String actionType) {
-        String endpoint = "/notifications/" + notifId;
-        if ("accept".equals(actionType)) {
-            endpoint += "/accept";
-            ApiService.putAsync(endpoint, null).thenAccept(res -> handleActionResponse(res.statusCode(), "Xác nhận thanh toán thành công!"));
-        } else if ("decline".equals(actionType)) {
-            endpoint += "/decline";
-            ApiService.putAsync(endpoint, null).thenAccept(res -> handleActionResponse(res.statusCode(), "Đã từ chối thanh toán!"));
-        } else if ("delete".equals(actionType)) {
-            ApiService.deleteAsync(endpoint).thenAccept(res -> handleActionResponse(res.statusCode(), null));
-        }
-    }
-
-    private void handleActionResponse(int statusCode, String successMsg) {
-        Platform.runLater(() -> {
-            if (statusCode >= 200 && statusCode < 300) {
-                if (successMsg != null) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setHeaderText(null);
-                    alert.setContentText(successMsg);
-                    alert.showAndWait();
-                }
-                loadNotifications();
-            } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText(null);
-                alert.setContentText("Thao tác thất bại! Mã lỗi: " + statusCode);
-                alert.showAndWait();
-            }
+        ApiService.deleteAsync("/notifications/" + notifId).thenAccept(res -> {
+            if (res.statusCode() == 200) Platform.runLater(this::loadNotifications);
         });
     }
 
@@ -340,8 +273,7 @@ public class HomeController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Node view = loader.load();
-            Node source = (Node) event.getSource();
-            Pane contentArea = (Pane) source.getScene().lookup("#contentArea");
+            Pane contentArea = (Pane) ((Node) event.getSource()).getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
         } catch (IOException e) { e.printStackTrace(); }
     }
