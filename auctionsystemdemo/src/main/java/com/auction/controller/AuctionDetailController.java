@@ -32,13 +32,38 @@ public class AuctionDetailController {
     @FXML private Button btnBidAction;
     @FXML private Label lblTimeTitle; // Thêm nhãn này
 
+
     private AuctionModel currentItem;
     private Timeline timeline;
+
+    //Biến cho bước nhảy tiền
+    private long currentBidValue = 0;
+    private final long STEP_VALUE = 1000;
+    private long currentHighestBid = 0;
+
+    @FXML
+    public void initialize() {
+        if (txtBidAmount != null) {
+            txtBidAmount.textProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue == null || newValue.isEmpty()) return;
+                try {
+                    String plainNumber = newValue.replace(".", "").replace(",", "");
+                    if (!plainNumber.isEmpty()) {
+                        currentBidValue = Long.parseLong(plainNumber);
+                    }
+                } catch (NumberFormatException e) {
+                    txtBidAmount.setText(oldValue); // Nếu nhập chữ chặn lại, trả về số cũ
+                }
+            });
+        }
+    }
 
     public void setAuctionData(AuctionModel item) {
         this.currentItem = item;
         updateUI();
         loadBalance();
+
+        initBidData();
 
         if ("RUNNING".equals(item.status)) {
             btnBidAction.setDisable(false);
@@ -185,6 +210,8 @@ public class AuctionDetailController {
                         updateUI();
                         loadBalance();
                         showToastSuccess();
+
+                        initBidData();
                     } else {
                         showToastError(apiRes.message);
                     }
@@ -228,5 +255,36 @@ public class AuctionDetailController {
             StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // --- CÁC HÀM XỬ LÝ NÚT TĂNG GIẢM ---
+    public void initBidData() {
+        if (currentItem != null) {
+            this.currentHighestBid = (long) currentItem.highestBid;
+            // Giá mới = Giá hiện tại + 1000
+            this.currentBidValue = this.currentHighestBid;
+            updateBidTextField();
+        }
+    }
+
+    @FXML
+    public void increaseBid() {
+        currentBidValue += STEP_VALUE;
+        updateBidTextField();
+    }
+
+    @FXML
+    public void decreaseBid() {
+        // Chỉ cho trừ nếu tiền vẫn lớn hơn mức giá cho phép (giá cao nhất + 1000)
+        if (currentBidValue > currentHighestBid + STEP_VALUE) {
+            currentBidValue -= STEP_VALUE;
+            updateBidTextField();
+        }
+    }
+
+    private void updateBidTextField() {
+        if (txtBidAmount != null) {
+            txtBidAmount.setText(String.format("%,d", currentBidValue).replace(",", "."));
+        }
     }
 }

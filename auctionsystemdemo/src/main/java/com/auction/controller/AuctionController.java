@@ -31,11 +31,16 @@ public class AuctionController {
 
     @FXML private ListView<AuctionModel> auctionListView;
     @FXML private Label lblBalance;
+    @FXML private Label eyeIconText; // Thêm khai báo cho nút Hiện/Ẩn
     @FXML private ComboBox<String> cbFilter;
     @FXML private ComboBox<String> cbSort;
 
     // List gốc để lưu trữ toàn bộ dữ liệu tải về từ API
     private List<AuctionModel> allAuctions = new ArrayList<>();
+
+    // Thêm biến để lưu số dư thật và trạng thái ẩn/hiện
+    private String realBalanceText = "0 VND";
+    private boolean isHidden = true; // Mặc định là đang ẩn
 
     @FXML
     public void initialize() {
@@ -48,7 +53,7 @@ public class AuctionController {
                 "Đã thanh toán (PAID)",
                 "Đã hủy (CANCELLED)"
         ));
-        cbFilter.setValue("Tất cả trạng thái");
+        cbFilter.setValue("RUNNING");
 
         // Cấu hình ComboBox Sắp xếp
         cbSort.setItems(FXCollections.observableArrayList(
@@ -99,7 +104,16 @@ public class AuctionController {
                         ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                         if (apiRes.code == 1000) {
                             WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
-                            lblBalance.setText(String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", "."));
+
+                            // Lưu số tiền vào biến tạm thay vì set thẳng vào Label
+                            realBalanceText = String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", ".");
+
+                            // Kiểm tra xem trạng thái đang là ẩn/hiện để set Label cho đúng
+                            if (!isHidden) {
+                                lblBalance.setText(realBalanceText);
+                            } else {
+                                lblBalance.setText("****** VND");
+                            }
                         }
                     }
                 });
@@ -183,5 +197,19 @@ public class AuctionController {
             StackPane contentArea = (StackPane) auctionListView.getScene().lookup("#contentArea");
             contentArea.getChildren().setAll(detailView);
         } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    // THÊM MỚI: Hàm xử lý sự kiện khi ấn vào chữ Hiện/Ẩn
+    @FXML
+    public void toggleBalanceVisibility() {
+        isHidden = !isHidden; // Đảo trạng thái
+
+        if (isHidden) {
+            lblBalance.setText("****** VND"); // Giấu đi
+            eyeIconText.setText("Hiện");
+        } else {
+            lblBalance.setText(realBalanceText); // Lấy biến tạm ra show lên
+            eyeIconText.setText("Ẩn");
+        }
     }
 }

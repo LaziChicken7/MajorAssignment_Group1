@@ -16,7 +16,7 @@
                 <!-- HEADER -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
 
-                    <!-- Nút Quay lại BẰNG CSS CỦA BẠN (Đã giữ nguyên hoàn toàn) -->
+                    <!-- Nút Quay lại BẰNG CSS -->
                     <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#goBack" alignment="CENTER_LEFT" style="-fx-cursor: hand;">
                         <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
                         <Label text="Đấu giá" styleClass="back-title" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
@@ -74,12 +74,20 @@
                                     <Label fx:id="lblCurrentPrice" text="0 VND" maxWidth="Infinity" alignment="CENTER" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 25;"/>
                                 </VBox>
 
-                                <HBox spacing="15" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
-                                    <Label text="+" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                                    <TextField fx:id="txtBidAmount" promptText="Nhập giá tiền..." prefWidth="200" style="-fx-font-size: 16px; -fx-background-radius: 10; -fx-padding: 8; -fx-border-color: #333; -fx-border-radius: 10;"/>
-                                    <Label text="VND" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                                <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 15 0 0 0;">
+
+                                    <HBox alignment="CENTER" spacing="0" style="-fx-border-color: #ced4da; -fx-border-radius: 25; -fx-background-radius: 25; -fx-background-color: white; -fx-padding: 2 5;">
+                                        <Button text="-" onAction="#decreaseBid" styleClass="stepper-btn"
+                                                style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c; -fx-cursor: hand; -fx-padding: 2 18;"/>
+                                        <TextField fx:id="txtBidAmount" alignment="CENTER" prefWidth="150"
+                                                   style="-fx-background-color: transparent; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 8 0;"/>
+                                        <Button text="+" onAction="#increaseBid" styleClass="stepper-btn"
+                                                style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2ecc71; -fx-cursor: hand; -fx-padding: 2 18;"/>
+                                    </HBox>
+                                    <Label text="VND" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4b5563;"/>
                                     <Region HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="btnBidAction" text="Đấu giá" onAction="#handleBidClick" style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 10 30; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                                    <Button fx:id="btnBidAction" text="Đấu giá" onAction="#handleBidClick"
+                                            style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 10 35; -fx-background-radius: 25; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 5, 0, 0, 2);"/>
                                 </HBox>
                             </children>
                         </VBox>

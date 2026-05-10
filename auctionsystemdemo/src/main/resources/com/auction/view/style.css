@@ -665,3 +665,19 @@
     -fx-border-color: rgba(255, 255, 255, 0.3);
     -fx-border-radius: 50;
 }
+
+
+/* Hiệu ứng cho nút Tăng/Giảm tiền */
+.stepper-btn {
+    -fx-background-color: transparent; /* Bổ sung dòng này vào đây */
+    -fx-background-radius: 20;
+    -fx-transition: all 0.2s ease;
+}
+.stepper-btn:hover {
+    -fx-background-color: #f1f2f6;
+}
+.stepper-btn:pressed {
+    -fx-background-color: #dfe4ea;
+    -fx-scale-x: 0.9;
+    -fx-scale-y: 0.9;
+}
