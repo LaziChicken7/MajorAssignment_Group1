@@ -28,7 +28,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -49,8 +48,7 @@ public class ProfileController {
     @FXML private TextField txtCitizenId;
     @FXML private PasswordField txtPassword; // Nơi nhập mật khẩu mới
 
-    // ...
-    @FXML private Button btnAdminControl; // THÊM DÒNG NÀY
+    @FXML private Button btnAdminControl;
     @FXML private ImageView imgAvatar;
     @FXML private Label lblAvatarPlaceholder;
 
@@ -98,16 +96,17 @@ public class ProfileController {
                                 txtPhone.setText(profile.numberPhone);
                                 txtCitizenId.setText(profile.citizenId);
 
-                                // --- ĐOẠN CODE MỚI THÊM: HIỂN THỊ AVATAR ---
+                                // --- HIỂN THỊ AVATAR ---
                                 String avatarPath = profile.avatarUrl;
                                 if (avatarPath == null || !avatarPath.startsWith("/uploads") || avatarPath.contains("default-")) {
                                     avatarPath = "/uploads/images/avatar/avatarmacdinh.png";
                                 }
-                                String fullImageUrl = "http://localhost:8080/auction" + avatarPath;
+
+                                // Thêm param chống cache để ảnh tải lại ngay lập tức khi load profile
+                                String fullImageUrl = "http://localhost:8080/auction" + avatarPath + "?t=" + System.currentTimeMillis();
 
                                 // Gọi hàm bo tròn ảnh
                                 displayCircularAvatar(fullImageUrl);
-                                // ------------------------------------------
 
                             } else {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi tải dữ liệu", apiResponse.message);
@@ -131,29 +130,22 @@ public class ProfileController {
         String currentUser = SessionManager.userName;
         if (currentUser == null) return;
 
-        // Lấy dữ liệu từ giao diện
         String fullName = txtFullName.getText().trim();
         String email = txtEmail.getText().trim();
         String phone = txtPhone.getText().trim();
         String newPassword = txtPassword.getText();
 
-        // Kiểm tra điều kiện cơ bản
         if (fullName.isEmpty() || email.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Họ tên và Email không được để trống!");
             return;
         }
 
-        // Đóng gói dữ liệu gửi lên (Gán vào Model)
         UserUpdateRequest request = new UserUpdateRequest();
         request.fullName = fullName;
         request.email = email;
         request.numberPhone = phone;
-
-        // Nếu ô password để trống -> Gửi null (Backend sẽ hiểu là không đổi pass)
-        // Nếu gửi chuỗi rỗng "", Spring Boot sẽ báo lỗi @Size(min=8)
         request.password = newPassword.isEmpty() ? null : newPassword;
 
-        // Gọi API PUT để cập nhật
         ApiService.putAsync("/users/profile/" + currentUser, request)
                 .thenAccept(response -> {
                     Platform.runLater(() -> {
@@ -161,17 +153,12 @@ public class ProfileController {
                             ApiResponse apiResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
                             if (apiResponse.code == 1000) {
                                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Cập nhật thông tin thành công!");
-
-                                // Cập nhật lại tên vào SessionManager (để các màn hình khác cập nhật theo)
                                 SessionManager.fullName = fullName;
-
-                                // Xóa trắng ô password sau khi đổi thành công
                                 txtPassword.clear();
                             } else {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi cập nhật", apiResponse.message);
                             }
                         } else {
-                            // Bắt lỗi Validation (ví dụ trùng Email, Pass ngắn...)
                             try {
                                 ApiResponse errResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
                                 showAlert(Alert.AlertType.ERROR, "Lỗi xác thực", errResponse.message);
@@ -188,22 +175,16 @@ public class ProfileController {
     }
 
     // ==========================================
-    // 3. HÀM ĐĂNG XUẤT (QUAY VỀ TRANG LOGIN)
+    // 3. HÀM ĐĂNG XUẤT
     // ==========================================
     @FXML
     public void handleLogout(ActionEvent event) {
-        // 1. Xóa thông tin người dùng khỏi bộ nhớ tạm
         SessionManager.logout();
-
-        // 2. Chuyển scene (Thay thế hoàn toàn cửa sổ Main bằng cửa sổ Login)
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/com/auction/view/Login.fxml"));
-
-            // Lấy Stage (Cửa sổ hiện tại) từ event của nút bấm
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.centerOnScreen();
-
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi giao diện", "Không thể mở trang đăng nhập!");
@@ -222,7 +203,7 @@ public class ProfileController {
     }
 
     // ==========================================
-    // 5. MỞ HỘP THOẠI CHỌN FILE VÀ MỞ GIAO DIỆN CẮT ẢNH
+    // 5. MỞ HỘP THOẠI CHỌN FILE
     // ==========================================
     @FXML
     public void handleUploadAvatar(ActionEvent event) {
@@ -236,7 +217,6 @@ public class ProfileController {
         File selectedFile = fileChooser.showOpenDialog(stage);
 
         if (selectedFile != null) {
-            // Mở cửa sổ cắt ảnh thay vì upload liền
             openCropDialog(selectedFile, stage);
         }
     }
@@ -256,7 +236,6 @@ public class ProfileController {
         ImageView imageView = new ImageView(originalImage);
         imageView.setPreserveRatio(true);
 
-        // TÍNH TOÁN KÍCH THƯỚC CHUẨN BAN ĐẦU
         double imgW = originalImage.getWidth();
         double imgH = originalImage.getHeight();
         double scale = (imgW < imgH) ? (cropSize / imgW) : (cropSize / imgH);
@@ -267,22 +246,18 @@ public class ProfileController {
         imageView.setFitWidth(actualW);
         imageView.setFitHeight(actualH);
 
-        // Đưa ảnh ra giữa khung ban đầu
         imageView.setTranslateX(-(actualW - cropSize) / 2);
         imageView.setTranslateY(-(actualH - cropSize) / 2);
 
-        // Ép buộc Container chứa ảnh phải vuông chính xác 300x300, không được co giãn
         Pane imageContainer = new Pane(imageView);
         imageContainer.setMinSize(cropSize, cropSize);
         imageContainer.setMaxSize(cropSize, cropSize);
         imageContainer.setClip(new Rectangle(cropSize, cropSize));
 
-        // HÀM KHÓA VIỀN: Ngăn không cho ảnh bị kéo lộ nền trắng
         Runnable clampPosition = () -> {
             double currentW = actualW * imageView.getScaleX();
             double currentH = actualH * imageView.getScaleY();
 
-            // Tính toán tọa độ giới hạn
             double minX = cropSize - (actualW + currentW) / 2;
             double maxX = (currentW - actualW) / 2;
             double minY = cropSize - (actualH + currentH) / 2;
@@ -291,16 +266,13 @@ public class ProfileController {
             double tx = imageView.getTranslateX();
             double ty = imageView.getTranslateY();
 
-            // Chặn kéo vượt biên ngang
             if (tx > maxX) imageView.setTranslateX(maxX);
             else if (tx < minX) imageView.setTranslateX(minX);
 
-            // Chặn kéo vượt biên dọc
             if (ty > maxY) imageView.setTranslateY(maxY);
             else if (ty < minY) imageView.setTranslateY(minY);
         };
 
-        // XỬ LÝ KÉO THẢ (DRAG)
         double[] mouseLastPos = new double[2];
         imageView.setOnMousePressed((MouseEvent e) -> {
             mouseLastPos[0] = e.getSceneX();
@@ -314,13 +286,12 @@ public class ProfileController {
             imageView.setTranslateX(imageView.getTranslateX() + deltaX);
             imageView.setTranslateY(imageView.getTranslateY() + deltaY);
 
-            clampPosition.run(); // Gọi hàm chặn viền ngay khi đang kéo
+            clampPosition.run();
 
             mouseLastPos[0] = e.getSceneX();
             mouseLastPos[1] = e.getSceneY();
         });
 
-        // XỬ LÝ LĂN CHUỘT (ZOOM)
         imageView.setOnScroll((ScrollEvent e) -> {
             double zoomFactor = 1.05;
             if (e.getDeltaY() < 0) {
@@ -328,16 +299,14 @@ public class ProfileController {
             }
             double newScale = imageView.getScaleX() * zoomFactor;
 
-            // KHÔNG CHO THU NHỎ QUÁ TỶ LỆ 1.0 ĐỂ TRÁNH LỘ NỀN TRẮNG
             if (newScale < 1.0) newScale = 1.0;
 
             imageView.setScaleX(newScale);
             imageView.setScaleY(newScale);
 
-            clampPosition.run(); // Căn chỉnh lại viền nếu thu nhỏ lại
+            clampPosition.run();
         });
 
-        // TẠO MẶT NẠ CẮT ẢNH
         Rectangle darkBackground = new Rectangle(cropSize, cropSize);
         Circle transparentHole = new Circle(cropSize / 2, cropSize / 2, cropSize / 2);
         Shape mask = Shape.subtract(darkBackground, transparentHole);
@@ -347,7 +316,6 @@ public class ProfileController {
         StackPane cropArea = new StackPane(imageContainer, mask);
         cropArea.setStyle("-fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-background-color: white;");
 
-        // CSS CHO NÚT BẤM (VIÊN THUỐC)
         String pillButtonStyle = "-fx-background-radius: 20; -fx-padding: 8 25; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;";
 
         Button btnCancel = new Button("Hủy");
@@ -356,7 +324,6 @@ public class ProfileController {
         Button btnCrop = new Button("Cắt & Tải lên");
         btnCrop.setStyle("-fx-background-color: #0A439D; -fx-text-fill: white; " + pillButtonStyle);
 
-        // XỬ LÝ LƯU ẢNH VÀ UPLOAD
         btnCrop.setOnAction(e -> {
             SnapshotParameters params = new SnapshotParameters();
             params.setFill(Color.TRANSPARENT);
@@ -393,7 +360,7 @@ public class ProfileController {
     }
 
     // ==========================================
-    // 7. UPLOAD FILE LÊN SERVER (MULTIPART FORM DATA)
+    // 7. UPLOAD FILE LÊN SERVER
     // ==========================================
     private void uploadFileToServer(File file) {
         String boundary = "===" + System.currentTimeMillis() + "===";
@@ -407,37 +374,41 @@ public class ProfileController {
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
                 conn.setRequestMethod("POST");
-                // Cài đặt header cho kiểu truyền File
                 conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
                 try (OutputStream outputStream = conn.getOutputStream();
                      PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true)) {
 
-                    // Bắt đầu body của file
                     writer.append("--").append(boundary).append("\r\n");
                     writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(file.getName()).append("\"\r\n");
-                    writer.append("Content-Type: ").append(Files.probeContentType(file.toPath())).append("\r\n");
-                    writer.append("\r\n");
+
+                    String contentType = Files.probeContentType(file.toPath());
+                    if (contentType == null) contentType = "image/png";
+                    writer.append("Content-Type: ").append(contentType).append("\r\n\r\n");
                     writer.flush();
 
-                    // Copy dữ liệu từ máy tính đẩy lên request
                     Files.copy(file.toPath(), outputStream);
                     outputStream.flush();
 
-                    writer.append("\r\n");
-                    writer.flush();
-
-                    // Kết thúc body
-                    writer.append("--").append(boundary).append("--\r\n");
-                    writer.flush();
+                    writer.append("\r\n").flush();
+                    writer.append("--").append(boundary).append("--\r\n").flush();
                 }
 
                 int responseCode = conn.getResponseCode();
                 Platform.runLater(() -> {
                     if (responseCode == 200 || responseCode == 201) {
                         showAlert(Alert.AlertType.INFORMATION, "Thành công", "Tải ảnh lên thành công!");
-                        // Load lại dữ liệu để lấy ảnh mới nhất
+
+                        // Load lại dữ liệu bên trong trang Profile
                         loadUserData();
+
+                        // =======================================================
+                        // GỌI MAIN CONTROLLER ĐỂ CẬP NHẬT LẠI AVATAR TRÊN SIDEBAR
+                        // =======================================================
+                        if (MainController.getInstance() != null) {
+                            MainController.getInstance().loadUserInfo();
+                        }
+
                     } else {
                         showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải ảnh. Mã lỗi Server: " + responseCode);
                     }
@@ -454,6 +425,7 @@ public class ProfileController {
     // 8. HÀM HIỂN THỊ VÀ BO TRÒN ẢNH VÀO KHUNG
     // ==========================================
     private void displayCircularAvatar(String imageUrl) {
+        // Tham số true, true ở cuối giúp ảnh load mượt mà dưới nền, không làm giật ứng dụng
         Image image = new Image(imageUrl, 200, 200, true, true, true);
 
         imgAvatar.setImage(image);
@@ -463,6 +435,8 @@ public class ProfileController {
         imgAvatar.setClip(clip);
 
         // Ẩn chữ icon 👤 đi khi đã có ảnh
-        lblAvatarPlaceholder.setVisible(false);
+        if (lblAvatarPlaceholder != null) {
+            lblAvatarPlaceholder.setVisible(false);
+        }
     }
 }

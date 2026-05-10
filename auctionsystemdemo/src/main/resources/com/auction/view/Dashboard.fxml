@@ -6,6 +6,7 @@
     <content>
         <VBox spacing="20" style="-fx-background-color: transparent; -fx-padding: 0 10 10 0;">
 
+            <!-- KHU VỰC 1: SẢN PHẨM NỔI BẬT (FULL CHIỀU RỘNG) -->
             <VBox spacing="15" styleClass="card" VBox.vgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Sản phẩm nổi bật" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
@@ -18,30 +19,44 @@
                 </VBox>
             </VBox>
 
-            <HBox spacing="25" VBox.vgrow="ALWAYS">
+            <!-- KHU VỰC 2: THÔNG BÁO VÀ THỐNG KÊ (CHIA TỶ LỆ 4:6) -->
+            <GridPane hgap="25" VBox.vgrow="ALWAYS">
+                <!-- Cấu hình chia 2 cột: Cột 1 = 40%, Cột 2 = 60% -->
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="40" />
+                    <ColumnConstraints percentWidth="60" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints vgrow="ALWAYS" />
+                </rowConstraints>
 
-                <VBox HBox.hgrow="SOMETIMES" spacing="15" minWidth="250" prefWidth="350" styleClass="card">
-                    <HBox alignment="CENTER_LEFT">
-                        <Label text="Thông báo mới" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                        <Label fx:id="lblNotifCount" text="0" visible="false" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-translate-x: 5; -fx-font-weight: bold;"/>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button text="Chi tiết" onAction="#handleViewMoreNotifications" styleClass="btn-primary" style="-fx-background-radius: 20; -fx-padding: 6 15;"/>
-                    </HBox>
+                <children>
+                    <!-- CỘT TRÁI (40%): THÔNG BÁO -->
+                    <VBox GridPane.columnIndex="0" spacing="15" styleClass="card" VBox.vgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="Thông báo mới" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+                            <Label fx:id="lblNotifCount" text="0" visible="false" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-translate-x: 5; -fx-font-weight: bold;"/>
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button text="Chi tiết" onAction="#handleViewMoreNotifications" styleClass="btn-primary" style="-fx-background-radius: 20; -fx-padding: 6 15;"/>
+                        </HBox>
 
-                    <VBox fx:id="vboxNotifications" spacing="15">
-                        <Label text="Đang tải dữ liệu..." style="-fx-text-fill: #888; -fx-font-style: italic;"/>
+                        <VBox fx:id="vboxNotifications" spacing="15">
+                            <Label text="Đang tải dữ liệu..." style="-fx-text-fill: #888; -fx-font-style: italic;"/>
+                        </VBox>
                     </VBox>
-                </VBox>
 
-                <VBox HBox.hgrow="ALWAYS" spacing="15" minWidth="300" styleClass="card">
-                    <Label text="Thống kê Tăng trưởng (Top 4)" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+                    <!-- CỘT PHẢI (60%): THỐNG KÊ TĂNG TRƯỞNG -->
+                    <VBox GridPane.columnIndex="1" spacing="15" styleClass="card" VBox.vgrow="ALWAYS">
+                        <Label text="Thống kê Tăng trưởng (Top 4)" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
 
-                    <VBox fx:id="vboxStatistics" spacing="12" VBox.vgrow="ALWAYS">
-                        <Label text="Đang tải dữ liệu..." style="-fx-text-fill: #888; -fx-font-style: italic;"/>
+                        <VBox fx:id="vboxStatistics" spacing="12" VBox.vgrow="ALWAYS">
+                            <Label text="Đang tải dữ liệu..." style="-fx-text-fill: #888; -fx-font-style: italic;"/>
+                        </VBox>
                     </VBox>
-                </VBox>
 
-            </HBox>
+                </children>
+            </GridPane>
+
         </VBox>
     </content>
 </ScrollPane>
