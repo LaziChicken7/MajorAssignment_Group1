@@ -24,12 +24,11 @@
             <HBox spacing="40" styleClass="card" style="-fx-background-color: white; -fx-padding: 30 40; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
 
                 <!-- CỘT TRÁI: Khu vực Ảnh -->
-                <VBox alignment="TOP_CENTER" spacing="20" minWidth="280">
-                    <StackPane prefHeight="280" prefWidth="280" style="-fx-border-color: #ddd; -fx-border-radius: 15; -fx-background-color: #000000; -fx-background-radius: 15;">
-                        <ImageView fx:id="productImage" fitHeight="270" fitWidth="270" pickOnBounds="true" preserveRatio="true" />
-                        <Label fx:id="lblPhotoIcon" style="-fx-font-size: 80px; -fx-text-fill: white;" text="🖼" />
-                    </StackPane>
-                    <Button onAction="#handleUploadImage" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 10 40; -fx-font-weight: bold; -fx-font-size: 15px; -fx-cursor: hand;" text="Tải ảnh lên" />
+                <VBox alignment="TOP_CENTER" spacing="10" minWidth="280">
+                    <ScrollPane prefHeight="250" prefWidth="280" style="-fx-background-color: #f8f9fa;">
+                        <HBox fx:id="imagePreviewBox" spacing="10" alignment="CENTER_LEFT" />
+                    </ScrollPane>
+                    <Button onAction="#handleUploadImage" text="Tải ảnh lên" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20;" />
                 </VBox>
 
                 <!-- CỘT PHẢI: Form nhập liệu đã được làm mới -->

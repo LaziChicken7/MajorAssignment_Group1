@@ -5,6 +5,7 @@ module com.auction {
     // Thư viện gọi API và ép kiểu JSON
     requires java.net.http;
     requires com.google.gson;
+    requires javafx.swing;
 
     // Cho phép JavaFX truy cập vào thư mục view và root để load giao diện
     opens com.auction to javafx.fxml, javafx.graphics;

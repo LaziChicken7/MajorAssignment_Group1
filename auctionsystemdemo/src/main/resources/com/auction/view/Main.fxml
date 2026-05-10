@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
+<?import javafx.scene.image.ImageView?>
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.MainController" stylesheets="@style.css" prefWidth="1200" prefHeight="700" styleClass="root-pane">
 
     <BorderPane>

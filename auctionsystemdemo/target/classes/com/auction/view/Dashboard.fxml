@@ -20,7 +20,7 @@
 
             <HBox spacing="25" VBox.vgrow="ALWAYS">
 
-                <VBox HBox.hgrow="ALWAYS" spacing="15" minWidth="250" prefWidth="400" styleClass="card">
+                <VBox HBox.hgrow="SOMETIMES" spacing="15" minWidth="250" prefWidth="350" styleClass="card">
                     <HBox alignment="CENTER_LEFT">
                         <Label text="Thông báo mới" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
                         <Label fx:id="lblNotifCount" text="0" visible="false" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-translate-x: 5; -fx-font-weight: bold;"/>

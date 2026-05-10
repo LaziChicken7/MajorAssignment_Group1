@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 public class AdminController {
 
+    @FXML private TableColumn<ItemModel, Void> colItemActions; // THÊM CỘT HÀNH ĐỘNG CHO ITEM
+
     // TAB ITEM
     @FXML private TableView<ItemModel> tbItems;
     @FXML private TableColumn<ItemModel, String> colItemId, colItemName, colItemType, colItemPrice, colItemSeller;
@@ -58,6 +60,49 @@ public class AdminController {
         colItemType.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().itemType != null ? cell.getValue().itemType : "N/A"));
         colItemPrice.setCellValueFactory(cell -> new SimpleStringProperty(String.format("%,.0f", cell.getValue().startPrice)));
         colItemSeller.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().seller != null ? cell.getValue().seller.userName : "Admin"));
+        colItemActions.setCellFactory(param -> new TableCell<>() {
+        private final Button btnCancel = new Button("Hủy SP");
+        {
+            btnCancel.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 20; -fx-padding: 5 15;");
+            btnCancel.setOnAction(e -> {
+                ItemModel item = getTableView().getItems().get(getIndex());
+                cancelItem(item);
+            });
+        }
+        @Override
+        protected void updateItem(Void item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) setGraphic(null);
+            else setGraphic(btnCancel);
+        }
+    });
+}
+
+    // Hàm hiển thị Popup nhập nguyên nhân và gọi API
+    private void cancelItem(ItemModel item) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Hủy sản phẩm");
+        dialog.setHeaderText("Hủy sản phẩm: " + item.name);
+        dialog.setContentText("Nhập lý do hủy:");
+
+        dialog.showAndWait().ifPresent(reason -> {
+            if (reason.trim().isEmpty()) {
+                new Alert(Alert.AlertType.WARNING, "Vui lòng nhập lý do!").show();
+                return;
+            }
+            // Gọi API với JSON body
+            String jsonBody = "{\"reason\":\"" + reason + "\"}";
+            ApiService.putAsync("/items/cancel/" + item.id, jsonBody).thenAccept(res -> {
+                Platform.runLater(() -> {
+                    if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                        new Alert(Alert.AlertType.INFORMATION, "Đã hủy sản phẩm thành công!").show();
+                        loadItems(); // Refresh data
+                    } else {
+                        new Alert(Alert.AlertType.ERROR, "Lỗi hủy sản phẩm!").show();
+                    }
+                });
+            });
+        });
     }
 
     private void loadItems() {

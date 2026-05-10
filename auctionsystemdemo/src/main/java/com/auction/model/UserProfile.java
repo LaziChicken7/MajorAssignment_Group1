@@ -7,4 +7,5 @@ public class UserProfile {
     public String numberPhone;
     public String citizenId;
     public boolean banned;
+    public String avatarUrl;
 }

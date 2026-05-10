@@ -3,6 +3,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
 
+<?import javafx.scene.image.ImageView?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.ProfileController" spacing="20" style="-fx-background-color: transparent;">
 
     <HBox alignment="CENTER_LEFT" spacing="5" styleClass="title-container">
@@ -12,10 +13,14 @@
 
     <HBox styleClass="card" spacing="40" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
         <VBox alignment="CENTER" spacing="15">
+            <!-- Đã thêm ImageView và các fx:id để Controller có thể điều khiển -->
             <StackPane style="-fx-background-color: black; -fx-background-radius: 100;" prefWidth="200" prefHeight="200">
-                <Label text="👤" style="-fx-font-size: 80px; -fx-text-fill: white;"/>
+                <Label fx:id="lblAvatarPlaceholder" text="👤" style="-fx-font-size: 80px; -fx-text-fill: white;"/>
+                <ImageView fx:id="imgAvatar" fitWidth="200" fitHeight="200" preserveRatio="false"/>
             </StackPane>
-            <Button text="Tải ảnh lên" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 25; -fx-font-weight: bold; -fx-cursor: hand;" />
+
+            <!-- Thêm sự kiện onAction="#handleUploadAvatar" -->
+            <Button text="Tải ảnh lên" onAction="#handleUploadAvatar" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 25; -fx-font-weight: bold; -fx-cursor: hand;" />
         </VBox>
 
         <GridPane hgap="20" vgap="15" HBox.hgrow="ALWAYS">

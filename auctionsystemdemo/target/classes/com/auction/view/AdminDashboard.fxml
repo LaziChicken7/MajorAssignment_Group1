@@ -29,6 +29,7 @@
                             <TableColumn fx:id="colItemType" text="Loại" prefWidth="120" />
                             <TableColumn fx:id="colItemPrice" text="Giá khởi điểm" prefWidth="150" />
                             <TableColumn fx:id="colItemSeller" text="Người Bán" prefWidth="150" />
+                            <TableColumn fx:id="colItemActions" text="Hành Động" prefWidth="120" />
                         </columns>
                     </TableView>
                 </content>

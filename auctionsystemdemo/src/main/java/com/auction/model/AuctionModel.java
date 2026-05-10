@@ -11,16 +11,20 @@ public class AuctionModel {
     public ItemModel bidProduct;
     public SellerModel seller;
 
-    // THÊM DÒNG NÀY ĐỂ HỨNG DỮ LIỆU NGƯỜI THẮNG
+    // HỨNG DỮ LIỆU NGƯỜI THẮNG
     public BidderModel winningUser;
 
     public List<BidTransactionModel> bidTransactions;
 
+    // ---- ĐÂY LÀ CLASS CHỨA THÔNG TIN SẢN PHẨM ----
     public static class ItemModel {
         public String id;
         public String name;
         public double startPrice;
         public String description;
+
+        // THÊM DÒNG NÀY ĐỂ NHẬN DANH SÁCH LINK ẢNH TỪ SERVER
+        public List<String> imageUrls;
     }
 
     public static class SellerModel {
@@ -34,6 +38,7 @@ public class AuctionModel {
     public static class BidTransactionModel {
         public double bidAmount;
         public BidderModel bidder;
+        public String bidTimestamp;
     }
 
     public double getMyHighestBid(String myUserName) {

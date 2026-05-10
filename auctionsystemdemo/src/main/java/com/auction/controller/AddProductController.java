@@ -13,10 +13,10 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
 import java.io.File;
 
 public class AddProductController {
@@ -24,7 +24,9 @@ public class AddProductController {
     @FXML private ImageView productImage;
     @FXML private Label lblPhotoIcon;
     @FXML private TextField txtProductName, txtStartPrice;
-    @FXML private TextArea txtDescription;
+    @FXML private TextArea txtDescription;    
+    @FXML private HBox imagePreviewBox;
+    private java.util.List<File> selectedFiles = new java.util.ArrayList<>();
 
     // Các ô nhập Thời gian đã được chia nhỏ
     @FXML private DatePicker dpStartDate, dpEndDate;
@@ -82,11 +84,24 @@ public class AddProductController {
     @FXML
     private void handleUploadImage() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
-        File file = fileChooser.showOpenDialog(txtProductName.getScene().getWindow());
-        if (file != null) {
-            productImage.setImage(new Image(file.toURI().toString()));
-            lblPhotoIcon.setVisible(false);
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Ảnh", "*.png", "*.jpg"));
+        
+        // Dùng showOpenMultipleDialog để cho phép bôi đen chọn nhiều ảnh
+        java.util.List<File> files = fileChooser.showOpenMultipleDialog(txtProductName.getScene().getWindow());
+        
+        if (files != null && !files.isEmpty()) {
+            selectedFiles.addAll(files);
+            imagePreviewBox.getChildren().clear(); // Xóa ảnh cũ trên màn hình
+            
+            // Vòng lặp vẽ từng cái ảnh nhỏ nhỏ xếp cạnh nhau
+            for (File f : selectedFiles) {
+                ImageView imgView = new ImageView(new javafx.scene.image.Image(f.toURI().toString()));
+                imgView.setFitHeight(200);
+                imgView.setFitWidth(150);
+                imgView.setPreserveRatio(true);
+                imagePreviewBox.getChildren().add(imgView);
+            }
+            if(lblPhotoIcon != null) lblPhotoIcon.setVisible(false);
         }
     }
 
@@ -150,29 +165,24 @@ public class AddProductController {
         });
     }
 
+    // HÀM 1: Bắt đầu quy trình (Chạy khi user bấm Xác nhận Hợp đồng)
     private void processActualSubmission(String name, String desc, String priceStr) {
         try {
             double startPrice = Double.parseDouble(priceStr);
 
             // Gộp chuỗi thời gian (Giờ:Phút:Giây)
-            String startTimeStr = formatTimePart(txtStartHour.getText()) + ":" +
-                    formatTimePart(txtStartMinute.getText()) + ":" +
-                    formatTimePart(txtStartSecond.getText());
-
-            String endTimeStr = formatTimePart(txtEndHour.getText()) + ":" +
-                    formatTimePart(txtEndMinute.getText()) + ":" +
-                    formatTimePart(txtEndSecond.getText());
-
-            // Format Giờ gửi lên Spring Boot (VD: 2026-12-31T23:59:59)
+            String startTimeStr = formatTimePart(txtStartHour.getText()) + ":" + formatTimePart(txtStartMinute.getText()) + ":" + formatTimePart(txtStartSecond.getText());
+            String endTimeStr = formatTimePart(txtEndHour.getText()) + ":" + formatTimePart(txtEndMinute.getText()) + ":" + formatTimePart(txtEndSecond.getText());
             String formattedStartTime = dpStartDate.getValue().toString() + "T" + startTimeStr;
             String formattedEndTime = dpEndDate.getValue().toString() + "T" + endTimeStr;
 
-            // BƯỚC 1: TẠO ITEM
+            // BƯỚC A: TẠO ITEM TRƯỚC (KHÔNG CÓ ẢNH) ĐỂ LẤY ID TỪ SERVER
             ItemCreationRequest itemReq = new ItemCreationRequest();
             itemReq.sellerUserName = SessionManager.userName;
             itemReq.name = name;
             itemReq.description = desc;
             itemReq.startPrice = startPrice;
+            itemReq.imageUrls = new java.util.ArrayList<>(); // Để rỗng trước
 
             String typeStr = cbItemType.getValue();
             if (typeStr.contains("ART")) {
@@ -189,45 +199,102 @@ public class AddProductController {
                 itemReq.mileage = txtMileage.getText().isEmpty() ? null : Integer.parseInt(txtMileage.getText().trim());
             }
 
-            // GỌI API
+            // Gọi API Tạo Item
             ApiService.postAsync("/items/create", itemReq).thenAccept(res1 -> {
-                Platform.runLater(() -> {
-                    if (res1.statusCode() == 200) {
-                        ApiResponse apiRes1 = ApiService.gson.fromJson(res1.body(), ApiResponse.class);
-                        if (apiRes1.code == 1000) {
+                if (res1.statusCode() == 200) {
+                    ApiResponse apiRes1 = ApiService.gson.fromJson(res1.body(), ApiResponse.class);
+                    if (apiRes1.code == 1000) {
 
-                            String resStr = apiRes1.result.getAsString();
-                            String itemId = resStr.substring(resStr.lastIndexOf(":") + 2).trim();
+                        // Lấy Item ID từ kết quả trả về
+                        String resStr = apiRes1.result.getAsString();
+                        String itemId = resStr.substring(resStr.lastIndexOf(":") + 2).trim();
 
-                            AuctionCreationRequest aucReq = new AuctionCreationRequest(itemId, formattedStartTime, formattedEndTime);
-
-                            ApiService.postAsync("/auctions/create", aucReq).thenAccept(res2 -> {
-                                Platform.runLater(() -> {
-                                    if (res2.statusCode() == 200) {
-                                        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã tạo sản phẩm và lên lịch đấu giá thành công!");
-                                        goBack();
-                                    } else {
-                                        showAlert(Alert.AlertType.ERROR, "Lỗi tạo Phiên", "Tạo sản phẩm thành công nhưng không thể lên lịch.");
-                                    }
-                                });
-                            });
+                        // BƯỚC B: KIỂM TRA CÓ ẢNH KHÔNG
+                        if (!selectedFiles.isEmpty()) {
+                            // Nếu có ảnh -> Gọi hàm upload ảnh vào ID đó
+                            uploadImagesToServer(itemId, formattedStartTime, formattedEndTime);
+                        } else {
+                            // Nếu không có ảnh -> Chuyển thẳng sang tạo Phiên đấu giá
+                            createAuctionForData(itemId, formattedStartTime, formattedEndTime);
                         }
-                    } else {
-                        showAlert(Alert.AlertType.ERROR, "Lỗi máy chủ", "Mã lỗi: " + res1.statusCode());
                     }
-                });
+                } else {
+                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi máy chủ", "Mã lỗi: " + res1.statusCode()));
+                }
             }).exceptionally(ex -> {
                 Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Mất kết nối", "Không thể gọi tới máy chủ."));
                 return null;
             });
 
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi nhập liệu", "Giá tiền, Năm, Số Km, Bảo hành... chỉ được nhập bằng số.");
+            showAlert(Alert.AlertType.ERROR, "Lỗi nhập liệu", "Giá tiền, Năm, Số Km... chỉ được nhập bằng số.");
         }
     }
 
+    // HÀM 2: Gắn ảnh vào Item đã tạo
+    private void uploadImagesToServer(String itemId, String formattedStartTime, String formattedEndTime) {
+        new Thread(() -> {
+            try {
+                // Gọi API MỚI: /items/{itemId}/upload-images
+                String urlStr = ApiService.BASE_URL + "/items/" + itemId + "/upload-images";
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(urlStr).openConnection();
+                String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+                java.io.OutputStream out = conn.getOutputStream();
+                java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.OutputStreamWriter(out, "UTF-8"), true);
+
+                for (File file : selectedFiles) {
+                    writer.append("--" + boundary).append("\r\n");
+                    writer.append("Content-Disposition: form-data; name=\"files\"; filename=\"" + file.getName() + "\"").append("\r\n");
+                    writer.append("Content-Type: " + java.nio.file.Files.probeContentType(file.toPath())).append("\r\n\r\n");
+                    writer.flush();
+                    java.nio.file.Files.copy(file.toPath(), out);
+                    out.flush();
+                    writer.append("\r\n").flush();
+                }
+                writer.append("--" + boundary + "--\r\n").flush();
+
+                // Đợi upload xong thì sang BƯỚC C: Tạo phiên đấu giá
+                int code = conn.getResponseCode();
+                if(code >= 200 && code < 300) {
+                    createAuctionForData(itemId, formattedStartTime, formattedEndTime);
+                } else {
+                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi Upload", "Không thể tải ảnh, nhưng sản phẩm đã được tạo."));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    // HÀM 3: Cuối cùng, tạo phiên đấu giá
+    private void createAuctionForData(String itemId, String formattedStartTime, String formattedEndTime) {
+        AuctionCreationRequest aucReq = new AuctionCreationRequest(itemId, formattedStartTime, formattedEndTime);
+
+        ApiService.postAsync("/auctions/create", aucReq).thenAccept(res2 -> {
+            Platform.runLater(() -> {
+                if (res2.statusCode() == 200) {
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã tạo sản phẩm và tải ảnh lên thành công!");
+
+                    // Dọn dẹp RAM
+                    selectedFiles.clear();
+                    imagePreviewBox.getChildren().clear();
+
+                    goBack();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi tạo Phiên", "Tạo sản phẩm thành công nhưng không thể lên lịch đấu giá.");
+                }
+            });
+        });
+    }
+
     private String getContractText() {
-        return "ĐIỀU KHOẢN VÀ DỊCH VỤ DÀNH CHO NGƯỜI BÁN (SELLER AGREEMENT)\n\n"
+        return "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                + "Độc lập - Tự do - Hạnh phúc\n\n"
+                + "ĐIỀU KHOẢN VÀ DỊCH VỤ DÀNH CHO NGƯỜI BÁN (SELLER AGREEMENT)\n\n"
                 + "Chào mừng bạn đến với Hệ thống Đấu giá Trực tuyến. Bằng việc đăng bán sản phẩm trên nền tảng của chúng tôi, bạn (sau đây gọi là \"Người Bán\") đồng ý tuân thủ toàn bộ các điều khoản và điều kiện dưới đây:\n\n"
                 + "ĐIỀU 1: TÍNH TRUNG THỰC VÀ NGUỒN GỐC SẢN PHẨM\n"
                 + "1.1. Người Bán cam kết chịu trách nhiệm 100% trước pháp luật về tính hợp pháp, nguồn gốc xuất xứ và quyền sở hữu hợp pháp của tài sản/sản phẩm được đưa lên đấu giá.\n"

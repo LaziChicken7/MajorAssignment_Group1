@@ -14,11 +14,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+// thư viện biểu đồ
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 
 public class AuctionDetailController {
 
@@ -30,40 +34,26 @@ public class AuctionDetailController {
     @FXML private HBox toastSuccess, toastError;
     @FXML private Label lblToastErrorMsg;
     @FXML private Button btnBidAction;
-    @FXML private Label lblTimeTitle; // Thêm nhãn này
-
-
+    @FXML private Label lblTimeTitle; 
+    @FXML private LineChart<String, Number> priceChart;
+    @FXML private ImageView productImageView;
+    @FXML private Label btnPrevImage, btnNextImage, lblImageIndex;
+    
+    private Timeline chartTimeline;
     private AuctionModel currentItem;
     private Timeline timeline;
 
-    //Biến cho bước nhảy tiền
-    private long currentBidValue = 0;
-    private final long STEP_VALUE = 1000;
-    private long currentHighestBid = 0;
+    // Biến lưu trữ ảnh
+    private List<String> imageUrls = new ArrayList<>();
+    private int currentImageIndex = 0;
+    
 
-    @FXML
-    public void initialize() {
-        if (txtBidAmount != null) {
-            txtBidAmount.textProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue == null || newValue.isEmpty()) return;
-                try {
-                    String plainNumber = newValue.replace(".", "").replace(",", "");
-                    if (!plainNumber.isEmpty()) {
-                        currentBidValue = Long.parseLong(plainNumber);
-                    }
-                } catch (NumberFormatException e) {
-                    txtBidAmount.setText(oldValue); // Nếu nhập chữ chặn lại, trả về số cũ
-                }
-            });
-        }
-    }
 
     public void setAuctionData(AuctionModel item) {
         this.currentItem = item;
         updateUI();
         loadBalance();
-
-        initBidData();
+        initChart(item.id);
 
         if ("RUNNING".equals(item.status)) {
             btnBidAction.setDisable(false);
@@ -168,6 +158,63 @@ public class AuctionDetailController {
         }
 
         if (txtDescription != null) txtDescription.setText(currentItem.bidProduct.description);
+
+        // THÊM CODE XỬ LÝ ẢNH Ở ĐÂY
+        if (currentItem.bidProduct.imageUrls != null && !currentItem.bidProduct.imageUrls.isEmpty()) {
+            this.imageUrls = currentItem.bidProduct.imageUrls;
+        } else {
+            this.imageUrls.clear();
+        }
+        this.currentImageIndex = 0; // Đặt lại index về 0 mỗi khi load sản phẩm mới
+        updateImageView();
+    }
+
+    // Hàm render ảnh ra màn hình
+    private void updateImageView() {
+        if (imageUrls.isEmpty()) {
+            // Nếu sản phẩm không có ảnh, hiện ảnh mặc định
+            productImageView.setImage(new javafx.scene.image.Image("https://via.placeholder.com/200?text=No+Image"));
+            lblImageIndex.setText("0/0");
+            btnPrevImage.setVisible(false);
+            btnNextImage.setVisible(false);
+        } else {
+            // Nối BASE_URL (VD: http://localhost:8080) với đường dẫn DB (VD: /uploads/abc.png)
+            String fullUrl = ApiService.BASE_URL + imageUrls.get(currentImageIndex);
+
+            // Dùng true ở tham số thứ 2 để Load ảnh ngầm (Background loading) giúp giao diện không bị giật
+            productImageView.setImage(new javafx.scene.image.Image(fullUrl, true));
+
+            lblImageIndex.setText((currentImageIndex + 1) + "/" + imageUrls.size());
+
+            // Ẩn/Hiện nút bấm nếu chỉ có 1 ảnh
+            boolean hasMultiple = imageUrls.size() > 1;
+            btnPrevImage.setVisible(hasMultiple);
+            btnNextImage.setVisible(hasMultiple);
+        }
+    }
+
+    // Hàm lùi ảnh (Click nút <)
+    @FXML
+    private void prevImage() {
+        if (imageUrls.isEmpty()) return;
+        currentImageIndex--;
+        // Nếu lùi quá 0 thì vòng lại ảnh cuối cùng
+        if (currentImageIndex < 0) {
+            currentImageIndex = imageUrls.size() - 1;
+        }
+        updateImageView();
+    }
+
+    // Hàm tiến ảnh (Click nút >)
+    @FXML
+    private void nextImage() {
+        if (imageUrls.isEmpty()) return;
+        currentImageIndex++;
+        // Nếu tiến qua ảnh cuối thì vòng lại ảnh đầu tiên
+        if (currentImageIndex >= imageUrls.size()) {
+            currentImageIndex = 0;
+        }
+        updateImageView();
     }
 
     @FXML
@@ -210,8 +257,6 @@ public class AuctionDetailController {
                         updateUI();
                         loadBalance();
                         showToastSuccess();
-
-                        initBidData();
                     } else {
                         showToastError(apiRes.message);
                     }
@@ -247,44 +292,45 @@ public class AuctionDetailController {
         delay.play();
     }
 
+    private void initChart(String auctionId) {
+        if (chartTimeline != null) chartTimeline.stop();
+        
+        // 2 giây quét api lấy giá 1 lần
+        chartTimeline = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
+            ApiService.getAsync("/auctions/" + auctionId + "/price-chart").thenAccept(res -> {
+                Platform.runLater(() -> {
+                    if (res.statusCode() == 200) {
+                        ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                        if (apiRes.code == 1000) {
+                            java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<AuctionModel.BidTransactionModel>>(){}.getType();
+                            java.util.List<AuctionModel.BidTransactionModel> txs = ApiService.gson.fromJson(apiRes.result, listType);
+
+                            XYChart.Series<String, Number> series = new XYChart.Series<>();
+                            series.setName("Giá (VND)");
+                            for (AuctionModel.BidTransactionModel tx : txs) {
+                                // lấy đúng phần Giờ:Phút:Giây cho gọn
+                                String timeLabel = tx.bidTimestamp.contains("T") ? tx.bidTimestamp.substring(11, 19) : tx.bidTimestamp;
+                                series.getData().add(new XYChart.Data<>(timeLabel, tx.bidAmount));
+                            }
+                            priceChart.getData().clear();
+                            priceChart.getData().add(series);
+                        }
+                    }
+                });
+            });
+        }));
+        chartTimeline.setCycleCount(Timeline.INDEFINITE);
+        chartTimeline.play();
+    }
+
     @FXML
     private void goBack() {
         if (timeline != null) timeline.stop();
+        if (chartTimeline != null) chartTimeline.stop(); // khi quay lại thì rút biểu đồ ra đỡ lag
         try {
             Node view = FXMLLoader.load(getClass().getResource("/com/auction/view/AuctionList.fxml"));
             StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) { e.printStackTrace(); }
-    }
-
-    // --- CÁC HÀM XỬ LÝ NÚT TĂNG GIẢM ---
-    public void initBidData() {
-        if (currentItem != null) {
-            this.currentHighestBid = (long) currentItem.highestBid;
-            // Giá mới = Giá hiện tại + 1000
-            this.currentBidValue = this.currentHighestBid;
-            updateBidTextField();
-        }
-    }
-
-    @FXML
-    public void increaseBid() {
-        currentBidValue += STEP_VALUE;
-        updateBidTextField();
-    }
-
-    @FXML
-    public void decreaseBid() {
-        // Chỉ cho trừ nếu tiền vẫn lớn hơn mức giá cho phép (giá cao nhất + 1000)
-        if (currentBidValue > currentHighestBid + STEP_VALUE) {
-            currentBidValue -= STEP_VALUE;
-            updateBidTextField();
-        }
-    }
-
-    private void updateBidTextField() {
-        if (txtBidAmount != null) {
-            txtBidAmount.setText(String.format("%,d", currentBidValue).replace(",", "."));
-        }
     }
 }

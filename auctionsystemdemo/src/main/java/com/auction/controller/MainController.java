@@ -15,10 +15,12 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -28,6 +30,18 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainController {
+
+    // --- SINGLETON ĐỂ CÁC MÀN HÌNH KHÁC GỌI ĐƯỢC MAIN CONTROLLER ---
+    private static MainController instance;
+
+    public MainController() {
+        instance = this;
+    }
+
+    public static MainController getInstance() {
+        return instance;
+    }
+    // ---------------------------------------------------------------
 
     @FXML private StackPane contentArea;
     @FXML private Label lblTime;
@@ -50,10 +64,9 @@ public class MainController {
     @FXML private Button btnNavAuction;
     @FXML private Button btnNavAdd;
     @FXML private Button btnNavNotif;
-    @FXML private Button btnNavProfile; // Dùng nút này để hiển thị tên thay cho Label
+    @FXML private Button btnNavProfile;
 
     private List<Button> allMenuButtons;
-
     private Timeline banCheckerTimeline;
 
     @FXML
@@ -70,11 +83,45 @@ public class MainController {
         startBanChecker();
     }
 
-    // Hiển thị tên đăng nhập lên nút Profile ở sidebar mở rộng
-    private void loadUserInfo() {
-        if (btnNavProfile != null && SessionManager.userName != null) {
-            btnNavProfile.setText("👤   " + SessionManager.userName);
-        }
+    /**
+     * Tải thông tin người dùng (Tên & Avatar).
+     * Để public để ProfileController có thể gọi lại hàm này khi đổi Avatar thành công.
+     */
+    public void loadUserInfo() {
+        if (btnNavProfile == null || SessionManager.userName == null) return;
+
+        // Set tạm tên trước khi có dữ liệu từ API
+        btnNavProfile.setText("   " + SessionManager.userName);
+
+        ApiService.getAsync("/users/profile/" + SessionManager.userName).thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() == 200) {
+                    com.auction.model.ApiResponse apiRes = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        com.auction.model.UserProfile profile = ApiService.gson.fromJson(apiRes.result, com.auction.model.UserProfile.class);
+
+                        String avatarPath = profile.avatarUrl;
+                        if (avatarPath == null || !avatarPath.startsWith("/uploads") || avatarPath.contains("default-")) {
+                            avatarPath = "/uploads/images/avatar/avatarmacdinh.png";
+                        }
+
+                        // CHỐNG CACHE ẢNH BẰNG CÁCH THÊM THỜI GIAN VÀO CUỐI URL
+                        String fullImageUrl = "http://localhost:8080/auction" + avatarPath + "?t=" + System.currentTimeMillis();
+
+                        // Tạo Avatar tròn cho chế độ thu gọn
+                        ImageView smallAvatar = createCircularAvatar(fullImageUrl, 16);
+                        btnIconProfile.setText("");
+                        btnIconProfile.setGraphic(smallAvatar);
+
+                        // Tạo Avatar tròn cho chế độ mở rộng
+                        ImageView expandedAvatar = createCircularAvatar(fullImageUrl, 16);
+                        String currentText = btnNavProfile.getText().replace("👤", "").trim();
+                        btnNavProfile.setText("   " + currentText);
+                        btnNavProfile.setGraphic(expandedAvatar);
+                    }
+                }
+            });
+        });
     }
 
     private void startClock() {
@@ -88,7 +135,6 @@ public class MainController {
             if (lblTime != null) {
                 lblTime.setText(now.format(timeFormatter));
             }
-
             if (lblDate != null) {
                 String dateStr = now.format(dateFormatter);
                 lblDate.setText(dateStr.substring(0, 1).toUpperCase() + dateStr.substring(1));
@@ -99,7 +145,6 @@ public class MainController {
         clock.play();
     }
 
-
     public void loadView(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -107,10 +152,11 @@ public class MainController {
             contentArea.getChildren().setAll(view);
         } catch (IOException e) {
             e.printStackTrace();
+            System.err.println("Lỗi khi tải file FXML: " + fxmlPath);
         }
     }
 
-    // Hàm tô màu nút được chọn (xóa màu nút cũ, thêm màu cho nút icon & text tương ứng)
+    // Hàm tô màu nút được chọn
     private void setActiveButton(Button iconBtn, Button navBtn) {
         // Xóa class active ở tất cả các nút
         for (Button btn : allMenuButtons) {
@@ -166,7 +212,7 @@ public class MainController {
         if (expandedSidebar != null && drawerOverlay != null) {
             drawerOverlay.setVisible(true);
             TranslateTransition slide = new TranslateTransition(Duration.millis(300), expandedSidebar);
-            slide.setToX(280);
+            slide.setToX(280); // Trượt menu ra ngoài (280px)
             FadeTransition fade = new FadeTransition(Duration.millis(300), drawerOverlay);
             fade.setFromValue(0.0);
             fade.setToValue(1.0);
@@ -178,7 +224,7 @@ public class MainController {
     public void closeSidebar() {
         if (expandedSidebar != null && drawerOverlay != null) {
             TranslateTransition slide = new TranslateTransition(Duration.millis(300), expandedSidebar);
-            slide.setToX(0);
+            slide.setToX(0); // Trượt menu trở về vị trí cũ
             FadeTransition fade = new FadeTransition(Duration.millis(300), drawerOverlay);
             fade.setFromValue(1.0);
             fade.setToValue(0.0);
@@ -192,18 +238,17 @@ public class MainController {
     // HỆ THỐNG QUÉT TÀI KHOẢN BỊ BAN NGẦM (MỖI 5 GIÂY)
     // ==========================================
     private void startBanChecker() {
-        // Admin thì không bao giờ bị khóa, nên bỏ qua không quét để tiết kiệm tài nguyên
+        // Admin thì không bao giờ bị khóa, bỏ qua để tiết kiệm tài nguyên
         if (SessionManager.userName == null || "ADMIN".equals(SessionManager.role)) return;
 
         banCheckerTimeline = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
-
             // Nếu người dùng đã tự đăng xuất, dừng quét luôn
             if (SessionManager.userName == null) {
                 banCheckerTimeline.stop();
                 return;
             }
 
-            // Gọi nhẹ API Profile để kiểm tra
+            // Gọi API Profile để kiểm tra
             ApiService.getAsync("/users/profile/" + SessionManager.userName).thenAccept(res -> {
                 Platform.runLater(() -> {
                     if (res.statusCode() == 200) {
@@ -211,7 +256,7 @@ public class MainController {
                         if (apiRes.code == 1000) {
                             com.auction.model.UserProfile profile = ApiService.gson.fromJson(apiRes.result, com.auction.model.UserProfile.class);
 
-                            // NẾU PHÁT HIỆN BỊ BAN (Khóa tài khoản) -> ĐÁ VĂNG NGAY LẬP TỨC
+                            // NẾU PHÁT HIỆN BỊ BAN -> ĐÁ VĂNG NGAY LẬP TỨC
                             if (profile.banned) {
                                 forceLogoutBannedUser();
                             }
@@ -220,8 +265,28 @@ public class MainController {
                 });
             });
         }));
-        banCheckerTimeline.setCycleCount(Timeline.INDEFINITE); // Chạy vô hạn
+        banCheckerTimeline.setCycleCount(Timeline.INDEFINITE);
         banCheckerTimeline.play();
+    }
+
+    /**
+     * Tạo ImageView với khung hình tròn
+     */
+    private ImageView createCircularAvatar(String imageUrl, double radius) {
+        Image image = new Image(imageUrl, radius * 2, radius * 2, true, true, true);
+
+        // Bắt lỗi nếu link ảnh hỏng/server sập
+        image.errorProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                System.err.println("Cảnh báo: Không thể tải ảnh từ URL -> " + imageUrl);
+            }
+        });
+
+        ImageView imageView = new ImageView(image);
+        Circle clip = new Circle(radius, radius, radius);
+        imageView.setClip(clip);
+
+        return imageView;
     }
 
     private void forceLogoutBannedUser() {
@@ -231,22 +296,15 @@ public class MainController {
         // 2. Xóa session
         SessionManager.logout();
 
-        // 3. Hiển thị thông báo
+        // 3. Hiển thị thông báo cỡ lớn
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Thông báo khẩn cấp");
         alert.setHeaderText("TÀI KHOẢN ĐÃ BỊ KHÓA!");
         alert.setContentText("Tài khoản của bạn vừa bị Admin khóa do vi phạm.\nBạn sẽ bị đăng xuất ngay lập tức.");
 
-        // =========================================================
-        // THÊM CODE ĐỂ PHÓNG TO MÀN HÌNH ALERT
-        // =========================================================
-        // 1. Ép kích thước khung to ra (Rộng 450, Cao 250)
+        // Phóng to khung Dialog để user thấy rõ
         alert.getDialogPane().setPrefSize(450, 250);
-
-        // 2. Phóng to cỡ chữ bên trong để cân xứng với khung
         alert.getDialogPane().setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        // =========================================================
-
         alert.showAndWait();
 
         // 4. Chuyển về màn hình đăng nhập
