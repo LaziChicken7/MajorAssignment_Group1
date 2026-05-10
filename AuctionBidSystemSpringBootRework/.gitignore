@@ -31,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### CUSTOM: UPLOADS DIRECTORY ###
+# 1. Bỏ qua tất cả mọi thứ trong thư mục uploads
+uploads/*
+
+# 2. Mở khóa cho phép Git đi vào thư mục images
+!uploads/images/
+
+# 3. Lại tiếp tục bỏ qua tất cả mọi thứ trong images (như thư mục items)
+uploads/images/*
+
+# 4. Mở khóa cho phép Git đi vào thư mục avatar
+!uploads/images/avatar/
+
+# 5. Bỏ qua tất cả các ảnh rác người dùng tải lên trong thư mục avatar
+uploads/images/avatar/*
+
+# 6. NGOẠI LỆ: CHỈ GIỮ LẠI CÁC ẢNH MẶC ĐỊNH NÀY (BẮT BUỘC ĐẨY LÊN GITHUB)
+!uploads/images/avatar/avatarmacdinh.png

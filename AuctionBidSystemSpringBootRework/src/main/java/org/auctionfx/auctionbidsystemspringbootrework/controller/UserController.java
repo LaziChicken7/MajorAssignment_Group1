@@ -139,29 +139,31 @@ public class UserController {
             throw new RuntimeException("User not found");
         }
 
-        // Tạo thư mục uploads nếu chưa có
-        String uploadDir = "uploads/";
+        // 1. ĐỔI ĐƯỜNG DẪN LƯU THÀNH THƯ MỤC AVATAR
+        String uploadDir = "uploads/images/avatar/";
         File dir = new File(uploadDir);
         if (!dir.exists() && !dir.mkdirs()) {
             throw new IOException("Could not create upload directory");
         }
 
-        // Lấy tên file gốc và phần mở rộng<png, jpg, etc.>
+        // Lấy phần mở rộng của file (ví dụ: .png, .jpg)
         String originalFileName = file.getOriginalFilename();
         String fileExtension = "";
         if (originalFileName != null && originalFileName.contains(".")) {
             fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
         }
 
-        // Tạo tên file mới ngẫu nhiên để tránh trùng lặp
-        String newFileName = UUID.randomUUID().toString() + fileExtension;
+        // 2. ĐẶT TÊN FILE THEO USERNAME KÈM ĐUÔI FILE (VD: nguoiban_01.png)
+        String newFileName = userName + fileExtension;
 
         // Đường dẫn đầy đủ để lưu file
         Path filePath = Paths.get(uploadDir + newFileName);
+
+        // Ghi đè file mới vào thư mục (nếu user up ảnh mới, ảnh cũ cùng tên sẽ bị ghi đè)
         Files.write(filePath, file.getBytes());
 
-        // Tạo URL truy cập file
-        String fileUrl = "/uploads/" + newFileName;
+        // 3. TẠO URL TRUY CẬP ĐÚNG CHUẨN
+        String fileUrl = "/uploads/images/avatar/" + newFileName;
 
         // Cập nhật avatarUrl trong database cho user này
         user.setAvatarUrl(fileUrl);
@@ -177,11 +179,11 @@ public class UserController {
     public ApiResponse<String> removeAvatar(@PathVariable String userName) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
 
-        // lấy user từ database 
+        // lấy user từ database
         User user = userService.getUserByUserName(userName);
 
-        // Ép nó về link mặc định ban đầu 
-        user.setAvatarUrl("/images/avatar/default-avatarmacdinh.png");
+        // LƯU Ý: Phải có dấu "/" ở đầu chuỗi để Frontend ghép link không bị lỗi
+        user.setAvatarUrl("/uploads/images/avatar/avatarmacdinh.png");
 
         // Dùng hàm lưu nhanh user 
         userService.saveUser(user);
@@ -192,5 +194,4 @@ public class UserController {
 
         return apiResponse;
     }
-    
 }
