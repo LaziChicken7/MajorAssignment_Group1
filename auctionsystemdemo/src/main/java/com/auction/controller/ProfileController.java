@@ -395,6 +395,33 @@ public class ProfileController {
                 }
 
                 int responseCode = conn.getResponseCode();
+
+                // -----------------------------------------------------
+                // MỚI: ĐỌC LỖI TỪ SERVER NẾU UPLOAD THẤT BẠI
+                // -----------------------------------------------------
+                String serverErrorMessage = "Không thể tải ảnh. Mã lỗi HTTP: " + responseCode;
+                if (responseCode >= 400) {
+                    try (java.io.InputStream errorStream = conn.getErrorStream()) {
+                        if (errorStream != null) {
+                            String responseBody = new String(errorStream.readAllBytes(), "UTF-8");
+                            try {
+                                // Cố gắng ép kiểu JSON về ApiResponse để lấy message
+                                ApiResponse errRes = ApiService.gson.fromJson(responseBody, ApiResponse.class);
+                                if (errRes != null && errRes.message != null) {
+                                    serverErrorMessage = errRes.message;
+                                } else {
+                                    serverErrorMessage = responseBody; // Nếu không có message, in toàn bộ text
+                                }
+                            } catch (Exception parseEx) {
+                                // Nếu server không trả về JSON mà trả về text/html
+                                serverErrorMessage = responseBody;
+                            }
+                        }
+                    } catch (Exception ignored) { }
+                }
+
+                final String finalErrorMsg = serverErrorMessage;
+
                 Platform.runLater(() -> {
                     if (responseCode == 200 || responseCode == 201) {
                         showAlert(Alert.AlertType.INFORMATION, "Thành công", "Tải ảnh lên thành công!");
@@ -402,15 +429,14 @@ public class ProfileController {
                         // Load lại dữ liệu bên trong trang Profile
                         loadUserData();
 
-                        // =======================================================
-                        // GỌI MAIN CONTROLLER ĐỂ CẬP NHẬT LẠI AVATAR TRÊN SIDEBAR
-                        // =======================================================
+                        // Cập nhật lại Avatar trên Sidebar (MainController)
                         if (MainController.getInstance() != null) {
                             MainController.getInstance().loadUserInfo();
                         }
 
                     } else {
-                        showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải ảnh. Mã lỗi Server: " + responseCode);
+                        // NÉM THÔNG BÁO LỖI CHUẨN TỪ SERVER LÊN UI
+                        showAlert(Alert.AlertType.ERROR, "Lỗi tải ảnh", finalErrorMsg);
                     }
                 });
 
