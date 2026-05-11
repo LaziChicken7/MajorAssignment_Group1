@@ -441,8 +441,38 @@ public class ProfileController {
                 });
 
             } catch (Exception e) {
-                e.printStackTrace();
-                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi kết nối", "Không thể gửi dữ liệu lên máy chủ."));
+                e.printStackTrace(); // In ra console cho lập trình viên (Terminal)
+
+                // Lấy thông điệp lỗi cụ thể từ Java
+                String detailedError = e.getMessage() != null ? e.getMessage() : e.toString();
+
+                Platform.runLater(() -> {
+                    // Mở rộng Alert để có thể hiển thị văn bản dài
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Lỗi hệ thống");
+                    alert.setHeaderText("Không thể gửi dữ liệu lên máy chủ.");
+
+                    // Tạo một TextArea để hiển thị chi tiết lỗi (Phòng trường hợp lỗi quá dài)
+                    TextArea textArea = new TextArea(detailedError);
+                    textArea.setEditable(false);
+                    textArea.setWrapText(true);
+                    textArea.setMaxWidth(Double.MAX_VALUE);
+                    textArea.setMaxHeight(Double.MAX_VALUE);
+
+                    // Thiết lập giao diện để nó có thể tự co giãn
+                    javafx.scene.layout.GridPane.setVgrow(textArea, javafx.scene.layout.Priority.ALWAYS);
+                    javafx.scene.layout.GridPane.setHgrow(textArea, javafx.scene.layout.Priority.ALWAYS);
+                    javafx.scene.layout.GridPane expContent = new javafx.scene.layout.GridPane();
+                    expContent.setMaxWidth(Double.MAX_VALUE);
+                    expContent.add(new Label("Chi tiết lỗi:"), 0, 0);
+                    expContent.add(textArea, 0, 1);
+
+                    // Gắn vào phần mở rộng (Show Details) của thông báo
+                    alert.getDialogPane().setExpandableContent(expContent);
+                    alert.getDialogPane().setExpanded(true); // Tự động mở rộng sẵn
+
+                    alert.showAndWait();
+                });
             }
         }).start();
     }
