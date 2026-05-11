@@ -23,8 +23,23 @@ public class AuctionModel {
         public double startPrice;
         public String description;
 
-        // THÊM DÒNG NÀY ĐỂ NHẬN DANH SÁCH LINK ẢNH TỪ SERVER
+        // DANH SÁCH LINK ẢNH TỪ SERVER
         public List<String> imageUrls;
+
+        // --- BỔ SUNG CÁC TRƯỜNG NÀY ĐỂ HỨNG THÔNG TIN KỸ THUẬT TỪ BACKEND ---
+        public String itemType;          // Phân loại: ART, ELECTRONIC, VEHICLE
+
+        // Dành cho mặt hàng Nghệ thuật (ART)
+        public String nameAuthor;
+        public Integer creationYear;     // Dùng Integer để tránh lỗi nếu null
+
+        // Dành cho đồ Điện tử (ELECTRONIC)
+        public String brand;
+        public Integer warrantyMonths;
+
+        // Dành cho Phương tiện (VEHICLE)
+        public String engineType;
+        public Integer mileage;
     }
 
     public static class SellerModel {

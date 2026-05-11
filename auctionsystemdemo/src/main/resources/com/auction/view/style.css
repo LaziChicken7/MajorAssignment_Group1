@@ -694,3 +694,41 @@
     -fx-background-radius: 10;
     -fx-background-insets: 0;
 }
+
+/* =========================================
+   19. STYLE CHO MŨI TÊN CHUYỂN ẢNH (SLIDER)
+   ========================================= */
+.slider-btn {
+    -fx-cursor: hand;
+    -fx-padding: 10;
+}
+
+/* Khi di chuột vào: Đổi màu mũi tên thành đen đậm (Giống nút Quay lại) */
+.slider-btn:hover .back-icon {
+    -fx-stroke: #2c3e50;
+}
+
+/* Khi bị khóa (Không có ảnh để chuyển): Tắt bàn tay và làm nhạt mũi tên */
+.slider-btn:disabled {
+    -fx-cursor: default;
+}
+.slider-btn:disabled .back-icon {
+    -fx-stroke: #ecf0f1; /* Màu xám siêu nhạt */
+}
+
+/* =========================================
+   20. STYLE CHO THANH TIẾN ĐỘ ĐẤU GIÁ (MÀU ĐỎ)
+   ========================================= */
+.red-progress-bar {
+    -fx-pref-height: 12px;
+}
+.red-progress-bar > .track {
+    -fx-background-color: #f1f2f6; /* Nền xám mờ */
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+}
+.red-progress-bar > .bar {
+    -fx-background-color: linear-gradient(to right, #ff6b6b, #e74c3c); /* Dải màu đỏ */
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+}
