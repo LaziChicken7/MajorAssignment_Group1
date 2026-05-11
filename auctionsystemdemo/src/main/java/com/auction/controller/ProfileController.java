@@ -102,8 +102,9 @@ public class ProfileController {
                                     avatarPath = "/uploads/images/avatar/avatarmacdinh.png";
                                 }
 
-                                // Thêm param chống cache để ảnh tải lại ngay lập tức khi load profile
-                                String fullImageUrl = "http://localhost:8080/auction" + avatarPath + "?t=" + System.currentTimeMillis();
+                                // 1. SỬ DỤNG ApiService.BASE_URL (Đừng dùng localhost)
+                                // 2. Thêm "?t=" + System.currentTimeMillis() để ép JavaFX phải tải lại ảnh mới nhất từ Server, không được dùng Cache
+                                String fullImageUrl = ApiService.BASE_URL + avatarPath + "?t=" + System.currentTimeMillis();
 
                                 // Gọi hàm bo tròn ảnh
                                 displayCircularAvatar(fullImageUrl);
@@ -425,18 +426,17 @@ public class ProfileController {
 
                 Platform.runLater(() -> {
                     if (responseCode == 200 || responseCode == 201) {
-                        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Tải ảnh lên thành công!");
 
-                        // Load lại dữ liệu bên trong trang Profile
+                        // 1. GỌI HÀM CẬP NHẬT GIAO DIỆN TRƯỚC!!!
                         loadUserData();
-
-                        // Cập nhật lại Avatar trên Sidebar (MainController)
                         if (MainController.getInstance() != null) {
                             MainController.getInstance().loadUserInfo();
                         }
 
+                        // 2. HIỆN THÔNG BÁO SAU
+                        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Tải ảnh lên thành công!");
+
                     } else {
-                        // NÉM THÔNG BÁO LỖI CHUẨN TỪ SERVER LÊN UI
                         showAlert(Alert.AlertType.ERROR, "Lỗi tải ảnh", finalErrorMsg);
                     }
                 });

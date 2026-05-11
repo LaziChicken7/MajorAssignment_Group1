@@ -105,8 +105,11 @@ public class MainController {
                             avatarPath = "/uploads/images/avatar/avatarmacdinh.png";
                         }
 
-                        // CHỐNG CACHE ẢNH BẰNG CÁCH THÊM THỜI GIAN VÀO CUỐI URL
-                        String fullImageUrl = "http://localhost:8080/auction" + avatarPath + "?t=" + System.currentTimeMillis();
+                        // ========================================================
+                        // CHỐNG CACHE: Bắt buộc JavaFX tải ảnh mới nhất từ Server
+                        // Dùng ApiService.BASE_URL thay vì localhost gán cứng
+                        // ========================================================
+                        String fullImageUrl = ApiService.BASE_URL + avatarPath + "?t=" + System.currentTimeMillis();
 
                         // Tạo Avatar tròn cho chế độ thu gọn
                         ImageView smallAvatar = createCircularAvatar(fullImageUrl, 16);
