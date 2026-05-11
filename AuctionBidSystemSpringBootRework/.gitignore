@@ -32,6 +32,14 @@ build/
 ### VS Code ###
 .vscode/
 
+### MacOS ###
+.DS_Store
+
+### LOGS & TEMP FILES ###
+# Bỏ qua thư mục logs (Vì Spring Boot tự sinh ra file log ở đây)
+logs/
+*.log
+
 ### CUSTOM: UPLOADS DIRECTORY ###
 # 1. Bỏ qua tất cả mọi thứ trong thư mục uploads
 uploads/*

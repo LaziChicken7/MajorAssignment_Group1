@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ItemCancellationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.ItemCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
@@ -20,11 +21,20 @@ import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
+@Slf4j // Kích hoạt bộ ghi log của Lombok
 public class ItemService {
     @Autowired private ItemRepository itemRepository;
     @Autowired private UserRepository userRepository;
@@ -32,14 +42,21 @@ public class ItemService {
     @Autowired private NotificationService notificationService;
     @Autowired private PaymentService paymentService;
 
+    // Thư mục lưu trữ file upload trên server (tương đối từ root project)
+    private static final String UPLOAD_DIR = "uploads/images/items/";
+
     @Transactional
     public String createItem(ItemCreationRequest request) {
+        log.info("SERVICE: Bắt đầu xử lý tạo Item mới loại [{}] cho Seller [{}]", request.getItemType(), request.getSellerUserName());
+
         // 1. Kiểm tra quyền của Seller
         User user = userRepository.findByUserName(request.getSellerUserName());
         if (user == null) {
+            log.error("Lỗi: Không tìm thấy Username [{}]", request.getSellerUserName());
             throw new ItemException(ErrorCode.USER_NOT_FOUND);
         }
         if (!(user instanceof Seller)) {
+            log.error("Lỗi: User [{}] không phải là SELLER, từ chối tạo Item", request.getSellerUserName());
             throw new ItemException(ErrorCode.SELLER_INVALID);
         }
 
@@ -64,7 +81,10 @@ public class ItemService {
                 veh.setMileage(request.getMileage());
                 item = veh;
             }
-            default -> throw new ItemException(ErrorCode.ITEM_INVALID);
+            default -> {
+                log.error("Lỗi: Loại sản phẩm [{}] không hợp lệ", request.getItemType());
+                throw new ItemException(ErrorCode.ITEM_INVALID);
+            }
         }
 
         item.setName(request.getName());
@@ -75,12 +95,14 @@ public class ItemService {
         // BẠN CẦN BỔ SUNG DÒNG NÀY ĐỂ DATABASE LƯU ĐƯỢC CHỮ "VEHICLE", "ART"...
         item.setItemType(request.getItemType());
 
-        // Cập nhật danh sách ảnh cho Item nếu có 
+        // Cập nhật danh sách ảnh cho Item nếu có
         if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+            log.debug("Cập nhật danh sách URL ảnh có sẵn cho Item");
             item.setImageUrls(request.getImageUrls());
         }
 
         itemRepository.save(item);
+        log.info("Tạo Item thành công! Sinh ra ID: {}", item.getId());
         return "Create item successfully, Item id is: " + item.getId();
     }
 
@@ -91,22 +113,32 @@ public class ItemService {
     //  *** Admin hủy sản phẩm ***
     //   - Cập nhật trạng thái auction thành CANCELLED
     //   - Hoàn tiền cho người thắng cuộc (nếu có)
-    //   - Gửi thông báo cho người bán và người mua    
+    //   - Gửi thông báo cho người bán và người mua
     @Transactional
     public String cancelItemByAdmin(String itemId, ItemCancellationRequest request) {
+        log.warn("SERVICE: Bắt đầu xử lý luồng Admin HỦY SẢN PHẨM ID [{}]", itemId);
+
         // 1. Kiểm tra Item có tồn tại không
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ItemException(ErrorCode.ITEM_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("Lỗi Hủy: Không tìm thấy Item [{}]", itemId);
+                    return new ItemException(ErrorCode.ITEM_NOT_FOUND);
+                });
 
         // 2. Tìm auction liên quan đến item này
         Auction auction = auctionRepository.findByBidProduct(item)
-                .orElseThrow(() -> new ItemException(ErrorCode.AUCTION_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("Lỗi Hủy: Không tìm thấy Auction liên kết với Item [{}]", itemId);
+                    return new ItemException(ErrorCode.AUCTION_NOT_FOUND);
+                });
 
         // 3. Kiểm tra xem auction đã hủy hoặc đã thanh toán rồi không (không được hủy lại)
         if (auction.getStatus() == AuctionStatus.CANCELLED) {
+            log.warn("Lỗi Hủy: Auction [{}] đã bị CANCELLED từ trước", auction.getId());
             throw new ItemException(ErrorCode.CONDITION_CANCEL_AUCTION_INVALID);
         }
         if (auction.getStatus() == AuctionStatus.PAID) {
+            log.warn("Lỗi Hủy: Auction [{}] đã hoàn tất thanh toán (PAID), không thể hủy", auction.getId());
             throw new ItemException(ErrorCode.CONDITION_CANCEL_AUCTION_INVALID);
         }
 
@@ -116,9 +148,11 @@ public class ItemService {
         // 5. Nếu có người thắng cuộc, hoàn tiền từ moneyInFrozen về moneyOnWallet
         if (winner != null && auction.getHighestBid() != null && auction.getHighestBid().compareTo(BigDecimal.ZERO) > 0) {
             try {
+                log.info("Tiến hành hoàn lại số tiền đóng băng {} VND cho người thắng [{}]", auction.getHighestBid(), winner.getUserName());
                 paymentService.unFreezeMoney(winner.getId(), auction.getHighestBid());
             } catch (Exception e) {
                 // Nếu hoàn tiền thất bại, throw exception
+                log.error("LỖI NGHIÊM TRỌNG: Quá trình hoàn tiền thất bại cho User [{}]", winner.getUserName(), e);
                 throw new ItemException(ErrorCode.NOT_ENOUGH_MONEY_IN_FROZEN);
             }
         }
@@ -126,6 +160,7 @@ public class ItemService {
         // 6. status auction thành CANCELLED
         auction.setStatus(AuctionStatus.CANCELLED);
         auctionRepository.save(auction);
+        log.info("Đã chuyển trạng thái Auction [{}] thành CANCELLED", auction.getId());
 
         // 7. Gửi thông báo cho người bán
         String sellerTitle = "Sản phẩm bị hủy bởi Admin";
@@ -141,6 +176,62 @@ public class ItemService {
                     buyerTitle, buyerDescription);
         }
 
+        log.info("Xử lý Hủy Sản Phẩm [{}] thành công và đã gửi đầy đủ thông báo.", itemId);
         return "Item cancelled successfully by admin";
+    }
+
+    // Logic xử lý Upload Image được dời từ Controller sang
+    @Transactional
+    public List<String> uploadImagesForItem(String itemId, MultipartFile[] files) throws IOException {
+        log.info("SERVICE: Xử lý lưu file vật lý cho Item [{}]", itemId);
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> {
+                    log.error("Lỗi Upload: Không tìm thấy Item [{}]", itemId);
+                    return new ItemException(ErrorCode.ITEM_NOT_FOUND);
+                });
+
+        if (files == null || files.length == 0) {
+            log.error("Lỗi Upload: Mảng files truyền vào bị Null hoặc rỗng");
+            throw new IOException("No files provided");
+        }
+
+        // 2. Thư mục vật lý sẽ tạo ra: uploads/images/items/{itemId}/
+        String itemDirPath = UPLOAD_DIR + itemId + "/";
+        File uploadDir = new File(itemDirPath);
+        if (!uploadDir.exists() && !uploadDir.mkdirs()) {
+            log.error("Lỗi Upload: Không thể tạo thư mục [{}]", itemDirPath);
+            throw new IOException("Could not create directory: " + itemDirPath);
+        }
+
+        List<String> fileUrls = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) continue;
+
+            String originalFileName = file.getOriginalFilename();
+            String fileExtension = originalFileName != null && originalFileName.contains(".")
+                    ? originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
+
+            String newFileName = UUID.randomUUID().toString() + fileExtension;
+            Path filePath = Paths.get(itemDirPath + newFileName);
+
+            log.debug("Đang lưu file: {}", newFileName);
+            Files.write(filePath, file.getBytes());
+
+            // 3. Đường dẫn lưu vào Database sẽ là: /uploads/images/items/{itemId}/{newFileName}
+            // (Thêm dấu "/" ở đầu để chuẩn định dạng URL web)
+            String fileUrl = "/" + UPLOAD_DIR + itemId + "/" + newFileName;
+            fileUrls.add(fileUrl);
+        }
+
+        List<String> currentImages = item.getImageUrls();
+        if (currentImages == null) currentImages = new ArrayList<>();
+        currentImages.addAll(fileUrls);
+        item.setImageUrls(currentImages);
+        itemRepository.save(item);
+
+        log.info("Lưu thành công {} ảnh vào thư mục của Item [{}]", fileUrls.size(), itemId);
+        return fileUrls;
     }
 }

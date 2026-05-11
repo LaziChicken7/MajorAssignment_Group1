@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.TransactionHistoryResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.List;
 
 @Service
+@Slf4j // Kích hoạt bộ ghi log của Lombok
 public class PaymentService {
     @Autowired
     private UserRepository userRepository;
@@ -31,8 +33,12 @@ public class PaymentService {
     // Ép kiểu an toàn từ User sang Bidder
     private Bidder getBidder(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_INVALID));
+                .orElseThrow(() -> {
+                    log.error("Lỗi: Không tìm thấy User ID [{}]", userId);
+                    return new UserException(ErrorCode.USER_INVALID);
+                });
         if (!(user instanceof Bidder)) {
+            log.error("Lỗi: User ID [{}] không có chức năng Ví (Không phải Bidder/Seller)", userId);
             throw new RuntimeException("User don't have Wallet functionality (Not Bidder/Seller)");
         }
         return (Bidder) user;
@@ -42,6 +48,7 @@ public class PaymentService {
     private Bidder getBidderByUserName(String userName) {
         User user = userRepository.findByUserName(userName);
         if (!(user instanceof Bidder)) {
+            log.error("Lỗi: User [{}] không tồn tại hoặc không có chức năng Ví", userName);
             throw new RuntimeException("User not found or not have Wallet functionality!");
         }
         return (Bidder) user;
@@ -51,9 +58,11 @@ public class PaymentService {
     // Trừ tiền ở Ví chính -> Cộng vào Ví đóng băng
     @Transactional(rollbackFor = Exception.class) // Nếu có lỗi xảy ra, toàn bộ tiền sẽ được rollback lại như cũ
     public String freezeMoney(String userId, BigDecimal amount) {
+        log.info("SERVICE: Yêu cầu ĐÓNG BĂNG {} VND của User ID [{}]", amount, userId);
         Bidder bidder = getBidder(userId);
 
         if (bidder.getMoneyOnWallet().compareTo(amount) < 0) {
+            log.warn("Thất bại: User ID [{}] không đủ tiền trong ví (Cần: {}, Có: {})", userId, amount, bidder.getMoneyOnWallet());
             throw new PaymentException(ErrorCode.NOT_ENOUGH_MONEY_ON_WALLET);
         }
 
@@ -61,6 +70,7 @@ public class PaymentService {
         bidder.setMoneyinFrozen(bidder.getMoneyinFrozen().add(amount));
 
         userRepository.save(bidder);
+        log.info("Đóng băng thành công {} VND cho User ID [{}]", amount, userId);
         return "Freeze Money successfully!";
     }
 
@@ -68,9 +78,11 @@ public class PaymentService {
     // Trừ tiền ở Ví đóng băng -> Trả lại Ví chính
     @Transactional(rollbackFor = Exception.class)
     public String unFreezeMoney(String userId, BigDecimal amount) {
+        log.info("SERVICE: Yêu cầu HOÀN TRẢ (Unfreeze) {} VND cho User ID [{}]", amount, userId);
         Bidder bidder = getBidder(userId);
 
         if (bidder.getMoneyinFrozen().compareTo(amount) < 0) {
+            log.error("Lỗi nghiêm trọng: Tiền đóng băng của User ID [{}] ({}) ít hơn số tiền cần hoàn ({})", userId, bidder.getMoneyinFrozen(), amount);
             throw new PaymentException(ErrorCode.NOT_ENOUGH_MONEY_IN_FROZEN);
         }
 
@@ -78,6 +90,7 @@ public class PaymentService {
         bidder.setMoneyOnWallet(bidder.getMoneyOnWallet().add(amount));
 
         userRepository.save(bidder);
+        log.info("Hoàn trả thành công {} VND vào ví chính cho User ID [{}]", amount, userId);
         return "Unfreeze Money successfully!";
     }
 
@@ -85,10 +98,12 @@ public class PaymentService {
     // Trừ tiền ở Ví đóng băng của người mua -> Cộng vào Ví chính của người bán
     @Transactional(rollbackFor = Exception.class)
     public String transferMoney(String fromUserId, String toUserId, BigDecimal amount) {
+        log.info("SERVICE: Yêu cầu CHUYỂN {} VND từ Ví đóng băng (Buyer ID: {}) sang Ví chính (Seller ID: {})", amount, fromUserId, toUserId);
         Bidder buyer = getBidder(fromUserId);
         Bidder seller = getBidder(toUserId);
 
         if (buyer.getMoneyinFrozen().compareTo(amount) < 0) {
+            log.error("Lỗi nghiêm trọng: Người mua ID [{}] không đủ tiền đóng băng để thanh toán", fromUserId);
             throw new PaymentException(ErrorCode.NOT_ENOUGH_MONEY_IN_FROZEN);
         }
 
@@ -101,42 +116,51 @@ public class PaymentService {
         userRepository.save(buyer);
         userRepository.save(seller);
 
+        log.info("Giao dịch chuyển tiền thành công: {} VND đã được chuyển cho Seller ID [{}]", amount, toUserId);
         return "Transfer Money successfully!";
     }
 
     // 4. Nạp tiền vào ví
     @Transactional(rollbackFor = Exception.class)
     public String deposit(String userName, BigDecimal amount) {
+        log.info("SERVICE: Bắt đầu giao dịch NẠP {} VND cho User [{}]", amount, userName);
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("Thất bại: Số tiền nạp phải lớn hơn 0 (Nhận được: {})", amount);
             throw new PaymentException(ErrorCode.DEPOSIT_MONEY_INVALID);
         }
         Bidder bidder = getBidderByUserName(userName);
         bidder.setMoneyOnWallet(bidder.getMoneyOnWallet().add(amount));
         userRepository.save(bidder);
 
+        log.info("Nạp tiền thành công. Số dư hiện tại của User [{}]: {}", userName, bidder.getMoneyOnWallet());
         return "Deposit successfully! Money on wallet now is: " + bidder.getMoneyOnWallet();
     }
 
     // 5. Rút tiền vào ví
     @Transactional(rollbackFor = Exception.class)
     public String withdraw(String userName, BigDecimal amount) {
+        log.info("SERVICE: Bắt đầu giao dịch RÚT {} VND cho User [{}]", amount, userName);
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("Thất bại: Số tiền rút phải lớn hơn 0 (Nhận được: {})", amount);
             throw new PaymentException(ErrorCode.WITHDRAW_MONEY_INVALID);
         }
         Bidder bidder = getBidderByUserName(userName);
         if (bidder.getMoneyOnWallet().compareTo(amount) < 0) {
+            log.warn("Thất bại: User [{}] yêu cầu rút {} nhưng số dư chỉ có {}", userName, amount, bidder.getMoneyOnWallet());
             throw new PaymentException(ErrorCode.NOT_ENOUGH_MONEY_ON_WALLET);
         }
 
         bidder.setMoneyOnWallet(bidder.getMoneyOnWallet().subtract(amount));
         userRepository.save(bidder);
 
+        log.info("Rút tiền thành công. Số dư hiện tại của User [{}]: {}", userName, bidder.getMoneyOnWallet());
         return "Withdraw successfully! Money on wallet now is: " + bidder.getMoneyOnWallet();
     }
 
     // 6. Đưa ra danh sách các sản phẩm đấu giá thành công hay thất bại của một user
     // Hàm này sẽ trả về dữ liệu về cho VÍ TIỀN
     public Map<String, Object> getMyWalletAndHistory(String userName) {
+        log.debug("SERVICE: Truy xuất dữ liệu Ví và Lịch sử giao dịch cho User [{}]", userName);
         Bidder bidder = getBidderByUserName(userName);
         Map<String, Object> responseData = new HashMap<>();
 
@@ -171,6 +195,7 @@ public class PaymentService {
         responseData.put("successTransaction", successList);
         responseData.put("failedTransaction", failedList);
 
+        log.debug("Đã đóng gói xong dữ liệu Ví. Tìm thấy {} giao dịch thành công và {} giao dịch thất bại", successList.size(), failedList.size());
         return responseData;
     }
 }

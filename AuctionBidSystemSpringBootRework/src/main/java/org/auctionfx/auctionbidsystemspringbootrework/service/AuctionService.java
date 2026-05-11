@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.BidTransaction;
@@ -25,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
+@Slf4j // Kích hoạt bộ ghi log của Lombok
 public class AuctionService {
     @Autowired private AuctionRepository auctionRepository;
     @Autowired private UserRepository userRepository;
@@ -40,13 +42,19 @@ public class AuctionService {
     // 1. Chức năng đặt giá (Place Bid) - Quan trọng nhất
     @Transactional(rollbackFor = Exception.class) // Nếu có lỗi xảy ra, toàn bộ tiền sẽ được rollback lại như cũ
     public String placeBid(String auctionId, String bidderUserName, BigDecimal bidAmount) {
+        log.info("SERVICE: Bắt đầu xử lý luồng đặt giá. AuctionID={}, Username={}, Amount={}", auctionId, bidderUserName, bidAmount);
+
         // 1. Tìm phiên đấu giá
         Auction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(() -> new AuctionException(ErrorCode.AUCTION_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("Lỗi: Không tìm thấy phiên đấu giá [{}]", auctionId);
+                    return new AuctionException(ErrorCode.AUCTION_NOT_FOUND);
+                });
 
         // 2. Tìm người đặt giá
         User user = userRepository.findByUserName(bidderUserName);
         if (user == null || !(user instanceof Bidder)) {
+            log.error("Lỗi: Người dùng [{}] không tồn tại hoặc không phải là Bidder", bidderUserName);
             throw new AuctionException(ErrorCode.USER_INVALID);
         }
         Bidder bidder = (Bidder) user;
@@ -54,18 +62,23 @@ public class AuctionService {
 
         // 3. Kiểm tra điều kiện
         if (auction.getStatus() != AuctionStatus.RUNNING) {
+            log.warn("Cảnh báo: Từ chối đặt giá. Phiên đấu giá [{}] không ở trạng thái RUNNING", auctionId);
             throw new AuctionException(ErrorCode.AUCTION_NOT_RUNNING);
         }
         if (bidder.getId().equals(auction.getSeller().getId())) {
+            log.warn("Cảnh báo: Seller [{}] cố tình tự đặt giá sản phẩm của chính mình!", bidder.getUserName());
             throw new AuctionException(ErrorCode.AUCTION_BIDDER_INVALID);
         }
         if (bidTimestamp.isAfter(auction.getEndTime())) {
+            log.warn("Cảnh báo: Phiên đấu giá [{}] đã hết giờ!", auctionId);
             throw new AuctionException(ErrorCode.AUCTION_NOT_RUNNING);
         }
         if (bidder.isBanned()) {
+            log.warn("Cảnh báo: Tài khoản [{}] đã bị cấm nhưng vẫn cố đặt giá", bidderUserName);
             throw new UserException(ErrorCode.USER_BANNED);
         }
         if (bidAmount.compareTo(auction.getHighestBid()) <= 0) {
+            log.warn("Cảnh báo: Giá nhập ({}) nhỏ hơn hoặc bằng giá hiện tại ({})", bidAmount, auction.getHighestBid());
             throw new RuntimeException("Money must be higher than now (" + auction.getHighestBid() + ")");
         }
 
@@ -75,10 +88,12 @@ public class AuctionService {
 
         // Nếu có người dẫn đầu trước đó -> Trả lại tiền cho họ
         if (previousWinner != null) {
+            log.info("Thực hiện hoàn trả tiền {} VND cho người dẫn đầu cũ [{}]", previousBid, previousWinner.getUserName());
             paymentService.unFreezeMoney(previousWinner.getId(), previousBid);
         }
 
         // Đóng băng tiền của người đặt giá mới
+        log.info("Thực hiện đóng băng {} VND của Bidder mới [{}]", bidAmount, bidder.getUserName());
         paymentService.freezeMoney(bidder.getId(), bidAmount);
 
         // 5. Cập nhật phiên đấu giá
@@ -89,6 +104,7 @@ public class AuctionService {
         long secondsRemaining = ChronoUnit.SECONDS.between(bidTimestamp, auction.getEndTime());
         boolean isExtended = false;
         if (secondsRemaining <= SNIPING_THRESHOLD_SECONDS) {
+            log.info("HỆ THỐNG ANTI-SNIPPING KÍCH HOẠT: Chỉ còn {} giây. Gia hạn thêm {} giây cho phiên [{}]", secondsRemaining, EXTENSION_SECONDS, auctionId);
             auction.setEndTime(auction.getEndTime().plusSeconds(EXTENSION_SECONDS));
             isExtended = true;
         }
@@ -107,12 +123,15 @@ public class AuctionService {
         if (isExtended) {
             result += "\n(Anti-Snipping system activated: Extended 60 seconds)";
         }
+
+        log.info("Giao dịch đặt giá thành công. Trạng thái hiện tại: Người thắng mới là [{}]", bidder.getUserName());
         return result;
     }
 
     // 2. Bắt đầu và kết thúc phiên đấu giá
     @Transactional
     public void startAuction(String auctionId) {
+        log.info("Bắt đầu khởi chạy thủ công phiên đấu giá[{}]", auctionId);
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
         auction.setStatus(AuctionStatus.RUNNING);
         auctionRepository.save(auction);
@@ -120,11 +139,13 @@ public class AuctionService {
 
     @Transactional
     public String closeAuction(String auctionId) {
+        log.info("Bắt đầu quá trình ĐÓNG phiên đấu giá [{}]", auctionId);
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
         auction.setStatus(AuctionStatus.FINISHED);
         String shortId = auction.getBidProduct().getId().substring(0, 4).toUpperCase();
 
         if (auction.getWinningUser() != null) {
+            log.info("Phiên đấu giá [{}] kết thúc thành công. Người thắng: [{}]", auctionId, auction.getWinningUser().getUserName());
             // 1. Thông báo cho người mua xác thực thanh toán
             Notification winnerNotif = new Notification();
             winnerNotif.setUser(auction.getWinningUser());
@@ -146,6 +167,7 @@ public class AuctionService {
             auctionRepository.save(auction);
             return "Session ended! Winner is: " + auction.getWinningUser().getFullName();
         } else {
+            log.info("Phiên đấu giá [{}] kết thúc nhưng Ế (Không ai đấu giá)", auctionId);
             auction.setTransactionStatus(TransactionStatus.FAILED);
 
             // 3. BỔ SUNG: Thông báo cho Người bán (Báo ế / Không ai mua)
@@ -165,8 +187,10 @@ public class AuctionService {
     // 3. Chấp nhận trả tiền và từ chối trả tiền
     @Transactional
     public void acceptPayment(String auctionId) {
+        log.info("Người mua đã CHẤP NHẬN thanh toán cho phiên [{}]", auctionId);
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
         if (auction.getStatus() != AuctionStatus.FINISHED || auction.getWinningUser() == null) {
+            log.error("Lỗi: Không đủ điều kiện để thanh toán cho phiên [{}]", auctionId);
             throw new AuctionException(ErrorCode.CONDITION_ACCEPT_PAYMENT_INVALID);
         }
         paymentService.transferMoney(auction.getWinningUser().getId(), auction.getSeller().getId(), auction.getHighestBid());
@@ -175,12 +199,15 @@ public class AuctionService {
         // GÁN SUCCESS KHI THANH TOÁN THÀNH CÔNG
         auction.setTransactionStatus(TransactionStatus.SUCCESS);
         auctionRepository.save(auction);
+        log.info("Đã chuyển thành công {} VND cho người bán", auction.getHighestBid());
     }
 
     @Transactional
     public void declinePayment(String auctionId) {
+        log.warn("Người mua TỪ CHỐI thanh toán cho phiên [{}]", auctionId);
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
         if (auction.getStatus() != AuctionStatus.FINISHED || auction.getWinningUser() == null) {
+            log.error("Lỗi: Không đủ điều kiện hủy thanh toán cho phiên [{}]", auctionId);
             throw new AuctionException(ErrorCode.CONDITION_ACCEPT_PAYMENT_INVALID);
         }
         paymentService.unFreezeMoney(auction.getWinningUser().getId(), auction.getHighestBid());
@@ -189,10 +216,12 @@ public class AuctionService {
         // GÁN FAILED KHI TỪ CHỐI THANH TOÁN
         auction.setTransactionStatus(TransactionStatus.FAILED);
         auctionRepository.save(auction);
+        log.info("Đã hoàn lại số tiền {} VND cho người mua bị từ chối", auction.getHighestBid());
     }
 
     @Transactional
     public void cancelAuction(String auctionId) {
+        log.warn("Hệ thống (Hoặc Admin) yêu cầu HỦY phiên đấu giá [{}]", auctionId);
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
 
         if (auction.getStatus() != AuctionStatus.RUNNING || auction.getWinningUser() == null) {
@@ -200,15 +229,18 @@ public class AuctionService {
         }
 
         // Trả lại tiền cho người đang dẫn đầu (nếu có)
+        log.info("Đang tiến hành hoàn trả tiền cho người đang dẫn đầu (nếu có)...");
         paymentService.unFreezeMoney(auction.getWinningUser().getId(), auction.getHighestBid());
 
         auction.setStatus(AuctionStatus.CANCELLED);
         auctionRepository.save(auction);
+        log.info("Đã hủy phiên đấu giá thành công");
     }
 
     // 4. Tạo sản phẩm đấu giá
     @Transactional(rollbackFor = Exception.class)
     public String createAuction(AuctionCreationRequest request) {
+        log.info("Bắt đầu tạo phiên đấu giá cho sản phẩm ID [{}]", request.getItemId());
         Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(() -> new AuctionException(ErrorCode.ITEM_NOT_FOUND));
 
@@ -221,6 +253,7 @@ public class AuctionService {
         auction.setHighestBid(item.getStartPrice()); // Giá khởi điểm
 
         auctionRepository.save(auction);
+        log.info("Tạo phiên đấu giá thành công. AuctionID={}", auction.getId());
         return "Create Auction item successfully! ID: " + auction.getId();
     }
 
@@ -231,30 +264,38 @@ public class AuctionService {
 
     // API Lấy dữ liệu biểu đồ giá theo thời gian thực
     public List<BidTransaction> getPriceChart(String auctionId) {
-
         // Nếu ID truyền lên bị rỗng hoặc null
         if (auctionId == null || auctionId.trim().isEmpty()) {
+            log.error("Lỗi: Auction ID truyền vào bị trống hoặc null");
             throw new IllegalArgumentException("Auction ID không hợp lệ");
         }
 
         // Kiểm tra xem phiên đấu giá có tồn tại thực sự trong DB không
-        if (!auctionRepository.existsById(auctionId)) { throw new AuctionException(ErrorCode.AUCTION_NOT_FOUND); }
+        if (!auctionRepository.existsById(auctionId)) {
+            log.error("Lỗi: Không tìm thấy phiên đấu giá [{}] trong CSDL", auctionId);
+            throw new AuctionException(ErrorCode.AUCTION_NOT_FOUND);
+        }
 
         try {
             // lấy danh sách, sắp theo thời gian cũ đến mới
             List<BidTransaction> chartData = bidTransactionRepository.findByAuctionIdOrderByBidTimestampAsc(auctionId);
 
             // trả về mảng rỗng nếu chưa có ai bid
-            if (chartData == null) { return new ArrayList<>(); }
+            if (chartData == null) {
+                log.debug("Biểu đồ rỗng: Chưa có lượt đấu giá nào cho phiên [{}]", auctionId);
+                return new ArrayList<>();
+            }
+            log.debug("Lấy thành công {} lượt giao dịch cho biểu đồ phiên [{}]", chartData.size(), auctionId);
             return chartData;
         } catch (Exception e) {
-            // Bắt lỗi hệ thống 
+            // Bắt lỗi hệ thống
+            log.error("LỖI HỆ THỐNG: Lỗi truy xuất cơ sở dữ liệu khi vẽ biểu đồ phiên [{}]: ", auctionId, e);
             throw new AuctionException(ErrorCode.BARCHART_CONNECT_FAILURE);
         }
     }
 
     // Tự động quét Auction
-    @Scheduled(fixedRate = 1000) // Cứ 1 giây quét 1 lần
+    @Scheduled(fixedRate = 500) // Cứ 0.5 giây quét 1 lần
     @Transactional
     public void autoUpdateAuctionStatus() {
         LocalDateTime now = LocalDateTime.now();
@@ -263,11 +304,13 @@ public class AuctionService {
         for (Auction auction : allAuctions) {
             // Đến giờ bắt đầu -> Đổi thành RUNNING
             if (auction.getStatus() == AuctionStatus.OPEN && now.isAfter(auction.getStartTime())) {
+                log.info("SYSTEM CRONJOB: Đã đến giờ mở cửa phiên đấu giá [{}]. Đổi trạng thái sang RUNNING.", auction.getId());
                 auction.setStatus(AuctionStatus.RUNNING);
                 auctionRepository.save(auction);
             }
             // Đến giờ kết thúc -> Đổi thành FINISHED (Và gửi thông báo nếu muốn)
             if (auction.getStatus() == AuctionStatus.RUNNING && now.isAfter(auction.getEndTime())) {
+                log.info("SYSTEM CRONJOB: Đã hết giờ phiên đấu giá [{}]. Tiến hành ĐÓNG phiên...", auction.getId());
                 closeAuction(auction.getId());
             }
         }

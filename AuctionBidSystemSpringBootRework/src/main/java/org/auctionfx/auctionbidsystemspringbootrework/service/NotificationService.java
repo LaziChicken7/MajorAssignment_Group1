@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.NotificationResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.notification.Notification;
@@ -15,13 +16,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class NotificationService {
-    @Autowired private NotificationRepository notificationRepository;
-    @Autowired private AuctionService auctionService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private AuctionService auctionService;
 
     // 1. Lấy danh sách thông báo cho JavaFX
     public List<NotificationResponse> getMyNotifications(String userName) {
+        log.info("Bắt đầu truy xuất danh sách thông báo từ DB cho user: {}", userName);
         List<Notification> rawList = notificationRepository.findByUserUserNameOrderByCreatedAtDesc(userName);
         List<NotificationResponse> responseList = new ArrayList<>();
 
@@ -35,30 +42,42 @@ public class NotificationService {
                     notif.getCreatedAt()
             ));
         }
+        log.info("Truy xuất thành công {} thông báo cho user: {}", responseList.size(), userName);
         return responseList;
     }
 
     // 2. Xoá thông báo (nút thùng rác)
     @Transactional
     public String deleteNotification(String notificationId) {
+        log.info("Thực hiện xóa thông báo ID: {}", notificationId);
         Notification notif = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("Không tìm thấy thông báo ID: {} để xóa", notificationId);
+                    return new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND);
+                });
 
         if (notif.getType() == NotificationType.PAYMENT_VERIFICATION) {
+            log.warn("Không thể xóa thông báo ID: {} vì thuộc loại PAYMENT_VERIFICATION", notificationId);
             throw new NotificationException(ErrorCode.NOTIFICATION_DELETE_INVALID);
         }
 
         notificationRepository.delete(notif);
+        log.info("Xóa thành công thông báo ID: {}", notificationId);
         return "Delete notification successfully!";
     }
 
     // 3. Xử lý nút tích xanh (Chấp nhận trả tiền)
     @Transactional
     public String acceptPayment(String notificationId) {
+        log.info("Xử lý chấp nhận thanh toán cho thông báo ID: {}", notificationId);
         Notification oldNotif = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("Không tìm thấy thông báo ID: {} để chấp nhận thanh toán", notificationId);
+                    return new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND);
+                });
 
         if (oldNotif.getType() != NotificationType.PAYMENT_VERIFICATION) {
+            log.warn("Thông báo ID: {} không phải loại PAYMENT_VERIFICATION. Rejecting request.", notificationId);
             throw new NotificationException(ErrorCode.NOTIFICATION_ACCEPT_PAYMENT_INVALID);
         }
 
@@ -86,16 +105,22 @@ public class NotificationService {
         // Xóa thông báo xác thực cũ đi
         notificationRepository.delete(oldNotif);
 
+        log.info("Giao dịch thành công cho Auction ID: {}. Đã gửi thông báo đến Buyer và Seller.", oldNotif.getAuction().getId());
         return "Accept payment successfully!";
     }
 
     // 4. Xử lý nút chữ X đỏ (Từ chối thanh toán)
     @Transactional
     public String declinePayment(String notificationId) {
+        log.info("Xử lý từ chối thanh toán cho thông báo ID: {}", notificationId);
         Notification oldNotif = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("Không tìm thấy thông báo ID: {} để từ chối thanh toán", notificationId);
+                    return new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND);
+                });
 
         if (oldNotif.getType() != NotificationType.PAYMENT_VERIFICATION) {
+            log.warn("Thông báo ID: {} không phải loại PAYMENT_VERIFICATION. Rejecting request.", notificationId);
             throw new NotificationException(ErrorCode.NOTIFICATION_DECLINE_PAYMENT_INVALID);
         }
 
@@ -123,13 +148,14 @@ public class NotificationService {
         // Xóa thông báo xác thực cũ đi
         notificationRepository.delete(oldNotif);
 
+        log.info("Hủy giao dịch cho Auction ID: {}. Đã gửi thông báo đến Buyer và Seller.", oldNotif.getAuction().getId());
         return "Decline payment successfully!";
     }
 
-    
     // Tạo notification mới <-> nguyên tắc DRY
     @Transactional
     public Notification createNotification(User user, Auction auction, NotificationType type, String title, String description) {
+        log.debug("Tạo mới thông báo - User: {}, Type: {}, Title: {}", user.getUserName(), type, title);
         Notification notification = new Notification();
         notification.setUser(user);
         notification.setAuction(auction);
@@ -138,6 +164,8 @@ public class NotificationService {
         notification.setDescription(description);
         notification.setRead(false);
 
-        return notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
+        log.debug("Đã lưu thành công thông báo ID: {}", savedNotification.getId());
+        return savedNotification;
     }
 }

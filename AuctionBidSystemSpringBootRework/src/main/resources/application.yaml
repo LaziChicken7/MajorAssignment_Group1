@@ -5,7 +5,7 @@ server:
 
 spring:
   datasource:
-    # Đã thêm ?createDatabaseIfNotExist=true vào cuối url
+    # Tự động tạo Database nếu chưa có
     url: "jdbc:mysql://localhost:3306/AuctionBidSystemTest?createDatabaseIfNotExist=true"
     username: root
     password: root
@@ -18,9 +18,27 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none # Giữ nguyên là 'none' để tắt Hibernate tự đẻ bảng
-    show-sql: true
+    show-sql: true # In ra các câu lệnh SQL trên màn hình Console
 
+  # Cấu hình giới hạn dung lượng tải file
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 50MB
+      max-file-size: 10MB   # Chỉnh lên 10MB cho mỗi file ảnh
+      max-request-size: 50MB # Cho phép tổng 1 lần đẩy nhiều ảnh lên tối đa 50MB
+
+# ==========================================
+# CẤU HÌNH HỆ THỐNG LOGGING (CƠ BẢN & ĐƠN GIẢN)
+# ==========================================
+logging:
+  level:
+    root: INFO
+    # Chỉ bật log chi tiết (DEBUG) cho code của riêng nhóm bạn
+    org.auctionfx.auctionbidsystemspringbootrework: DEBUG
+
+  # Cấu hình lưu log ra file
+  file:
+    name: logs/auction-server.log
+
+  # Cấu hình hiển thị màu sắc log trên màn hình Console của IDE cho dễ nhìn
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%-5level) %clr([%t]){faint} %clr(%c{1}){cyan} : %msg%n"

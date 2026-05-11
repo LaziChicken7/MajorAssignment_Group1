@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.PlaceBidRequest;
@@ -13,12 +14,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/auctions")
+@Slf4j // Kích hoạt bộ ghi log của Lombok
 public class AuctionController {
     @Autowired
     private AuctionService auctionService;
 
     @PostMapping("/{auctionId}/place-bid")
     public ApiResponse<String> placeBid(@PathVariable String auctionId, @RequestBody PlaceBidRequest request) {
+        log.info("API CALL: User [{}] yêu cầu đặt giá cho phiên đấu giá [{}]", request.getBidderUserName(), auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(auctionService.placeBid(auctionId, request.getBidderUserName(), request.getBidAmount()));
         return apiResponse;
@@ -26,6 +29,7 @@ public class AuctionController {
 
     @PutMapping("/{auctionId}/start")
     public ApiResponse<String> startAuction(@PathVariable String auctionId) {
+        log.info("API CALL: Yêu cầu bắt đầu phiên đấu giá [{}]", auctionId);
         auctionService.startAuction(auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult("Auction started successfully!");
@@ -34,14 +38,15 @@ public class AuctionController {
 
     @PutMapping("/{auctionId}/close")
     public ApiResponse<String> closeAuction(@PathVariable String auctionId) {
+        log.info("API CALL: Yêu cầu đóng phiên đấu giá [{}]", auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(auctionService.closeAuction(auctionId));
-        apiResponse.setResult("Auction closed successfully!");
         return apiResponse;
     }
 
     @PutMapping("/{auctionId}/accept-payment")
     public ApiResponse<String> acceptPayment(@PathVariable String auctionId) {
+        log.info("API CALL: Yêu cầu chấp nhận thanh toán cho phiên đấu giá [{}]", auctionId);
         auctionService.acceptPayment(auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult("Payment accepted and transferred successfully!");
@@ -50,14 +55,16 @@ public class AuctionController {
 
     @PutMapping("/{auctionId}/decline-payment")
     public ApiResponse<String> declinePayment(@PathVariable String auctionId) {
+        log.info("API CALL: Yêu cầu từ chối thanh toán cho phiên đấu giá [{}]", auctionId);
         auctionService.declinePayment(auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setResult("Payment accepted and transferred successfully!");
+        apiResponse.setResult("Payment declined and money refunded successfully!");
         return apiResponse;
     }
 
     @PutMapping("/{auctionId}/cancel")
     public ApiResponse<String> cancelAuction(@PathVariable String auctionId) {
+        log.warn("API CALL: Yêu cầu HỦY phiên đấu giá [{}]", auctionId);
         auctionService.cancelAuction(auctionId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult("Auction cancelled successfully!");
@@ -66,6 +73,7 @@ public class AuctionController {
 
     @PostMapping("/create")
     public ApiResponse<String> createAuction(@RequestBody AuctionCreationRequest request) {
+        log.info("API CALL: Yêu cầu tạo phiên đấu giá mới cho sản phẩm [{}]", request.getItemId());
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(auctionService.createAuction(request));
         return apiResponse;
@@ -74,6 +82,7 @@ public class AuctionController {
     // API Lấy danh sách đấu giá
     @GetMapping
     public ApiResponse<List<Auction>> getAllAuctions() {
+        log.debug("API CALL: Yêu cầu lấy danh sách toàn bộ phiên đấu giá");
         ApiResponse<List<Auction>> response = new ApiResponse<>();
         response.setResult(auctionService.getAllAuctions());
         return response;
@@ -82,11 +91,9 @@ public class AuctionController {
     // API Lấy dữ liệu biểu đồ giá theo thời gian thực
     @GetMapping("/{auctionId}/price-chart")
     public ApiResponse<List<BidTransaction>> getPriceChart(@PathVariable String auctionId) {
+        log.debug("API CALL: Yêu cầu lấy biểu đồ giá cho phiên đấu giá [{}]", auctionId);
         ApiResponse<List<BidTransaction>> response = new ApiResponse<>();
-        try {
-            List<BidTransaction> chartData = auctionService.getPriceChart(auctionId);
-            response.setResult(chartData);
-        } catch (Exception e) { throw e;}
+        response.setResult(auctionService.getPriceChart(auctionId));
         return response;
     }
 

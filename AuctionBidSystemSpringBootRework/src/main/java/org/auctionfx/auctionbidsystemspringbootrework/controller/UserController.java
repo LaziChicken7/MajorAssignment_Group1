@@ -1,26 +1,20 @@
 package org.auctionfx.auctionbidsystemspringbootrework.controller;
 
 import jakarta.validation.Valid;
-
-import org.apache.catalina.connector.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
-import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
+@Slf4j // Kích hoạt bộ ghi log của Lombok
 public class UserController {
     @Autowired
     private UserService userService;
@@ -28,6 +22,7 @@ public class UserController {
     // Create
     @PostMapping("/register")
     public ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
+        log.info("API CALL: Yêu cầu đăng ký tài khoản mới với Username [{}]", request.getUserName());
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.createUser(request));
         return apiResponse;
@@ -36,6 +31,7 @@ public class UserController {
     // Read - Danh sách User
     @GetMapping("/admin")
     public ApiResponse<List<User>> getUsers() {
+        log.debug("API CALL: Yêu cầu lấy danh sách toàn bộ User (Admin)");
         ApiResponse<List<User>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.getUsers());
         return apiResponse;
@@ -44,6 +40,7 @@ public class UserController {
     // Read - Lấy 1 User
     @GetMapping("/admin/{userId}")
     public ApiResponse<User> getUser(@PathVariable("userId") String userId) {
+        log.debug("API CALL: Yêu cầu lấy chi tiết User ID [{}] (Admin)", userId);
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.getUser(userId));
         return apiResponse;
@@ -52,6 +49,7 @@ public class UserController {
     // Update
     @PutMapping("/admin/{userId}")
     public ApiResponse<User> updateUser(@PathVariable("userId") String userId, @RequestBody @Valid UserUpdateRequest request) {
+        log.info("API CALL: Yêu cầu cập nhật thông tin User ID [{}] (Admin)", userId);
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.updateUser(userId, request));
         return apiResponse;
@@ -60,6 +58,7 @@ public class UserController {
     // Cập nhật thông tin cá nhân (Dành cho User tự cập nhật)
     @PutMapping("/profile/{userName}")
     public ApiResponse<User> updateMyProfile(@PathVariable String userName, @RequestBody @Valid UserUpdateRequest request) {
+        log.info("API CALL: User [{}] tự yêu cầu cập nhật thông tin cá nhân", userName);
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.updateMyProfile(userName, request));
         return apiResponse;
@@ -68,6 +67,7 @@ public class UserController {
     // Delete
     @DeleteMapping("/admin/{userName}")
     public ApiResponse<String> deleteUser(@PathVariable("userName") String userName) {
+        log.warn("API CALL: CẢNH BÁO - Yêu cầu xóa User [{}] (Admin)", userName);
         User user = userService.getUserByUserName(userName);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.deleteUser(user.getId()));
@@ -77,6 +77,7 @@ public class UserController {
     // Upgrade to Seller
     @PutMapping("/upgrade-to-seller/{userName}")
     public ApiResponse<String> upgradeToSeller(@PathVariable String userName) {
+        log.info("API CALL: Yêu cầu nâng cấp User [{}] lên vai trò SELLER", userName);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.upgradeBidderToSeller(userName));
         return apiResponse;
@@ -85,6 +86,7 @@ public class UserController {
     // Đăng nhập
     @PostMapping("/login")
     public ApiResponse<User> login(@RequestBody LoginRequest request) {
+        log.info("API CALL: Yêu cầu đăng nhập từ Username[{}]", request.getUserName());
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.login(request));
         return apiResponse;
@@ -93,6 +95,7 @@ public class UserController {
     // Quên mật khẩu - Xác thực
     @PostMapping("/verify-reset-info")
     public ApiResponse<String> verifyUserInfo(@RequestBody VerifyInfoRequest request) {
+        log.info("API CALL: Yêu cầu xác thực thông tin Quên mật khẩu cho User [{}]", request.getUserName());
         ApiResponse<String> apiResponse = new ApiResponse<>();
         // API này sẽ trả về cái Mã bí mật
         apiResponse.setResult(userService.verifyUserInfo(request));
@@ -102,6 +105,7 @@ public class UserController {
     // Quên mật khẩu - Đổi pass
     @PutMapping("/reset-password")
     public ApiResponse<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        log.info("API CALL: Yêu cầu cấp lại mật khẩu mới cho User [{}] bằng Token", request.getUserName());
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.resetPassword(request));
         return apiResponse;
@@ -110,6 +114,7 @@ public class UserController {
     // Lấy thông tin cá nhân bằng userName
     @GetMapping("/profile/{userName}")
     public ApiResponse<User> getMyProfile(@PathVariable String userName) {
+        log.debug("API CALL: Yêu cầu lấy thông tin Profile của User [{}]", userName);
         ApiResponse<User> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.getUserByUserName(userName));
         return apiResponse;
@@ -118,6 +123,7 @@ public class UserController {
     // Nút Khóa / Mở khóa tài khoản
     @PutMapping("/admin/{userName}/ban")
     public ApiResponse<String> toggleBanUser(@PathVariable("userName") String userName) {
+        log.warn("API CALL: Yêu cầu Khóa / Mở khóa tài khoản User [{}] (Admin)", userName);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.toggleBanUser(userName));
         return apiResponse;
@@ -126,72 +132,20 @@ public class UserController {
     // Upload avatar cho User
     @PostMapping("/{userName}/avatar")
     public ApiResponse<String> uploadAvatar(@PathVariable String userName, @RequestParam("file") MultipartFile file) throws IOException {
+        log.info("API CALL: User [{}] yêu cầu tải lên ảnh Avatar mới", userName);
         ApiResponse<String> apiResponse = new ApiResponse<>();
-
-        // Kiểm tra file 
-        if (file == null || file.isEmpty()) {
-            throw new IOException("No file uploaded or file is empty");
-        }
-
-        // Kiểm tra user có tồn tại trong database không
-        User user = userService.getUserByUserName(userName);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
-
-        // 1. ĐỔI ĐƯỜNG DẪN LƯU THÀNH THƯ MỤC AVATAR
-        String uploadDir = "uploads/images/avatar/";
-        File dir = new File(uploadDir);
-        if (!dir.exists() && !dir.mkdirs()) {
-            throw new IOException("Could not create upload directory");
-        }
-
-        // Lấy phần mở rộng của file (ví dụ: .png, .jpg)
-        String originalFileName = file.getOriginalFilename();
-        String fileExtension = "";
-        if (originalFileName != null && originalFileName.contains(".")) {
-            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-        }
-
-        // 2. ĐẶT TÊN FILE THEO USERNAME KÈM ĐUÔI FILE (VD: nguoiban_01.png)
-        String newFileName = userName + fileExtension;
-
-        // Đường dẫn đầy đủ để lưu file
-        Path filePath = Paths.get(uploadDir + newFileName);
-
-        // Ghi đè file mới vào thư mục (nếu user up ảnh mới, ảnh cũ cùng tên sẽ bị ghi đè)
-        Files.write(filePath, file.getBytes());
-
-        // 3. TẠO URL TRUY CẬP ĐÚNG CHUẨN
-        String fileUrl = "/uploads/images/avatar/" + newFileName;
-
-        // Cập nhật avatarUrl trong database cho user này
-        user.setAvatarUrl(fileUrl);
-        userService.saveUser(user);
-
-        // Trả về message thành công
-        apiResponse.setResult("Avatar uploaded successfully: " + fileUrl);
+        apiResponse.setResult(userService.uploadAvatar(userName, file));
         return apiResponse;
     }
 
     // Gỡ avatar ( đưa về avatar mặc định)
     @DeleteMapping("/{userName}/avatar")
     public ApiResponse<String> removeAvatar(@PathVariable String userName) {
+        log.info("API CALL: User [{}] yêu cầu gỡ Avatar về mặc định", userName);
         ApiResponse<String> apiResponse = new ApiResponse<>();
-
-        // lấy user từ database
-        User user = userService.getUserByUserName(userName);
-
-        // LƯU Ý: Phải có dấu "/" ở đầu chuỗi để Frontend ghép link không bị lỗi
-        user.setAvatarUrl("/uploads/images/avatar/avatarmacdinh.png");
-
-        // Dùng hàm lưu nhanh user 
-        userService.saveUser(user);
-
         apiResponse.setCode(1000);
         apiResponse.setMessage("deleted avatar successfully");
-        apiResponse.setResult(user.getAvatarUrl());
-
+        apiResponse.setResult(userService.removeAvatar(userName));
         return apiResponse;
     }
 }
