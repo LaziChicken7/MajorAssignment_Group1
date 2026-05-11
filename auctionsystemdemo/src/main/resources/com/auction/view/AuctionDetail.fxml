@@ -41,7 +41,7 @@
                                             <graphic><SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" /></graphic>
                                         </Label>
                                         <!-- Giảm size ảnh xuống 180 để tối ưu chiều cao -->
-                                        <ImageView fx:id="productImageView" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true">
+                                        <ImageView fx:id="productImageView" onMouseClicked="#handleOpenImageZoom" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);">
                                             <image><Image url="https://via.placeholder.com/180?text=Loading..." /></image>
                                         </ImageView>
                                         <Label fx:id="btnNextImage" onMouseClicked="#nextImage" styleClass="slider-btn">
@@ -179,5 +179,21 @@
             </VBox>
         </VBox>
 
-    </children>
+        <!-- LỚP 4: POPUP PHÓNG TO ẢNH (LIGHTBOX) -->
+        <VBox fx:id="paneImageZoom" visible="false" alignment="CENTER" style="-fx-background-color: rgba(0,0,0,0.85);" onMouseClicked="#handleCloseImageZoom">
+            <StackPane maxWidth="750" maxHeight="550">
+                <!-- Ảnh phóng to -->
+                <ImageView fx:id="zoomedImageView" fitWidth="700" fitHeight="500" preserveRatio="true" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 20, 0, 0, 10);" />
+
+                <!-- Nút Tắt (Dấu X) ở góc trên bên phải -->
+                <Button text="✕" onAction="#handleCloseImageZoom" StackPane.alignment="TOP_RIGHT"
+                        style="-fx-background-color: rgba(231, 76, 60, 0.8); -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-cursor: hand; -fx-padding: 2 10;">
+                    <StackPane.margin>
+                        <Insets top="-15" right="-15"/>
+                    </StackPane.margin>
+                </Button>
+            </StackPane>
+        </VBox>
+
+    </children> <!-- ĐÂY LÀ THẺ ĐÓNG CÓ SẴN CỦA BẠN -->
 </StackPane>

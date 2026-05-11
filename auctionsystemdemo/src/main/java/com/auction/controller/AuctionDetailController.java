@@ -61,6 +61,10 @@ public class AuctionDetailController {
     @FXML private ProgressBar bidProgressBar;
     @FXML private VBox vboxBidHistory;
 
+    // --- BIẾN CHO TÍNH NĂNG PHÓNG TO ẢNH ---
+    @FXML private VBox paneImageZoom;
+    @FXML private ImageView zoomedImageView;
+
     @FXML
     public void initialize() {
         if (txtBidAmount != null) {
@@ -562,5 +566,30 @@ public class AuctionDetailController {
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         row.setStyle("-fx-background-color: white; -fx-padding: 10 15; -fx-background-radius: 8; -fx-border-color: #ecf0f1; -fx-border-radius: 8;");
         return row;
+    }
+
+    // ==========================================
+    // TÍNH NĂNG PHÓNG TO ẢNH (LIGHTBOX)
+    // ==========================================
+
+    @FXML
+    private void handleOpenImageZoom() {
+        // Lấy chính bức ảnh đang hiển thị ở khung nhỏ ném sang khung to
+        if (productImageView.getImage() != null) {
+            zoomedImageView.setImage(productImageView.getImage());
+            paneImageZoom.setVisible(true);
+
+            // Tạm thời dừng timeline load biểu đồ để dồn tài nguyên render ảnh to cho mượt
+            if (chartTimeline != null) chartTimeline.pause();
+        }
+    }
+
+    @FXML
+    private void handleCloseImageZoom() {
+        paneImageZoom.setVisible(false);
+        zoomedImageView.setImage(null); // Xóa ảnh để giải phóng RAM
+
+        // Tiếp tục chạy lại timeline biểu đồ
+        if (chartTimeline != null) chartTimeline.play();
     }
 }
