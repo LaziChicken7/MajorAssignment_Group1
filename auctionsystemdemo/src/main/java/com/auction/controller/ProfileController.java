@@ -364,7 +364,8 @@ public class ProfileController {
     // ==========================================
     private void uploadFileToServer(File file) {
         String boundary = "===" + System.currentTimeMillis() + "===";
-        String urlString = "http://localhost:8080/auction/users/" + SessionManager.userName + "/avatar";
+        // Sửa urlString để nó linh động lấy IP từ ApiService
+        String urlString = ApiService.BASE_URL + "/users/" + SessionManager.userName + "/avatar";
 
         new Thread(() -> {
             try {
