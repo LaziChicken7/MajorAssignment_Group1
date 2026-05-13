@@ -1,0 +1,154 @@
+package com.auction.controller.wallet;
+
+import com.auction.model.ApiResponse;
+import com.auction.model.TransactionHistoryResponse;
+import com.auction.model.WalletDataResponse;
+import com.auction.util.ApiService;
+import com.auction.util.SessionManager;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+
+import java.util.List;
+
+public class WalletController {
+
+    @FXML private VBox walletRoot;
+    @FXML private VBox historySection;
+
+    @FXML private TextField balanceField;
+    @FXML private Label eyeIconText;
+    @FXML private Label lblFrozenBalance;
+    @FXML private Label lblBankAccount;
+
+    @FXML private VBox vboxSuccess;
+    @FXML private VBox vboxFailed;
+
+    private double actualBalance = 0.0;
+    private boolean isBalanceVisible = false;
+
+    @FXML
+    public void initialize() {
+        loadWalletData();
+    }
+
+    private void loadWalletData() {
+        if (SessionManager.userName == null) return;
+
+        ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(response -> {
+            Platform.runLater(() -> {
+                try {
+                    if (response.statusCode() == 200) {
+                        ApiResponse apiResponse = ApiService.gson.fromJson(response.body(), ApiResponse.class);
+                        if (apiResponse.code == 1000) {
+                            WalletDataResponse walletData = ApiService.gson.fromJson(apiResponse.result, WalletDataResponse.class);
+
+                            lblBankAccount.setText(walletData.bankAccountNumber != null ? walletData.bankAccountNumber : "Chưa có");
+
+                            this.actualBalance = walletData.moneyOnWallet;
+                            updateBalanceDisplay();
+
+                            lblFrozenBalance.setText(formatMoney(walletData.moneyinFrozen));
+
+                            renderTransactions(walletData.successTransaction, vboxSuccess, true);
+                            renderTransactions(walletData.failedTransaction, vboxFailed, false);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("Lỗi parse JSON trong Wallet: " + e.getMessage());
+                }
+            });
+        });
+    }
+
+    @FXML
+    public void toggleBalanceVisibility(javafx.scene.input.MouseEvent event) {
+        isBalanceVisible = !isBalanceVisible;
+        updateBalanceDisplay();
+    }
+
+    private void updateBalanceDisplay() {
+        if (isBalanceVisible) {
+            balanceField.setText(formatMoney(actualBalance));
+            eyeIconText.setText("Ẩn");
+            eyeIconText.setStyle("-fx-font-size: 16px; -fx-text-fill: #FF0000; -fx-font-weight: bold; -fx-cursor: hand;");
+        } else {
+            balanceField.setText("****** VND");
+            eyeIconText.setText("Hiện");
+            eyeIconText.setStyle("-fx-font-size: 16px; -fx-text-fill: #0A439D; -fx-font-weight: bold; -fx-cursor: hand;");
+        }
+    }
+
+    private void renderTransactions(List<TransactionHistoryResponse> transactions, VBox container, boolean isSuccess) {
+        container.getChildren().clear();
+
+        if (transactions == null || transactions.isEmpty()) {
+            Label lblEmpty = new Label("Chưa có giao dịch nào");
+            lblEmpty.setStyle("-fx-text-fill: #999; -fx-font-style: italic;");
+            container.getChildren().add(lblEmpty);
+            return;
+        }
+
+        int limit = Math.min(transactions.size(), 3);
+        for (int i = 0; i < limit; i++) {
+            TransactionHistoryResponse tx = transactions.get(i);
+            String status = tx.status != null ? tx.status : "FAILED";
+            String itemName = tx.itemName != null ? tx.itemName : "Sản phẩm ẩn";
+
+            String colorCode = isSuccess ? "#00C853" : "#FF0000";
+            if ("CANCELLED".equals(status)) {
+                colorCode = "#e74c3c";
+            }
+
+            HBox row = new HBox();
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 25; -fx-padding: 10 20 10 20;");
+
+            Label lblName = new Label(itemName);
+            lblName.setStyle("-fx-font-size: 14px;");
+            HBox.setHgrow(lblName, Priority.ALWAYS);
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            Label lblAmount = new Label(formatMoney(tx.amount));
+            lblAmount.setStyle("-fx-background-color: " + colorCode + "; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 15; -fx-font-weight: bold;");
+
+            row.getChildren().addAll(lblName, spacer, lblAmount);
+            container.getChildren().add(row);
+        }
+    }
+
+    // BẮT BUỘC DÙNG ActionEvent CHO CÁC NÚT ĐỂ CHUYỂN TRANG KHÔNG BAO GIỜ BỊ LỖI
+    private void switchView(javafx.event.ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Node view = loader.load();
+            Node source = (Node) event.getSource();
+            Pane contentArea = (Pane) source.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(view);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML public void handleDeposit(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/DepositForm.fxml"); }
+    @FXML public void handleWithdraw(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/WithDrawForm.fxml"); }
+    @FXML public void handleSuccessfulTransaction(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/SuccessfulTransaction.fxml"); }
+    @FXML public void handleFailureTransaction(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/FailureTransaction.fxml"); }
+
+    private String formatMoney(double amount) {
+        return String.format("%,.0f", amount).replace(",", ".") + " VND";
+    }
+}

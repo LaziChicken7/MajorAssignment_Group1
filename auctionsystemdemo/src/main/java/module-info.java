@@ -21,5 +21,19 @@ module com.auction {
     // Export các package để có thể chạy được
     exports com.auction;
     exports com.auction.controller;
-    exports com.auction.util; // Mở thêm gói util để gọi ApiService và SessionManager
+    exports com.auction.util;
+    exports com.auction.controller.addauctionitem;
+    opens com.auction.controller.addauctionitem to javafx.fxml;
+    exports com.auction.controller.notification;
+    opens com.auction.controller.notification to javafx.fxml;
+    exports com.auction.controller.wallet;
+    opens com.auction.controller.wallet to javafx.fxml;
+    exports com.auction.controller.profile;
+    opens com.auction.controller.profile to javafx.fxml;
+    exports com.auction.controller.home;
+    opens com.auction.controller.home to javafx.fxml;
+    exports com.auction.controller.auction;
+    opens com.auction.controller.auction to javafx.fxml;
+    exports com.auction.controller.dashboard;
+    opens com.auction.controller.dashboard to javafx.fxml; // Mở thêm gói util để gọi ApiService và SessionManager
 }

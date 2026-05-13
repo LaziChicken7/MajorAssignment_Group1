@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.SVGPath?> <!-- IMPORT QUAN TRỌNG -->
+
+<VBox spacing="20" style="-fx-background-color: transparent;" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.addauctionitem.AddProductController">
+
+    <!-- HEADER: ĐÃ THAY BẰNG CẤU TRÚC NÚT QUAY LẠI MỚI (CÓ SVGPath) -->
+    <HBox alignment="CENTER_LEFT">
+        <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#goBack">
+            <!-- Vẽ mũi tên bo tròn bằng Vector -->
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label text="Thêm sản phẩm" styleClass="back-title" />
+        </HBox>
+        <Region HBox.hgrow="ALWAYS" />
+    </HBox>
+
+    <!-- VÙNG CUỘN -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <content>
+            <!-- KHUNG THẺ TRẮNG CHỨA TOÀN BỘ NỘI DUNG -->
+            <HBox spacing="40" styleClass="card" style="-fx-background-color: white; -fx-padding: 30 40; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+
+                <!-- CỘT TRÁI: Khu vực Ảnh -->
+                <VBox alignment="TOP_CENTER" spacing="10" minWidth="280">
+                    <ScrollPane prefHeight="250" prefWidth="280" style="-fx-background-color: #f8f9fa;">
+                        <HBox fx:id="imagePreviewBox" spacing="10" alignment="CENTER_LEFT" />
+                    </ScrollPane>
+                    <Button onAction="#handleUploadImage" text="Tải ảnh lên" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20;" />
+                </VBox>
+
+                <!-- CỘT PHẢI: Form nhập liệu đã được làm mới -->
+                <VBox spacing="25" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
+
+                    <!-- Tên sản phẩm & Mô tả -->
+                    <TextField fx:id="txtProductName" promptText="Tên sản phẩm" styleClass="modern-input"/>
+                    <TextArea fx:id="txtDescription" prefRowCount="6" promptText="Mô tả chi tiết sản phẩm..." wrapText="true" styleClass="modern-text-area"/>
+
+                    <!-- Combo Chọn Loại Sản Phẩm -->
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <Label text="Loại sản phẩm:" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #555;" prefWidth="130" />
+                        <ComboBox fx:id="cbItemType" prefWidth="300" styleClass="modern-combo-box"/>
+                    </HBox>
+
+                    <!-- KHUNG ĐỘNG 1: NGHỆ THUẬT -->
+                    <VBox fx:id="vboxArt" spacing="15" visible="false" managed="false" style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-background-radius: 15;">
+                        <HBox spacing="20">
+                            <TextField fx:id="txtAuthor" promptText="Tên tác giả" HBox.hgrow="ALWAYS" styleClass="modern-input"/>
+                            <TextField fx:id="txtYear" promptText="Năm sáng tác (VD: 1998)" prefWidth="220" styleClass="modern-input"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- KHUNG ĐỘNG 2: ĐIỆN TỬ -->
+                    <VBox fx:id="vboxElectronic" spacing="15" visible="false" managed="false" style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-background-radius: 15;">
+                        <HBox spacing="20">
+                            <TextField fx:id="txtBrand" promptText="Thương hiệu (VD: Apple)" HBox.hgrow="ALWAYS" styleClass="modern-input"/>
+                            <TextField fx:id="txtWarranty" promptText="Bảo hành (tháng)" prefWidth="220" styleClass="modern-input"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- KHUNG ĐỘNG 3: PHƯƠNG TIỆN -->
+                    <VBox fx:id="vboxVehicle" spacing="15" visible="false" managed="false" style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-background-radius: 15;">
+                        <HBox spacing="20">
+                            <TextField fx:id="txtEngine" promptText="Động cơ (Điện, Xăng, Dầu)" HBox.hgrow="ALWAYS" styleClass="modern-input"/>
+                            <TextField fx:id="txtMileage" promptText="Số Km đã đi" prefWidth="220" styleClass="modern-input"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- KHU VỰC THỜI GIAN VÀ GIÁ (ĐÃ ĐƯỢC CHỈNH CÂN BẰNG) -->
+                    <VBox spacing="20">
+                        <TextField fx:id="txtStartPrice" promptText="Số tiền khởi điểm (VND)" styleClass="modern-input"/>
+
+                        <!-- Lịch Mở Phiên -->
+                        <HBox alignment="CENTER_LEFT">
+                            <DatePicker fx:id="dpStartDate" promptText="Ngày bắt đầu" styleClass="custom-date-picker" prefHeight="45" prefWidth="200" />
+                            <Region HBox.hgrow="ALWAYS" /> <!-- Lò xo đẩy lề -->
+                            <HBox spacing="10" alignment="CENTER">
+                                <TextField fx:id="txtStartHour" promptText="Giờ" prefWidth="70" alignment="CENTER" styleClass="modern-input-small"/>
+                                <Label text=":" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+                                <TextField fx:id="txtStartMinute" promptText="Phút" prefWidth="70" alignment="CENTER" styleClass="modern-input-small"/>
+                                <Label text=":" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+                                <TextField fx:id="txtStartSecond" promptText="Giây" text="00" prefWidth="70" alignment="CENTER" styleClass="modern-input-small"/>
+                            </HBox>
+                        </HBox>
+
+                        <!-- Lịch Kết Thúc -->
+                        <HBox alignment="CENTER_LEFT">
+                            <DatePicker fx:id="dpEndDate" promptText="Ngày kết thúc" styleClass="custom-date-picker" prefHeight="45" prefWidth="200" />
+                            <Region HBox.hgrow="ALWAYS" /> <!-- Lò xo đẩy lề -->
+                            <HBox spacing="10" alignment="CENTER">
+                                <TextField fx:id="txtEndHour" promptText="Giờ" prefWidth="70" alignment="CENTER" styleClass="modern-input-small"/>
+                                <Label text=":" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+                                <TextField fx:id="txtEndMinute" promptText="Phút" prefWidth="70" alignment="CENTER" styleClass="modern-input-small"/>
+                                <Label text=":" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+                                <TextField fx:id="txtEndSecond" promptText="Giây" text="00" prefWidth="70" alignment="CENTER" styleClass="modern-input-small"/>
+                            </HBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- NÚT XÁC NHẬN -->
+                    <HBox alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                        <Button onAction="#handleConfirmAdd" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-padding: 12 60; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 18px; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(10,67,157,0.4), 10, 0, 0, 4);" text="Xác nhận đưa lên sàn" />
+                    </HBox>
+
+                </VBox>
+            </HBox>
+        </content>
+    </ScrollPane>
+</VBox>

@@ -13,7 +13,7 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         // SỬA DẤU CHẤM THÀNH DẤU GẠCH CHÉO Ở ĐÂY
-        URL fxmlLocation = getClass().getResource("/com/auction/view/Login.fxml");
+        URL fxmlLocation = getClass().getResource("/com/auction/view/dashboard/Login.fxml");
 
         if (fxmlLocation == null) {
             System.out.println("Lỗi: Không tìm thấy file Main.fxml. Hãy kiểm tra lại thư mục resources!");
