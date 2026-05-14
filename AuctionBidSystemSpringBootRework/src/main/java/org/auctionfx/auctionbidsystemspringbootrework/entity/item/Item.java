@@ -1,5 +1,8 @@
 package org.auctionfx.auctionbidsystemspringbootrework.entity.item;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.base.BaseEntity;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
@@ -12,6 +15,22 @@ import java.util.List;
 @Entity
 @Table(name = "items")
 @Inheritance(strategy = InheritanceType.JOINED)
+// =========================================================================
+// BỔ SUNG 2 ANNOTATION NÀY ĐỂ FIX LỖI ÉP SPRING BOOT GỬI DỮ LIỆU CLASS CON
+// =========================================================================
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "itemType",
+        visible = true
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Art.class, name = "ART"),
+        @JsonSubTypes.Type(value = Electronic.class, name = "ELECTRONIC"),
+        @JsonSubTypes.Type(value = Vehicle.class, name = "VEHICLE")
+})
+// THÊM DÒNG NÀY ĐỂ BỎ QUA LỖI PROXY
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Item extends BaseEntity {
     // KHAI BÁO THUỘC TÍNH
     private String name;

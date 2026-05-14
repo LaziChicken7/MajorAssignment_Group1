@@ -10,6 +10,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -95,6 +96,15 @@ public class AuctionController {
         ApiResponse<List<BidTransaction>> response = new ApiResponse<>();
         response.setResult(auctionService.getPriceChart(auctionId));
         return response;
+    }
+
+    // API Người dùng cài đặt Autobid
+    @PostMapping("/{auctionId}/setup-autobid")
+    public ApiResponse<String> setupAutoBid(@PathVariable String auctionId, @RequestParam String username, @RequestParam BigDecimal maxAmount) {
+        log.info("API CALL: User [{}] cài đặt Autobid cho phiên [{}] với giá tối đa [{}]", username, auctionId, maxAmount);
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(auctionService.setupAutoBid(auctionId, username, maxAmount));
+        return apiResponse;
     }
 
 }

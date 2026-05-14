@@ -1,5 +1,7 @@
 package com.auction.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class ItemCreationRequest {
@@ -12,10 +14,23 @@ public class ItemCreationRequest {
     public List<String> imageUrls;
 
     // Các trường đặc thù (Tùy loại mà gán, không thì để null)
+    @SerializedName("nameAuthor")
     public String nameAuthor;
-    public Integer creationYear; // Dùng Integer thay vì int để có thể gửi null
+
+    @SerializedName("creationYear")
+    public Integer creationYear;
+
+    // 2. Dành cho Đồ điện tử
+    @SerializedName("brand")
     public String brand;
+
+    @SerializedName("warrantyMonths")
     public Integer warrantyMonths;
+
+    // 3. Dành cho Phương tiện
+    @SerializedName("engineType")
     public String engineType;
+
+    @SerializedName("mileage")
     public Integer mileage;
 }

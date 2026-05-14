@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.profile.SellerProfileController" style="-fx-background-color: transparent;">
+    <children>
+        <VBox spacing="15.0" style="-fx-background-color: transparent;">
+
+            <!-- HEADER -->
+            <HBox alignment="CENTER_LEFT" minHeight="36">
+                <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#goBack" alignment="CENTER_LEFT">
+                    <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+                    <Label text="Hồ sơ Người Bán" styleClass="back-title" />
+                </HBox>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- NỘI DUNG -->
+            <HBox VBox.vgrow="ALWAYS" spacing="20" style="-fx-padding: 5 5 20 5;">
+
+                <!-- CỘT TRÁI: THÔNG TIN VÀ FORM -->
+                <VBox spacing="15" prefWidth="300">
+                    <VBox spacing="10" alignment="CENTER" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
+                        <ImageView fx:id="imgAvatar" fitWidth="100" fitHeight="100" />
+                        <Label fx:id="lblName" text="Tên người bán" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label fx:id="lblRating" text="⭐ 0.0/5.0" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+                    </VBox>
+
+                    <!-- FORM VIẾT ĐÁNH GIÁ -->
+                    <VBox spacing="10" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
+                        <Label text="Viết đánh giá:" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="cbStar" promptText="Chọn số sao" prefWidth="260" styleClass="modern-combo-box"/>
+                        <TextArea fx:id="txtComment" promptText="Nhận xét của bạn..." prefHeight="80" wrapText="true" styleClass="modern-text-area"/>
+                        <Button text="Gửi đánh giá" onAction="#handleSubmitReview" prefWidth="260" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                    </VBox>
+                </VBox>
+
+                <!-- CỘT PHẢI: DANH SÁCH BÌNH LUẬN -->
+                <VBox HBox.hgrow="ALWAYS" spacing="10" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
+                    <Label text="Đánh giá từ người mua" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                    <Separator style="-fx-opacity: 0.3;" />
+
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-width: 0;" VBox.vgrow="ALWAYS">
+                        <content>
+                            <VBox fx:id="vboxReviews" spacing="15" />
+                        </content>
+                    </ScrollPane>
+
+                    <!-- NÚT LOAD MORE (NẰM DƯỚI CÙNG CỘT PHẢI) -->
+                    <HBox alignment="CENTER">
+                        <Button fx:id="btnLoadMore" text="Tải thêm bình luận ▾" onAction="#loadReviews" style="-fx-background-color: #f1f2f6; -fx-text-fill: #34495e; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+
+            </HBox>
+        </VBox>
+    </children>
+</StackPane>

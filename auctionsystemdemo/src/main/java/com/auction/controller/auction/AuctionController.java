@@ -173,7 +173,7 @@ public class AuctionController {
 
     private void showDetail(AuctionModel item) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/controller/addauctionitem/AuctionDetail.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
             Node detailView = loader.load();
             AuctionDetailController controller = loader.getController();
             controller.setAuctionData(item);

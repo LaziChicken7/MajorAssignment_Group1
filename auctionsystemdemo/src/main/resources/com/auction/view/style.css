@@ -192,44 +192,64 @@
 /* =========================================
    9. DATEPICKER (LỊCH BO TRÒN - KHÔNG VIỀN)
    ========================================= */
+
+/* Khung bật lên của bộ lịch */
 .date-picker-popup {
     -fx-background-color: white;
-    -fx-background-radius: 15;
-    -fx-border-color: transparent;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 5);
-    -fx-padding: 5;
+    -fx-background-radius: 12;
+    -fx-border-color: #ecf0f1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 5);
+    -fx-padding: 0;
 }
+
+/* Phần tiêu đề chọn Tháng/Năm */
 .date-picker-popup .month-year-pane {
-    -fx-background-color: transparent;
+    -fx-background-color: #f8f9fa; /* Xám nhạt hiện đại */
     -fx-padding: 10;
+    -fx-background-radius: 12 12 0 0;
 }
 .date-picker-popup .month-year-pane .label {
-    -fx-text-fill: #333333;
+    -fx-text-fill: #2c3e50;
     -fx-font-weight: bold;
     -fx-font-size: 15px;
 }
+.date-picker-popup .month-year-pane .button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+/* Tiêu đề các ngày trong tuần (T2, T3...) */
 .date-picker-popup .day-name-cell {
     -fx-font-weight: bold;
-    -fx-text-fill: #95a5a6;
+    -fx-text-fill: #7f8c8d;
     -fx-padding: 10 5 10 5;
 }
+
+/* Các ô ngày bình thường */
 .date-picker-popup .day-cell {
     -fx-background-color: transparent;
-    -fx-text-fill: #333333;
-    -fx-background-radius: 20;
+    -fx-text-fill: #2c3e50;
+    -fx-background-radius: 20; /* Bo tròn hoàn toàn thành hình tròn */
     -fx-padding: 8;
     -fx-font-size: 14px;
 }
+
+/* Hiệu ứng khi lướt chuột qua ngày */
 .date-picker-popup .day-cell:hover {
-    -fx-background-color: #f1f2f6;
+    -fx-background-color: #e4f1fe;
     -fx-text-fill: #0A439D;
     -fx-cursor: hand;
 }
+
+/* Ngày được chọn */
 .date-picker-popup .day-cell:selected {
     -fx-background-color: #0A439D;
     -fx-text-fill: white;
     -fx-font-weight: bold;
 }
+
+/* Đánh dấu ngày hôm nay */
 .date-picker-popup .day-cell:today {
     -fx-border-color: #0A439D;
     -fx-border-radius: 20;
@@ -238,29 +258,56 @@
     -fx-font-weight: bold;
 }
 
+/* Ẩn tuần phụ (các ngày của tháng trước/sau) cho đỡ rối */
+.date-picker-popup .week-number-cell {
+    -fx-text-fill: transparent;
+    -fx-background-color: transparent;
+}
+
+/* -------------------------------------
+   KHUNG NHẬP LIỆU BÊN NGOÀI CỦA LỊCH
+   ------------------------------------- */
+.custom-date-picker {
+    -fx-background-color: transparent;
+}
 .custom-date-picker .arrow-button {
     -fx-background-color: transparent;
+    -fx-cursor: hand;
 }
-.custom-date-picker .arrow-button:hover {
-    -fx-background-color: transparent;
+.custom-date-picker .arrow-button .arrow {
+    -fx-background-color: #7f8c8d;
 }
 .custom-date-picker > .text-field {
-    -fx-background-color: white;
-    -fx-border-color: transparent;
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #ecf0f1;
     -fx-background-radius: 10;
+    -fx-border-radius: 10;
     -fx-padding: 10 15;
     -fx-font-size: 15px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 3);
+    -fx-text-fill: #2c3e50;
 }
 .custom-date-picker > .text-field:focused {
+    -fx-background-color: white;
     -fx-border-color: #0A439D;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 10;
+    -fx-border-width: 2;
     -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.2), 10, 0, 0, 3);
 }
 
 /* =========================================
-   10. Ô NHẬP LIỆU HIỆN ĐẠI (3D BÓNG MỜ NỔI)
+   10. KHUNG HIỂN THỊ ẢNH (IMAGE PREVIEW)
+   ========================================= */
+.image-preview-container {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 15;
+    -fx-border-color: #ecf0f1;
+    -fx-border-radius: 15;
+    -fx-border-width: 2;
+    -fx-border-style: dashed; /* Kẻ nét đứt tạo cảm giác "Kéo thả ảnh vào đây" */
+    -fx-padding: 15;
+}
+
+/* =========================================
+   11. Ô NHẬP LIỆU HIỆN ĐẠI (3D BÓNG MỜ NỔI)
    ========================================= */
 .modern-input {
     -fx-background-color: white;
@@ -328,7 +375,7 @@
 }
 
 /* =========================================
-   11. CUSTOM SCROLLBAR (THANH CUỘN ẨN)
+   12. CUSTOM SCROLLBAR (THANH CUỘN ẨN)
    ========================================= */
 .list-view .scroll-bar:vertical,
 .scroll-pane .scroll-bar:vertical {
@@ -370,7 +417,7 @@
 }
 
 /* =========================================
-   12. CUSTOM PROGRESS BAR (THANH THỐNG KÊ)
+   13. CUSTOM PROGRESS BAR (THANH THỐNG KÊ)
    ========================================= */
 .modern-progress-bar {
     -fx-pref-height: 12px; /* Độ dày của thanh */
@@ -390,7 +437,7 @@
 }
 
 /* =========================================
-   13. NÚT QUAY LẠI VÀ TIÊU ĐỀ TRANG
+   14. NÚT QUAY LẠI VÀ TIÊU ĐỀ TRANG
    ========================================= */
 
 /* A. Dành cho Tiêu đề CÓ chức năng Quay Lại (Có hover như Ảnh 3) */
@@ -425,7 +472,7 @@
 }
 
 /* =========================================
-   14. CUSTOM TABPANE (MENU CHUYỂN TAB DẠNG VIÊN THUỐC)
+   15. CUSTOM TABPANE (MENU CHUYỂN TAB DẠNG VIÊN THUỐC)
    ========================================= */
 .tab-pane {
     -fx-background-color: transparent;
@@ -473,7 +520,7 @@
 }
 
 /* =========================================
-   15. CUSTOM TABLEVIEW (BẢNG DỮ LIỆU) VÀ CÁC NÚT VIÊN THUỐC
+   16. CUSTOM TABLEVIEW (BẢNG DỮ LIỆU) VÀ CÁC NÚT VIÊN THUỐC
    ========================================= */
 .table-view {
     -fx-background-color: white;
@@ -561,7 +608,7 @@
 }
 
 /* =========================================
-   16. ĐỒNG BỘ SCROLLBAR VỚI APP CHUNG
+   17. ĐỒNG BỘ SCROLLBAR VỚI APP CHUNG
    ========================================= */
 .scroll-pane-table .scroll-bar:vertical,
 .scroll-pane-table .scroll-bar:horizontal {
@@ -586,7 +633,7 @@
 }
 
 /* =========================================
-   17. STYLE CHO CÁC NÚT VIÊN THUỐC (PILL-SHAPE)
+   18. STYLE CHO CÁC NÚT VIÊN THUỐC (PILL-SHAPE)
    ========================================= */
 .btn-pill-refresh { /* Nút refresh */
     -fx-background-color: #0A439D;
@@ -666,7 +713,7 @@
 }
 
 /* =========================================
-   18. CUSTOM PROGRESS BAR (THANH THỐNG KÊ ĐỘNG)
+   19. CUSTOM PROGRESS BAR (THANH THỐNG KÊ ĐỘNG)
    ========================================= */
 .progress-normal, .progress-alert {
     -fx-pref-height: 12px;
@@ -731,4 +778,140 @@
     -fx-background-color: linear-gradient(to right, #ff6b6b, #e74c3c); /* Dải màu đỏ */
     -fx-background-radius: 10;
     -fx-padding: 0;
+}
+
+/* =======================================================
+   21. STYLE CHO BẢNG HIỆN ĐẠI (MODERN TABLEVIEW)
+   ======================================================= */
+
+/* Xóa viền ngoài cùng của bảng và đổi nền trong suốt */
+.modern-table {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* 1. Khu vực Header (Tiêu đề các cột) */
+.modern-table .column-header-background {
+    -fx-background-color: #f8f9fa; /* Màu nền xám cực nhạt */
+    -fx-background-radius: 8 8 0 0; /* Bo tròn góc trên */
+    -fx-border-width: 0 0 2 0; /* Chỉ có đường kẻ viền ở dưới cùng */
+    -fx-border-color: #e9ecef;
+}
+
+/* Xóa viền dọc và căn chỉnh chiều cao Header */
+.modern-table .column-header, .modern-table .filler {
+    -fx-background-color: transparent;
+    -fx-size: 45px; /* Chiều cao của thanh Tiêu đề */
+    -fx-border-width: 0;
+}
+
+/* Style cho chữ trong Header */
+.modern-table .column-header .label {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-alignment: center;
+}
+
+/* 2. Khu vực Row (Từng dòng dữ liệu) */
+.modern-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-width: 0 0 1 0; /* Chỉ kẻ đường gạch ngang ngăn cách các hàng */
+    -fx-border-color: #f1f2f6;
+    -fx-cell-size: 48px; /* Tăng độ rộng của hàng để nhìn thoáng đãng hơn */
+}
+
+/* Dòng chẵn/lẻ (Zebra striping) - Dòng lẻ màu xám cực nhẹ để dễ nhìn */
+.modern-table .table-row-cell:odd {
+    -fx-background-color: #fafbfc;
+}
+
+/* Hiệu ứng khi di chuột qua hàng (Hover) */
+.modern-table .table-row-cell:hover {
+    -fx-background-color: #f0f4f8; /* Xanh nhạt bồng bềnh */
+}
+
+/* Hiệu ứng khi click chọn 1 hàng */
+.modern-table .table-row-cell:selected {
+    -fx-background-color: #e4f1fe;
+    -fx-table-cell-border-color: transparent;
+}
+
+/* 3. Khu vực Cell (Từng ô dữ liệu) */
+.modern-table .table-cell {
+    -fx-border-width: 0; /* RẤT QUAN TRỌNG: Xóa sọc caro dọc rác mắt của JavaFX */
+    -fx-padding: 0 15 0 15; /* Thêm khoảng đệm trái phải để chữ không chạm lề */
+}
+
+/* Tắt viền Focus (đường kẻ xanh quanh bảng khi click vào) */
+.modern-table:focused {
+    -fx-background-color: transparent;
+}
+.modern-table:focused .table-row-cell:selected {
+    -fx-background-color: #e4f1fe;
+}
+
+/* =======================================================
+   22. STYLE CHO THANH PHÂN TRANG HIỆN ĐẠI (MODERN PAGINATION)
+   ======================================================= */
+
+/* Ẩn dòng chữ "Page 1 of 10" và xóa nền */
+.modern-pagination {
+    -fx-page-information-visible: false;
+    -fx-background-color: transparent;
+    -fx-padding: 10 0 0 0;
+}
+
+/* Xóa viền/nền của khu vực chứa nút */
+.modern-pagination .pagination-control {
+    -fx-background-color: transparent;
+}
+
+/* 1. Style chung cho các Nút Số và Nút Mũi tên */
+.modern-pagination .number-button,
+.modern-pagination .left-arrow-button,
+.modern-pagination .right-arrow-button {
+    -fx-background-color: white; /* Nền trắng phẳng */
+    -fx-text-fill: #7f8c8d; /* Chữ màu xám */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-background-radius: 50; /* Bo tròn thành hình tròn */
+    -fx-border-radius: 50;
+    -fx-border-color: #ecf0f1; /* Viền xám mỏng */
+    -fx-border-width: 1.5px;
+    -fx-cursor: hand;
+}
+
+/* 2. Hiệu ứng Hover (Di chuột qua) */
+.modern-pagination .number-button:hover,
+.modern-pagination .left-arrow-button:hover,
+.modern-pagination .right-arrow-button:hover {
+    -fx-background-color: #f1f2f6; /* Nền xám nhạt */
+    -fx-text-fill: #2c3e50;
+    -fx-border-color: #bdc3c7;
+}
+
+/* 3. Style cho Nút đang được chọn (Active Page) */
+.modern-pagination .number-button:selected {
+    -fx-background-color: #0A439D; /* Màu xanh chủ đạo */
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.3), 8, 0, 0, 3); /* Đổ bóng nhẹ */
+}
+
+/* 4. Đổi màu biểu tượng mũi tên Trái/Phải */
+.modern-pagination .left-arrow,
+.modern-pagination .right-arrow {
+    -fx-background-color: #7f8c8d; /* Mũi tên xám */
+}
+.modern-pagination .left-arrow-button:hover .left-arrow,
+.modern-pagination .right-arrow-button:hover .right-arrow {
+    -fx-background-color: #2c3e50; /* Đậm lên khi hover */
+}
+
+/* Tắt viền focus (đường nét đứt màu xanh khi click vào) */
+.modern-pagination:focused {
+    -fx-background-color: transparent;
 }

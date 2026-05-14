@@ -10,10 +10,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle; // IMPORT THƯ VIỆN BO GÓC ẢNH
 import javafx.stage.FileChooser;
 import java.io.File;
 
@@ -22,7 +24,7 @@ public class AddProductController {
     @FXML private ImageView productImage;
     @FXML private Label lblPhotoIcon;
     @FXML private TextField txtProductName, txtStartPrice;
-    @FXML private TextArea txtDescription;    
+    @FXML private TextArea txtDescription;
     @FXML private HBox imagePreviewBox;
     private java.util.List<File> selectedFiles = new java.util.ArrayList<>();
 
@@ -106,10 +108,24 @@ public class AddProductController {
 
             // Vòng lặp vẽ từng cái ảnh nhỏ nhỏ xếp cạnh nhau
             for (File f : selectedFiles) {
-                ImageView imgView = new ImageView(new javafx.scene.image.Image(f.toURI().toString()));
+                ImageView imgView = new ImageView(new Image("file:" + f.getAbsolutePath()));
+
+                // Set kích thước cố định để các ảnh đều nhau (vuông vức)
                 imgView.setFitHeight(200);
-                imgView.setFitWidth(150);
-                imgView.setPreserveRatio(true);
+                imgView.setFitWidth(200);
+                imgView.setPreserveRatio(false); // Bắt buộc tắt cái này đi để cắt vuông
+
+                // ===============================================
+                // BƯỚC QUAN TRỌNG: CẮT BO GÓC CHO ẢNH BẰNG RECTANGLE
+                // ===============================================
+                Rectangle clip = new Rectangle(imgView.getFitWidth(), imgView.getFitHeight());
+                clip.setArcWidth(25);  // Độ cong cạnh ngang
+                clip.setArcHeight(25); // Độ cong cạnh dọc
+                imgView.setClip(clip);
+
+                // Hiệu ứng bóng đổ nhẹ phía dưới ảnh để tạo chiều sâu
+                imgView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
+
                 imagePreviewBox.getChildren().add(imgView);
             }
             if(lblPhotoIcon != null) lblPhotoIcon.setVisible(false);
@@ -293,7 +309,6 @@ public class AddProductController {
     }
 
     // HÀM 2: Gắn ảnh vào Item đã tạo
-    // HÀM 2: Gắn ảnh vào Item đã tạo
     private void uploadImagesToServer(String itemId, String formattedStartTime, String formattedEndTime) {
         new Thread(() -> {
             try {
@@ -307,17 +322,12 @@ public class AddProductController {
 
                 // =========================================================
                 // FIX 1: QUAN TRỌNG - THÊM TOKEN XÁC THỰC VÀO HEADER
-                // (Nếu biến lưu token của bạn trong SessionManager tên khác, hãy sửa lại chữ "token" nhé)
                 // =========================================================
                 try {
-                    // Giả sử token được lưu ở biến SessionManager.token
-                    // Nếu bạn lưu ở biến khác (VD: SessionManager.jwt, SessionManager.accessToken) thì đổi lại
                     if (SessionManager.token != null && !SessionManager.token.isEmpty()) {
                         conn.setRequestProperty("Authorization", "Bearer " + SessionManager.token);
                     }
-                } catch (Exception ignored) {
-                    // Bỏ qua nếu SessionManager không có thuộc tính token
-                }
+                } catch (Exception ignored) {}
 
                 java.io.OutputStream out = conn.getOutputStream();
                 java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.OutputStreamWriter(out, "UTF-8"), true);
@@ -345,13 +355,12 @@ public class AddProductController {
 
                 // Đợi upload xong thì kiểm tra kết quả
                 int code = conn.getResponseCode();
-                System.out.println("API Upload Image Response Code: " + code); // IN RA CONSOLE ĐỂ KIỂM TRA
+                System.out.println("API Upload Image Response Code: " + code);
 
                 if (code >= 200 && code < 300) {
                     // THÀNH CÔNG -> Chuyển sang Bước C: Tạo phiên đấu giá
                     createAuctionForData(itemId, formattedStartTime, formattedEndTime);
                 } else {
-                    // Đọc chi tiết nguyên nhân lỗi từ Server
                     java.io.InputStream errStream = conn.getErrorStream();
                     String errorMessage = "Lỗi không xác định";
                     if (errStream != null) {
@@ -359,8 +368,6 @@ public class AddProductController {
                         errorMessage = s.hasNext() ? s.next() : "";
                         System.out.println("Chi tiết lỗi từ Server: " + errorMessage);
                     }
-
-                    // Hiển thị mã lỗi lên Dialog cho bạn dễ biết
                     final String errorTitle = "Mã lỗi: " + code;
                     Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi Upload", "Không thể tải ảnh (" + errorTitle + ").\nSản phẩm đã tạo thành công nhưng không có ảnh."));
                 }

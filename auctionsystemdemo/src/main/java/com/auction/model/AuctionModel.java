@@ -1,5 +1,6 @@
 package com.auction.model;
 
+import com.google.gson.annotations.SerializedName; // BẮT BUỘC PHẢI IMPORT CÁI NÀY
 import java.util.List;
 
 public class AuctionModel {
@@ -26,24 +27,39 @@ public class AuctionModel {
         // DANH SÁCH LINK ẢNH TỪ SERVER
         public List<String> imageUrls;
 
-        // --- BỔ SUNG CÁC TRƯỜNG NÀY ĐỂ HỨNG THÔNG TIN KỸ THUẬT TỪ BACKEND ---
         public String itemType;          // Phân loại: ART, ELECTRONIC, VEHICLE
 
-        // Dành cho mặt hàng Nghệ thuật (ART)
-        public String nameAuthor;
-        public Integer creationYear;     // Dùng Integer để tránh lỗi nếu null
+        // ========================================================
+        // FIX LỖI: THÊM @SerializedName ĐỂ GSON ÉP KIỂU ĐÚNG TỪ JSON
+        // ========================================================
 
-        // Dành cho đồ Điện tử (ELECTRONIC)
-        public String brand;
+        // 1. Dành cho mặt hàng Nghệ thuật (ART)
+        @SerializedName(value = "nameAuthor", alternate = {"name_author"})
+        public String nameAuthor;
+
+        @SerializedName(value = "creationYear", alternate = {"creation_year"})
+        public Integer creationYear;
+
+        // 2. Dành cho đồ Điện tử (ELECTRONIC)
+        public String brand; // brand thì 1 chữ nên không cần SerializedName
+
+        @SerializedName(value = "warrantyMonths", alternate = {"warranty_months"})
         public Integer warrantyMonths;
 
-        // Dành cho Phương tiện (VEHICLE)
+        // 3. Dành cho Phương tiện (VEHICLE)
+        @SerializedName(value = "engineType", alternate = {"engine_type"})
         public String engineType;
+
         public Integer mileage;
     }
 
     public static class SellerModel {
         public String userName;
+
+        // BỔ SUNG THÊM 3 TRƯỜNG NÀY ĐỂ HỨNG DATA NGƯỜI BÁN TỪ SPRING BOOT
+        public String fullName;
+        public String avatarUrl;
+        public double rating;
     }
 
     public static class BidderModel {

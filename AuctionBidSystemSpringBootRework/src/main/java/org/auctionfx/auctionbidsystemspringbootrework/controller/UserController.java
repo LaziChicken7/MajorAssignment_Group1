@@ -148,4 +148,25 @@ public class UserController {
         apiResponse.setResult(userService.removeAvatar(userName));
         return apiResponse;
     }
+
+    // VIẾT ĐÁNH GIÁ
+    @PostMapping("/reviews")
+    public ApiResponse<String> addSellerReview(@RequestBody org.auctionfx.auctionbidsystemspringbootrework.dto.request.ReviewRequest request) {
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setResult(userService.addSellerReview(request));
+        return response;
+    }
+
+    // XEM ĐÁNH GIÁ (CÓ LOAD MORE)
+    // Cách gọi: GET /users/LaziChicken7/reviews?page=0&size=5
+    @GetMapping("/{sellerUsername}/reviews")
+    public ApiResponse<List<org.auctionfx.auctionbidsystemspringbootrework.entity.user.SellerReview>> getSellerReviews(
+            @PathVariable String sellerUsername,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        ApiResponse<List<org.auctionfx.auctionbidsystemspringbootrework.entity.user.SellerReview>> response = new ApiResponse<>();
+        response.setResult(userService.getSellerReviews(sellerUsername, page, size));
+        return response;
+    }
 }

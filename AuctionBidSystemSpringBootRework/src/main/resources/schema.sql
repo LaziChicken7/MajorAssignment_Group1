@@ -2,13 +2,15 @@
 -- 1. XÓA BẢNG CŨ (Theo thứ tự ngược: Bảng con xóa trước, bảng cha xóa sau)
 -- ==============================================================================
 DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS auto_bid_configs;
 DROP TABLE IF EXISTS bid_transactions;
 DROP TABLE IF EXISTS auctions;
-DROP TABLE IF EXISTS item_image_urls; -- Thêm bảng phụ của Item (chứa List imageUrls)
+DROP TABLE IF EXISTS item_image_urls;
 DROP TABLE IF EXISTS arts;
 DROP TABLE IF EXISTS electronics;
 DROP TABLE IF EXISTS vehicles;
 DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS seller_reviews; -- BỔ SUNG: Bảng Đánh giá người bán
 DROP TABLE IF EXISTS sellers;
 DROP TABLE IF EXISTS bidders;
 DROP TABLE IF EXISTS admins;
@@ -29,7 +31,7 @@ CREATE TABLE users (
                        number_phone VARCHAR(20) UNIQUE,
                        citizen_id VARCHAR(50) UNIQUE,
                        role VARCHAR(20) NOT NULL,
-                       avatar_url VARCHAR(700) DEFAULT '/images/avatar/default-avatarmacdinh.png', -- Đã bổ sung trường avatar_url
+                       avatar_url VARCHAR(700) DEFAULT '/images/avatar/default-avatarmacdinh.png',
                        is_banned BOOLEAN DEFAULT FALSE
 );
 
@@ -113,6 +115,7 @@ CREATE TABLE auctions (
                           start_time DATETIME,
                           end_time DATETIME,
                           highest_bid DECIMAL(19, 2),
+                          step_price DECIMAL(19, 2) DEFAULT 1000.00,
                           status VARCHAR(50) DEFAULT 'OPEN',
                           transaction_status VARCHAR(50) DEFAULT NULL,
                           item_id VARCHAR(36) UNIQUE NOT NULL,
@@ -134,9 +137,23 @@ CREATE TABLE bid_transactions (
                                   CONSTRAINT fk_trans_bidder FOREIGN KEY (bidder_id) REFERENCES bidders(id)
 );
 
+-- Bảng Cấu hình Đấu giá tự động (Auto-Bid)
+CREATE TABLE auto_bid_configs (
+                                  id VARCHAR(36) PRIMARY KEY,
+                                  auction_id VARCHAR(36) NOT NULL,
+                                  bidder_id VARCHAR(36) NOT NULL,
+                                  max_bid_amount DECIMAL(19, 2) NOT NULL,
+                                  is_active BOOLEAN DEFAULT TRUE,
+                                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                  CONSTRAINT fk_autobid_auction FOREIGN KEY (auction_id) REFERENCES auctions(id) ON DELETE CASCADE,
+                                  CONSTRAINT fk_autobid_bidder FOREIGN KEY (bidder_id) REFERENCES bidders(id) ON DELETE CASCADE
+);
+
 -- ==============================================================================
--- 5. TẠO NHÁNH THÔNG BÁO (NOTIFICATIONS)
+-- 5. TẠO NHÁNH THÔNG BÁO VÀ ĐÁNH GIÁ (NOTIFICATIONS & REVIEWS)
 -- ==============================================================================
+
+-- Bảng Thông báo
 CREATE TABLE notifications (
                                id VARCHAR(36) PRIMARY KEY,
                                title VARCHAR(255) NOT NULL,
@@ -148,4 +165,16 @@ CREATE TABLE notifications (
                                auction_id VARCHAR(36),
                                CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                                CONSTRAINT fk_notif_auction FOREIGN KEY (auction_id) REFERENCES auctions(id) ON DELETE SET NULL
+);
+
+-- BỔ SUNG: Bảng Đánh giá người bán (Seller Reviews)
+CREATE TABLE seller_reviews (
+                                id VARCHAR(36) PRIMARY KEY,
+                                seller_id VARCHAR(36) NOT NULL,
+                                reviewer_id VARCHAR(36) NOT NULL,
+                                star INT NOT NULL,
+                                comment TEXT,
+                                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                CONSTRAINT fk_review_seller FOREIGN KEY (seller_id) REFERENCES sellers(id) ON DELETE CASCADE,
+                                CONSTRAINT fk_review_reviewer FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE CASCADE
 );

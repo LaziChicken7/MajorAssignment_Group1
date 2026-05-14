@@ -27,7 +27,7 @@ spring:
       max-request-size: 50MB # Cho phép tổng 1 lần đẩy nhiều ảnh lên tối đa 50MB
 
 # ==========================================
-# CẤU HÌNH HỆ THỐNG LOGGING (CƠ BẢN & ĐƠN GIẢN)
+# CẤU HÌNH HỆ THỐNG LOGGING CHUYÊN NGHIỆP
 # ==========================================
 logging:
   level:
@@ -35,10 +35,33 @@ logging:
     # Chỉ bật log chi tiết (DEBUG) cho code của riêng nhóm bạn
     org.auctionfx.auctionbidsystemspringbootrework: DEBUG
 
-  # Cấu hình lưu log ra file
+    # ========================================================
+    # THÊM DÒNG NÀY VÀO ĐỂ TẮT CẢNH BÁO "NARROWING PROXY"
+    # (Chỉ hiện lỗi Error, tắt các cảnh báo xàm của Hibernate)
+    # ========================================================
+    org.hibernate.orm.persistenceContext: ERROR
+
   file:
+    # File log hiện tại (hệ thống sẽ luôn ghi trực tiếp vào file này)
     name: logs/auction-server.log
 
-  # Cấu hình hiển thị màu sắc log trên màn hình Console của IDE cho dễ nhìn
+  logback:
+    rollingpolicy:
+      # Format tên file khi bị CẮT (Lưu vào thư mục archived, có thêm Ngày và Index %i)
+      file-name-pattern: "logs/archived/auction-server-%d{yyyy-MM-dd}.%i.log"
+
+      # Kích thước tối đa của 1 file log. Nếu vượt qua mức này, tự cắt sang file .1, .2
+      max-file-size: 10MB
+
+      # Số ngày lưu trữ tối đa (Ví dụ: Giữ log trong 30 ngày qua, sau đó tự xóa)
+      max-history: 30
+
+      # Tổng dung lượng tối đa thư mục log được phép chiếm ổ cứng (Tránh sập Server do đầy ổ)
+      total-size-cap: 1GB
+
   pattern:
-    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%-5level) %clr([%t]){faint} %clr(%c{1}){cyan} : %msg%n"
+    # Format log hiển thị trên màn hình Console IDE (CÓ MÀU SẮC DỄ NHÌN)
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%-5level) %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %msg%n"
+
+    # Format log ghi vào file text (KHÔNG DÙNG MÀU SẮC để file .log mở ra không bị lỗi font)
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} : %msg%n"

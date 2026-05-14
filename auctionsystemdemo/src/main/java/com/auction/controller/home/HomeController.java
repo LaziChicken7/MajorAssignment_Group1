@@ -132,7 +132,7 @@ public class HomeController {
                                     // SỬA: Bắt sự kiện click vào dòng sản phẩm để mở màn hình chi tiết
                                     row.setOnMouseClicked(event -> {
                                         try {
-                                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/controller/addauctionitem/AuctionDetail.fxml"));
+                                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
                                             Node view = loader.load();
 
                                             AuctionDetailController detailController = loader.getController();

@@ -9,10 +9,9 @@ module com.auction {
 
     // Cho phép JavaFX truy cập vào thư mục view và root để load giao diện
     opens com.auction to javafx.fxml, javafx.graphics;
-    opens com.auction.view to javafx.fxml;
 
-    // CỰC KỲ QUAN TRỌNG: Cho phép FXML truy cập vào các Controller
-    opens com.auction.controller to javafx.fxml;
+    // (Lưu ý: Nếu thư mục view của bạn cũng không có file .java nào trực tiếp bên trong, bạn cũng phải xóa dòng dưới này đi)
+    opens com.auction.view to javafx.fxml;
 
     // CỰC KỲ QUAN TRỌNG 2: Cho phép Gson soi vào các file Model để gán data JSON
     opens com.auction.model to com.google.gson;
@@ -20,20 +19,29 @@ module com.auction {
 
     // Export các package để có thể chạy được
     exports com.auction;
-    exports com.auction.controller;
     exports com.auction.util;
+
+    // ĐÃ XÓA 2 DÒNG com.auction.controller Ở ĐÂY VÌ NÓ RỖNG
+
+    // Khai báo chính xác từng package con có chứa Controller
     exports com.auction.controller.addauctionitem;
     opens com.auction.controller.addauctionitem to javafx.fxml;
+
     exports com.auction.controller.notification;
     opens com.auction.controller.notification to javafx.fxml;
+
     exports com.auction.controller.wallet;
     opens com.auction.controller.wallet to javafx.fxml;
+
     exports com.auction.controller.profile;
     opens com.auction.controller.profile to javafx.fxml;
+
     exports com.auction.controller.home;
     opens com.auction.controller.home to javafx.fxml;
+
     exports com.auction.controller.auction;
     opens com.auction.controller.auction to javafx.fxml;
+
     exports com.auction.controller.dashboard;
-    opens com.auction.controller.dashboard to javafx.fxml; // Mở thêm gói util để gọi ApiService và SessionManager
+    opens com.auction.controller.dashboard to javafx.fxml;
 }

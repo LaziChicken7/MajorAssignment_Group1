@@ -21,7 +21,10 @@ public class Auction extends BaseEntity {
     private LocalDateTime endTime;
     private BigDecimal highestBid;
 
-    @ManyToOne
+    // THÊM: Bước giá cho mỗi lần đặt giá hoặc Autobid (Ví dụ: 10.000đ, 50.000đ)
+    private BigDecimal stepPrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "winning_user_id")
     private Bidder winningUser;
 
@@ -33,19 +36,23 @@ public class Auction extends BaseEntity {
     private TransactionStatus transactionStatus;
 
     // MQH một một với khóa ngoài item_id
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item bidProduct;
 
     // MQH Nhiều một (Nhiều Auction với một Seller) với khóa ngoài seller_id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
     // MQH Một nhiều (Một Auction với nhiều lượt trả giá)
     // Nếu Auction bị xóa, toàn bộ Bid cũng bị xóa theo
-    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BidTransaction> bidTransactions = new ArrayList<>();
+
+    // THÊM: MQH Một nhiều (Một Auction có nhiều người cài đặt Autobid)
+    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<AutoBidConfig> autoBidConfigs = new ArrayList<>();
 
     // GETTER VÀ SETTER
 
@@ -119,5 +126,13 @@ public class Auction extends BaseEntity {
 
     public void setTransactionStatus(TransactionStatus transactionStatus) {
         this.transactionStatus = transactionStatus;
+    }
+
+    public BigDecimal getStepPrice() {
+        return stepPrice;
+    }
+
+    public void setStepPrice(BigDecimal stepPrice) {
+        this.stepPrice = stepPrice;
     }
 }

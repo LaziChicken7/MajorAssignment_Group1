@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: white; -fx-padding: 15 20; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.notification.NotificationItemController">
+
+    <VBox HBox.hgrow="ALWAYS" spacing="5">
+        <Label fx:id="lblTitle" text="Tiêu đề thông báo" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #333;"/>
+        <Label fx:id="lblDescription" text="Nội dung chi tiết..." style="-fx-font-size: 14px; -fx-text-fill: #555;" wrapText="true"/>
+        <Label fx:id="lblTime" text="Thời gian" style="-fx-font-size: 12px; -fx-text-fill: #999;"/>
+    </VBox>
+
+    <!-- Khu vực nút thao tác -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="btnAccept" text="✔ Xác nhận" onAction="#handleAccept" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;"/>
+        <Button fx:id="btnDecline" text="✖ Từ chối" onAction="#handleDecline" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;"/>
+        <Button fx:id="btnDelete" text="🗑 Xóa" onAction="#handleDelete" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;"/>
+    </HBox>
+</HBox>

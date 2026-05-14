@@ -125,56 +125,61 @@ public class ItemService {
                     return new ItemException(ErrorCode.ITEM_NOT_FOUND);
                 });
 
-        // 2. Tìm auction liên quan đến item này
-        Auction auction = auctionRepository.findByBidProduct(item)
-                .orElseThrow(() -> {
-                    log.error("Lỗi Hủy: Không tìm thấy Auction liên kết với Item [{}]", itemId);
-                    return new ItemException(ErrorCode.AUCTION_NOT_FOUND);
-                });
+        // 2. TÌM AUCTION LIÊN QUAN (NẾU CÓ)
+        // Dùng Optional thay vì orElseThrow, vì có thể Item này chưa kịp tạo Auction
+        java.util.Optional<Auction> auctionOpt = auctionRepository.findByBidProduct(item);
 
-        // 3. Kiểm tra xem auction đã hủy hoặc đã thanh toán rồi không (không được hủy lại)
-        if (auction.getStatus() == AuctionStatus.CANCELLED) {
-            log.warn("Lỗi Hủy: Auction [{}] đã bị CANCELLED từ trước", auction.getId());
-            throw new ItemException(ErrorCode.CONDITION_CANCEL_AUCTION_INVALID);
-        }
-        if (auction.getStatus() == AuctionStatus.PAID) {
-            log.warn("Lỗi Hủy: Auction [{}] đã hoàn tất thanh toán (PAID), không thể hủy", auction.getId());
-            throw new ItemException(ErrorCode.CONDITION_CANCEL_AUCTION_INVALID);
-        }
+        if (auctionOpt.isPresent()) {
+            Auction auction = auctionOpt.get();
 
-        // 4. Kiểm tra xem có người thắng cuộc không
-        Bidder winner = auction.getHighestBid() != null ? auction.getWinningUser() : null;
-
-        // 5. Nếu có người thắng cuộc, hoàn tiền từ moneyInFrozen về moneyOnWallet
-        if (winner != null && auction.getHighestBid() != null && auction.getHighestBid().compareTo(BigDecimal.ZERO) > 0) {
-            try {
-                log.info("Tiến hành hoàn lại số tiền đóng băng {} VND cho người thắng [{}]", auction.getHighestBid(), winner.getUserName());
-                paymentService.unFreezeMoney(winner.getId(), auction.getHighestBid());
-            } catch (Exception e) {
-                // Nếu hoàn tiền thất bại, throw exception
-                log.error("LỖI NGHIÊM TRỌNG: Quá trình hoàn tiền thất bại cho User [{}]", winner.getUserName(), e);
-                throw new ItemException(ErrorCode.NOT_ENOUGH_MONEY_IN_FROZEN);
+            // 3. Kiểm tra xem auction đã hủy hoặc đã thanh toán rồi không
+            if (auction.getStatus() == AuctionStatus.CANCELLED) {
+                log.warn("Lỗi Hủy: Auction [{}] đã bị CANCELLED từ trước", auction.getId());
+                throw new ItemException(ErrorCode.CONDITION_CANCEL_AUCTION_INVALID);
             }
+            if (auction.getStatus() == AuctionStatus.PAID) {
+                log.warn("Lỗi Hủy: Auction [{}] đã hoàn tất thanh toán (PAID), không thể hủy", auction.getId());
+                throw new ItemException(ErrorCode.CONDITION_CANCEL_AUCTION_INVALID);
+            }
+
+            // 4. Kiểm tra xem có người thắng cuộc không
+            Bidder winner = auction.getHighestBid() != null ? auction.getWinningUser() : null;
+
+            // 5. Nếu có người thắng cuộc, hoàn tiền đóng băng
+            if (winner != null && auction.getHighestBid() != null && auction.getHighestBid().compareTo(BigDecimal.ZERO) > 0) {
+                try {
+                    log.info("Tiến hành hoàn lại số tiền đóng băng {} VND cho người thắng [{}]", auction.getHighestBid(), winner.getUserName());
+                    paymentService.unFreezeMoney(winner.getId(), auction.getHighestBid());
+                } catch (Exception e) {
+                    log.error("LỖI NGHIÊM TRỌNG: Quá trình hoàn tiền thất bại cho User [{}]", winner.getUserName(), e);
+                    throw new ItemException(ErrorCode.NOT_ENOUGH_MONEY_IN_FROZEN);
+                }
+            }
+
+            // 6. Cập nhật trạng thái Auction thành CANCELLED
+            auction.setStatus(AuctionStatus.CANCELLED);
+            auctionRepository.save(auction);
+            log.info("Đã chuyển trạng thái Auction [{}] thành CANCELLED", auction.getId());
+
+            // 7. Gửi thông báo cho người mua (nếu có người thắng cuộc)
+            if (winner != null) {
+                String buyerTitle = "Sản phẩm đã bị hủy";
+                // ĐÃ FIX LỖI STRING.FORMAT
+                String buyerDescription = String.format("Sản phẩm bạn đặt giá đã bị hủy do Admin. Tiền đã được hoàn lại trong ví. Lý do: %s", request.getReason());
+                notificationService.createNotification(winner, auction, NotificationType.ITEM_CANCELLED_BY_ADMIN,
+                        buyerTitle, buyerDescription);
+            }
+        } else {
+            log.info("Item [{}] chưa có phiên đấu giá nào liên kết. Hệ thống sẽ tiến hành bỏ qua bước xử lý Auction.", itemId);
         }
 
-        // 6. status auction thành CANCELLED
-        auction.setStatus(AuctionStatus.CANCELLED);
-        auctionRepository.save(auction);
-        log.info("Đã chuyển trạng thái Auction [{}] thành CANCELLED", auction.getId());
-
-        // 7. Gửi thông báo cho người bán
+        // 8. LUÔN LUÔN gửi thông báo cho người bán (Dù có Auction hay không)
         String sellerTitle = "Sản phẩm bị hủy bởi Admin";
-        String sellerDescription = String.format("sản phẩm đã bị hủy do admin, vui lòng liên hệ admin để tìm hiểu rõ nguyên nhân", request.getReason());
-        notificationService.createNotification(auction.getSeller(), auction, NotificationType.ITEM_CANCELLED_BY_ADMIN,
-                sellerTitle, sellerDescription);
+        // ĐÃ FIX LỖI STRING.FORMAT (Bổ sung %s để nhận request.getReason())
+        String sellerDescription = String.format("Sản phẩm của bạn đã bị hủy bởi Admin. Lý do: %s", request.getReason());
 
-        // 8. Gửi thông báo cho người mua (nếu có người thắng cuộc)
-        if (winner != null) {
-            String buyerTitle = "Sản phẩm đã bị hủy";
-            String buyerDescription = String.format("sản phẩm đã bị hủy do admin, tiền được hoàn lại trong ví", request.getReason());
-            notificationService.createNotification(winner, auction, NotificationType.ITEM_CANCELLED_BY_ADMIN,
-                    buyerTitle, buyerDescription);
-        }
+        notificationService.createNotification(item.getSeller(), auctionOpt.orElse(null), NotificationType.ITEM_CANCELLED_BY_ADMIN,
+                sellerTitle, sellerDescription);
 
         log.info("Xử lý Hủy Sản Phẩm [{}] thành công và đã gửi đầy đủ thông báo.", itemId);
         return "Item cancelled successfully by admin";

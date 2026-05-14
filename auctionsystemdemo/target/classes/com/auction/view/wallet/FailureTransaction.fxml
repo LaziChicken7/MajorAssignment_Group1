@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.shape.SVGPath?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.wallet.TransactionController" spacing="20" style="-fx-background-color: transparent;">
+
+    <HBox alignment="CENTER_LEFT">
+        <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#handleBackToWallet">
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label text="Giao dịch không thành công" styleClass="back-title" />
+        </HBox>
+        <Region HBox.hgrow="ALWAYS" />
+    </HBox>
+
+    <!-- ĐÃ ĐỔI vbarPolicy="ALWAYS" ĐỂ LUÔN HIỆN THANH TRƯỢT KÉO DỌC -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox fx:id="failedContainer" spacing="15" styleClass="card" />
+        </content>
+    </ScrollPane>
+</VBox>

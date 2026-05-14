@@ -87,15 +87,40 @@ public class AdminController {
                 new Alert(Alert.AlertType.WARNING, "Vui lòng nhập lý do!").show();
                 return;
             }
-            // Gọi API với JSON body
-            String jsonBody = "{\"reason\":\"" + reason + "\"}";
-            ApiService.putAsync("/items/cancel/" + item.id, jsonBody).thenAccept(res -> {
+
+            // ========================================================
+            // FIX LỖI MÃ HÓA KÉP: DÙNG MAP THAY VÌ TỰ NỐI CHUỖI
+            // ========================================================
+            java.util.Map<String, String> requestBody = new java.util.HashMap<>();
+            requestBody.put("reason", reason);
+
+            // Truyền thẳng requestBody (kiểu Map) vào, Gson sẽ tự chuyển thành JSON: {"reason": "Lý do của bạn"}
+            ApiService.putAsync("/items/cancel/" + item.id, requestBody).thenAccept(res -> {
                 Platform.runLater(() -> {
                     if (res.statusCode() >= 200 && res.statusCode() < 300) {
                         new Alert(Alert.AlertType.INFORMATION, "Đã hủy sản phẩm thành công!").show();
                         loadItems(); // Refresh data
                     } else {
-                        new Alert(Alert.AlertType.ERROR, "Lỗi hủy sản phẩm!").show();
+                        // HIỂN THỊ LỖI BẰNG TEXTAREA RỘNG RÃI
+                        String errorMsg = res.body();
+                        try {
+                            ApiResponse errRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                            if (errRes != null && errRes.message != null) {
+                                errorMsg = errRes.message;
+                            }
+                        } catch (Exception ignored) {}
+
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Lỗi hủy sản phẩm");
+                        alert.setHeaderText("Hệ thống từ chối yêu cầu!");
+
+                        TextArea area = new TextArea("Chi tiết lỗi:\n" + errorMsg);
+                        area.setWrapText(true);
+                        area.setEditable(false);
+                        area.setPrefSize(500, 200);
+
+                        alert.getDialogPane().setContent(area);
+                        alert.show();
                     }
                 });
             });

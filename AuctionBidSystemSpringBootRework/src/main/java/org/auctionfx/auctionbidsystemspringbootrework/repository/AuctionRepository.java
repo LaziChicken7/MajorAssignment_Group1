@@ -1,9 +1,12 @@
 package org.auctionfx.auctionbidsystemspringbootrework.repository;
 
+import jakarta.persistence.LockModeType;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.item.Item;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -29,4 +32,18 @@ public interface AuctionRepository extends JpaRepository<Auction, String> {
 
     // 3. TÌM AUCTION THEO PRODUCT
     Optional<Auction> findByBidProduct(Item item);
+
+    // 4. Thêm annotation này để database "Khoá" dòng đấu giá này lại khi có người đặt giá.
+    // Thằng khác (hoặc bot) bay vào phải Đứng Chờ thằng trước chạy xong transaction mới được đụng vào.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM Auction a WHERE a.id = :id")
+    Optional<Auction> findByIdWithLock(String id);
+
+    // =========================================================
+    // FIX LỖI MẤT DỮ LIỆU ĐA HÌNH:
+    // Ép Spring Boot phải truy xuất THẲNG vào dữ liệu thật của class con
+    // (Art, Electronic...) thay vì dùng bản sao giả (Proxy).
+    // =========================================================
+    @EntityGraph(attributePaths = {"bidProduct"})
+    List<Auction> findAll();
 }

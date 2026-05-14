@@ -4,16 +4,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
-import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Admin;
-import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
-import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
-import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
+import org.auctionfx.auctionbidsystemspringbootrework.entity.user.*;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
+import org.auctionfx.auctionbidsystemspringbootrework.exception.ReviewException;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.BidderRepository;
+import org.auctionfx.auctionbidsystemspringbootrework.repository.SellerReviewRepository;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +38,13 @@ public class UserService {
 
     @Autowired
     private BidderRepository bidderRepository;
+
+    // Tiêm (Inject) bộ mã hóa mật khẩu của Spring Boot vào
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private SellerReviewRepository reviewRepository;
 
     // Khay chứa Mã bí mật (Key là Username, Value là Mã Token)
     private final Map<String, String> resetTokens = new ConcurrentHashMap<>();
@@ -104,8 +111,10 @@ public class UserService {
 
         // 4. Set dữ liệu chung
         newUser.setUserName(request.getUserName());
-        // Tạm thời mã hóa kiểu cũ của bạn (cộng 5 ASCII), sau này học Security sẽ đổi sang Bcrypt
-        newUser.setPassword(encodePassword(request.getPassword()));
+
+        // Sử dụng thuật toán BCrypt băm mật khẩu 1 chiều trước khi lưu vào DB
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+
         newUser.setFullName(request.getFullName());
         newUser.setEmail(request.getEmail());
         newUser.setNumberPhone(request.getNumberPhone());
@@ -137,11 +146,12 @@ public class UserService {
             throw new UserException(ErrorCode.USER_BANNED);
         }
 
-        // Kiểm tra mật khẩu (Sử dụng hàm mã hóa đang có sẵn trong file của bạn)
-        if (!user.getPassword().equals(encodePassword(request.getPassword()))) {
+        // Kiểm tra mật khẩu (Sử dụng hàm matches của BCrypt để so sánh)
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.error("Lỗi đăng nhập: Sai mật khẩu cho Username [{}]", request.getUserName());
             throw new UserException(ErrorCode.PASSWORD_NOT_MATCH); // Hoặc tạo mã lỗi WRONG_PASSWORD
         }
+
         log.info("Đăng nhập thành công! Chào mừng [{}]", request.getUserName());
         return user;
     }
@@ -238,9 +248,9 @@ public class UserService {
             throw new UserException(ErrorCode.INVALID_RESET_TOKEN);
         }
 
-        // Nếu đúng mã -> Đổi mật khẩu
+        // Nếu đúng mã -> Đổi mật khẩu (Mã hóa trước khi lưu)
         User user = userRepository.findByUserName(request.getUserName());
-        user.setPassword(encodePassword(request.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
         // Đổi xong thì XÓA mã bí mật đó đi (Mỗi mã chỉ được dùng 1 lần)
@@ -287,7 +297,12 @@ public class UserService {
         }
 
         user.setFullName(request.getFullName());
-        user.setPassword(encodePassword(request.getPassword()));
+
+        // Nếu Admin có cập nhật mật khẩu thì mới băm lại
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
         user.setEmail(request.getEmail());
         user.setNumberPhone(request.getNumberPhone());
         if (request.getAvatarUrl() != null && !request.getAvatarUrl().isBlank()) {
@@ -320,10 +335,10 @@ public class UserService {
             user.setAvatarUrl(request.getAvatarUrl());
         }
 
-        // Nếu người dùng có nhập mật khẩu mới thì mới tiến hành đổi
+        // Nếu người dùng có nhập mật khẩu mới thì mới tiến hành đổi và băm lại
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
             log.info("User [{}] đã tiến hành thay đổi cả mật khẩu", userName);
-            user.setPassword(encodePassword(request.getPassword()));
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         log.info("Cập nhật thông tin cá nhân thành công cho User [{}]", userName);
@@ -353,24 +368,6 @@ public class UserService {
             throw new UserException(ErrorCode.USER_NOT_FOUND);
         }
         return user;
-    }
-
-    // MÃ HÓA VÀ GIẢI MÃ PASSWORD
-
-    private static String encodePassword(String password) {
-        StringBuilder encoded = new StringBuilder();
-        for (char c : password.toCharArray()) {
-            encoded.append((char) (c + 5));
-        }
-        return encoded.toString();
-    }
-
-    public static String decode(String encodedPassword) {
-        StringBuilder decoded = new StringBuilder();
-        for (char c : encodedPassword.toCharArray()) {
-            decoded.append((char) (c - 5));
-        }
-        return decoded.toString();
     }
 
     // Hàm sinh số tài khoản ngẫu nhiên 10 chữ số (Ví dụ: 1045628193)
@@ -473,6 +470,83 @@ public class UserService {
         return user.getAvatarUrl();
     }
 
+    // Tính năng Rating & Review Seller
+    public String addSellerReview(ReviewRequest request) {
+        log.info("SERVICE: Bắt đầu xử lý luồng User [{}] đánh giá {} sao cho Seller [{}]",
+                request.getReviewerUsername(), request.getStar(), request.getSellerUsername());
+
+        User reviewer = userRepository.findByUserName(request.getReviewerUsername());
+        User targetUser = userRepository.findByUserName(request.getSellerUsername());
+
+        if (reviewer == null || targetUser == null || !(targetUser instanceof Seller)) {
+            log.error("Lỗi Đánh giá: Không tìm thấy User hoặc người bị đánh giá [{}] không phải là Seller", request.getSellerUsername());
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
+        Seller seller = (Seller) targetUser;
+
+        // Chống spam
+        if (reviewRepository.existsBySellerAndReviewer(seller, reviewer)) {
+            log.warn("Cảnh báo Spam: User [{}] cố tình đánh giá Seller [{}] nhiều lần!", reviewer.getUserName(), seller.getUserName());
+            throw new ReviewException(ErrorCode.REVIEW_EXISTED);
+        }
+        if (request.getStar() < 0 || request.getStar() > 5) {
+            log.warn("Lỗi dữ liệu: Số sao ({}) không hợp lệ!", request.getStar());
+            throw new ReviewException(ErrorCode.RATING_INVALID);
+        }
+
+        // Lưu Đánh giá
+        log.debug("Thông tin hợp lệ, tiến hành lưu bình luận vào CSDL...");
+        SellerReview review = new SellerReview();
+        review.setReviewer(reviewer);
+        review.setSeller(seller);
+        review.setStar(request.getStar());
+        review.setComment(request.getComment());
+        reviewRepository.save(review);
+
+        // Tính lại điểm trung bình cho Seller
+        updateSellerAverageRating(seller);
+
+        log.info("Lưu đánh giá thành công cho Seller [{}]", seller.getUserName());
+        return "Đánh giá người bán thành công!";
+    }
+
+    private void updateSellerAverageRating(Seller seller) {
+        log.debug("Đang tính toán lại điểm trung bình Rating cho Seller [{}]...", seller.getUserName());
+
+        // Lấy full để tính trung bình
+        List<SellerReview> allReviews = reviewRepository.findBySellerOrderByCreatedAtDesc(seller, org.springframework.data.domain.PageRequest.of(0, 10000));
+        if (allReviews.isEmpty()) return;
+
+        double totalStars = 0;
+        for (SellerReview r : allReviews) {
+            totalStars += r.getStar();
+        }
+        double avg = totalStars / allReviews.size();
+        double finalRating = (double) Math.round(avg * 10) / 10;
+
+        seller.setRating(finalRating);
+        userRepository.save(seller);
+
+        log.info("Đã cập nhật Rating mới cho Seller [{}]: {}/5.0 sao (Dựa trên {} đánh giá)",
+                seller.getUserName(), finalRating, allReviews.size());
+    }
+
+    // Tính năng LOAD MORE (Cắt trang)
+    public List<SellerReview> getSellerReviews(String sellerUsername, int page, int size) {
+        log.info("SERVICE: Truy xuất danh sách bình luận của Seller [{}] - Trang: {}, Số lượng/Trang: {}", sellerUsername, page, size);
+
+        User targetUser = userRepository.findByUserName(sellerUsername);
+        if (targetUser == null || !(targetUser instanceof Seller)) {
+            log.error("Lỗi Lấy Đánh giá: Không tìm thấy Seller [{}]", sellerUsername);
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // Gọi database cắt đúng [size] dòng ở trang số [page]
+        List<SellerReview> reviews = reviewRepository.findBySellerOrderByCreatedAtDesc((Seller) targetUser, org.springframework.data.domain.PageRequest.of(page, size));
+
+        log.debug("Lấy thành công {} bình luận của Seller [{}]", reviews.size(), sellerUsername);
+        return reviews;
+    }
 }
 
 /*

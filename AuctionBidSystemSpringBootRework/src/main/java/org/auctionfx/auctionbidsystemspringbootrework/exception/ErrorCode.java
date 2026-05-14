@@ -44,6 +44,7 @@ public enum ErrorCode {
     AUCTION_NOT_RUNNING(7002, "Auction not in running status"),
     AUCTION_BIDDER_INVALID(7003, "Bidder can not bid own product"),
     BARCHART_CONNECT_FAILURE(7004, "Failed to extract chart data"),
+    BID_AMOUNT_INVALID(7005, "Money must be higher than now"),
     // ===========================================================================
     // ITEM CREATE EXCEPTION
     SELLER_INVALID(8001, "User is not seller, can not create item"),
@@ -56,11 +57,14 @@ public enum ErrorCode {
     NOTIFICATION_ACCEPT_PAYMENT_INVALID(9003, "This notification not required to Accept payment"),
     NOTIFICATION_DECLINE_PAYMENT_INVALID(9004, "This notification not required to Decline payment"),
     // ===========================================================================
+    // REVIEW EXCEPTION
+    REVIEW_EXISTED(10001, "User has been reviewed seller before"),
+    RATING_INVALID(10002, "Invalid star, star must be between 0 and 5"),
+    // ===========================================================================
     // RUNTIME EXCEPTION
     RUNTIME_EXCEPTION(89999, "Runtime exception"),
     // ===========================================================================
-    UNCATEGORIZED_EXCEPTION(99999, "Something went wrong!"),
-    ;
+    UNCATEGORIZED_EXCEPTION(99999, "Something went wrong!");
 
     ErrorCode(int code, String message) {
         this.code = code;
