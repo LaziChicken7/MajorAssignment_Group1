@@ -360,4 +360,24 @@ public class ChatController {
 
         return box;
     }
+
+    // ========================================================
+    // XỬ LÝ NÚT "DANH SÁCH KẾT BẠN" -> CHUYỂN SANG TRANG FRIEND LIST
+    // ========================================================
+    @FXML
+    private void showAllFriends(javafx.event.ActionEvent event) {
+        try {
+            // Chuyển sang giao diện FriendList
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/auction/view/chat/FriendList.fxml"));
+            javafx.scene.Node view = loader.load();
+            javafx.scene.Node source = (javafx.scene.Node) event.getSource();
+            javafx.scene.layout.Pane contentArea = (javafx.scene.layout.Pane) source.getScene().lookup("#contentArea");
+
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(view);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -1,6 +1,7 @@
 module com.auction {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.graphics;
 
     // Thư viện gọi API và ép kiểu JSON
     requires java.net.http;

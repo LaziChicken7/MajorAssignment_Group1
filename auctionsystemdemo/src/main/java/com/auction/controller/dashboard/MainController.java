@@ -23,6 +23,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Circle;
+import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -74,6 +77,11 @@ public class MainController {
     @FXML private Button btnNavChat;
 
     @FXML private TextField txtSearch;
+
+    @FXML private StackPane rootPane; // Giao diện gốc bọc toàn bộ App
+    @FXML private Rectangle switchBackground; // Nền cần gạt
+    @FXML private Circle switchKnob; // Cục tròn cần gạt
+    private boolean isDarkMode = false; // Trạng thái hiện tại
 
     @FXML
     public void initialize() {
@@ -359,5 +367,33 @@ public class MainController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // ==========================================
+    // XỬ LÝ SỰ KIỆN GẠT DARK MODE / LIGHT MODE
+    // ==========================================
+    @FXML
+    public void handleThemeToggle() {
+        isDarkMode = !isDarkMode;
+
+        // Tạo hiệu ứng trượt mượt mà (0.25 giây)
+        TranslateTransition transition = new TranslateTransition(Duration.millis(250), switchKnob);
+
+        if (isDarkMode) {
+            // Chuyển sang Dark Mode
+            transition.setToX(10); // Cục tròn trượt sang phải
+            switchBackground.setFill(Color.web("#2c3e50")); // Nền gạt đổi màu tối
+
+            // Gắn class css "dark-theme" vào root để đổi màu toàn bộ app
+            rootPane.getStyleClass().add("dark-theme");
+        } else {
+            // Chuyển về Light Mode
+            transition.setToX(-10); // Cục tròn trượt về trái
+            switchBackground.setFill(Color.web("#bdc3c7")); // Nền gạt đổi về xám
+
+            // Gỡ class "dark-theme"
+            rootPane.getStyleClass().remove("dark-theme");
+        }
+        transition.play();
     }
 }

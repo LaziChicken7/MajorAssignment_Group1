@@ -3,8 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.Circle?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.dashboard.MainController" stylesheets="@../style.css" prefWidth="1200" prefHeight="750" styleClass="root-pane">
+<?import javafx.scene.shape.SVGPath?>
+<StackPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.dashboard.MainController" stylesheets="@../style.css" prefWidth="1200" prefHeight="750" styleClass="root-pane">
 
     <BorderPane>
         <!-- SIDEBAR THU GỌN -->
@@ -21,7 +24,7 @@
                     <Button fx:id="btnIconAuction" text="⚖" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showAuctionList"/>
                     <Button fx:id="btnIconAdd" text="➕" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#handleShowMyProducts"/>
 
-                    <!-- BỔ SUNG NÚT CHAT VÀO ĐÂY -->
+                    <!-- NÚT CHAT VÀ BẠN BÈ -->
                     <Button fx:id="btnIconChat" text="💬" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showChat"/>
                 </VBox>
 
@@ -34,9 +37,36 @@
 
         <center>
             <VBox>
+                <!-- HEADER CHÍNH -->
                 <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-header">
                     <TextField fx:id="txtSearch" promptText="🔍 Tìm kiếm sản phẩm, người dùng..." styleClass="modern-search-bar" prefWidth="500" onAction="#handleSearch"/>
+
                     <Region HBox.hgrow="ALWAYS" />
+
+                    <!-- ========================================== -->
+                    <!-- CỤM CẦN GẠT SÁNG / TỐI (DARK MODE SWITCH) -->
+                    <!-- ========================================== -->
+                    <HBox alignment="CENTER" spacing="10" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 6 15; -fx-background-radius: 20;">
+
+                        <!-- Icon Mặt Trời (Vector vẽ bằng nét Line) -->
+                        <SVGPath content="M 12 2 V 4 M 12 20 V 22 M 4 12 H 2 M 22 12 H 20 M 4.93 4.93 L 6.34 6.34 M 19.07 19.07 L 17.66 17.66 M 4.93 19.07 L 6.34 17.66 M 19.07 4.93 L 17.66 6.34 M 12 7 A 5 5 0 1 0 12 17 A 5 5 0 1 0 12 7 Z"
+                                 stroke="white" strokeWidth="2" strokeLineCap="ROUND" fill="TRANSPARENT" scaleX="0.65" scaleY="0.65"/>
+
+                        <!-- Cần gạt -->
+                        <StackPane onMouseClicked="#handleThemeToggle" style="-fx-cursor: hand;">
+                            <Rectangle fx:id="switchBackground" width="42" height="22" arcWidth="22" arcHeight="22" fill="#bdc3c7"/>
+                            <Circle fx:id="switchKnob" radius="9" fill="white" translateX="-10"/>
+                        </StackPane>
+
+                        <!-- Icon Mặt Trăng (Vector hình trăng khuyết) -->
+                        <SVGPath content="M 21 12.79 A 9 9 0 1 1 11.21 3 A 7 7 0 0 0 21 12.79 Z"
+                                 fill="white" scaleX="0.65" scaleY="0.65"/>
+
+                    </HBox>
+
+                    <!-- ========================================== -->
+                    <!-- ĐỒNG HỒ -->
+                    <!-- ========================================== -->
                     <VBox alignment="CENTER_RIGHT" spacing="-2.0">
                         <children>
                             <Label fx:id="lblTime" text="00:00:00" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" />
@@ -44,6 +74,7 @@
                         </children>
                     </VBox>
                 </HBox>
+
                 <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS">
                     <padding><Insets top="20" right="30" bottom="20" left="30"/></padding>
                 </StackPane>
@@ -66,8 +97,6 @@
                 <Button fx:id="btnNavWallet" text="💰   Ví tiền" styleClass="nav-btn" prefWidth="250" onAction="#showWallet"/>
                 <Button fx:id="btnNavAuction" text="⚖   Đấu giá" styleClass="nav-btn" prefWidth="250" onAction="#showAuctionList"/>
                 <Button fx:id="btnNavAdd" text="➕   Thêm sản phẩm" styleClass="nav-btn" prefWidth="250" onAction="#handleShowMyProducts"/>
-
-                <!-- BỔ SUNG NÚT CHAT VÀO ĐÂY -->
                 <Button fx:id="btnNavChat" text="💬   Nhắn tin &amp; Bạn bè" styleClass="nav-btn" prefWidth="250" onAction="#showChat"/>
             </VBox>
 

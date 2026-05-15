@@ -927,3 +927,144 @@
 .modern-pagination:focused {
     -fx-background-color: transparent;
 }
+
+/* =========================================
+   24. CHẾ ĐỘ TỐI (DARK MODE) - BẢN CAO CẤP
+   ========================================= */
+
+/* 1. Nền tổng thể của toàn bộ App */
+.dark-theme.root-pane,
+.dark-theme .root-container {
+    -fx-background-color: #121212; /* Đen nhám chuẩn Material Design */
+}
+
+/* 2. ÉP SIDEBAR VÀ HEADER CHUYỂN SANG MÀU ĐEN (Cực kỳ quan trọng để trông liền mạch) */
+.dark-theme .sidebar,
+.dark-theme .sidebar-expanded,
+.dark-theme .top-header {
+    -fx-background-color: #18181A; /* Đen chì, tối hơn nền một chút */
+    -fx-border-color: transparent transparent #27272A transparent; /* Đường kẻ mờ viền dưới header */
+    -fx-border-width: 1px;
+}
+
+/* 3. Các thẻ Card (Sản phẩm nổi bật, Thông báo, Khung Chat...) */
+.dark-theme .card,
+.dark-theme .modern-table .table-row-cell,
+.dark-theme .modern-table .column-header-background,
+.dark-theme .modern-input,
+.dark-theme .modern-text-area {
+    -fx-background-color: #1E1E1E; /* Xám than, nổi lên trên nền đen */
+    -fx-border-color: #2A2A2A; /* Viền mỏng tinh tế */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 15, 0, 0, 8); /* Đổ bóng đậm hơn */
+}
+
+/* Đổi màu khi Hover trong bảng */
+.dark-theme .modern-table .table-row-cell:hover {
+    -fx-background-color: #2C2C2E;
+}
+
+/* 4. Fix lỗi nền trắng của ComboBox (Dropdown) */
+.dark-theme .modern-combo-box,
+.dark-theme .combo-box-popup .list-view,
+.dark-theme .combo-box-popup .list-cell {
+    -fx-background-color: #1E1E1E;
+    -fx-text-fill: #E0E0E0;
+}
+.dark-theme .combo-box-popup .list-cell:hover {
+    -fx-background-color: #2C2C2E;
+}
+
+/* 5. Màu chữ (Text) */
+.dark-theme .label,
+.dark-theme .modern-table .column-header .label,
+.dark-theme .table-cell,
+.dark-theme .back-title,
+.dark-theme .modern-input,
+.dark-theme .modern-text-area {
+    -fx-text-fill: #E4E4E7; /* Trắng xám không gây mỏi mắt */
+}
+
+/* Làm mờ các text mô tả phụ */
+.dark-theme .label[style*="-fx-text-fill: #7f8c8d;"],
+.dark-theme .label[style*="-fx-text-fill: #888;"] {
+    -fx-text-fill: #A1A1AA !important;
+}
+
+/* 6. Thanh tìm kiếm trên Header */
+.dark-theme .modern-search-bar {
+    -fx-background-color: #27272A;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #A1A1AA;
+}
+.dark-theme .modern-search-bar:focused {
+    -fx-background-color: #1E1E1E;
+    -fx-border-color: #3B82F6; /* Đổi viền xanh nhạt chuẩn Dark mode */
+}
+
+/* 7. Đổi màu Vector (Mũi tên, Icon) */
+.dark-theme .back-icon {
+    -fx-stroke: #E4E4E7;
+}
+.dark-theme .back-btn-container:hover,
+.dark-theme .title-container:hover {
+    -fx-background-color: #27272A; /* Nền xám mờ khi rê chuột vào nút quay lại */
+}
+
+/* 8. Fix màu nền các VBox xen kẽ (Ví dụ thanh tiến độ, dòng chẵn lẻ) */
+.dark-theme .table-row-cell:odd {
+    -fx-background-color: #18181A;
+}
+
+/* ========================================================
+   25. CẬP NHẬT MÀU CHỮ & FIX LỖI GÓC VUÔNG ĐEN (DASHBOARD)
+   ======================================================== */
+
+/* Màu mặc định (Chế độ Sáng) */
+.section-title {
+    -fx-text-fill: #333333;
+}
+.muted-text {
+    -fx-text-fill: #888888;
+    -fx-font-style: italic;
+}
+
+/* Đổi màu khi bật chế độ Tối (Đảm bảo sáng rực, dễ đọc) */
+.dark-theme .section-title {
+    -fx-text-fill: #FFFFFF; /* Trắng tinh */
+}
+.dark-theme .muted-text {
+    -fx-text-fill: #A1A1AA; /* Xám nhạt */
+}
+
+/* ========================================================
+   FIX LỖI GÓC VUÔNG ĐEN (DOG-EAR BORDER BUG)
+   ======================================================== */
+/* Sửa lại Card trong Darkmode: Bắt buộc background-radius phải bằng border-radius */
+.dark-theme .card,
+.dark-theme .modern-table .table-row-cell,
+.dark-theme .modern-input,
+.dark-theme .modern-text-area {
+    -fx-background-color: #1E1E1E;
+    -fx-border-color: #2A2A2A;
+    -fx-border-width: 1px;
+    -fx-background-radius: 15; /* SỬA LỖI Ở ĐÂY */
+    -fx-border-radius: 15;     /* SỬA LỖI Ở ĐÂY */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 8);
+}
+
+/* Fix các dòng dữ liệu do Java code sinh ra (Thống kê, Thông báo, Sản phẩm) */
+.dark-theme *[style*="-fx-background-color: #F8F9FB;"] {
+    -fx-background-color: #18181A !important;
+    -fx-border-color: transparent !important; /* XÓA BỎ VIỀN ĐỂ KHÔNG BỊ LÒI GÓC */
+    -fx-border-width: 0px !important;
+    -fx-background-radius: 15 !important;
+}
+
+/* Ép màu các Text động sinh ra từ file Java */
+.dark-theme .label[style*="-fx-text-fill: #333;"],
+.dark-theme .label[style*="-fx-text-fill: #2c3e50;"] {
+    -fx-text-fill: #E4E4E7 !important;
+}
+.dark-theme .label[style*="-fx-text-fill: #666;"] {
+    -fx-text-fill: #A1A1AA !important;
+}

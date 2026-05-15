@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+
+<VBox spacing="20" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.chat.FriendListController">
+
+    <!-- HEADER: ĐỒNG BỘ 100% VỚI CÁC TRANG KHÁC (CÓ HOVER ĐỔI MÀU) -->
+    <HBox alignment="CENTER_LEFT">
+        <!-- Đã đổi sang styleClass="back-btn-container" để ăn CSS hover -->
+        <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#goBack">
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label styleClass="back-title" text="Danh sách bạn bè" />
+        </HBox>
+    </HBox>
+
+    <!-- CONTENT: GỘP CHUNG VÀO 1 KHỐI (CARD) DUY NHẤT -->
+    <ScrollPane fitToWidth="true" styleClass="edge-to-edge" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox style="-fx-padding: 0 5 30 5;">
+
+                <!-- THẺ CARD MÀU TRẮNG CHỨA CẢ 2 DANH SÁCH -->
+                <VBox styleClass="card" style="-fx-padding: 0;">
+
+                    <!-- PHẦN 1: LỜI MỜI KẾT BẠN (CHỜ XÁC NHẬN) -->
+                    <VBox spacing="15" style="-fx-padding: 20;">
+                        <Label text="Lời mời kết bạn (Chờ xác nhận)" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+                        <VBox fx:id="vboxPending" spacing="12" />
+                    </VBox>
+
+                    <!-- VẠCH MỜ NGĂN CÁCH (Tinh tế, mờ mờ) -->
+                    <Separator style="-fx-opacity: 0.2;" />
+
+                    <!-- PHẦN 2: BẠN BÈ ĐÃ KẾT BẠN -->
+                    <VBox spacing="15" style="-fx-padding: 20;" VBox.vgrow="ALWAYS">
+                        <Label text="Bạn bè của tôi" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <VBox fx:id="vboxFriends" spacing="12" />
+                    </VBox>
+
+                </VBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+</VBox>
