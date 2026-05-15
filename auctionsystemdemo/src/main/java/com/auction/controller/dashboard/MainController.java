@@ -15,6 +15,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -69,12 +70,17 @@ public class MainController {
     private List<Button> allMenuButtons;
     private Timeline banCheckerTimeline;
 
+    @FXML private Button btnIconChat;
+    @FXML private Button btnNavChat;
+
+    @FXML private TextField txtSearch;
+
     @FXML
     public void initialize() {
-        // Gom tất cả nút vào 1 danh sách để dễ dàng reset màu sắc
+        // Gom tất cả nút vào 1 danh sách (Nhớ bổ sung 2 nút Chat vào đây)
         allMenuButtons = Arrays.asList(
-                btnIconHome, btnIconWallet, btnIconAuction, btnIconAdd, btnIconNotif, btnIconProfile,
-                btnNavHome, btnNavWallet, btnNavAuction, btnNavAdd, btnNavNotif, btnNavProfile
+                btnIconHome, btnIconWallet, btnIconAuction, btnIconAdd, btnIconNotif, btnIconProfile, btnIconChat,
+                btnNavHome, btnNavWallet, btnNavAuction, btnNavAdd, btnNavNotif, btnNavProfile, btnNavChat
         );
 
         loadUserInfo();
@@ -208,6 +214,14 @@ public class MainController {
         closeSidebar();
     }
 
+    // THÊM HÀM CHUYỂN TRANG NÀY VÀO KHU VỰC CHUYỂN TRANG
+    @FXML public void showChat(ActionEvent event) {
+        // Tí nữa chúng ta sẽ tạo file Chat.fxml sau
+        loadView("/com/auction/view/chat/Chat.fxml");
+        setActiveButton(btnIconChat, btnNavChat);
+        closeSidebar();
+    }
+
     // ====== HÀM XỬ LÝ HIỆU ỨNG SIDEBAR ======
 
     @FXML
@@ -318,6 +332,32 @@ public class MainController {
             stage.centerOnScreen();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    // BẮT SỰ KIỆN KHI NGƯỜI DÙNG ẤN ENTER TRONG Ô TÌM KIẾM
+    @FXML
+    public void handleSearch() {
+        String keyword = txtSearch.getText().trim();
+        if (keyword.isEmpty()) return; // Không nhập gì thì không tìm
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/search/Search.fxml"));
+            Node view = loader.load();
+
+            // Ép kiểu controller và truyền từ khóa tìm kiếm sang
+            com.auction.controller.search.SearchController controller = loader.getController();
+            controller.executeSearch(keyword);
+
+            // Bỏ active tất cả các nút ở Sidebar vì ta đang ở trang Search
+            for (Button btn : allMenuButtons) {
+                if (btn != null) btn.getStyleClass().remove("active-menu-btn");
+            }
+
+            contentArea.getChildren().setAll(view);
+            closeSidebar();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

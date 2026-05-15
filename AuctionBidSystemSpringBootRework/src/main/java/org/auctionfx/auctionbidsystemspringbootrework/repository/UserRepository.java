@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     // Thủ kho kiểm tra xem các thông tin này đã tồn tại trong Database chưa
@@ -32,4 +34,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Modifying
     @Query(value = "INSERT INTO sellers (id, rating) VALUES (:userId, 0.0)", nativeQuery = true)
     void insertIntoSellersTable(@Param("userId") String userId);
+
+    // 4. Tìm người dùng theo Tên đăng nhập hoặc Họ tên
+    @Query("SELECT u FROM User u WHERE LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<User> searchUsers(@org.springframework.data.repository.query.Param("keyword") String keyword);
 }

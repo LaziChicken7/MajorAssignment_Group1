@@ -26,14 +26,14 @@ public class NotificationItemController {
         String time = item.createdAt != null ? item.createdAt.replace("T", " ") : "";
         lblTime.setText(time);
 
-        // HIỂN THỊ NÚT BẤM DỰA THEO LOẠI THÔNG BÁO
-        if ("PAYMENT_VERIFICATION".equals(item.type)) {
-            // Yêu cầu xác thực -> Bật Xanh/Đỏ, Tắt Xóa
+        // =======================================================
+        // BỔ SUNG: NẾU LÀ YÊU CẦU KẾT BẠN THÌ CŨNG HIỆN 2 NÚT XANH ĐỎ
+        // =======================================================
+        if ("PAYMENT_VERIFICATION".equals(item.type) || "FRIEND_REQUEST".equals(item.type)) {
             btnAccept.setVisible(true); btnAccept.setManaged(true);
             btnDecline.setVisible(true); btnDecline.setManaged(true);
             btnDelete.setVisible(false); btnDelete.setManaged(false);
         } else {
-            // Thành công/Thất bại -> Chỉ bật Xóa
             btnAccept.setVisible(false); btnAccept.setManaged(false);
             btnDecline.setVisible(false); btnDecline.setManaged(false);
             btnDelete.setVisible(true); btnDelete.setManaged(true);
@@ -42,14 +42,16 @@ public class NotificationItemController {
 
     @FXML
     private void handleAccept() {
+        String msg = "FRIEND_REQUEST".equals(currentItem.type) ? "Đã chấp nhận kết bạn!" : "Xác nhận thanh toán thành công!";
         ApiService.putAsync("/notifications/" + currentItem.notificationId + "/accept", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), "Xác nhận thanh toán thành công!"));
+                .thenAccept(res -> handleResponse(res.statusCode(), msg));
     }
 
     @FXML
     private void handleDecline() {
+        String msg = "FRIEND_REQUEST".equals(currentItem.type) ? "Đã từ chối kết bạn!" : "Đã từ chối thanh toán!";
         ApiService.putAsync("/notifications/" + currentItem.notificationId + "/decline", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), "Đã từ chối thanh toán!"));
+                .thenAccept(res -> handleResponse(res.statusCode(), msg));
     }
 
     @FXML

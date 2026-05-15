@@ -1,6 +1,8 @@
 -- ==============================================================================
 -- 1. XÓA BẢNG CŨ (Theo thứ tự ngược: Bảng con xóa trước, bảng cha xóa sau)
 -- ==============================================================================
+DROP TABLE IF EXISTS chat_messages; -- Bổ sung: Bảng tin nhắn
+DROP TABLE IF EXISTS connections;   -- Bổ sung: Bảng kết bạn
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS auto_bid_configs;
 DROP TABLE IF EXISTS bid_transactions;
@@ -10,7 +12,7 @@ DROP TABLE IF EXISTS arts;
 DROP TABLE IF EXISTS electronics;
 DROP TABLE IF EXISTS vehicles;
 DROP TABLE IF EXISTS items;
-DROP TABLE IF EXISTS seller_reviews; -- BỔ SUNG: Bảng Đánh giá người bán
+DROP TABLE IF EXISTS seller_reviews;
 DROP TABLE IF EXISTS sellers;
 DROP TABLE IF EXISTS bidders;
 DROP TABLE IF EXISTS admins;
@@ -167,7 +169,7 @@ CREATE TABLE notifications (
                                CONSTRAINT fk_notif_auction FOREIGN KEY (auction_id) REFERENCES auctions(id) ON DELETE SET NULL
 );
 
--- BỔ SUNG: Bảng Đánh giá người bán (Seller Reviews)
+-- Bảng Đánh giá người bán (Seller Reviews)
 CREATE TABLE seller_reviews (
                                 id VARCHAR(36) PRIMARY KEY,
                                 seller_id VARCHAR(36) NOT NULL,
@@ -177,4 +179,31 @@ CREATE TABLE seller_reviews (
                                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                 CONSTRAINT fk_review_seller FOREIGN KEY (seller_id) REFERENCES sellers(id) ON DELETE CASCADE,
                                 CONSTRAINT fk_review_reviewer FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ==============================================================================
+-- 6. TẠO NHÁNH KẾT BẠN VÀ TIN NHẮN (CHAT & CONNECTIONS)
+-- ==============================================================================
+
+-- Bảng Kết bạn / Liên hệ
+CREATE TABLE connections (
+                             id VARCHAR(36) PRIMARY KEY,
+                             sender_id VARCHAR(36) NOT NULL,
+                             receiver_id VARCHAR(36) NOT NULL,
+                             status VARCHAR(50) DEFAULT 'PENDING', -- PENDING, ACCEPTED, BLOCKED
+                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                             CONSTRAINT fk_conn_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+                             CONSTRAINT fk_conn_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Bảng Lịch sử Tin nhắn
+CREATE TABLE chat_messages (
+                               id VARCHAR(36) PRIMARY KEY,
+                               sender_id VARCHAR(36) NOT NULL,
+                               receiver_id VARCHAR(36) NOT NULL,
+                               content TEXT NOT NULL,
+                               is_read BOOLEAN DEFAULT FALSE,
+                               send_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+                               CONSTRAINT fk_chat_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+                               CONSTRAINT fk_chat_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
 );

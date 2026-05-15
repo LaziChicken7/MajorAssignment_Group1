@@ -7,6 +7,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.dto.request.PlaceBidReques
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.BidTransaction;
 import org.auctionfx.auctionbidsystemspringbootrework.service.AuctionService;
+import org.auctionfx.auctionbidsystemspringbootrework.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,9 @@ import java.util.List;
 public class AuctionController {
     @Autowired
     private AuctionService auctionService;
+
+    @Autowired
+    private SearchService searchService;
 
     @PostMapping("/{auctionId}/place-bid")
     public ApiResponse<String> placeBid(@PathVariable String auctionId, @RequestBody PlaceBidRequest request) {
@@ -107,4 +111,11 @@ public class AuctionController {
         return apiResponse;
     }
 
+    @GetMapping("/search")
+    public ApiResponse<List<Auction>> searchAuctions(@RequestParam String keyword) {
+        log.info("API CALL: Khách yêu cầu tìm kiếm phiên đấu giá bằng từ khóa [{}]", keyword);
+        ApiResponse<List<Auction>> response = new ApiResponse<>();
+        response.setResult(searchService.searchAuctions(keyword));
+        return response;
+    }
 }

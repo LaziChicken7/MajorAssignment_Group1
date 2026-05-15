@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.entity.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.base.BaseEntity;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
@@ -9,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Entity
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
 
     // KHAI BÁO THUỘC TÍNH

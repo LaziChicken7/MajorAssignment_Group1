@@ -95,27 +95,24 @@ public class NotificationController {
     private void openPopup(NotificationModel item) {
         this.selectedNotification = item;
 
-        // Cập nhật dữ liệu lên Popup
         lblPopupTitle.setText(item.title);
         lblPopupDesc.setText(item.description);
         lblPopupTime.setText(item.createdAt != null ? item.createdAt.replace("T", " ") : "");
-        // Ẩn/Hiện nút bấm theo phân loại
-        if ("PAYMENT_VERIFICATION".equals(item.type)) {
-            // Yêu cầu xác thực -> Có Xác nhận, Từ chối, Đóng (Ẩn Xóa)
+
+        // =======================================================
+        // BỔ SUNG FRIEND_REQUEST
+        // =======================================================
+        if ("PAYMENT_VERIFICATION".equals(item.type) || "FRIEND_REQUEST".equals(item.type)) {
             btnPopupAccept.setVisible(true); btnPopupAccept.setManaged(true);
             btnPopupDecline.setVisible(true); btnPopupDecline.setManaged(true);
             btnPopupDelete.setVisible(false); btnPopupDelete.setManaged(false);
-
             btnPopupClose.setVisible(true); btnPopupClose.setManaged(true);
         } else {
-            // Thông báo thường -> Có Xóa, Đóng (Ẩn Xác nhận, Từ chối)
             btnPopupAccept.setVisible(false); btnPopupAccept.setManaged(false);
             btnPopupDecline.setVisible(false); btnPopupDecline.setManaged(false);
             btnPopupDelete.setVisible(true); btnPopupDelete.setManaged(true);
-
             btnPopupClose.setVisible(true); btnPopupClose.setManaged(true);
         }
-
         popupOverlay.setVisible(true);
     }
 
@@ -129,16 +126,20 @@ public class NotificationController {
     @FXML
     private void handlePopupAccept() {
         if (selectedNotification == null) return;
+        String msg = "FRIEND_REQUEST".equals(selectedNotification.type) ? "Đã chấp nhận kết bạn!" : "Xác nhận thanh toán thành công!";
+
         ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/accept", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), "Xác nhận thanh toán thành công!"));
+                .thenAccept(res -> handleResponse(res.statusCode(), msg));
     }
 
     // Xử lý khi ấn nút Từ chối trên Popup
     @FXML
     private void handlePopupDecline() {
         if (selectedNotification == null) return;
+        String msg = "FRIEND_REQUEST".equals(selectedNotification.type) ? "Đã từ chối kết bạn!" : "Đã từ chối thanh toán!";
+
         ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/decline", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), "Đã từ chối thanh toán!"));
+                .thenAccept(res -> handleResponse(res.statusCode(), msg));
     }
 
     // Xử lý khi ấn nút Xóa trên Popup

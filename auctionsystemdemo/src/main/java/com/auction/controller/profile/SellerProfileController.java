@@ -37,6 +37,7 @@ public class SellerProfileController {
     @FXML private TextArea txtComment;
     @FXML private VBox vboxReviews;
     @FXML private Button btnLoadMore;
+    @FXML private Button btnAddFriend;
 
     private AuctionModel.SellerModel seller;
     private AuctionModel previousAuctionItem; // Lưu lại để quay về trang cũ
@@ -62,6 +63,12 @@ public class SellerProfileController {
             Rectangle clip = new Rectangle(100, 100);
             clip.setArcWidth(100); clip.setArcHeight(100);
             imgAvatar.setClip(clip);
+        }
+
+        // Nếu đang xem profile của chính mình thì ẨN nút Kết bạn đi
+        if (SessionManager.userName.equals(seller.userName)) {
+            btnAddFriend.setVisible(false);
+            btnAddFriend.setManaged(false);
         }
 
         // Tải 5 bình luận đầu tiên
@@ -199,5 +206,30 @@ public class SellerProfileController {
         star.setStrokeWidth(1.5);
         star.setStrokeLineJoin(StrokeLineJoin.ROUND); // ĐÂY LÀ PHÉP THUẬT: Tự động bo tròn 5 góc nhọn của ngôi sao
         return star;
+    }
+
+    // THÊM HÀM NÀY VÀO CUỐI FILE ĐỂ GỌI API KẾT BẠN
+    @FXML
+    private void handleSendFriendRequest() {
+        // Gọi API POST /chat/friend-request?sender=...&receiver=...
+        String url = "/chat/friend-request?sender=" + SessionManager.userName + "&receiver=" + seller.userName;
+
+        ApiService.postAsync(url, null).thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                    new Alert(Alert.AlertType.INFORMATION, "Đã gửi lời mời kết bạn!").show();
+                    btnAddFriend.setText("Đã gửi lời mời ✓");
+                    btnAddFriend.setDisable(true);
+                    btnAddFriend.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 20;");
+                } else {
+                    try {
+                        com.auction.model.ApiResponse err = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
+                        new Alert(Alert.AlertType.ERROR, err.message).show();
+                    } catch (Exception e) {
+                        new Alert(Alert.AlertType.ERROR, "Lỗi khi gửi kết bạn!").show();
+                    }
+                }
+            });
+        });
     }
 }

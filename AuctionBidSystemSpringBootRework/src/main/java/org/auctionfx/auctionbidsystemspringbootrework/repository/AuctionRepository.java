@@ -46,4 +46,8 @@ public interface AuctionRepository extends JpaRepository<Auction, String> {
     // =========================================================
     @EntityGraph(attributePaths = {"bidProduct"})
     List<Auction> findAll();
+
+    // Tìm đấu giá theo tên sản phẩm chứa từ khóa
+    @EntityGraph(attributePaths = {"bidProduct"})
+    List<Auction> findByBidProductNameContainingIgnoreCase(String keyword);
 }

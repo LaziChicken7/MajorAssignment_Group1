@@ -32,6 +32,38 @@
             <artifactId>javafx-swing</artifactId>
             <version>17.0.2</version> <!-- Bạn có thể đổi version khớp với javafx-controls bạn đang dùng -->
         </dependency>
+        <!-- Thư viện Spring WebSocket Client (Để kết nối STOMP) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>6.1.5</version> <!-- Có thể dùng bản 6.x.x tùy bản Spring Boot của bạn -->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>6.1.5</version>
+        </dependency>
+        <!-- Bộ máy chạy WebSocket vật lý cho Java -->
+        <dependency>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-client-api</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.tyrus</groupId>
+            <artifactId>tyrus-client</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.tyrus</groupId>
+            <artifactId>tyrus-container-grizzly-client</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version> <!-- Bạn có thể chỉnh version phù hợp -->
+        </dependency>
     </dependencies>
     
     <build>

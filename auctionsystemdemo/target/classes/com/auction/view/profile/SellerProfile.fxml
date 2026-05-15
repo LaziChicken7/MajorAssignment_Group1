@@ -27,6 +27,9 @@
                         <ImageView fx:id="imgAvatar" fitWidth="100" fitHeight="100" />
                         <Label fx:id="lblName" text="Tên người bán" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
                         <Label fx:id="lblRating" text="⭐ 0.0/5.0" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+
+                        <!-- NÚT KẾT BẠN MỚI THÊM -->
+                        <Button fx:id="btnAddFriend" text="➕ Gửi kết bạn" onAction="#handleSendFriendRequest" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 20; -fx-cursor: hand; -fx-margin-top: 10px;"/>
                     </VBox>
 
                     <!-- FORM VIẾT ĐÁNH GIÁ -->

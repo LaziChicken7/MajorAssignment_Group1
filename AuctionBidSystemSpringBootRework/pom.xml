@@ -82,6 +82,15 @@
             <artifactId>junit-platform-suite</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Thư viện WebSocket: Giúp Spring Boot mở kết nối Real-time -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

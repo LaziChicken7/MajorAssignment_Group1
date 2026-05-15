@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.ApiResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
+import org.auctionfx.auctionbidsystemspringbootrework.service.SearchService;
 import org.auctionfx.auctionbidsystemspringbootrework.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,9 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SearchService searchService;
 
     // Create
     @PostMapping("/register")
@@ -167,6 +171,15 @@ public class UserController {
 
         ApiResponse<List<org.auctionfx.auctionbidsystemspringbootrework.entity.user.SellerReview>> response = new ApiResponse<>();
         response.setResult(userService.getSellerReviews(sellerUsername, page, size));
+        return response;
+    }
+
+    // API: Tìm kiếm người dùng
+    @GetMapping("/search")
+    public ApiResponse<List<User>> searchUsers(@RequestParam String keyword) {
+        log.info("API CALL: Khách yêu cầu tìm kiếm người dùng bằng từ khóa [{}]", keyword);
+        ApiResponse<List<User>> response = new ApiResponse<>();
+        response.setResult(searchService.searchUsers(keyword));
         return response;
     }
 }

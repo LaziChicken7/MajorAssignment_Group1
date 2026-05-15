@@ -108,7 +108,7 @@ public class NotificationServiceTest {
     void acceptPayment_ValidNotif_Success() {
         when(notificationRepository.findById("NOTIF-VERIFY")).thenReturn(Optional.of(verificationNotif));
 
-        String result = notificationService.acceptPayment("NOTIF-VERIFY");
+        String result = notificationService.acceptNotification("NOTIF-VERIFY");
 
         assertEquals("Accept payment successfully!", result);
 
@@ -127,7 +127,7 @@ public class NotificationServiceTest {
     void declinePayment_ValidNotif_Success() {
         when(notificationRepository.findById("NOTIF-VERIFY")).thenReturn(Optional.of(verificationNotif));
 
-        String result = notificationService.declinePayment("NOTIF-VERIFY");
+        String result = notificationService.declineNotification("NOTIF-VERIFY");
 
         assertEquals("Decline payment successfully!", result);
 

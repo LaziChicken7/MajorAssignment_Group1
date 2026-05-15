@@ -37,19 +37,17 @@ public class NotificationController {
 
     // Nút Tích xanh: Chấp nhận thanh toán
     @PutMapping("/{notificationId}/accept")
-    public ApiResponse<String> acceptPayment(@PathVariable String notificationId) {
-        log.info("API Request: Chấp nhận thanh toán cho thông báo ID [{}]", notificationId);
+    public ApiResponse<String> acceptNotification(@PathVariable String notificationId) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(notificationService.acceptPayment(notificationId));
+        apiResponse.setResult(notificationService.acceptNotification(notificationId));
         return apiResponse;
     }
 
     // Nút Chữ X đỏ: Từ chối thanh toán
     @PutMapping("/{notificationId}/decline")
-    public ApiResponse<String> declinePayment(@PathVariable String notificationId) {
-        log.info("API Request: Từ chối thanh toán cho thông báo ID [{}]", notificationId);
+    public ApiResponse<String> declineNotification(@PathVariable String notificationId) {
         ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(notificationService.declinePayment(notificationId));
+        apiResponse.setResult(notificationService.declineNotification(notificationId));
         return apiResponse;
     }
 }

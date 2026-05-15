@@ -7,21 +7,28 @@ module com.auction {
     requires com.google.gson;
     requires javafx.swing;
 
+    // =======================================================
+    // BỔ SUNG: Thư viện WebSocket để chạy tính năng Chat Real-time
+    // =======================================================
+    requires spring.messaging;
+    requires spring.websocket;
+    requires jakarta.websocket.client;
+    requires spring.core;
+
+    requires com.fasterxml.jackson.databind;
+
+
     // Cho phép JavaFX truy cập vào thư mục view và root để load giao diện
     opens com.auction to javafx.fxml, javafx.graphics;
-
-    // (Lưu ý: Nếu thư mục view của bạn cũng không có file .java nào trực tiếp bên trong, bạn cũng phải xóa dòng dưới này đi)
     opens com.auction.view to javafx.fxml;
 
     // CỰC KỲ QUAN TRỌNG 2: Cho phép Gson soi vào các file Model để gán data JSON
     opens com.auction.model to com.google.gson;
     exports com.auction.model; // Export để các class khác có thể dùng
 
-    // Export các package để có thể chạy được
+    // Export các package tiện ích và gốc
     exports com.auction;
     exports com.auction.util;
-
-    // ĐÃ XÓA 2 DÒNG com.auction.controller Ở ĐÂY VÌ NÓ RỖNG
 
     // Khai báo chính xác từng package con có chứa Controller
     exports com.auction.controller.addauctionitem;
@@ -44,4 +51,13 @@ module com.auction {
 
     exports com.auction.controller.dashboard;
     opens com.auction.controller.dashboard to javafx.fxml;
+
+    // =======================================================
+    // BỔ SUNG: Cho phép JavaFX truy cập vào package Chat mới tạo
+    // =======================================================
+    exports com.auction.controller.chat;
+    opens com.auction.controller.chat to javafx.fxml;
+
+    exports com.auction.controller.search;
+    opens com.auction.controller.search to javafx.fxml;
 }

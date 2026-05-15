@@ -2,14 +2,13 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-
 <?import javafx.scene.image.ImageView?>
+
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.dashboard.MainController" stylesheets="@../style.css" prefWidth="1200" prefHeight="750" styleClass="root-pane">
 
     <BorderPane>
         <!-- SIDEBAR THU GỌN -->
         <left>
-            <!-- Tăng prefWidth từ 90 lên 110 -->
             <VBox styleClass="sidebar" prefWidth="110" spacing="15" alignment="TOP_CENTER">
                 <padding><Insets top="20" bottom="20"/></padding>
 
@@ -17,12 +16,13 @@
 
                 <VBox spacing="15" VBox.vgrow="ALWAYS" alignment="TOP_CENTER">
                     <padding><Insets top="20"/></padding>
-                    <!-- Tăng prefWidth và prefHeight từ 55 lên 65 -->
-                    <!-- Thêm -fx-padding: 0; để icon được căn giữa hoàn hảo và không bị ép viền -->
                     <Button fx:id="btnIconHome" text="🏠" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showDashboard"/>
                     <Button fx:id="btnIconWallet" text="💰" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showWallet"/>
                     <Button fx:id="btnIconAuction" text="⚖" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showAuctionList"/>
                     <Button fx:id="btnIconAdd" text="➕" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#handleShowMyProducts"/>
+
+                    <!-- BỔ SUNG NÚT CHAT VÀO ĐÂY -->
+                    <Button fx:id="btnIconChat" text="💬" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showChat"/>
                 </VBox>
 
                 <VBox spacing="15" alignment="BOTTOM_CENTER">
@@ -35,14 +35,12 @@
         <center>
             <VBox>
                 <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-header">
-                    <TextField promptText="🔍 Tìm kiếm" styleClass="search-bar" prefWidth="500" />
+                    <TextField fx:id="txtSearch" promptText="🔍 Tìm kiếm sản phẩm, người dùng..." styleClass="modern-search-bar" prefWidth="500" onAction="#handleSearch"/>
                     <Region HBox.hgrow="ALWAYS" />
-                    <!-- Trong Main.fxml -->
                     <VBox alignment="CENTER_RIGHT" spacing="-2.0">
                         <children>
-                            <Label fx:id="lblTime" text="18:13:39" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" />
-
-                            <Label fx:id="lblDate" text="Thứ Năm, 07/05/2026" style="-fx-text-fill: #e2e8f0; -fx-font-size: 14px;" />
+                            <Label fx:id="lblTime" text="00:00:00" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" />
+                            <Label fx:id="lblDate" text="Đang tải..." style="-fx-text-fill: #e2e8f0; -fx-font-size: 14px;" />
                         </children>
                     </VBox>
                 </HBox>
@@ -64,11 +62,13 @@
             </HBox>
 
             <VBox spacing="10" VBox.vgrow="ALWAYS">
-                <!-- Đã thêm fx:id -->
                 <Button fx:id="btnNavHome" text="🏠   Trang chủ" styleClass="nav-btn" prefWidth="250" onAction="#showDashboard"/>
                 <Button fx:id="btnNavWallet" text="💰   Ví tiền" styleClass="nav-btn" prefWidth="250" onAction="#showWallet"/>
                 <Button fx:id="btnNavAuction" text="⚖   Đấu giá" styleClass="nav-btn" prefWidth="250" onAction="#showAuctionList"/>
                 <Button fx:id="btnNavAdd" text="➕   Thêm sản phẩm" styleClass="nav-btn" prefWidth="250" onAction="#handleShowMyProducts"/>
+
+                <!-- BỔ SUNG NÚT CHAT VÀO ĐÂY -->
+                <Button fx:id="btnNavChat" text="💬   Nhắn tin &amp; Bạn bè" styleClass="nav-btn" prefWidth="250" onAction="#showChat"/>
             </VBox>
 
             <VBox spacing="10" alignment="BOTTOM_LEFT">
