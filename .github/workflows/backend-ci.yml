@@ -27,7 +27,7 @@ jobs:
         run: |
           cd AuctionBidSystemSpringBootRework
           
-          Write-Host "=== DANG BUILD SERVER BENG MAVEN ==="
+          Write-Host "=== DANG BUILD SERVER BANG MAVEN ==="
           mvn clean package -DskipTests
           
           # Bắt lỗi: Nếu lệnh mvn ở trên thất bại, dừng ngay lập tức
@@ -52,18 +52,19 @@ jobs:
           Write-Host "Da tim thay file: $($appFile.FullName)"
           Copy-Item -Path $appFile.FullName -Destination "build_exe\server.jar"
           
-          jpackage --type app-image --dest output --name "Auction Bid Server" --app-version 0.5.0 --input build_exe --main-jar server.jar --win-console
+          # ĐÓNG GÓI BẢN 1.0.0
+          jpackage --type app-image --dest output --name "Auction Bid Server" --app-version 1.0.0 --input build_exe --main-jar server.jar --win-console
           
           $batContent = "@echo off`r`n`"Auction Bid Server.exe`"`r`npause"
           Set-Content -Path "output\Auction Bid Server\Run-Debug.bat" -Value $batContent -Encoding ASCII
           
-          Compress-Archive -Path "output\Auction Bid Server" -DestinationPath "Auction-Bid-Server-0.5.0-Portable.zip"
+          Compress-Archive -Path "output\Auction Bid Server" -DestinationPath "Auction-Bid-Server-1.0.0-Portable.zip"
 
       - name: 4. Build & Package JavaFX (Auction Bid System)
         run: |
           cd auctionsystemdemo 
           
-          Write-Host "=== DANG BUILD CLIENT BENG MAVEN ==="
+          Write-Host "=== DANG BUILD CLIENT BANG MAVEN ==="
           mvn clean package dependency:copy-dependencies -DoutputDirectory=target/libs -DskipTests
           
           # Bắt lỗi: Nếu lệnh mvn ở trên thất bại, dừng ngay lập tức
@@ -90,21 +91,27 @@ jobs:
           
           if (Test-Path "target\libs") { Copy-Item -Path "target\libs" -Destination build_exe -Recurse }
           
-          jpackage --type app-image --dest output --name "Auction Bid System" --app-version 0.5.0 --module-path "build_exe\libs;build_exe\client.jar" --module com.auction/com.auction.App --add-modules jdk.naming.dns,jdk.crypto.ec,jdk.crypto.cryptoki,jdk.charsets,java.net.http --win-console
+          Write-Host "=== TAO JRE TUY CHINH DE TRANH LOI AUTOMATIC MODULE ==="
+          # Tạo JRE bỏ qua thư viện Spring để tránh lỗi jlink
+          jlink --add-modules java.base,java.desktop,java.sql,java.naming,java.management,java.net.http,java.xml,java.prefs,jdk.unsupported,jdk.accessibility,jdk.crypto.ec,jdk.crypto.cryptoki,jdk.charsets,jdk.naming.dns --output custom_jre --no-header-files --no-man-pages
+          
+          Write-Host "=== DONG GOI APP BẢN 1.0.0 BANG JPACKAGE ==="
+          # Trỏ tham số --runtime-image vào JRE vừa tạo, nâng version lên 1.0.0
+          jpackage --type app-image --dest output --name "Auction Bid System" --app-version 1.0.0 --runtime-image custom_jre --module-path "build_exe\libs;build_exe\client.jar" --module com.auction/com.auction.App --win-console
           
           $batContent = "@echo off`r`n`"Auction Bid System.exe`"`r`npause"
           Set-Content -Path "output\Auction Bid System\Run-Debug.bat" -Value $batContent -Encoding ASCII
           
-          Compress-Archive -Path "output\Auction Bid System" -DestinationPath "Auction-Bid-System-0.5.0-Portable.zip"
+          Compress-Archive -Path "output\Auction Bid System" -DestinationPath "Auction-Bid-System-1.0.0-Portable.zip"
 
       - name: 5. Upload Releases
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            AuctionBidSystemSpringBootRework/Auction-Bid-Server-0.5.0-Portable.zip
-            auctionsystemdemo/Auction-Bid-System-0.5.0-Portable.zip
-          tag_name: "v0.5.0.${{ github.run_number }}"
-          name: "Auction Bid System version 2.0.${{ github.run_number }}"
+            AuctionBidSystemSpringBootRework/Auction-Bid-Server-1.0.0-Portable.zip
+            auctionsystemdemo/Auction-Bid-System-1.0.0-Portable.zip
+          tag_name: "v1.0.0.${{ github.run_number }}"
+          name: "Auction Bid System Release v1.0.${{ github.run_number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
