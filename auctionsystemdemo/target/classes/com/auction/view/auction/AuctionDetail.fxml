@@ -123,7 +123,7 @@
                                             </VBox>
                                         </VBox>
 
-                                        <!-- Card 2: Thông tin Người Bán (CHỖ NÀY BỊ THIẾU NÈ) -->
+                                        <!-- Card 2: Thông tin Người Bán -->
                                         <HBox spacing="15" styleClass="card" style="-fx-padding: 15; -fx-alignment: center-left;">
                                             <ImageView fx:id="imgSellerAvatar" fitWidth="45" fitHeight="45" />
                                             <VBox spacing="2" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
@@ -221,14 +221,28 @@
         <VBox fx:id="paneAutoBidConfig" visible="false" alignment="CENTER" style="-fx-background-color: rgba(0,0,0,0.5);">
             <VBox alignment="CENTER" spacing="15" styleClass="card" style="-fx-max-width: 450; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 20, 0, 0, 10);">
                 <Label text="🤖 Cài đặt Bot Đấu Giá" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #8e44ad;"/>
+
+                <!-- BỔ SUNG: KHỐI HIỂN THỊ TRẠNG THÁI VÀ MỨC TRẦN ĐANG CHẠY -->
+                <VBox alignment="CENTER" spacing="5">
+                    <Label fx:id="lblCurrentBotStatus" text="Trạng thái: Đang kiểm tra..." style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #95a5a6;"/>
+                    <Label fx:id="lblCurrentMaxBid" text="Mức trần đang cài: 0 VND" visible="false" managed="false" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+                </VBox>
+
                 <Label text="Hệ thống sẽ tự động trả giá thay bạn đến khi đạt mức trần." textAlignment="CENTER" wrapText="true" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
-                <VBox spacing="5" alignment="CENTER_LEFT">
-                    <Label text="Mức giá tối đa bạn sẵn sàng trả:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                    <TextField fx:id="txtAutoBidMaxAmount" promptText="Nhập số tiền tối đa (VND)" styleClass="modern-input" style="-fx-font-size: 16px; -fx-padding: 10;"/>
+
+                <Label fx:id="lblAutoBidStep" text="Bước giá: Đang tính..." style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+
+                <VBox spacing="5" alignment="CENTER">
+                    <Label text="Mức giá tối đa bạn muốn điều chỉnh:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 5 0 0 0;">
+                        <Button text="-" onAction="#decreaseAutoBid" styleClass="btn-primary" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 0 12; -fx-background-radius: 20; -fx-background-color: #e74c3c;"/>
+                        <TextField fx:id="txtAutoBidMaxAmount" alignment="CENTER" promptText="Giá trần (VND)" prefWidth="180" styleClass="modern-input" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 8; -fx-background-radius: 20;"/>
+                        <Button text="+" onAction="#increaseAutoBid" styleClass="btn-primary" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 0 12; -fx-background-radius: 20; -fx-background-color: #2ecc71;"/>
+                    </HBox>
                 </VBox>
                 <HBox alignment="CENTER" spacing="20" style="-fx-padding: 10 0 0 0;">
-                    <Button text="Kích hoạt Bot" onAction="#processSetupAutoBid" prefWidth="150" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 10; -fx-background-radius: 10; -fx-cursor: hand;"/>
-                    <Button text="Hủy bỏ" onAction="#handleCloseAutoBid" prefWidth="130" styleClass="btn-danger" style="-fx-font-size: 15px; -fx-padding: 10;"/>
+                    <Button fx:id="btnSubmitAutoBid" text="Kích hoạt Bot" onAction="#processSetupAutoBid" prefWidth="150" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 10; -fx-background-radius: 25; -fx-cursor: hand;"/>
+                    <Button text="Hủy bỏ" onAction="#handleCloseAutoBid" prefWidth="130" styleClass="btn-danger" style="-fx-font-size: 15px; -fx-padding: 10; -fx-background-radius: 25;"/>
                 </HBox>
             </VBox>
         </VBox>

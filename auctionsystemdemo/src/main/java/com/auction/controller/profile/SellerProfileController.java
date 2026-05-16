@@ -7,8 +7,6 @@ import com.auction.model.ReviewRequest;
 import com.auction.model.SellerReviewModel;
 import com.auction.util.ApiService;
 import com.auction.util.SessionManager;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -85,14 +83,16 @@ public class SellerProfileController {
                 if (res.statusCode() == 200) {
                     ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
-                        // Spring Boot trả về dạng Page<SellerReview>, data nằm trong mảng "content"
-                        JsonObject pageObject = apiRes.result.getAsJsonObject();
-                        JsonElement contentArray = pageObject.get("content");
 
+                        // ========================================================
+                        // ĐÃ SỬA LỖI Ở ĐÂY:
+                        // Backend trả về List trực tiếp, KHÔNG phải Page object.
+                        // Đọc thẳng mảng từ apiRes.result luôn.
+                        // ========================================================
                         java.lang.reflect.Type listType = new TypeToken<List<SellerReviewModel>>(){}.getType();
-                        List<SellerReviewModel> list = ApiService.gson.fromJson(contentArray, listType);
+                        List<SellerReviewModel> list = ApiService.gson.fromJson(apiRes.result, listType);
 
-                        if (list.isEmpty()) {
+                        if (list == null || list.isEmpty()) {
                             if (currentPage == 0) vboxReviews.getChildren().add(new Label("Chưa có đánh giá nào."));
                             btnLoadMore.setVisible(false); // Hết dữ liệu thì ẩn nút đi
                         } else {

@@ -2,108 +2,122 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.shape.Circle?>
-
 <?import javafx.scene.shape.SVGPath?>
+
 <StackPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.dashboard.MainController" stylesheets="@../style.css" prefWidth="1200" prefHeight="750" styleClass="root-pane">
 
     <BorderPane>
-        <!-- SIDEBAR THU GỌN -->
         <left>
-            <VBox styleClass="sidebar" prefWidth="110" spacing="15" alignment="TOP_CENTER">
-                <padding><Insets top="20" bottom="20"/></padding>
+            <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="110" minWidth="110" maxWidth="110" spacing="8" alignment="TOP_LEFT">
+                <padding><Insets top="20" bottom="20" left="15" right="15"/></padding>
 
-                <Button text="☰" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 28px; -fx-cursor: hand;" onAction="#openSidebar"/>
-
-                <VBox spacing="15" VBox.vgrow="ALWAYS" alignment="TOP_CENTER">
-                    <padding><Insets top="20"/></padding>
-                    <Button fx:id="btnIconHome" text="🏠" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showDashboard"/>
-                    <Button fx:id="btnIconWallet" text="💰" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showWallet"/>
-                    <Button fx:id="btnIconAuction" text="⚖" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showAuctionList"/>
-                    <Button fx:id="btnIconAdd" text="➕" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#handleShowMyProducts"/>
-
-                    <!-- NÚT CHAT VÀ BẠN BÈ -->
-                    <Button fx:id="btnIconChat" text="💬" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showChat"/>
+                <VBox style="-fx-padding: 0 0 20 0;" alignment="CENTER_LEFT">
+                    <Button styleClass="menu-toggle-btn" onAction="#toggleSidebar">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath fx:id="iconToggle" content="M 3 12 h 18 M 3 6 h 18 M 3 18 h 18" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
                 </VBox>
 
-                <VBox spacing="15" alignment="BOTTOM_CENTER">
-                    <Button fx:id="btnIconNotif" text="📩" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showNotification"/>
-                    <Button fx:id="btnIconProfile" text="👤" styleClass="icon-btn" style="-fx-padding: 0;" prefWidth="65" prefHeight="65" onAction="#showProfile"/>
+                <VBox spacing="15" VBox.vgrow="ALWAYS">
+                    <Button fx:id="btnNavHome" text="Trang chủ" styleClass="sidebar-btn" onAction="#showDashboard">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath content="M 3 9 l 9 -7 l 9 7 v 11 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 z" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
+
+                    <Button fx:id="btnNavWallet" text="Ví tiền" styleClass="sidebar-btn" onAction="#showWallet">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath content="M 21 4 H 3 a 2 2 0 0 0 -2 2 v 12 a 2 2 0 0 0 2 2 h 18 a 2 2 0 0 0 2 -2 V 6 a 2 2 0 0 0 -2 -2 z M 1 10 h 22" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
+
+                    <Button fx:id="btnNavAuction" text="Đấu giá" styleClass="sidebar-btn" onAction="#showAuctionList">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath content="M 14 13 l -9 9 c -1.1 1.1 -3.1 1.1 -4.2 0 c -1.1 -1.1 -1.1 -3.1 0 -4.2 l 9 -9 M 14 13 l 4 -4 M 18 9 l 3 3 M 21 12 l -4 4 M 17 16 l -3 -3 M 14.5 9.5 L 11 6 c -1.1 -1.1 -1.1 -3.1 0 -4.2 c 1.1 -1.1 3.1 -1.1 4.2 0 l 3.5 3.5 M 22 22 H 2" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
+
+                    <Button fx:id="btnNavAdd" text="Thêm sản phẩm" styleClass="sidebar-btn" onAction="#handleShowMyProducts">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath content="M 12 5 v 14 M 5 12 h 14" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
+
+                    <Button fx:id="btnNavChat" text="Tin nhắn" styleClass="sidebar-btn" onAction="#showChat">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath content="M 21 15 a 2 2 0 0 1 -2 2 H 7 l -4 4 V 5 a 2 2 0 0 1 2 -2 h 14 a 2 2 0 0 1 2 2 z" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
+                </VBox>
+
+                <VBox spacing="15" alignment="BOTTOM_LEFT">
+                    <Button fx:id="btnNavNotif" text="Thông báo" styleClass="sidebar-btn" onAction="#showNotification">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath content="M 18 8 A 6 6 0 0 0 6 8 c 0 7 -3 9 -3 9 h 18 s -3 -2 -3 -9 M 13.73 21 a 2 2 0 0 1 -3.46 0" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
+
+                    <Button fx:id="btnNavProfile" text="Đang tải..." styleClass="sidebar-btn" onAction="#showProfile">
+                        <graphic>
+                            <StackPane prefWidth="35" alignment="CENTER">
+                                <SVGPath content="M 20 21 v -2 a 4 4 0 0 0 -4 -4 H 8 a 4 4 0 0 0 -4 4 v 2 M 12 3 a 4 4 0 1 0 0 8 a 4 4 0 1 0 0 -8 z" styleClass="modern-icon"/>
+                            </StackPane>
+                        </graphic>
+                    </Button>
                 </VBox>
             </VBox>
         </left>
 
         <center>
-            <VBox>
-                <!-- HEADER CHÍNH -->
-                <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-header">
-                    <TextField fx:id="txtSearch" promptText="🔍 Tìm kiếm sản phẩm, người dùng..." styleClass="modern-search-bar" prefWidth="500" onAction="#handleSearch"/>
+            <VBox styleClass="top-header" style="-fx-padding: 0;">
+                <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 15 30 15 30;">
+
+                    <HBox alignment="CENTER_LEFT" prefWidth="500" spacing="10" styleClass="modern-search-box">
+                        <padding><Insets left="20" right="20"/></padding>
+
+                        <SVGPath content="M 15.5 14 h -.79 l -.28 -.27 A 6.471 6.471 0 0 0 16 9.5 A 6.5 6.5 0 1 0 9.5 16 c 1.61 0 3.09 -.59 4.23 -1.57 l .27 .28 v .79 l 5 4.99 L 20.49 19 l -4.99 -5 z m -6 0 C 7.01 14 5 11.99 5 9.5 S 7.01 5 9.5 5 S 14 7.01 14 9.5 S 11.99 14 9.5 14 z" styleClass="search-icon-svg"/>
+
+                        <TextField fx:id="txtSearch" promptText="Tìm kiếm sản phẩm, người dùng..." styleClass="modern-search-input" HBox.hgrow="ALWAYS" onAction="#handleSearch"/>
+                    </HBox>
 
                     <Region HBox.hgrow="ALWAYS" />
 
-                    <!-- ========================================== -->
-                    <!-- CỤM CẦN GẠT SÁNG / TỐI (DARK MODE SWITCH) -->
-                    <!-- ========================================== -->
                     <HBox alignment="CENTER" spacing="10" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 6 15; -fx-background-radius: 20;">
-
-                        <!-- Icon Mặt Trời (Vector vẽ bằng nét Line) -->
-                        <SVGPath content="M 12 2 V 4 M 12 20 V 22 M 4 12 H 2 M 22 12 H 20 M 4.93 4.93 L 6.34 6.34 M 19.07 19.07 L 17.66 17.66 M 4.93 19.07 L 6.34 17.66 M 19.07 4.93 L 17.66 6.34 M 12 7 A 5 5 0 1 0 12 17 A 5 5 0 1 0 12 7 Z"
-                                 stroke="white" strokeWidth="2" strokeLineCap="ROUND" fill="TRANSPARENT" scaleX="0.65" scaleY="0.65"/>
-
-                        <!-- Cần gạt -->
+                        <SVGPath content="M 12 2 V 4 M 12 20 V 22 M 4 12 H 2 M 22 12 H 20 M 4.93 4.93 L 6.34 6.34 M 19.07 19.07 L 17.66 17.66 M 4.93 19.07 L 6.34 17.66 M 19.07 4.93 L 17.66 6.34 M 12 7 A 5 5 0 1 0 12 17 A 5 5 0 1 0 12 7 Z" stroke="white" strokeWidth="2" strokeLineCap="ROUND" fill="TRANSPARENT" scaleX="0.65" scaleY="0.65"/>
                         <StackPane onMouseClicked="#handleThemeToggle" style="-fx-cursor: hand;">
                             <Rectangle fx:id="switchBackground" width="42" height="22" arcWidth="22" arcHeight="22" fill="#bdc3c7"/>
                             <Circle fx:id="switchKnob" radius="9" fill="white" translateX="-10"/>
                         </StackPane>
-
-                        <!-- Icon Mặt Trăng (Vector hình trăng khuyết) -->
-                        <SVGPath content="M 21 12.79 A 9 9 0 1 1 11.21 3 A 7 7 0 0 0 21 12.79 Z"
-                                 fill="white" scaleX="0.65" scaleY="0.65"/>
-
+                        <SVGPath content="M 21 12.79 A 9 9 0 1 1 11.21 3 A 7 7 0 0 0 21 12.79 Z" fill="white" scaleX="0.65" scaleY="0.65"/>
                     </HBox>
 
-                    <!-- ========================================== -->
-                    <!-- ĐỒNG HỒ -->
-                    <!-- ========================================== -->
                     <VBox alignment="CENTER_RIGHT" spacing="-2.0">
-                        <children>
-                            <Label fx:id="lblTime" text="00:00:00" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" />
-                            <Label fx:id="lblDate" text="Đang tải..." style="-fx-text-fill: #e2e8f0; -fx-font-size: 14px;" />
-                        </children>
+                        <Label fx:id="lblTime" text="00:00:00" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;" />
+                        <Label fx:id="lblDate" text="Đang tải..." style="-fx-text-fill: #e2e8f0; -fx-font-size: 14px;" />
                     </VBox>
                 </HBox>
 
-                <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS">
+                <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS" styleClass="root-container" style="-fx-background-radius: 35 0 0 0;">
                     <padding><Insets top="20" right="30" bottom="20" left="30"/></padding>
                 </StackPane>
             </VBox>
         </center>
     </BorderPane>
-
-    <!-- SIDEBAR MỞ RỘNG (OVERLAY) -->
-    <AnchorPane fx:id="drawerOverlay" visible="false" style="-fx-background-color: rgba(0,0,0,0.4);">
-        <Button AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" style="-fx-background-color: transparent;" onAction="#closeSidebar"/>
-
-        <VBox fx:id="expandedSidebar" styleClass="sidebar-expanded" prefWidth="280" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-280">
-            <padding><Insets top="20" right="15" bottom="20" left="15"/></padding>
-            <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 30 10;">
-                <Button text="✕" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-cursor: hand; -fx-font-weight: bold;" onAction="#closeSidebar"/>
-            </HBox>
-
-            <VBox spacing="10" VBox.vgrow="ALWAYS">
-                <Button fx:id="btnNavHome" text="🏠   Trang chủ" styleClass="nav-btn" prefWidth="250" onAction="#showDashboard"/>
-                <Button fx:id="btnNavWallet" text="💰   Ví tiền" styleClass="nav-btn" prefWidth="250" onAction="#showWallet"/>
-                <Button fx:id="btnNavAuction" text="⚖   Đấu giá" styleClass="nav-btn" prefWidth="250" onAction="#showAuctionList"/>
-                <Button fx:id="btnNavAdd" text="➕   Thêm sản phẩm" styleClass="nav-btn" prefWidth="250" onAction="#handleShowMyProducts"/>
-                <Button fx:id="btnNavChat" text="💬   Nhắn tin &amp; Bạn bè" styleClass="nav-btn" prefWidth="250" onAction="#showChat"/>
-            </VBox>
-
-            <VBox spacing="10" alignment="BOTTOM_LEFT">
-                <Button fx:id="btnNavNotif" text="📩   Thông báo" styleClass="nav-btn" prefWidth="250" onAction="#showNotification"/>
-                <Button fx:id="btnNavProfile" text="👤   Pipodaucatmoi" styleClass="nav-btn" prefWidth="250" onAction="#showProfile"/>
-            </VBox>
-        </VBox>
-    </AnchorPane>
 </StackPane>

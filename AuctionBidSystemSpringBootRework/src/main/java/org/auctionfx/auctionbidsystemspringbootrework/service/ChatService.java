@@ -177,20 +177,65 @@ public class ChatService {
     // HÀM MỚI: KIỂM TRA TRẠNG THÁI MỐI QUAN HỆ GIỮA 2 NGƯỜI
     // =========================================================
     public String checkConnectionStatus(String user1, String user2) {
+        // 1. Tìm User entity từ Username (Sử dụng đúng hàm findByUserName của bạn)
         User u1 = userRepository.findByUserName(user1);
         User u2 = userRepository.findByUserName(user2);
-        if (u1 == null || u2 == null) return "NONE";
 
-        Connection conn = connectionRepository.findExistingConnection(u1, u2);
-        if (conn == null) return "NONE";
-
-        if ("ACCEPTED".equals(conn.getStatus())) return "ACCEPTED";
-
-        if ("PENDING".equals(conn.getStatus())) {
-            // Xem ai là người đã gửi lời mời
-            if (conn.getSender().getUserName().equals(user1)) return "PENDING_SENDER";
-            else return "PENDING_RECEIVER";
+        if (u1 == null || u2 == null) {
+            return "NONE";
         }
+
+        // 2. Query trong DB xem có Connection nào giữa 2 User này không
+        // (Sử dụng đúng hàm findExistingConnection truyền vào 2 đối tượng User)
+        Connection conn = connectionRepository.findExistingConnection(u1, u2);
+
+        if (conn == null) {
+            return "NONE";
+        }
+
+        // 3. Lấy trạng thái (status của bạn đã là String nên không cần .name() nữa)
+        String status = conn.getStatus();
+
+        if ("ACCEPTED".equals(status)) {
+            return "ACCEPTED";
+        }
+
+        if ("PENDING".equals(status)) {
+            // 4. Phân biệt ai là người gửi để Frontend biết đường hiển thị
+            if (conn.getSender().getId().equals(u1.getId())) {
+                return "PENDING_SENDER";   // user1 là người gửi -> Hiện nút "Đã gửi lời mời"
+            } else {
+                return "PENDING_RECEIVER"; // user2 là người gửi -> Hiện nút "Chấp nhận/Từ chối"
+            }
+        }
+
         return "NONE";
+    }
+
+    @Transactional
+    public String declineOrRemoveConnection(String senderUsername, String receiverUsername) {
+        log.info("SERVICE: [{}] thực hiện xóa kết nối với [{}]", receiverUsername, senderUsername);
+
+        User user1 = userRepository.findByUserName(senderUsername);
+        User user2 = userRepository.findByUserName(receiverUsername);
+
+        if (user1 == null || user2 == null) {
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // Tìm connection giữa 2 người (không phân biệt ai gửi trước)
+        Connection existConn = connectionRepository.findExistingConnection(user1, user2);
+
+        if (existConn == null) {
+            throw new RuntimeException("Không tìm thấy yêu cầu kết bạn hoặc liên kết bạn bè!");
+        }
+
+        // Xóa bản ghi khỏi database
+        connectionRepository.delete(existConn);
+
+        // (Tùy chọn) Nếu muốn chuyên nghiệp hơn, bạn có thể tạo thông báo cho người kia
+        // notificationService.createNotification(user1, null, NotificationType.SYSTEM, "Thông báo", user2.getFullName() + " đã từ chối/hủy kết bạn.");
+
+        return "Đã xóa yêu cầu kết bạn hoặc hủy kết bạn thành công.";
     }
 }

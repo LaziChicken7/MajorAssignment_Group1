@@ -60,4 +60,14 @@ public class ChatRestController {
         response.setResult(chatService.checkConnectionStatus(user1, user2));
         return response;
     }
+
+    // ============================================
+    // API TỪ CHỐI HOẶC HỦY KẾT BẠN
+    // ============================================
+    @DeleteMapping("/decline-request")
+    public ApiResponse<String> declineFriendRequest(@RequestParam String sender, @RequestParam String receiver) {
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setResult(chatService.declineOrRemoveConnection(sender, receiver));
+        return response;
+    }
 }

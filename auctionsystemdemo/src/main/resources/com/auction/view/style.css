@@ -30,22 +30,47 @@
 /* =========================================
    2.1. THANH TÌM KIẾM TRÊN HEADER
    ========================================= */
-.modern-search-bar {
-    -fx-background-color: #f1f2f6; /* Nền xám nhạt */
-    -fx-background-radius: 25; /* Bo tròn cực đại thành hình viên thuốc */
-    -fx-padding: 10 20 10 20; /* Rộng rãi, thoải mái */
-    -fx-font-size: 14.5px;
-    -fx-text-fill: #2c3e50;
-    -fx-border-color: transparent;
+
+/* Hộp chứa bên ngoài (Nền xám bo tròn giống Messenger) */
+.modern-search-box {
+    -fx-background-color: #f1f2f6;
+    -fx-background-radius: 25;
+    -fx-cursor: text;
 }
 
-/* Hiệu ứng khi người dùng click chuột vào ô tìm kiếm */
-.modern-search-bar:focused {
-    -fx-background-color: white;
-    -fx-border-color: #0A439D; /* Viền sáng lên màu xanh thương hiệu */
-    -fx-border-radius: 25;
-    -fx-border-width: 1.5px;
-    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.2), 10, 0, 0, 4); /* Đổ bóng phát sáng */
+/* Ô nhập liệu TextField thực tế (Trong suốt hoàn toàn) */
+.modern-search-input {
+    -fx-background-color: transparent;
+    -fx-padding: 12 0 12 5; /* Đệm cách icon một chút xíu */
+    -fx-font-size: 14.5px;
+    -fx-text-fill: #2c3e50;
+    -fx-prompt-text-fill: #8d949e;
+}
+
+/* Ẩn hoàn toàn viền mặc định của JavaFX khi click vào ô tìm kiếm */
+.modern-search-input:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Style cho Kính lúp (Fill màu xám chì) */
+.search-icon-svg {
+    -fx-fill: #8d949e;
+    -fx-stroke: transparent; /* Đảm bảo không bị viền */
+    -fx-scale-x: 0.9;
+    -fx-scale-y: 0.9;
+}
+
+/* -------------------------------------
+   CẬP NHẬT CHO DARK THEME (NẾU DÙNG)
+   ------------------------------------- */
+.dark-theme .modern-search-box {
+    -fx-background-color: #27272A;
+}
+.dark-theme .modern-search-input {
+    -fx-text-fill: white;
 }
 
 /* =========================================
@@ -991,14 +1016,21 @@
 }
 
 /* 6. Thanh tìm kiếm trên Header */
-.dark-theme .modern-search-bar {
-    -fx-background-color: #27272A;
-    -fx-text-fill: white;
-    -fx-prompt-text-fill: #A1A1AA;
+.modern-search-bar {
+    -fx-border-width: 1.5px !important;       /* Xí chỗ trước 1.5px viền */
+    -fx-border-color: transparent !important; /* Nhưng cho nó tàng hình */
+    -fx-background-insets: 0 !important;      /* Tắt bóng mờ rác của JavaFX */
 }
-.dark-theme .modern-search-bar:focused {
-    -fx-background-color: #1E1E1E;
-    -fx-border-color: #3B82F6; /* Đổi viền xanh nhạt chuẩn Dark mode */
+.modern-search-bar:focused {
+    -fx-border-color: #0A439D !important;     /* Khi click chỉ đổi màu, không đổi size */
+}
+
+/* 2. Dành cho thanh tìm kiếm kiểu Messenger (Trong suốt) */
+.modern-search-input, .modern-search-input:focused {
+    -fx-background-insets: 0 !important;
+    -fx-border-width: 0 !important;
+    -fx-focus-color: transparent !important;
+    -fx-faint-focus-color: transparent !important;
 }
 
 /* 7. Đổi màu Vector (Mũi tên, Icon) */
@@ -1037,7 +1069,7 @@
 }
 
 /* ========================================================
-   FIX LỖI GÓC VUÔNG ĐEN (DOG-EAR BORDER BUG)
+   26. FIX LỖI GÓC VUÔNG ĐEN (DOG-EAR BORDER BUG)
    ======================================================== */
 /* Sửa lại Card trong Darkmode: Bắt buộc background-radius phải bằng border-radius */
 .dark-theme .card,
@@ -1067,4 +1099,122 @@
 }
 .dark-theme .label[style*="-fx-text-fill: #666;"] {
     -fx-text-fill: #A1A1AA !important;
+}
+
+/* =========================================
+   27. LÀM ĐẸP THANH CUỘN NGANG (HORIZONTAL SCROLLBAR)
+   ========================================= */
+.scroll-pane .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-height: 8; /* Độ mỏng của thanh cuộn ngang */
+}
+.scroll-pane .scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.scroll-pane .scroll-bar:horizontal .increment-button,
+.scroll-pane .scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-width: 0;
+    -fx-padding: 0;
+}
+.scroll-pane .scroll-bar:horizontal .increment-arrow,
+.scroll-pane .scroll-bar:horizontal .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+.scroll-pane .scroll-bar:horizontal .thumb {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+}
+.scroll-pane:hover .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(149, 165, 166, 0.5); /* Hiện mờ khi rê chuột vào khung */
+}
+.scroll-pane .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #3b5998; /* Đậm lên khi trỏ chuột thẳng vào thanh cuộn */
+}
+
+/* =========================================
+   28. STYLE CHO SIDEBAR TRƯỢT MƯỢT MÀ (PUSH EFFECT)
+   ========================================= */
+
+/* =========================================
+   28. STYLE CHO SIDEBAR TRƯỢT MƯỢT MÀ (PUSH EFFECT)
+   ========================================= */
+
+/* 1A. Thiết lập cho CÁC NÚT MENU (Trang chủ, Ví tiền...) */
+.sidebar-btn {
+    -fx-alignment: CENTER_LEFT !important;
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 22px;
+    -fx-background-radius: 50px;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 22px;
+
+    /* BỘ 3 PHÉP THUẬT GIÚP NÚT CO GIÃN MƯỢT MÀ VÀ GIỮ NGUYÊN BO GÓC */
+    -fx-max-width: infinity;      /* 1. Giãn dài chạm mép phải khi mở rộng */
+    -fx-min-width: 0;             /* 2. Cho phép nút thu nhỏ lại thành viên thuốc khi đóng */
+    -fx-text-overrun: clip;       /* 3. Cắt chữ gọn gàng, không hiện dấu chấm lửng "..." */
+}
+
+/* 1B. Thiết lập RIÊNG cho NÚT X (Hamburger Toggle) */
+.menu-toggle-btn {
+    -fx-alignment: CENTER_LEFT !important;
+    -fx-background-color: transparent;
+    -fx-padding: 12px 22px; /* Lề 22px giúp nút X thẳng hàng tuyệt đối với các icon dưới */
+    -fx-background-radius: 50px;
+    -fx-cursor: hand;
+    /* KHÔNG CÓ -fx-max-width: infinity; -> Nút X sẽ giữ nguyên kích thước nhỏ gọn ở góc trái */
+}
+
+/* 2. Cấu hình màu cho Icon Nét Viền (Outline Icons) */
+.sidebar-btn .modern-icon, .menu-toggle-btn .modern-icon {
+    -fx-fill: transparent;
+    -fx-stroke: white;
+    -fx-stroke-width: 1.8px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+/* 3. Kiểu dáng khi lướt chuột qua nút BÌNH THƯỜNG (Hover) */
+.sidebar-btn:hover, .menu-toggle-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.15); /* Sáng mờ ảo */
+}
+
+/* 4. Kiểu dáng cho nút ĐANG ĐƯỢC CHỌN (Active) */
+.active-menu-btn {
+    -fx-background-color: #1A3266 !important; /* Nền xanh đen đậm y hệt ảnh bạn gửi */
+    -fx-text-fill: white !important;          /* Chữ trắng */
+}
+
+/* Giữ nguyên icon màu trắng khi nút đang được chọn */
+.active-menu-btn .modern-icon {
+    -fx-stroke: white !important;
+    -fx-fill: transparent;
+}
+
+/* Hiệu ứng trỏ chuột (Hover) vào chính nút ĐANG CHỌN */
+.active-menu-btn:hover {
+    -fx-background-color: #213D7A !important; /* Xanh đậm nhưng sáng lên một xíu để có cảm giác tương tác */
+}
+
+/* 5. Áp dụng cho Dark Theme (Nếu có) */
+.dark-theme .sidebar-btn, .dark-theme .menu-toggle-btn {
+    -fx-text-fill: #E4E4E7;
+}
+.dark-theme .sidebar-btn .modern-icon, .dark-theme .menu-toggle-btn .modern-icon {
+    -fx-stroke: #E4E4E7;
+}
+.dark-theme .sidebar-btn:hover, .dark-theme .menu-toggle-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+.dark-theme .active-menu-btn {
+    -fx-background-color: #374151 !important;
+    -fx-text-fill: #60a5fa !important;
+}
+.dark-theme .active-menu-btn .modern-icon {
+    -fx-stroke: #60a5fa !important;
 }

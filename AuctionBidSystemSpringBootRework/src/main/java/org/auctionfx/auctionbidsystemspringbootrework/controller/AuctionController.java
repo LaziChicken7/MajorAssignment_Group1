@@ -118,4 +118,13 @@ public class AuctionController {
         response.setResult(searchService.searchAuctions(keyword));
         return response;
     }
+
+    // API Lấy cấu hình Autobid hiện tại của User
+    @GetMapping("/{auctionId}/my-autobid")
+    public ApiResponse<BigDecimal> getMyAutoBid(@PathVariable String auctionId, @RequestParam String username) {
+        log.debug("API CALL: User [{}] yêu cầu xem cấu hình Autobid của phiên [{}]", username, auctionId);
+        ApiResponse<BigDecimal> response = new ApiResponse<>();
+        response.setResult(auctionService.getMyAutoBid(auctionId, username));
+        return response;
+    }
 }

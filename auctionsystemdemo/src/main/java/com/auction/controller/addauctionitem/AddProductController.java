@@ -43,6 +43,9 @@ public class AddProductController {
     @FXML private CheckBox chkAgree;
     @FXML private Button btnSubmit;
 
+    @FXML private VBox paneImageZoom;
+    @FXML private ImageView zoomedImageView;
+
     @FXML
     public void initialize() {
         if (btnSubmit != null && chkAgree != null) {
@@ -89,46 +92,65 @@ public class AddProductController {
         java.util.List<File> files = fileChooser.showOpenMultipleDialog(txtProductName.getScene().getWindow());
 
         if (files != null && !files.isEmpty()) {
-
-            // ==========================================================
-            // FIX: KIỂM TRA DUNG LƯỢNG ẢNH TRƯỚC KHI CHO VÀO LIST
-            // ==========================================================
-            long maxFileSize = 5 * 1024 * 1024; // Giới hạn 5MB cho mỗi ảnh
+            // Kiểm tra dung lượng
+            long maxFileSize = 5 * 1024 * 1024; // Giới hạn 5MB
             for (File f : files) {
                 if (f.length() > maxFileSize) {
                     showAlert(Alert.AlertType.WARNING, "Ảnh quá lớn",
                             "Bức ảnh '" + f.getName() + "' nặng hơn 5MB.\nVui lòng chọn ảnh nhẹ hơn để tải lên!");
-                    return; // Chặn luôn, không load ảnh lên màn hình nữa
+                    return;
                 }
             }
 
-            // Nếu qua ải kiểm tra dung lượng thì mới add vào list
+            // Thêm danh sách ảnh mới vào List tổng
             selectedFiles.addAll(files);
-            imagePreviewBox.getChildren().clear(); // Xóa ảnh cũ trên màn hình
 
-            // Vòng lặp vẽ từng cái ảnh nhỏ nhỏ xếp cạnh nhau
-            for (File f : selectedFiles) {
-                ImageView imgView = new ImageView(new Image("file:" + f.getAbsolutePath()));
+            // Gọi hàm Render để vẽ lại toàn bộ ảnh ra màn hình
+            renderImagePreviews();
+        }
+    }
 
-                // Set kích thước cố định để các ảnh đều nhau (vuông vức)
-                imgView.setFitHeight(200);
-                imgView.setFitWidth(200);
-                imgView.setPreserveRatio(false); // Bắt buộc tắt cái này đi để cắt vuông
+    // HÀM MỚI: Tách logic vẽ ảnh ra riêng để dùng chung khi Thêm và Xóa
+    private void renderImagePreviews() {
+        imagePreviewBox.getChildren().clear();
 
-                // ===============================================
-                // BƯỚC QUAN TRỌNG: CẮT BO GÓC CHO ẢNH BẰNG RECTANGLE
-                // ===============================================
-                Rectangle clip = new Rectangle(imgView.getFitWidth(), imgView.getFitHeight());
-                clip.setArcWidth(25);  // Độ cong cạnh ngang
-                clip.setArcHeight(25); // Độ cong cạnh dọc
-                imgView.setClip(clip);
+        for (File f : selectedFiles) {
+            Image imageFile = new Image("file:" + f.getAbsolutePath());
+            ImageView imgView = new ImageView(imageFile);
+            imgView.setFitHeight(200);
+            imgView.setFitWidth(200);
+            imgView.setPreserveRatio(false);
 
-                // Hiệu ứng bóng đổ nhẹ phía dưới ảnh để tạo chiều sâu
-                imgView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
+            // Gắn class css để rê chuột vào đổi thành hình bàn tay báo hiệu có thể click
+            imgView.setStyle("-fx-cursor: hand;");
 
-                imagePreviewBox.getChildren().add(imgView);
-            }
-            if(lblPhotoIcon != null) lblPhotoIcon.setVisible(false);
+            // XỬ LÝ SỰ KIỆN CLICK VÀO ẢNH ĐỂ MỞ POPUP ZOOM
+            imgView.setOnMouseClicked(e -> {
+                zoomedImageView.setImage(imageFile);
+                paneImageZoom.setVisible(true);
+            });
+
+            Rectangle clip = new Rectangle(200, 200);
+            clip.setArcWidth(25);
+            clip.setArcHeight(25);
+            imgView.setClip(clip);
+
+            // NÚT XÓA ẢNH (X)
+            Button btnDelete = new Button("✕");
+            btnDelete.setStyle("-fx-background-color: rgba(231, 76, 60, 0.9); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-cursor: hand; -fx-padding: 2 8; -fx-font-size: 14px;");
+
+            StackPane.setAlignment(btnDelete, javafx.geometry.Pos.TOP_RIGHT);
+            StackPane.setMargin(btnDelete, new javafx.geometry.Insets(10, 10, 0, 0));
+
+            btnDelete.setOnAction(e -> {
+                selectedFiles.remove(f);
+                renderImagePreviews();
+            });
+
+            StackPane imageContainer = new StackPane(imgView, btnDelete);
+            imageContainer.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 5);");
+
+            imagePreviewBox.getChildren().add(imageContainer);
         }
     }
 
@@ -436,5 +458,11 @@ public class AddProductController {
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void closeImageZoom() {
+        paneImageZoom.setVisible(false);
+        zoomedImageView.setImage(null); // Giải phóng RAM ảnh
     }
 }

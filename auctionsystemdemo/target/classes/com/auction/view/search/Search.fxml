@@ -6,33 +6,34 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.search.SearchController" spacing="20" style="-fx-background-color: transparent;">
 
-    <!-- HEADER -->
-    <HBox alignment="CENTER_LEFT" minHeight="36">
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="🔍" style="-fx-font-size: 24px;"/>
-            <Label text="Kết quả tìm kiếm cho:" style="-fx-font-size: 20px; -fx-text-fill: #7f8c8d;"/>
-            <Label fx:id="lblKeyword" text="'từ khóa'" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0A439D;"/>
+    <HBox alignment="CENTER_LEFT">
+        <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#handleGoBack" style="-fx-cursor: hand;">
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label styleClass="back-title" text="Kết quả tìm kiếm" />
+        </HBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <HBox alignment="CENTER_LEFT" spacing="8" style="-fx-background-color: #e8f0fe; -fx-padding: 8 18; -fx-background-radius: 20;">
+            <Label text="Từ khóa:" style="-fx-text-fill: #7f8c8d; -fx-font-size: 15px;"/>
+            <Label fx:id="lblKeyword" text="'từ khóa'" style="-fx-font-weight: bold; -fx-text-fill: #0A439D; -fx-font-size: 16px;"/>
         </HBox>
     </HBox>
 
-    <!-- KẾT QUẢ: 2 TAB -->
-    <TabPane styleClass="tab-pane-custom" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+    <TabPane styleClass="tab-pane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
 
-        <!-- TAB SẢN PHẨM -->
         <Tab text="Sản phẩm đấu giá">
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="edge-to-edge" style="-fx-background-color: transparent;">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane-table" style="-fx-background-color: transparent;">
                 <content>
-                    <!-- FlowPane giúp các thẻ sản phẩm tự rớt dòng tạo thành dạng lưới (Grid) -->
-                    <FlowPane fx:id="paneItems" hgap="20" vgap="20" style="-fx-padding: 20;"/>
+                    <FlowPane fx:id="paneItems" hgap="25" vgap="25" style="-fx-padding: 20;" alignment="TOP_LEFT"/>
                 </content>
             </ScrollPane>
         </Tab>
 
-        <!-- TAB MỌI NGƯỜI (BẠN BÈ) -->
-        <Tab text="Mọi người">
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="edge-to-edge" style="-fx-background-color: transparent;">
+        <Tab text="Người dùng">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane-table" style="-fx-background-color: transparent;">
                 <content>
-                    <VBox fx:id="paneUsers" spacing="10" style="-fx-padding: 20;"/>
+                    <VBox fx:id="paneUsers" spacing="15" style="-fx-padding: 20;"/>
                 </content>
             </ScrollPane>
         </Tab>

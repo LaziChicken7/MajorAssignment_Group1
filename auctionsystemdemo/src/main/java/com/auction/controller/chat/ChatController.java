@@ -4,6 +4,7 @@ import com.auction.model.ApiResponse;
 import com.auction.model.ChatMessageModel;
 import com.auction.model.ConnectionModel;
 import com.auction.util.ApiService;
+import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import com.auction.util.WebSocketClientService;
 import com.google.gson.reflect.TypeToken;
@@ -59,7 +60,22 @@ public class ChatController {
         vboxMessages.heightProperty().addListener((observable, oldValue, newValue) -> scrollMessages.setVvalue(1.0));
 
         loadFriendsList();
-        setupWebSocket();
+
+        // Nhận tin nhắn từ Global
+        GlobalWebSocketManager.setActiveChatListener(this::handleIncomingMessageUI);
+
+        // ==========================================================
+        // ĐÃ SỬA LẠI THÀNH SCENE PROPERTY (ĐẢM BẢO CHUẨN XÁC 100%)
+        // ==========================================================
+        vboxMessages.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            // Khi newScene == null nghĩa là Giao diện Chat đã thực sự bị xóa khỏi cửa sổ hiển thị
+            if (newScene == null) {
+                System.out.println("🔥 HỆ THỐNG: Giao diện Chat đã đóng -> Bật lại thông báo Toast!");
+                GlobalWebSocketManager.currentActiveChatPartner = null;
+                GlobalWebSocketManager.setActiveChatListener(null);
+            }
+        });
+        // ==========================================================
     }
 
     // ========================================================
@@ -68,6 +84,9 @@ public class ChatController {
     @FXML
     public void goBack(javafx.scene.input.MouseEvent event) {
         try {
+            // Reset lại partner để đi ra chỗ khác sẽ nhận được Toast
+            GlobalWebSocketManager.currentActiveChatPartner = null;
+            GlobalWebSocketManager.setActiveChatListener(null);
             // Đổi đường dẫn "/com/auction/view/home/Home.fxml" thành FXML bạn muốn quay lại
             // (Ví dụ trang chủ hoặc dashboard)
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/auction/view/home/Home.fxml"));
@@ -86,6 +105,21 @@ public class ChatController {
     private void setupWebSocket() {
         webSocketService = new WebSocketClientService();
         webSocketService.connect(SessionManager.userName, this::handleIncomingMessage);
+    }
+
+    // THÊM HÀM NÀY ĐỂ XỬ LÝ UI KHI CÓ TIN NHẮN TỪ GLOBAL ĐẨY VÀO
+    private void handleIncomingMessageUI(ChatMessageModel msg) {
+        if (msg == null) return;
+
+        // Chỉ render khung chat nếu tin nhắn này thuộc về cuộc hội thoại đang mở
+        boolean isRelevantChat =
+                (msg.sender.userName.equals(SessionManager.userName) && msg.receiver.userName.equals(currentChatPartner)) ||
+                        (msg.sender.userName.equals(currentChatPartner) && msg.receiver.userName.equals(SessionManager.userName));
+
+        if (isRelevantChat) {
+            boolean isMe = msg.sender.userName.equals(SessionManager.userName);
+            vboxMessages.getChildren().add(createChatBubble(msg.content, isMe));
+        }
     }
 
     // ========================================================
@@ -215,6 +249,10 @@ public class ChatController {
 
     private void openChatWith(ConnectionModel.UserModel friend) {
         currentChatPartner = friend.userName;
+
+        // BÁO CHO GLOBAL MANAGER BIẾT ĐỂ NÓ KHÔNG HIỆN TOAST THỪA
+        GlobalWebSocketManager.currentActiveChatPartner = currentChatPartner;
+
         lblChatName.setText(friend.fullName != null ? friend.fullName : friend.userName);
         imgChatAvatar.setImage(new Image(ApiService.BASE_URL + friend.avatarUrl, true));
         Rectangle clip = new Rectangle(45, 45); clip.setArcWidth(45); clip.setArcHeight(45);
@@ -267,14 +305,14 @@ public class ChatController {
         return row;
     }
 
+    // SỬA HÀM SEND MESSAGE ĐỂ GỌI GLOBAL
     @FXML
     private void sendMessage() {
         String text = txtMessage.getText().trim();
         if (text.isEmpty() || currentChatPartner == null) return;
 
-        // Bắn tin qua WebSocket
-        webSocketService.sendMessage(SessionManager.userName, currentChatPartner, text);
-
+        // GỌI GLOBAL MANAGER
+        GlobalWebSocketManager.sendMessage(SessionManager.userName, currentChatPartner, text);
         txtMessage.clear();
     }
 
@@ -367,6 +405,10 @@ public class ChatController {
     @FXML
     private void showAllFriends(javafx.event.ActionEvent event) {
         try {
+            // BỔ SUNG LỆNH RESET VÀO ĐÂY GIỐNG NHƯ HÀM goBack()
+            GlobalWebSocketManager.currentActiveChatPartner = null;
+            GlobalWebSocketManager.setActiveChatListener(null);
+
             // Chuyển sang giao diện FriendList
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/auction/view/chat/FriendList.fxml"));
             javafx.scene.Node view = loader.load();

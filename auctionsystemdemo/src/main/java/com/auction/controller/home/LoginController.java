@@ -3,6 +3,7 @@ package com.auction.controller.home;
 import com.auction.model.ApiResponse;
 import com.auction.model.LoginRequest;
 import com.auction.util.ApiService;
+import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -73,6 +74,8 @@ public class LoginController {
                                 SessionManager.role = resultObj.get("role").getAsString();
 
                                 System.out.println("Đăng nhập thành công: " + SessionManager.userName);
+                                // Ngay sau khi gán SessionManager.userName = ...
+                                GlobalWebSocketManager.initConnection();
                                 switchToMain();
                             } else {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi đăng nhập", apiResponse.message);

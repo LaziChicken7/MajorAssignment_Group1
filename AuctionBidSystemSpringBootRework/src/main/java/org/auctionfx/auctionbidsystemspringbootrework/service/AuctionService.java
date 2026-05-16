@@ -41,9 +41,48 @@ public class AuctionService {
     private static final int SNIPING_THRESHOLD_SECONDS = 10; // Đấu giá trong 10s cuối
     private static final int EXTENSION_SECONDS = 60; // Thì gia hạn thêm 60s
 
-    // Bạn nên định nghĩa 1 BƯỚC GIÁ (Ví dụ: mỗi lần Autobid sẽ tự động cộng thêm 10.000 VND so với giá hiện tại)
-    // (Note: Sẽ lấy stepPrice động từ Auction, nếu null thì mặc định lấy 10000 như comment của bạn)
-    private static final BigDecimal DEFAULT_BID_STEP = new BigDecimal("10000");
+    // ========================================================================
+    // TÍNH TOÁN BƯỚC GIÁ ĐỘNG BẰNG TOÁN HỌC (QUY TẮC 1-2-5)
+    // Ngăn chặn bot sinh ra hàng chục nghìn transaction rác cho tài sản lớn
+    // ========================================================================
+    private BigDecimal calculateDynamicStep(BigDecimal startPrice) {
+        if (startPrice == null || startPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            return new BigDecimal("10000"); // Tối thiểu 10k
+        }
+
+        double price = startPrice.doubleValue();
+
+        // 1. Tính bước giá nháp = 2% giá trị sản phẩm
+        double rawStep = price * 0.02;
+
+        // Quy định mức thấp nhất không bao giờ dưới 10,000 VND
+        if (rawStep < 10000) {
+            return new BigDecimal("10000");
+        }
+
+        // 2. Tìm bậc (Magnitude) của số đó bằng Log10
+        double magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+
+        // 3. Chuẩn hóa về số có 1 chữ số (Từ 1.0 đến 9.999)
+        double normalized = rawStep / magnitude;
+
+        // 4. Ép tròn vào các mốc số Đẹp (1, 2, 5, 10)
+        double niceDigit;
+        if (normalized < 1.5) {
+            niceDigit = 1.0;  // Gần 1 -> Làm tròn thành 1
+        } else if (normalized < 3.5) {
+            niceDigit = 2.0;  // Gần 2 -> Làm tròn thành 2
+        } else if (normalized < 7.5) {
+            niceDigit = 5.0;  // Gần 5 -> Làm tròn thành 5
+        } else {
+            niceDigit = 10.0; // Gần 10 -> Kéo lên bậc tiếp theo
+        }
+
+        // 5. Nhân ngược lại để ra bước giá thực tế cực tròn trịa
+        long finalStep = (long) (niceDigit * magnitude);
+
+        return BigDecimal.valueOf(finalStep);
+    }
 
     // 1. Cài đặt AutoBid
     @Transactional(rollbackFor = Exception.class)
@@ -82,7 +121,19 @@ public class AuctionService {
         // 3. Kiểm tra maxAmount có lớn hơn giá hiện tại không
         if (maxAmount.compareTo(auction.getHighestBid()) <= 0) {
             log.warn("Cảnh báo: Giá nhập ({}) nhỏ hơn hoặc bằng giá hiện tại ({})", maxAmount, auction.getHighestBid());
-            throw new RuntimeException("Money autobid must be higher than now (" + auction.getHighestBid() + ")");
+            throw new RuntimeException("Mức giá Auto-bid phải cao hơn giá hiện tại (" + String.format("%,d", auction.getHighestBid().longValue()).replace(",", ".") + " VND)");
+        }
+
+        // ========================================================================
+        // KIỂM TRA MỨC GIÁ AUTO-BID CÓ PHẢI LÀ BỘI SỐ CỦA BƯỚC GIÁ HAY KHÔNG?
+        // ========================================================================
+        BigDecimal stepPrice = auction.getStepPrice() != null ? auction.getStepPrice() : calculateDynamicStep(auction.getBidProduct().getStartPrice());
+
+        // Phép chia lấy dư: Nếu phần dư (remainder) khác 0 => KHÔNG PHẢI LÀ BỘI SỐ
+        if (maxAmount.remainder(stepPrice).compareTo(BigDecimal.ZERO) != 0) {
+            String stepStr = String.format("%,d", stepPrice.longValue()).replace(",", ".");
+            log.warn("Cảnh báo: Giá Auto-bid ({}) không phải là bội số của bước giá ({})", maxAmount, stepPrice);
+            throw new RuntimeException("Tiền cài đặt Auto-bid phải là bội số của " + stepStr + " VND để hệ thống dễ khớp giá.");
         }
 
         // Lưu cấu hình vào DB
@@ -212,8 +263,8 @@ public class AuctionService {
             // Lấy danh sách các cấu hình AutoBid đang ACTIVE của phiên này (sắp xếp theo thời gian setup cũ nhất -> ưu tiên)
             List<AutoBidConfig> autoBids = autoBidConfigRepository.findByAuctionAndIsActiveTrueOrderByCreatedAtAsc(auction);
 
-            // Xác định bước giá (dùng động nếu có, hoặc mặc định 10000)
-            BigDecimal stepPrice = auction.getStepPrice() != null ? auction.getStepPrice() : DEFAULT_BID_STEP;
+            // GỌI HÀM BƯỚC GIÁ ĐỘNG VỪA TẠO
+            BigDecimal stepPrice = auction.getStepPrice() != null ? auction.getStepPrice() : calculateDynamicStep(auction.getBidProduct().getStartPrice());
 
             for (AutoBidConfig autoBid : autoBids) {
                 // Nếu người này ĐANG là người dẫn đầu rồi thì không tự bid đè lên chính mình
@@ -364,7 +415,7 @@ public class AuctionService {
         Auction auction = new Auction();
         auction.setBidProduct(item);
         auction.setSeller(item.getSeller());
-        // SỬA DÒNG NÀY: Lấy thời gian bắt đầu từ Request thay vì now()
+        // Lấy thời gian bắt đầu từ Request thay vì now()
         auction.setStartTime(request.getStartTime());
         auction.setEndTime(request.getEndTime());
         auction.setHighestBid(item.getStartPrice()); // Giá khởi điểm
@@ -409,6 +460,22 @@ public class AuctionService {
             log.error("LỖI HỆ THỐNG: Lỗi truy xuất cơ sở dữ liệu khi vẽ biểu đồ phiên [{}]: ", auctionId, e);
             throw new AuctionException(ErrorCode.BARCHART_CONNECT_FAILURE);
         }
+    }
+
+    // Lấy thông tin mức giá Auto-bid đang chạy của User (Nếu có)
+    public BigDecimal getMyAutoBid(String auctionId, String username) {
+        Auction auction = auctionRepository.findById(auctionId).orElse(null);
+        if (auction == null) return null;
+
+        // Quét danh sách Bot đang chạy của phiên này
+        List<AutoBidConfig> autoBids = autoBidConfigRepository.findByAuctionAndIsActiveTrueOrderByCreatedAtAsc(auction);
+        for (AutoBidConfig config : autoBids) {
+            // Nếu thấy tên user trùng khớp, trả về số tiền
+            if (config.getBidder().getUserName().equals(username)) {
+                return config.getMaxBidAmount();
+            }
+        }
+        return null; // Không có thì trả về null
     }
 
     // Tự động quét Auction

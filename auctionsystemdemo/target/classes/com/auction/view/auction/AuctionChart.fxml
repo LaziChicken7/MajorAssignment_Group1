@@ -3,47 +3,40 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.chart.*?>
-<?import javafx.geometry.Insets?>
 
 <StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.auction.AuctionChartController" style="-fx-background-color: transparent;">
     <children>
-
-        <!-- LỚP 1: GIAO DIỆN CHÍNH -->
         <VBox spacing="15.0" style="-fx-background-color: transparent;">
             <children>
 
-                <!-- HEADER: CỐ ĐỊNH Ở TRÊN CÙNG -->
-                <!-- Thêm minHeight="36" để ép thanh này cao bằng đúng thanh bên trang AuctionDetail -->
+                <!-- HEADER -->
                 <HBox alignment="CENTER_LEFT" minHeight="36">
                     <HBox spacing="5" styleClass="back-btn-container" onMouseClicked="#goBack" alignment="CENTER_LEFT">
                         <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
                         <Label fx:id="lblChartTitle" text="Biểu đồ đấu giá trực tiếp" styleClass="back-title" />
                     </HBox>
                     <Region HBox.hgrow="ALWAYS"/>
+
+                    <!-- NÚT RESET ZOOM -->
+                    <Button text="🔄 Khôi phục góc nhìn" onAction="#resetZoom" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand;"/>
                 </HBox>
 
-                <!-- PHẦN NỘI DUNG: Kéo dài lấp đầy không gian -->
-                <!-- Căn lề padding 5 5 20 5 giống hệt khung chứa bên AuctionDetail -->
                 <VBox VBox.vgrow="ALWAYS" style="-fx-padding: 5 5 20 5;">
-
-                    <!-- Bọc biểu đồ vào trong một thẻ Card trắng để đồng bộ thiết kế với trang trước -->
-                    <VBox VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
-
+                    <!-- Bọc biểu đồ vào trong một thẻ Card trắng -->
+                    <VBox fx:id="chartContainer" VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
                         <LineChart fx:id="priceChart" VBox.vgrow="ALWAYS" animated="false" legendVisible="false" style="-fx-background-color: transparent;">
                             <xAxis>
-                                <CategoryAxis label="Thời gian (Giờ:Phút:Giây)" />
+                                <!-- ĐỔI THÀNH NUMBER AXIS VÀ TẮT ZERO -->
+                                <NumberAxis fx:id="xAxis" label="Thời gian (Giờ:Phút:Giây)" forceZeroInRange="false" autoRanging="true"/>
                             </xAxis>
                             <yAxis>
-                                <NumberAxis label="Mức giá (VND)" autoRanging="true"/>
+                                <NumberAxis fx:id="yAxis" label="Mức giá (VND)" forceZeroInRange="false" autoRanging="true"/>
                             </yAxis>
                         </LineChart>
-
                     </VBox>
-
                 </VBox>
 
             </children>
         </VBox>
-
     </children>
 </StackPane>
