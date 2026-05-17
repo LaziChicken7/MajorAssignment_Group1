@@ -23,38 +23,42 @@
 
                 <!-- CỘT TRÁI: THÔNG TIN VÀ FORM -->
                 <VBox spacing="15" prefWidth="300">
-                    <VBox spacing="10" alignment="CENTER" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
+
+                    <!-- Xóa nền trắng cứng, chỉ giữ class card -->
+                    <VBox spacing="10" alignment="CENTER" styleClass="card" style="-fx-padding: 20;">
                         <ImageView fx:id="imgAvatar" fitWidth="100" fitHeight="100" />
-                        <Label fx:id="lblName" text="Tên người bán" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <!-- Xóa màu chữ cứng, dùng class section-title -->
+                        <Label fx:id="lblName" text="Tên người bán" styleClass="section-title" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                        <!-- Màu cam của sao giữ nguyên vì nó nổi bật trên mọi nền -->
                         <Label fx:id="lblRating" text="⭐ 0.0/5.0" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
 
-                        <!-- NÚT KẾT BẠN MỚI THÊM -->
+                        <!-- NÚT KẾT BẠN -->
                         <Button fx:id="btnAddFriend" text="➕ Gửi kết bạn" onAction="#handleSendFriendRequest" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 20; -fx-cursor: hand; -fx-margin-top: 10px;"/>
                     </VBox>
 
                     <!-- FORM VIẾT ĐÁNH GIÁ -->
-                    <VBox spacing="10" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
-                        <Label text="Viết đánh giá:" style="-fx-font-weight: bold;"/>
+                    <VBox spacing="10" styleClass="card" style="-fx-padding: 20;">
+                        <Label text="Viết đánh giá:" styleClass="section-title" style="-fx-font-weight: bold;"/>
                         <ComboBox fx:id="cbStar" promptText="Chọn số sao" prefWidth="260" styleClass="modern-combo-box"/>
                         <TextArea fx:id="txtComment" promptText="Nhận xét của bạn..." prefHeight="80" wrapText="true" styleClass="modern-text-area"/>
-                        <Button text="Gửi đánh giá" onAction="#handleSubmitReview" prefWidth="260" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                        <Button text="Gửi đánh giá" onAction="#handleSubmitReview" prefWidth="260" styleClass="btn-primary" style="-fx-font-size: 15px; -fx-padding: 10;"/>
                     </VBox>
                 </VBox>
 
                 <!-- CỘT PHẢI: DANH SÁCH BÌNH LUẬN -->
-                <VBox HBox.hgrow="ALWAYS" spacing="10" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
-                    <Label text="Đánh giá từ người mua" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                <VBox HBox.hgrow="ALWAYS" spacing="10" styleClass="card" style="-fx-padding: 20;">
+                    <Label text="Đánh giá từ người mua" styleClass="section-title" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                     <Separator style="-fx-opacity: 0.3;" />
 
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-width: 0;" VBox.vgrow="ALWAYS">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="edge-to-edge" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-width: 0;" VBox.vgrow="ALWAYS">
                         <content>
                             <VBox fx:id="vboxReviews" spacing="15" />
                         </content>
                     </ScrollPane>
 
-                    <!-- NÚT LOAD MORE (NẰM DƯỚI CÙNG CỘT PHẢI) -->
+                    <!-- NÚT LOAD MORE (Thay vì code cứng màu, dùng luôn class btn-primary) -->
                     <HBox alignment="CENTER">
-                        <Button fx:id="btnLoadMore" text="Tải thêm bình luận ▾" onAction="#loadReviews" style="-fx-background-color: #f1f2f6; -fx-text-fill: #34495e; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                        <Button fx:id="btnLoadMore" text="Tải thêm bình luận ▾" onAction="#loadReviews" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
                     </HBox>
                 </VBox>
 

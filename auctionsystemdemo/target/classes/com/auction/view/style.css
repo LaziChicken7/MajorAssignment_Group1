@@ -1047,6 +1047,16 @@
     -fx-background-color: #18181A;
 }
 
+/* 9. Sửa lỗi chữ ComboBox bị đen khi đang đóng ở Dark Mode */
+.dark-theme .modern-combo-box .list-cell {
+    -fx-text-fill: #E4E4E7 !important;
+}
+
+/* 10. Tiện tay làm sáng luôn cái mũi tên (arrow) trỏ xuống cho đẹp */
+.dark-theme .modern-combo-box .arrow {
+    -fx-background-color: #E4E4E7;
+}
+
 /* ========================================================
    25. CẬP NHẬT MÀU CHỮ & FIX LỖI GÓC VUÔNG ĐEN (DASHBOARD)
    ======================================================== */
@@ -1826,4 +1836,404 @@
 }
 .dark-theme .wallet-action-text:hover {
     -fx-text-fill: #93c5fd;
+}
+
+/* =======================================================
+   35. STYLE CHO BIỂU ĐỒ (LINE CHART) TRONG DARK MODE
+   ======================================================= */
+.dark-theme .chart-plot-background {
+    -fx-background-color: #1E1E1E; /* Nền biểu đồ */
+}
+.dark-theme .axis {
+    -fx-tick-label-fill: #A1A1AA; /* Đổi màu chữ số trên trục X, Y thành xám sáng */
+}
+.dark-theme .axis-label {
+    -fx-text-fill: #E4E4E7; /* Màu tiêu đề "Thời gian", "Mức giá" */
+}
+.dark-theme .chart-vertical-grid-lines,
+.dark-theme .chart-horizontal-grid-lines {
+    -fx-stroke: #2C2C2E; /* Đổi màu các đường kẻ caro trong biểu đồ cho tối lại */
+}
+
+/* =======================================================
+   36. FIX LỖI NÚT QUAY LẠI (BACK BUTTON) Ở DARK MODE
+   ======================================================= */
+
+/* 1. Ép xóa bỏ cái nền hình chữ nhật xám/đen rác mắt khi Hover */
+.dark-theme .back-btn-container:hover,
+.dark-theme .title-container:hover {
+    -fx-background-color: transparent !important;
+}
+
+/* 2. Tạo hiệu ứng Hover tuyệt đẹp: Mũi tên và Chữ phát sáng màu xanh lam */
+.dark-theme .back-btn-container:hover .back-icon {
+    -fx-stroke: #60a5fa !important;
+}
+.dark-theme .back-btn-container:hover .back-title {
+    -fx-text-fill: #60a5fa !important;
+}
+
+/* (Tuỳ chọn) Nếu bạn muốn ở Light Mode nó cũng có hiệu ứng Hover màu xanh: */
+.back-btn-container:hover .back-icon {
+    -fx-stroke: #0A439D !important;
+}
+.back-btn-container:hover .back-title {
+    -fx-text-fill: #0A439D !important;
+}
+
+/* =======================================================
+   37. TẮT HIỆU ỨNG THU NHỎ NÚT KHI BẤM / HOVER
+   ======================================================= */
+.btn-success:pressed, .btn-success:hover,
+.btn-danger:pressed, .btn-danger:hover {
+    -fx-scale-x: 1 !important;
+    -fx-scale-y: 1 !important;
+}
+
+/* Đảm bảo chữ tiêu đề Giao dịch ở Dark Mode cũng sáng lên */
+.dark-theme .section-title {
+    -fx-text-fill: #E4E4E7 !important;
+}
+
+/* =======================================================
+   38. SỬA LỖI LỊCH TÀNG HÌNH & BỎ VIỀN/BO GÓC Ô NHẬP GIỜ
+   ======================================================= */
+
+/* --- 1. LÀM TRÒN KHỐI & BỎ VIỀN Ô NHẬP GIỜ --- */
+.dark-theme .modern-input-small {
+    -fx-background-color: #2A2A2D !important; /* Nền xám nhạt nổi bật lên trên nền đen */
+    -fx-background-radius: 10 !important;     /* Bo góc tròn trịa */
+    -fx-border-width: 0 !important;           /* XÓA VIỀN */
+    -fx-border-color: transparent !important;
+    -fx-text-fill: #E4E4E7 !important;
+    -fx-prompt-text-fill: #71717A !important;
+}
+
+/* Hiệu ứng khi bấm vào ô giờ để gõ số */
+.dark-theme .modern-input-small:focused {
+    -fx-background-color: #1E1E1E !important;
+    -fx-border-width: 1.5px !important;
+    -fx-border-color: #60a5fa !important;    /* Viền xanh lam phát sáng */
+    -fx-border-radius: 10 !important;
+}
+
+/* Ô text hiển thị Ngày của DatePicker */
+.dark-theme .custom-date-picker > .text-field {
+    -fx-background-color: #2A2A2D !important;
+    -fx-background-radius: 10 !important;
+    -fx-border-width: 0 !important;
+    -fx-text-fill: #E4E4E7 !important;
+    -fx-prompt-text-fill: #71717A !important;
+}
+.dark-theme .custom-date-picker > .text-field:focused {
+    -fx-background-color: #1E1E1E !important;
+    -fx-border-width: 1.5px !important;
+    -fx-border-color: #60a5fa !important;
+}
+.dark-theme .custom-date-picker .arrow-button .arrow {
+    -fx-background-color: #A1A1AA;
+}
+
+
+/* --- 2. SỬA LỖI NỀN LỊCH TRẮNG KHIẾN CHỮ BỊ TÀNG HÌNH --- */
+
+/* Ép nền tổng và nền của LƯỚI LỊCH thành màu đen */
+.dark-theme .date-picker-popup,
+.dark-theme .date-picker-popup .calendar-grid {
+    -fx-background-color: #1E1E1E !important;
+    -fx-border-color: #2A2A2A !important;
+}
+
+/* Thanh Tiêu đề (Chứa Tháng và Năm) */
+.dark-theme .date-picker-popup .month-year-pane {
+    -fx-background-color: #18181A !important;
+}
+.dark-theme .date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #FFFFFF !important;
+}
+.dark-theme .date-picker-popup .month-year-pane .left-button .left-arrow,
+.dark-theme .date-picker-popup .month-year-pane .right-button .right-arrow {
+    -fx-background-color: #A1A1AA;
+}
+.dark-theme .date-picker-popup .month-year-pane .left-button:hover .left-arrow,
+.dark-theme .date-picker-popup .month-year-pane .right-button:hover .right-arrow {
+    -fx-background-color: #FFFFFF;
+}
+
+/* Dòng chữ T2, T3, T4... (Thứ trong tuần) */
+.dark-theme .date-picker-popup .day-name-cell {
+    -fx-background-color: #1E1E1E !important; /* Xóa nền trắng mặc định của JavaFX */
+    -fx-text-fill: #60a5fa !important;        /* Chữ màu xanh cho nổi bật */
+    -fx-font-weight: bold;
+}
+
+/* Xóa cái nền rác ở góc lịch */
+.dark-theme .date-picker-popup .week-number-cell {
+    -fx-background-color: #1E1E1E !important;
+}
+
+/* CÁC Ô NGÀY BÌNH THƯỜNG (1, 2, 3...) */
+
+.dark-theme .date-picker-popup .calendar-grid {
+    -fx-background-color: transparent !important; /* Tàng hình cái nền tạo viền */
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+}
+
+.dark-theme .date-picker-popup .day-cell {
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-background-insets: 0 !important; /* PHÉP THUẬT XÓA VIỀN NẰM Ở ĐÂY */
+    -fx-background-color: transparent !important; /* Để nền tàng hình, chỉ hiện số */
+    -fx-text-fill: #E4E4E7 !important;
+}
+
+/* Ngày cũ/mới bị mờ đi */
+.dark-theme .date-picker-popup .day-cell:disabled {
+    -fx-opacity: 0.3 !important;
+}
+
+/* Lướt chuột vào 1 ngày (Hover) */
+.dark-theme .date-picker-popup .day-cell:hover {
+    -fx-background-color: #2C2C2E !important;
+    -fx-background-insets: 2 !important; /* Thu nhỏ viên bi lại một xíu cho đẹp */
+    -fx-background-radius: 50 !important; /* Tròn xoe */
+}
+
+/* Ngày được chọn */
+.dark-theme .date-picker-popup .day-cell:selected {
+    -fx-background-color: #0A439D !important;
+    -fx-background-insets: 2 !important;
+    -fx-background-radius: 50 !important;
+}
+
+/* Ngày Hôm Nay */
+.dark-theme .date-picker-popup .day-cell:today {
+    -fx-background-color: transparent !important;
+    -fx-border-color: #60a5fa !important;
+    -fx-border-radius: 20 !important;
+    -fx-text-fill: #60a5fa !important;
+    -fx-font-weight: bold;
+}
+
+/* =======================================================
+   39. ĐỒNG BỘ DARK MODE CHO POPUP HỢP ĐỒNG (DIALOG)
+   ======================================================= */
+
+/* 1. Ép nền cửa sổ Popup thành màu Đen/Xám sang trọng */
+.dialog-pane.dark-theme,
+.dark-theme .dialog-pane {
+    -fx-background-color: #1E1E1E !important;
+}
+
+/* Ép thanh ButtonBar phía dưới mất cái nền trắng mặc định đi */
+.dialog-pane.dark-theme > .button-bar > .container,
+.dark-theme .dialog-pane > .button-bar > .container {
+    -fx-background-color: #1E1E1E !important;
+}
+
+/* 2. Cấu hình cho cái khung chứa chữ Hợp Đồng (.contract-scroll-pane) */
+.contract-scroll-pane,
+.contract-scroll-pane .viewport {
+    -fx-background-color: transparent !important;
+    -fx-background: transparent !important;
+}
+.contract-scroll-pane {
+    -fx-border-color: #ecf0f1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 5;
+}
+
+/* Viền khung ở chế độ Dark Mode sẽ tối lại */
+.dark-theme .contract-scroll-pane {
+    -fx-border-color: #2C2C2E;
+}
+
+/* 3. Tút lại nhan sắc cho Thanh Cuộn Dọc (Scrollbar) */
+.contract-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8; /* Thanh cuộn mỏng tinh tế */
+}
+.contract-scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.contract-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(149, 165, 166, 0.4);
+    -fx-background-radius: 10;
+}
+.contract-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #3b5998;
+}
+
+/* Màu thanh cuộn ở chế độ Dark Mode */
+.dark-theme .contract-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+.dark-theme .contract-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #60a5fa;
+}
+
+/* =======================================================
+   40. HOÀN THIỆN KHUNG CHAT (MESSENGER STYLE)
+   ======================================================= */
+
+/* --- 1. HIỆU ỨNG HOVER BẠN BÈ Ở CỘT TRÁI --- */
+.friend-chat-item {
+    -fx-padding: 10 15;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-background-color: transparent;
+}
+/* Sáng: Hover xám nhạt */
+.friend-chat-item:hover {
+    -fx-background-color: #f1f2f6;
+}
+/* Tối: Hover xám đen nổi bật */
+.dark-theme .friend-chat-item:hover {
+    -fx-background-color: #2C2C2E;
+}
+
+/* --- 2. BONG BÓNG CHAT --- */
+/* Của Tôi (Mặc định Xanh Dương) */
+.chat-bubble-me {
+    -fx-background-color: #0A439D;
+    -fx-text-fill: white;
+    -fx-padding: 10 15;
+    -fx-background-radius: 15 15 0 15;
+    -fx-font-size: 14.5px;
+}
+.dark-theme .chat-bubble-me {
+    -fx-background-color: #0A439D; /* Trả về màu xanh chủ đạo của App */
+    -fx-text-fill: white;
+}
+
+/* Của Người Gửi (Mặc định Xám nhạt) */
+.chat-bubble-other {
+    -fx-background-color: #f1f2f6;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 10 15;
+    -fx-background-radius: 15 15 15 0;
+    -fx-font-size: 14.5px;
+}
+/* Chuyển thành xám tối nhẹ giống Messenger khi bật Dark Mode */
+.dark-theme .chat-bubble-other {
+    -fx-background-color: #3E4042;
+    -fx-text-fill: #E4E4E7;
+}
+
+/* --- 3. MENU ĐÍNH KÈM (POPUP DẤU CỘNG) --- */
+.chat-attachment-item {
+    -fx-padding: 8 15;
+    -fx-background-color: transparent;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-pref-width: 200;
+}
+.chat-attachment-label {
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+}
+.chat-attachment-icon {
+    -fx-fill: #333333;
+}
+
+/* Hiệu ứng Hover chung */
+.chat-attachment-item:hover {
+    -fx-background-color: #0084FF;
+}
+.chat-attachment-item:hover .chat-attachment-label {
+    -fx-text-fill: white;
+}
+.chat-attachment-item:hover .chat-attachment-icon {
+    -fx-fill: white;
+}
+
+
+/* TRẠNG THÁI ĐANG ĐƯỢC CHỌN ĐỂ CHAT (ACTIVE) */
+.friend-chat-item.active-chat {
+    -fx-background-color: #EAF3FF; /* Màu xanh nhạt nhẹ nhàng ở Light Mode */
+}
+
+.dark-theme .friend-chat-item.active-chat {
+    -fx-background-color: #252F3C; /* Màu xanh đen đặc trưng của Messenger Dark Mode */
+}
+
+/* Cân bằng màu Menu Đính kèm trong Dark Mode */
+.dark-theme .chat-attachment-label {
+    -fx-text-fill: #E4E4E7;
+}
+.dark-theme .chat-attachment-icon {
+    -fx-fill: #E4E4E7;
+}
+
+/* =======================================================
+   41. HIỆU ỨNG THẺ TÌM KIẾM SẢN PHẨM
+   ======================================================= */
+.auction-search-card {
+    -fx-transition: 0.2s;
+    -fx-border-color: transparent;
+    -fx-border-radius: 15;     /* THÊM DÒNG NÀY ĐỂ BO TRÒN VIỀN MÀU XANH */
+    -fx-background-radius: 15; /* THÊM DÒNG NÀY ĐỂ BO TRÒN NỀN TRẮNG */
+}
+
+/* Hiệu ứng Hover ở Light Mode */
+.auction-search-card:hover {
+    -fx-border-color: #0A439D;
+    -fx-border-width: 1.5px;
+    -fx-translate-y: -5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.2), 15, 0, 0, 8);
+}
+
+/* Hiệu ứng Hover ở Dark Mode */
+.dark-theme .auction-search-card:hover {
+    -fx-border-color: #60a5fa;
+    -fx-border-width: 1.5px;
+    -fx-translate-y: -5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(96, 165, 250, 0.3), 15, 0, 0, 8);
+}
+
+/* Cập nhật màu chữ hiển thị Từ khóa tìm kiếm cho hài hòa Dark Mode */
+.dark-theme .label[style*="-fx-text-fill: #0A439D;"] {
+    -fx-text-fill: #60a5fa !important;
+}
+
+/* =======================================================
+   42. BADGE THÔNG BÁO (BONG BÓNG ĐỎ CHỨA SỐ)
+   ======================================================= */
+.notification-badge {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 1 5 1 5;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    /* Bóng đổ nhẹ cho nó nổi bật hẳn lên */
+    -fx-effect: dropshadow(three-pass-box, rgba(231, 76, 60, 0.4), 5, 0, 0, 2);
+}
+
+/* =======================================================
+   43. HIỆU ỨNG THẺ DẠNG HÀNG NGANG (ROW CARD)
+   ======================================================= */
+.auction-row-card {
+    -fx-transition: 0.2s;
+    -fx-border-color: transparent;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+}
+
+/* Nổi bật khối ở Light Mode */
+.auction-row-card:hover {
+    -fx-border-color: #0A439D;
+    -fx-border-width: 1.5px;
+    -fx-translate-y: -3px; /* Nảy nhẹ khối lên 3px */
+    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.15), 15, 0, 0, 5);
+}
+
+/* Nổi bật khối ở Dark Mode */
+.dark-theme .auction-row-card:hover {
+    -fx-border-color: #60a5fa;
+    -fx-effect: dropshadow(three-pass-box, rgba(96, 165, 250, 0.2), 15, 0, 0, 5);
 }

@@ -40,14 +40,16 @@ public interface AuctionRepository extends JpaRepository<Auction, String> {
     Optional<Auction> findByIdWithLock(String id);
 
     // =========================================================
-    // FIX LỖI MẤT DỮ LIỆU ĐA HÌNH:
-    // Ép Spring Boot phải truy xuất THẲNG vào dữ liệu thật của class con
-    // (Art, Electronic...) thay vì dùng bản sao giả (Proxy).
+    // Đã bổ sung "bidProduct.imageUrls" để tránh lỗi N+1 Query
     // =========================================================
-    @EntityGraph(attributePaths = {"bidProduct"})
+    @EntityGraph(attributePaths = {"bidProduct", "bidProduct.imageUrls", "seller"})
     List<Auction> findAll();
 
-    // Tìm đấu giá theo tên sản phẩm chứa từ khóa
-    @EntityGraph(attributePaths = {"bidProduct"})
+    @EntityGraph(attributePaths = {"bidProduct", "bidProduct.imageUrls", "seller"})
     List<Auction> findByBidProductNameContainingIgnoreCase(String keyword);
+
+    // Thêm hàm lấy riêng sản phẩm của 1 người bán (Kèm luôn EntityGraph để tránh N+1)
+    @EntityGraph(attributePaths = {"bidProduct", "seller"})
+    @Query("SELECT a FROM Auction a WHERE a.seller.userName = :username")
+    List<Auction> findBySellerUserName(@Param("username") String username);
 }

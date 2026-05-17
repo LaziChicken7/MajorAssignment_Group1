@@ -62,45 +62,42 @@ public class TransactionController {
 
         if (list == null || list.isEmpty()) {
             Label emptyLbl = new Label("Không có giao dịch nào.");
-            emptyLbl.setStyle("-fx-font-size: 16px; -fx-text-fill: #888; -fx-font-style: italic;");
+            emptyLbl.getStyleClass().add("muted-text");
+            emptyLbl.setStyle("-fx-font-size: 16px; -fx-font-style: italic;");
             container.getChildren().add(emptyLbl);
             return;
         }
 
         for (int i = 0; i < list.size(); i++) {
             TransactionHistoryResponse tx = list.get(i);
-
-            // Chống Null
             String status = tx.status != null ? tx.status : "FAILED";
             String itemName = tx.itemName != null ? tx.itemName : "Sản phẩm ẩn";
-
             String colorHex;
             String statusText;
 
             if ("SUCCESS".equals(status)) {
-                colorHex = "#00C853";
-                statusText = "Giao dịch thành công";
+                colorHex = "#00C853"; statusText = "Giao dịch thành công";
             } else if ("CANCELLED".equals(status)) {
-                colorHex = "#e74c3c";
-                statusText = "Đã từ chối / Hủy giao dịch";
+                colorHex = "#e74c3c"; statusText = "Đã từ chối / Hủy giao dịch";
             } else {
-                colorHex = "#FF0000";
-                statusText = "Trượt đấu giá";
+                colorHex = "#FF0000"; statusText = "Trượt đấu giá";
             }
 
             VBox card = new VBox(15);
-            card.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 15; -fx-padding: 20;");
+            card.getStyleClass().add("custom-row"); // DÙNG CLASS ĐỔI MÀU NỀN TỰ ĐỘNG
+            card.setStyle("-fx-padding: 20;");
 
             HBox headerBox = new HBox(15);
             headerBox.setAlignment(Pos.CENTER_LEFT);
 
-            // SỬA ĐOẠN NÀY: Cắt lấy 4 ký tự đầu của itemId (Giống hệt trang Đấu giá)
             String shortId = tx.itemId != null && tx.itemId.length() >= 4 ? tx.itemId.substring(0, 4).toUpperCase() : "N/A";
             Label lblId = new Label("SP" + shortId);
-            lblId.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;");
+            lblId.getStyleClass().add("row-title-bold");
+            lblId.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
 
             Label lblName = new Label(itemName);
-            lblName.setStyle("-fx-font-size: 18px; -fx-text-fill: #333333;");
+            lblName.getStyleClass().add("row-text-normal");
+            lblName.setStyle("-fx-font-size: 18px;");
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -113,33 +110,65 @@ public class TransactionController {
             HBox detailBox = new HBox(20);
             detailBox.setAlignment(Pos.CENTER_LEFT);
 
-            VBox imagePlaceholder = new VBox();
-            imagePlaceholder.setPrefSize(100, 90);
-            imagePlaceholder.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-radius: 10;");
+            // ==================================================
+            // --- XỬ LÝ HIỂN THỊ ẢNH SẢN PHẨM CÓ BO GÓC TRÒN ---
+            // ==================================================
+            javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView();
+            imgView.setFitWidth(100);
+            imgView.setFitHeight(90);
+
+            // Kiểm tra link ảnh từ Backend
+            String imgPath = "https://via.placeholder.com/100x90?text=No+Image";
+            try {
+                // (Lưu ý: Model TransactionHistoryResponse của bạn cần có khai báo biến imageUrl)
+                if (tx.imageUrl != null && !tx.imageUrl.isEmpty()) {
+                    imgPath = ApiService.BASE_URL + tx.imageUrl;
+                }
+            } catch (Exception e) {}
+
+            imgView.setImage(new javafx.scene.image.Image(imgPath, true));
+
+            // Bo tròn 15px cho các góc của ảnh
+            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(100, 90);
+            clip.setArcWidth(15);
+            clip.setArcHeight(15);
+            imgView.setClip(clip);
+
+            // Bọc ảnh vào VBox để đẹp hơn
+            VBox imageBox = new VBox(imgView);
+            imageBox.setPrefSize(100, 90);
+            imageBox.setStyle("-fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+            // ==================================================
 
             VBox infoColumn = new VBox(8);
             infoColumn.setStyle("-fx-font-size: 15px;");
 
             infoColumn.getChildren().addAll(
-                    createDetailRow("Ngày ghi nhận:", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), "#333333"),
-                    createDetailRow("Địa chỉ giao hàng:", "Chưa cập nhật (Lấy từ Profile)", "#333333"),
+                    createDetailRow("Ngày ghi nhận:", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), null),
+                    createDetailRow("Địa chỉ giao hàng:", "Chưa cập nhật", null),
                     createDetailRow("Trạng thái:", statusText, colorHex)
             );
 
-            detailBox.getChildren().addAll(imagePlaceholder, infoColumn);
+            // Đã đổi từ imagePlaceholder thành imageBox
+            detailBox.getChildren().addAll(imageBox, infoColumn);
             card.getChildren().addAll(headerBox, detailBox);
             container.getChildren().add(card);
         }
     }
 
-    private HBox createDetailRow(String title, String value, String valueColor) {
+    private HBox createDetailRow(String title, String value, String customColor) {
         HBox row = new HBox(10);
         Label lblTitle = new Label(title);
         lblTitle.setPrefWidth(200);
-        lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #333333;");
+        lblTitle.getStyleClass().add("muted-text"); // Chữ tiêu đề xám mờ
+        lblTitle.setStyle("-fx-font-weight: bold;");
 
         Label lblValue = new Label(value);
-        lblValue.setStyle("-fx-text-fill: " + valueColor + "; " + ("#333333".equals(valueColor) ? "" : "-fx-font-weight: bold;"));
+        if (customColor == null) {
+            lblValue.getStyleClass().add("row-title-bold"); // Chữ nội dung tự động Đen/Trắng
+        } else {
+            lblValue.setStyle("-fx-text-fill: " + customColor + "; -fx-font-weight: bold;"); // Ép màu Xanh/Đỏ
+        }
 
         row.getChildren().addAll(lblTitle, lblValue);
         return row;

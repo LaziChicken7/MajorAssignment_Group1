@@ -2,14 +2,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.*?>
-<?import javafx.geometry.Insets?>
 
+<!-- Dùng HBox để xếp ảnh bên trái, thông tin bên phải -->
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.addauctionitem.MyAuctionItemController"
       spacing="20" alignment="CENTER_LEFT"
-      style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+      styleClass="custom-row, auction-row-card" style="-fx-padding: 20; -fx-cursor: hand;">
 
-    <!-- CỘT TRÁI: ẢNH ĐẠI DIỆN SẢN PHẨM -->
-    <VBox alignment="CENTER" style="-fx-border-color: #ddd; -fx-border-radius: 10; -fx-padding: 5;" minWidth="130" minHeight="130">
+    <!-- CỘT TRÁI: ẢNH SẢN PHẨM -->
+    <VBox alignment="CENTER" minWidth="130" minHeight="130">
         <ImageView fx:id="imgThumbnail" fitHeight="120.0" fitWidth="120.0" preserveRatio="true">
             <image>
                 <Image url="https://via.placeholder.com/120?text=Loading..." />
@@ -17,41 +17,38 @@
         </ImageView>
     </VBox>
 
-    <!-- CỘT PHẢI: FORM GIAO DIỆN CŨ CỦA BẠN (Giữ nguyên cấu trúc) -->
+    <!-- CỘT PHẢI: THÔNG TIN SẢN PHẨM -->
     <VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
 
-        <!-- Dòng 1: ID và Tên -->
-        <HBox spacing="20" alignment="CENTER_LEFT">
-            <Label fx:id="lblId" text="SP1" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #000;"/>
-            <Label fx:id="lblName" text="Auction Name" style="-fx-font-size: 18px; -fx-text-fill: #333;"/>
+        <!-- Dòng 1: ID, Tên và Trạng thái -->
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Label fx:id="lblId" text="SP1" styleClass="row-title-bold" style="-fx-font-size: 18px;"/>
+            <Label fx:id="lblName" text="Auction Name" styleClass="row-text-normal" style="-fx-font-size: 18px;"/>
+
+            <Region HBox.hgrow="ALWAYS" />
+
+            <Label text="Trạng thái:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
+            <Label fx:id="lblStatus" text="Đang tải..." style="-fx-font-size: 15px; -fx-font-weight: bold;"/>
         </HBox>
 
         <!-- Dòng 2: Giá và Thời gian -->
         <HBox alignment="CENTER_LEFT">
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Giá hiện tại:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                <Label fx:id="lblPrice" text="0 VND" style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+                <Label text="Giá hiện tại:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
+                <Label fx:id="lblPrice" text="0 VND" style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;"/>
+
+                <!-- Nút Bắt đầu phiên (Mặc định ẩn) -->
+                <Button fx:id="btnStartAuction" text="▶ Bắt đầu phiên" onAction="#handleStartAuction"
+                        visible="false" managed="false" styleClass="btn-success"
+                        style="-fx-font-size: 14px; -fx-padding: 5 15; -fx-background-radius: 15;"/>
             </HBox>
 
             <Region HBox.hgrow="ALWAYS"/>
 
             <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Label text="Thời gian:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                <Label fx:id="lblTime" text="00:00:00" style="-fx-background-color: #f1c40f; -fx-text-fill: #000; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+                <Label text="Thời gian:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
+                <Label fx:id="lblTime" text="00:00:00" style="-fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: white;"/>
             </HBox>
-        </HBox>
-
-        <!-- Dòng 3: Trạng thái và Nút bấm -->
-        <HBox alignment="CENTER_LEFT" spacing="15">
-            <Label text="Trạng thái:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <Label fx:id="lblStatus" text="OPEN" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <!-- Nút Bắt đầu phiên (Mặc định ẩn, sẽ do Controller quyết định hiển thị) -->
-            <Button fx:id="btnStartAuction" text="▶ Bắt đầu phiên đấu giá" onAction="#handleStartAuction"
-                    visible="false" managed="false"
-                    style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 10; -fx-padding: 5 15;"/>
         </HBox>
 
     </VBox>

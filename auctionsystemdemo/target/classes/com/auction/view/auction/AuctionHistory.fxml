@@ -25,14 +25,18 @@
 
                 <!-- BẢNG DỮ LIỆU & PHÂN TRANG -->
                 <VBox VBox.vgrow="ALWAYS" style="-fx-padding: 5 5 20 5;">
-                    <VBox VBox.vgrow="ALWAYS" spacing="10" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                    <!-- Đã xóa nền trắng cứng, giữ lại class card -->
+                    <VBox VBox.vgrow="ALWAYS" spacing="10" styleClass="card" style="-fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
 
                         <!-- TableView -->
                         <TableView fx:id="tableHistory" VBox.vgrow="ALWAYS" styleClass="modern-table" style="-fx-font-size: 14.5px;">
                             <columns>
-                                <TableColumn fx:id="colStt" text="STT" prefWidth="60" style="-fx-alignment: CENTER; -fx-font-weight: bold; -fx-text-fill: #95a5a6;" />
-                                <TableColumn fx:id="colTime" text="Thời gian" prefWidth="200" style="-fx-alignment: CENTER; -fx-text-fill: #7f8c8d;" />
-                                <TableColumn fx:id="colUser" text="Người tham gia" prefWidth="250" style="-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                                <!-- Đã xóa các đoạn -fx-text-fill -->
+                                <TableColumn fx:id="colStt" text="STT" prefWidth="60" style="-fx-alignment: CENTER; -fx-font-weight: bold;" />
+                                <TableColumn fx:id="colTime" text="Thời gian" prefWidth="200" style="-fx-alignment: CENTER;" />
+                                <TableColumn fx:id="colUser" text="Người tham gia" prefWidth="250" style="-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;" />
+
+                                <!-- Giữ lại màu cam cho cột tiền để tạo điểm nhấn -->
                                 <TableColumn fx:id="colAmount" text="Mức giá (VND)" prefWidth="200" style="-fx-alignment: CENTER-RIGHT; -fx-font-weight: bold; -fx-text-fill: #e67e22; -fx-font-size: 15px;" />
                             </columns>
                             <columnResizePolicy>
@@ -40,7 +44,6 @@
                             </columnResizePolicy>
                         </TableView>
 
-                        <!-- Phân trang: Đã gắn thêm class modern-pagination -->
                         <Pagination fx:id="pagination" maxPageIndicatorCount="5" styleClass="modern-pagination"/>
 
                     </VBox>

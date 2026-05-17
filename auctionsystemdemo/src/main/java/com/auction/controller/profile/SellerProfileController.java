@@ -93,7 +93,12 @@ public class SellerProfileController {
                         List<SellerReviewModel> list = ApiService.gson.fromJson(apiRes.result, listType);
 
                         if (list == null || list.isEmpty()) {
-                            if (currentPage == 0) vboxReviews.getChildren().add(new Label("Chưa có đánh giá nào."));
+                            if (currentPage == 0) {
+                                Label emptyLabel = new Label("Chưa có đánh giá nào.");
+                                emptyLabel.getStyleClass().add("muted-text"); // Gắn class để chữ xám ở Light, sáng ở Dark
+                                emptyLabel.setStyle("-fx-font-size: 15px; -fx-font-style: italic;");
+                                vboxReviews.getChildren().add(emptyLabel);
+                            }
                             btnLoadMore.setVisible(false); // Hết dữ liệu thì ẩn nút đi
                         } else {
                             for (SellerReviewModel r : list) {
@@ -114,7 +119,9 @@ public class SellerProfileController {
 
     private Node createReviewNode(SellerReviewModel r) {
         VBox box = new VBox(5);
-        box.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 10;");
+        // Xóa màu nền cứng, dùng class custom-row thần thánh của bạn
+        box.getStyleClass().add("custom-row");
+        box.setStyle("-fx-padding: 15;");
 
         HBox header = new HBox(10);
         header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -126,23 +133,29 @@ public class SellerProfileController {
 
         VBox info = new VBox(2);
         Label name = new Label(r.reviewer.fullName != null ? r.reviewer.fullName : r.reviewer.userName);
-        name.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
-        HBox starsBox = new HBox(3); // Khoảng cách giữa các sao là 3px
+        // Dùng class row-title-bold
+        name.getStyleClass().add("row-title-bold");
+        name.setStyle("-fx-font-size: 15px;");
+
+        HBox starsBox = new HBox(3);
         for (int i = 0; i < r.star; i++) {
             starsBox.getChildren().add(createStar());
         }
 
-        info.getChildren().addAll(name, starsBox); // Nhét khối sao vào Info
+        info.getChildren().addAll(name, starsBox);
 
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
         Label date = new Label(r.createdAt.replace("T", " ").substring(0, 16));
-        date.setStyle("-fx-text-fill: #95a5a6; -fx-font-size: 12px;");
+        // Dùng class row-text-muted
+        date.getStyleClass().add("row-text-muted");
 
         header.getChildren().addAll(avt, info, spacer, date);
 
         Label cmt = new Label(r.comment);
         cmt.setWrapText(true);
-        cmt.setStyle("-fx-text-fill: #34495e; -fx-font-size: 14px; -fx-padding: 10 0 0 0;");
+        // Dùng class row-text-normal
+        cmt.getStyleClass().add("row-text-normal");
+        cmt.setStyle("-fx-padding: 10 0 0 0;");
 
         box.getChildren().addAll(header, cmt);
         return box;

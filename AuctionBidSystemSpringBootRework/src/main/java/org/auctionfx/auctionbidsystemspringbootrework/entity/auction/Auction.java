@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.entity.auction;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.base.BaseEntity;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.item.Item;
@@ -48,6 +49,7 @@ public class Auction extends BaseEntity {
     // MQH Một nhiều (Một Auction với nhiều lượt trả giá)
     // Nếu Auction bị xóa, toàn bộ Bid cũng bị xóa theo
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore // THÊM DÒNG NÀY: Giấu danh sách lịch sử đi khi gọi API danh sách
     private List<BidTransaction> bidTransactions = new ArrayList<>();
 
     // THÊM: MQH Một nhiều (Một Auction có nhiều người cài đặt Autobid)

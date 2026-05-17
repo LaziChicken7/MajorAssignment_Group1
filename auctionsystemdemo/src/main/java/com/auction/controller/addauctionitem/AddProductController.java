@@ -179,75 +179,91 @@ public class AddProductController {
         dialog.setTitle("Điều khoản và Dịch vụ");
 
         DialogPane dialogPane = dialog.getDialogPane();
-        dialogPane.setStyle("-fx-background-color: white; -fx-font-family: 'Segoe UI', Arial, sans-serif;");
 
         // ========================================================
-        // FIX LỖI THANH CUỘN: Lấy CSS từ cả Scene và Root Node
+        // PHÉP THUẬT 1: ÉP POPUP NẠP FILE CSS & DARK MODE TỪ MÀN HÌNH MẸ
         // ========================================================
+        // Truy ngược lên Node gốc cùng để lấy file style.css truyền vào Popup
+        javafx.scene.Parent parent = txtProductName.getParent();
+        while (parent != null) {
+            if (!parent.getStylesheets().isEmpty()) {
+                dialogPane.getStylesheets().addAll(parent.getStylesheets());
+            }
+            parent = parent.getParent();
+        }
+
         if (txtProductName.getScene() != null) {
-            // 1. Lấy CSS nếu nó được gắn ở Scene
             dialogPane.getStylesheets().addAll(txtProductName.getScene().getStylesheets());
+            if (txtProductName.getScene().getRoot() != null) {
+                dialogPane.getStylesheets().addAll(txtProductName.getScene().getRoot().getStylesheets());
 
-            // 2. Lấy CSS nếu nó được khai báo trực tiếp trong file FXML (Root Node)
-            javafx.scene.Parent root = txtProductName.getScene().getRoot();
-            if (root != null) {
-                dialogPane.getStylesheets().addAll(root.getStylesheets());
+                // Nếu App đang ở Dark Mode -> Ép Popup bật Dark Mode
+                if (txtProductName.getScene().getRoot().getStyleClass().contains("dark-theme")) {
+                    dialogPane.getStyleClass().add("dark-theme");
+                }
             }
         }
 
+        // Gắn class "card" để Popup tự đổi màu nền Đen/Trắng
+        dialogPane.getStyleClass().add("card");
+        dialogPane.setStyle("-fx-font-family: 'Segoe UI', Arial, sans-serif;");
+
         // Tiêu đề của Dialog
         Label lblTitle = new Label("HỢP ĐỒNG ĐĂNG BÁN SẢN PHẨM");
-        lblTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0A439D;");
+        lblTitle.getStyleClass().add("section-title");
+        lblTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         lblTitle.setMaxWidth(Double.MAX_VALUE);
         lblTitle.setAlignment(javafx.geometry.Pos.CENTER);
 
         // Nội dung hợp đồng
         Label lblContent = new Label(getContractText());
         lblContent.setWrapText(true);
-        lblContent.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-line-spacing: 6px; -fx-padding: 10 15 10 10;");
+        lblContent.getStyleClass().add("row-text-normal");
+        lblContent.setStyle("-fx-font-size: 14.5px; -fx-line-spacing: 6px; -fx-padding: 10 15 10 10;");
         lblContent.setMaxWidth(560);
 
-        // Bọc nội dung vào ScrollPane
+        // Khung cuộn văn bản
         ScrollPane scrollPane = new ScrollPane(lblContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefSize(600, 350);
-
-        // Tắt thanh cuộn ngang (chỉ giữ thanh cuộn dọc)
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.getStyleClass().add("contract-scroll-pane");
 
-        // Gán class CSS "scroll-pane-table" (Tương ứng Mục 16 trong file CSS của bạn)
-        scrollPane.getStyleClass().add("scroll-pane-table");
-
-        // Xóa viền đen của ScrollPane
-        scrollPane.setStyle("-fx-background: white; -fx-background-color: white; -fx-border-color: #ecf0f1; -fx-border-radius: 10; -fx-background-radius: 10;");
+        // Ép viền bo tròn trực tiếp phòng hờ CSS tải chậm
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: #ecf0f1; -fx-border-radius: 10; -fx-padding: 5;");
 
         // Checkbox xác nhận
         CheckBox chkPopupAgree = new CheckBox("Tôi xác nhận đã đọc và đồng ý với các điều khoản dịch vụ");
         chkPopupAgree.setStyle("-fx-font-size: 15px; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 10 0 0 0;");
 
-        // Gom nhóm layout
         VBox dialogContent = new VBox(15);
         dialogContent.setStyle("-fx-padding: 20;");
         dialogContent.getChildren().addAll(lblTitle, scrollPane, chkPopupAgree);
         dialogPane.setContent(dialogContent);
 
-        // 3. Thêm nút Đồng ý và Hủy
+        // 3. Khởi tạo cụm nút bấm
         ButtonType btnTypeAgree = new ButtonType("Đồng ý", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnTypeCancel = new ButtonType("Hủy", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialogPane.getButtonTypes().addAll(btnTypeAgree, btnTypeCancel);
 
-        // 4. CUSTOM CSS CHO NÚT HÌNH VIÊN THUỐC
         Button btnAgree = (Button) dialogPane.lookupButton(btnTypeAgree);
         Button btnCancel = (Button) dialogPane.lookupButton(btnTypeCancel);
 
-        btnCancel.setStyle("-fx-background-color: #f1f2f6; -fx-text-fill: #57606f; -fx-background-radius: 25; -fx-padding: 10 30; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;");
+        // ========================================================
+        // PHÉP THUẬT 2: BO TRÒN NÚT (VIÊN THUỐC) VÀ TÔ MÀU TRỰC TIẾP
+        // ========================================================
+        // Nút Hủy (Màu đỏ)
+        btnCancel.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 14.5px; -fx-font-weight: bold; -fx-padding: 8 25; -fx-background-radius: 20; -fx-cursor: hand;");
 
-        String disableStyle = "-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 10 30; -fx-font-size: 14px; -fx-font-weight: bold;";
-        String enableStyle = "-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 10 30; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(10,67,157,0.4), 8, 0, 0, 3);";
+        // Style nút Đồng ý lúc CHƯA TÍCH (Màu xám)
+        String disableStyle = "-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-font-size: 14.5px; -fx-font-weight: bold; -fx-padding: 8 25; -fx-background-radius: 20;";
+        // Style nút Đồng ý lúc ĐÃ TÍCH (Màu xanh dương)
+        String enableStyle  = "-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-size: 14.5px; -fx-font-weight: bold; -fx-padding: 8 25; -fx-background-radius: 20; -fx-cursor: hand;";
 
         btnAgree.setStyle(disableStyle);
         btnAgree.setDisable(true);
 
+        // Đổi màu viên thuốc ngay khi ấn Checkbox
         chkPopupAgree.selectedProperty().addListener((observable, oldValue, newValue) -> {
             btnAgree.setDisable(!newValue);
             btnAgree.setStyle(newValue ? enableStyle : disableStyle);
@@ -256,7 +272,7 @@ public class AddProductController {
         dialog.setHeaderText(null);
         dialog.setGraphic(null);
 
-        // 5. Hiển thị Popup và xử lý kết quả
+        // 4. Hiển thị Popup và xử lý kết quả
         dialog.showAndWait().ifPresent(response -> {
             if (response == btnTypeAgree) {
                 processActualSubmission(name, desc, priceStr);

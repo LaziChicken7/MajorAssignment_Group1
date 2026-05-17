@@ -9,10 +9,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 
 public class MyAuctionItemController {
 
-    @FXML private ImageView imgThumbnail;
+    @FXML private ImageView imgThumbnail; // ĐÃ KHÔI PHỤC ẢNH
     @FXML private Label lblId;
     @FXML private Label lblName;
     @FXML private Label lblPrice;
@@ -27,70 +28,90 @@ public class MyAuctionItemController {
         if (item == null || item.bidProduct == null) return;
 
         // 1. Dữ liệu cơ bản
-        lblId.setText(item.bidProduct.id.substring(0, 8).toUpperCase());
+        String shortId = item.bidProduct.id != null && item.bidProduct.id.length() >= 4 ? item.bidProduct.id.substring(0, 4).toUpperCase() : "N/A";
+        lblId.setText("SP" + shortId);
         lblName.setText(item.bidProduct.name);
         lblPrice.setText(String.format("%,.0f VND", item.highestBid).replace(",", "."));
 
-        // 2. Logic Ảnh đại diện
+        // ==========================================
+        // 2. LOGIC LOAD ẢNH SIÊU TỐC VÀ BO GÓC TRÒN
+        // ==========================================
+        imgThumbnail.setCache(true);
+        imgThumbnail.setCacheHint(javafx.scene.CacheHint.SPEED);
+
         if (item.bidProduct.imageUrls != null && !item.bidProduct.imageUrls.isEmpty()) {
             String fullUrl = ApiService.BASE_URL + item.bidProduct.imageUrls.get(0);
-            imgThumbnail.setImage(new Image(fullUrl, true)); // true: Load ngầm không giật lag
+            Image image = new Image(fullUrl, 130, 130, true, true, true);
+            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=Loading...", 130, 130, true, true, false));
+
+            image.progressProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal.doubleValue() == 1.0) {
+                    if (!image.isError()) {
+                        imgThumbnail.setImage(image);
+                    } else {
+                        imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=Error", 130, 130, true, true, false));
+                    }
+                }
+            });
         } else {
-            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=No+Image", true));
+            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));
         }
 
+        // Bo tròn góc ảnh
+        Rectangle clip = new Rectangle(120, 120);
+        clip.setArcWidth(15);
+        clip.setArcHeight(15);
+        imgThumbnail.setClip(clip);
+        // ==========================================
+
         // 3. Logic Thời gian, Trạng thái & Nút bắt đầu
-        // Mặc định ẩn nút
         btnStartAuction.setVisible(false);
         btnStartAuction.setManaged(false);
 
+        String baseColor;
+
         switch (item.status) {
             case "OPEN":
+                baseColor = "#f39c12"; // Cam
                 lblStatus.setText("SẮP MỞ");
-                lblStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-weight: bold; -fx-font-size: 16px;");
-                lblTime.setText(item.startTime != null ? item.startTime.replace("T", " ") : "Chưa rõ");
-
-                // NẾU LÀ SELLER VÀ STATUS LÀ OPEN -> HIỆN NÚT BẮT ĐẦU
+                lblTime.setText(item.startTime != null ? item.startTime.replace("T", " ") : "--:--");
                 btnStartAuction.setVisible(true);
                 btnStartAuction.setManaged(true);
                 break;
-
             case "RUNNING":
+                baseColor = "#2ecc71"; // Xanh lá
                 lblStatus.setText("ĐANG ĐẤU GIÁ");
-                lblStatus.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold; -fx-font-size: 16px;");
-                lblTime.setText(item.endTime != null ? item.endTime.replace("T", " ") : "Chưa rõ");
+                lblTime.setText(item.endTime != null ? item.endTime.replace("T", " ") : "--:--");
                 break;
-
             case "FINISHED":
             case "PAID":
+                baseColor = "#2ecc71"; // Xanh lá
                 lblStatus.setText("ĐÃ KẾT THÚC");
-                lblStatus.setStyle("-fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-font-size: 16px;");
-                lblTime.setText(item.endTime != null ? item.endTime.replace("T", " ") : "Chưa rõ");
+                lblTime.setText(item.endTime != null ? item.endTime.replace("T", " ") : "--:--");
                 break;
-
             case "CANCELLED":
+                baseColor = "#e74c3c"; // Đỏ
                 lblStatus.setText("ĐÃ HỦY");
-                lblStatus.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 16px;");
                 lblTime.setText("--:--");
                 break;
-
             default:
+                baseColor = "#95a5a6"; // Xám
                 lblStatus.setText(item.status);
                 lblTime.setText("--:--");
                 break;
         }
+
+        lblStatus.setStyle("-fx-text-fill: " + baseColor + "; -fx-font-weight: bold; -fx-font-size: 15px;");
+        lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;");
     }
 
     @FXML
     private void handleStartAuction() {
         if (currentItem == null) return;
 
-        System.out.println("Đang gọi API bắt đầu phiên: /auctions/" + currentItem.id + "/start");
-
         ApiService.putAsync("/auctions/" + currentItem.id + "/start", null).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
-                    // Nếu Backend có bọc dữ liệu trong class ApiResponse
                     try {
                         com.auction.model.ApiResponse apiRes = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
                         if (apiRes.code == 1000) {
@@ -101,26 +122,23 @@ public class MyAuctionItemController {
 
                             btnStartAuction.setVisible(false); btnStartAuction.setManaged(false);
                             lblStatus.setText("ĐANG ĐẤU GIÁ");
-                            lblStatus.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold; -fx-font-size: 16px;");
+                            lblStatus.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold; -fx-font-size: 15px;");
+                            lblTime.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;");
                         } else {
-                            // Trả về 200 nhưng code lỗi (VD: 1005 - Chưa đến giờ)
                             showErrorAlert(apiRes.message);
                         }
                     } catch (Exception e) {
-                        // Trường hợp Backend trả về String trực tiếp không bọc ApiResponse
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Thành công"); alert.setHeaderText(null);
                         alert.setContentText("Đã bắt đầu phiên đấu giá!");
                         alert.showAndWait();
                     }
                 } else {
-                    // Backend văng lỗi 400, 404, 500...
-                    System.out.println("Chi tiết lỗi từ Server: " + res.body());
                     try {
                         com.auction.model.ApiResponse errRes = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
                         showErrorAlert("Lỗi từ Server: " + errRes.message);
                     } catch (Exception e) {
-                        showErrorAlert("Mã lỗi HTTP: " + res.statusCode() + ". Vui lòng xem log ở Console IntelliJ/Eclipse.");
+                        showErrorAlert("Mã lỗi HTTP: " + res.statusCode());
                     }
                 }
             });

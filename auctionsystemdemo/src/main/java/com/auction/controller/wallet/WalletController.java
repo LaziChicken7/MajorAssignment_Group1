@@ -102,7 +102,9 @@ public class WalletController {
 
         if (transactions == null || transactions.isEmpty()) {
             Label lblEmpty = new Label("Chưa có giao dịch nào");
-            lblEmpty.setStyle("-fx-text-fill: #999; -fx-font-style: italic;");
+            // DÙNG CLASS MUTED-TEXT THAY VÌ MÀU #999
+            lblEmpty.getStyleClass().add("muted-text");
+            lblEmpty.setStyle("-fx-font-style: italic; -fx-font-size: 14px;");
             container.getChildren().add(lblEmpty);
             return;
         }
@@ -120,9 +122,13 @@ public class WalletController {
 
             HBox row = new HBox();
             row.setAlignment(Pos.CENTER_LEFT);
-            row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 25; -fx-padding: 10 20 10 20;");
+            // THAY MÀU #F8F9FB BẰNG CLASS custom-row
+            row.getStyleClass().add("custom-row");
+            row.setStyle("-fx-padding: 10 20; -fx-background-radius: 25;");
 
             Label lblName = new Label(itemName);
+            // THAY CLASS ĐỂ CHỮ TỰ SÁNG TRONG DARK MODE
+            lblName.getStyleClass().add("row-title-bold");
             lblName.setStyle("-fx-font-size: 14px;");
             HBox.setHgrow(lblName, Priority.ALWAYS);
 

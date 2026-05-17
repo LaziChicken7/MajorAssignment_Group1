@@ -3,35 +3,39 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.search.SearchController" spacing="20" style="-fx-background-color: -search-bg-main;">
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.search.SearchController" spacing="20" style="-fx-background-color: transparent;">
 
     <HBox alignment="CENTER_LEFT">
-        <HBox spacing="15" styleClass="back-btn-container" onMouseClicked="#handleGoBack" style="-fx-cursor: hand;" alignment="CENTER_LEFT">
-            <SVGPath content="M 16 4 L 6 14 L 16 24" style="-fx-stroke: -search-svg-color; -fx-stroke-width: 2.5; -fx-fill: transparent;" />
-            <Label style="-fx-text-fill: -search-text-primary; -fx-font-size: 24px; -fx-font-weight: bold;" text="Kết quả tìm kiếm" />
+        <!-- Nút Back chuẩn hệ thống -->
+        <HBox spacing="15" styleClass="back-btn-container" onMouseClicked="#handleGoBack" alignment="CENTER_LEFT">
+            <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
+            <Label styleClass="back-title" text="Kết quả tìm kiếm" />
         </HBox>
 
         <Region HBox.hgrow="ALWAYS" />
 
-        <HBox alignment="CENTER_LEFT" spacing="8" style="-fx-background-color: -search-bg-card; -fx-padding: 8 18; -fx-background-radius: 20;">
-            <Label text="Từ khóa:" style="-fx-text-fill: -search-text-secondary; -fx-font-size: 15px;"/>
-            <Label fx:id="lblKeyword" text="'từ khóa'" style="-fx-font-weight: bold; -fx-text-fill: -search-text-keyword; -fx-font-size: 16px;"/>
+        <!-- Hiển thị từ khóa -->
+        <HBox alignment="CENTER_LEFT" spacing="8" styleClass="card" style="-fx-padding: 8 20; -fx-background-radius: 20;">
+            <Label text="Từ khóa:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
+            <Label fx:id="lblKeyword" text="'từ khóa'" style="-fx-font-weight: bold; -fx-text-fill: #0A439D; -fx-font-size: 16px;"/>
         </HBox>
     </HBox>
 
     <TabPane styleClass="tab-pane, search-tab-pane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
 
         <Tab text="Sản phẩm đấu giá">
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="edge-to-edge" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-width: 0;">
                 <content>
+                    <!-- FlowPane chứa Card Sản Phẩm -->
                     <FlowPane fx:id="paneItems" hgap="25" vgap="25" style="-fx-padding: 20;" alignment="TOP_LEFT"/>
                 </content>
             </ScrollPane>
         </Tab>
 
         <Tab text="Người dùng">
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="edge-to-edge" style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-width: 0;">
                 <content>
+                    <!-- VBox chứa Card Người dùng -->
                     <VBox fx:id="paneUsers" spacing="15" style="-fx-padding: 20;"/>
                 </content>
             </ScrollPane>

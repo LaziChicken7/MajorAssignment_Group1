@@ -22,11 +22,10 @@
                 </HBox>
 
                 <VBox VBox.vgrow="ALWAYS" style="-fx-padding: 5 5 20 5;">
-                    <!-- Bọc biểu đồ vào trong một thẻ Card trắng -->
-                    <VBox fx:id="chartContainer" VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                    <!-- Đã xóa -fx-background-color: white;, CSS của class "card" sẽ tự lo -->
+                    <VBox fx:id="chartContainer" VBox.vgrow="ALWAYS" styleClass="card" style="-fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
                         <LineChart fx:id="priceChart" VBox.vgrow="ALWAYS" animated="false" legendVisible="false" style="-fx-background-color: transparent;">
                             <xAxis>
-                                <!-- ĐỔI THÀNH NUMBER AXIS VÀ TẮT ZERO -->
                                 <NumberAxis fx:id="xAxis" label="Thời gian (Giờ:Phút:Giây)" forceZeroInRange="false" autoRanging="true"/>
                             </xAxis>
                             <yAxis>

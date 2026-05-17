@@ -478,6 +478,10 @@ public class AuctionService {
         return null; // Không có thì trả về null
     }
 
+    public List<Auction> getMyAuctions(String username) {
+        return auctionRepository.findBySellerUserName(username);
+    }
+
     // Tự động quét Auction
     @Scheduled(fixedRate = 500) // Cứ 0.5 giây quét 1 lần
     @Transactional

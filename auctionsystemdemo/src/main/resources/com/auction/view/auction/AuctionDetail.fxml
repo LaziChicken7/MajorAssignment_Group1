@@ -54,7 +54,7 @@
                                             <graphic><SVGPath content="M 6 4 L 16 14 L 6 24" styleClass="back-icon" /></graphic>
                                         </Label>
                                     </HBox>
-                                    <Label fx:id="lblImageIndex" text="0/0" style="-fx-font-size: 15px; -fx-text-fill: #555; -fx-font-weight: bold;"/>
+                                    <Label fx:id="lblImageIndex" text="0/0" styleClass="muted-text" style="-fx-font-size: 15px; -fx-font-weight: bold;"/>
                                 </VBox>
 
                                 <Separator orientation="VERTICAL" style="-fx-opacity: 0.3;" />
@@ -67,7 +67,7 @@
                                         <Label fx:id="lblTime" text="00:00:00" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 14px;"/>
                                     </HBox>
 
-                                    <Label fx:id="lblName" text="Tên sản phẩm" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                    <Label fx:id="lblName" text="Tên sản phẩm" styleClass="section-title" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
 
                                     <HBox alignment="CENTER" spacing="20">
                                         <VBox alignment="CENTER" spacing="2">
@@ -83,8 +83,8 @@
                                     <VBox alignment="CENTER" spacing="3">
                                         <Label fx:id="lblCurrentPrice" text="0 VND" alignment="CENTER" maxWidth="Infinity" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold; -fx-padding: 8; -fx-background-radius: 25;"/>
                                         <HBox alignment="CENTER" spacing="5">
-                                            <Label text="Người trả cao nhất:" style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"/>
-                                            <Label fx:id="lblHighestBidder" text="Chưa có" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                            <Label text="Người trả cao nhất:" styleClass="muted-text" style="-fx-font-size: 13px;"/>
+                                            <Label fx:id="lblHighestBidder" text="Chưa có" styleClass="section-title" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
                                         </HBox>
                                     </VBox>
 
@@ -115,12 +115,13 @@
                                         <!-- Card 1: Kỹ thuật & Mô tả -->
                                         <VBox spacing="12" styleClass="card" style="-fx-padding: 15;">
                                             <VBox spacing="5">
-                                                <Label text="Thông tin kỹ thuật:" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #34495e;"/>
-                                                <VBox fx:id="vboxItemDetails" spacing="5" style="-fx-background-color: #F4F7FC; -fx-padding: 12; -fx-background-radius: 10;" />
+                                                <Label text="Thông tin kỹ thuật:" styleClass="section-title" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+                                                <!-- Đổi màu nền cứng thành class custom-row -->
+                                                <VBox fx:id="vboxItemDetails" spacing="5" styleClass="custom-row" style="-fx-padding: 12;"/>
                                             </VBox>
                                             <Separator style="-fx-opacity: 0.3;" />
                                             <VBox spacing="5" VBox.vgrow="ALWAYS">
-                                                <Label text="Mô tả chi tiết:" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #34495e;"/>
+                                                <Label text="Mô tả chi tiết:" styleClass="section-title" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
                                                 <TextArea fx:id="txtDescription" editable="false" wrapText="true" prefHeight="100" styleClass="modern-text-area" style="-fx-font-size: 13px; -fx-background-color: transparent;" VBox.vgrow="ALWAYS"/>
                                             </VBox>
                                         </VBox>
@@ -129,8 +130,8 @@
                                         <HBox spacing="15" styleClass="card" style="-fx-padding: 15; -fx-alignment: center-left;">
                                             <ImageView fx:id="imgSellerAvatar" fitWidth="45" fitHeight="45" />
                                             <VBox spacing="2" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-                                                <Label text="Người bán" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
-                                                <Label fx:id="lblSellerName" text="Đang tải..." style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #2c3e50;"/>
+                                                <Label text="Người bán" styleClass="muted-text" style="-fx-font-size: 12px;"/>
+                                                <Label fx:id="lblSellerName" text="Đang tải..." styleClass="section-title" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
                                                 <Label fx:id="lblSellerRating" text="⭐ 0.0/5.0" style="-fx-text-fill: #e67e22; -fx-font-size: 12px; -fx-font-weight: bold;"/>
                                             </VBox>
                                             <Button text="Xem hồ sơ" onAction="#handleOpenSellerProfile" style="-fx-background-color: #ecf0f1; -fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand;"/>
@@ -140,12 +141,12 @@
 
                                     <!-- Ô 60%: Thống kê & Lịch sử Đấu giá -->
                                     <VBox GridPane.columnIndex="1" spacing="15" styleClass="card" style="-fx-padding: 20;">
-                                        <Label text="Thống kê &amp; Lịch sử đấu giá:" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #34495e;"/>
+                                        <Label text="Thống kê &amp; Lịch sử đấu giá:" styleClass="section-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
 
-                                        <!-- THANH PROGRESS BAR -->
-                                        <VBox spacing="8" style="-fx-background-color: #F8F9FB; -fx-padding: 15; -fx-background-radius: 10;">
+                                        <!-- THANH PROGRESS BAR: Đổi màu nền cứng thành custom-row -->
+                                        <VBox spacing="8" styleClass="custom-row" style="-fx-padding: 15;">
                                             <HBox alignment="CENTER_LEFT">
-                                                <Label fx:id="lblHistoryName" text="Tên SP" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;"/>
+                                                <Label fx:id="lblHistoryName" text="Tên SP" styleClass="row-title-bold" style="-fx-font-size: 16px;"/>
                                                 <Region HBox.hgrow="ALWAYS"/>
                                                 <Label fx:id="lblHistoryCurrentPrice" text="+0 VND" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #e74c3c;"/>
                                             </HBox>

@@ -127,4 +127,13 @@ public class AuctionController {
         response.setResult(auctionService.getMyAutoBid(auctionId, username));
         return response;
     }
+
+    // API dành riêng cho trang "Sản phẩm của tôi"
+    @GetMapping("/my-auctions")
+    public ApiResponse<List<Auction>> getMyAuctions(@RequestParam String username) {
+        log.debug("API CALL: Yêu cầu lấy danh sách sản phẩm của seller [{}]", username);
+        ApiResponse<List<Auction>> response = new ApiResponse<>();
+        response.setResult(auctionService.getMyAuctions(username));
+        return response;
+    }
 }

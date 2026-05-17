@@ -5,4 +5,5 @@ public class TransactionHistoryResponse {
     public String itemName;
     public double amount;
     public String status;
+    public String imageUrl;
 }

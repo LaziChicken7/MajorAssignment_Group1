@@ -171,12 +171,20 @@ public class PaymentService {
         // 2. Lọc giao dịch thành công
         List<Auction> wonAuctions = auctionRepository.findWonAuctions(userName, TransactionStatus.SUCCESS);
         List<TransactionHistoryResponse> successList = new ArrayList<>();
+
         for (Auction auction : wonAuctions) {
+            // Lấy ảnh đầu tiên của sản phẩm (nếu có)
+            String firstImageUrl = null;
+            if (auction.getBidProduct().getImageUrls() != null && !auction.getBidProduct().getImageUrls().isEmpty()) {
+                firstImageUrl = auction.getBidProduct().getImageUrls().get(0);
+            }
+
             successList.add(new TransactionHistoryResponse(
-                    auction.getBidProduct().getId(), // THÊM DÒNG NÀY
+                    auction.getBidProduct().getId(),
                     auction.getBidProduct().getName(),
                     auction.getHighestBid(),
-                    auction.getTransactionStatus()
+                    auction.getTransactionStatus(),
+                    firstImageUrl // TRUYỀN THÊM LINK ẢNH VÀO ĐÂY
             ));
         }
 
@@ -184,11 +192,18 @@ public class PaymentService {
         List<Auction> lostAuctions = auctionRepository.findLostAuctions(userName, TransactionStatus.FAILED);
         List<TransactionHistoryResponse> failedList = new ArrayList<>();
         for (Auction auction : lostAuctions) {
+            // Lấy ảnh đầu tiên của sản phẩm (nếu có)
+            String firstImageUrl = null;
+            if (auction.getBidProduct().getImageUrls() != null && !auction.getBidProduct().getImageUrls().isEmpty()) {
+                firstImageUrl = auction.getBidProduct().getImageUrls().get(0);
+            }
+
             failedList.add(new TransactionHistoryResponse(
                     auction.getBidProduct().getId(), // THÊM DÒNG NÀY
                     auction.getBidProduct().getName(),
                     auction.getHighestBid(),
-                    auction.getTransactionStatus() != null ? auction.getTransactionStatus() : TransactionStatus.FAILED
+                    auction.getTransactionStatus() != null ? auction.getTransactionStatus() : TransactionStatus.FAILED,
+                    firstImageUrl // TRUYỀN THÊM LINK ẢNH VÀO ĐÂY
             ));
         }
 

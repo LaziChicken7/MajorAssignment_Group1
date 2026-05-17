@@ -30,51 +30,59 @@ public class AuctionController {
 
     @FXML private ListView<AuctionModel> auctionListView;
     @FXML private Label lblBalance;
-    @FXML private Label eyeIconText; // Nút Ẩn/Hiện
+    @FXML private Label eyeIconText;
     @FXML private ComboBox<String> cbFilter;
     @FXML private ComboBox<String> cbSort;
 
     private List<AuctionModel> allAuctions = new ArrayList<>();
 
-    // --- BIẾN TRẠNG THÁI ẨN/HIỆN TIỀN ---
     private String realBalanceText = "0 VND";
-    private boolean isHidden = true; // Mặc định vào app là giấu tiền
+    private boolean isHidden = true;
 
     @FXML
     public void initialize() {
         cbFilter.setItems(FXCollections.observableArrayList(
-                "Tất cả trạng thái",
-                "Sắp diễn ra (OPEN)",
-                "Đang diễn ra (RUNNING)",
-                "Đã kết thúc (FINISHED)",
-                "Đã thanh toán (PAID)",
-                "Đã hủy (CANCELLED)"
+                "Tất cả trạng thái", "Sắp diễn ra (OPEN)", "Đang diễn ra (RUNNING)",
+                "Đã kết thúc (FINISHED)", "Đã thanh toán (PAID)", "Đã hủy (CANCELLED)"
         ));
         cbFilter.setValue("Đang diễn ra (RUNNING)");
 
         cbSort.setItems(FXCollections.observableArrayList(
-                "Mặc định",
-                "Kết thúc sớm nhất (Tăng dần)",
-                "Kết thúc muộn nhất (Giảm dần)"
+                "Mặc định", "Kết thúc sớm nhất (Tăng dần)", "Kết thúc muộn nhất (Giảm dần)"
         ));
         cbSort.setValue("Kết thúc sớm nhất (Tăng dần)");
 
         cbFilter.setOnAction(e -> applyFilterAndSort());
         cbSort.setOnAction(e -> applyFilterAndSort());
 
+        // ========================================================
+        // TỐI ƯU SIÊU TỐC: CACHE FXML NODE ĐỂ KHÔNG BỊ GIẬT LAG
+        // ========================================================
         auctionListView.setCellFactory(param -> new ListCell<AuctionModel>() {
+            private Node view;
+            private AuctionItemController controller;
+
+            // Khối khởi tạo: Chỉ chạy 1 lần duy nhất khi tạo Cell
+            {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionItem.fxml"));
+                    view = loader.load();
+                    controller = loader.getController();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             @Override
             protected void updateItem(AuctionModel item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
+                    setText(null);
                 } else {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionItem.fxml"));
-                        setGraphic(loader.load());
-                        AuctionItemController controller = loader.getController();
-                        controller.setData(item);
-                    } catch (IOException e) { e.printStackTrace(); }
+                    // Tái sử dụng lại giao diện đã load, chỉ đắp data mới vào
+                    controller.setData(item);
+                    setGraphic(view);
                 }
             }
         });
@@ -89,7 +97,6 @@ public class AuctionController {
 
     @FXML
     public void loadData() {
-        // 1. Lấy số dư ví (Có xử lý ẩn/hiện)
         if (SessionManager.userName != null) {
             ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(res -> {
                 Platform.runLater(() -> {
@@ -97,23 +104,14 @@ public class AuctionController {
                         ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                         if (apiRes.code == 1000) {
                             WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
-
-                            // Lưu số tiền thật vào biến
                             realBalanceText = String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", ".");
-
-                            // Cập nhật giao diện tùy theo trạng thái đang khóa hay mở
-                            if (isHidden) {
-                                lblBalance.setText("****** VND");
-                            } else {
-                                lblBalance.setText(realBalanceText);
-                            }
+                            lblBalance.setText(isHidden ? "****** VND" : realBalanceText);
                         }
                     }
                 });
             });
         }
 
-        // 2. Lấy danh sách đấu giá
         ApiService.getAsync("/auctions").thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -128,17 +126,11 @@ public class AuctionController {
         });
     }
 
-    // --- HÀM XỬ LÝ CLICK NÚT HIỆN/ẨN ---
     @FXML
     public void toggleBalanceVisibility() {
-        isHidden = !isHidden; // Đảo trạng thái
-        if (isHidden) {
-            lblBalance.setText("****** VND");
-            eyeIconText.setText("Hiện");
-        } else {
-            lblBalance.setText(realBalanceText);
-            eyeIconText.setText("Ẩn");
-        }
+        isHidden = !isHidden;
+        lblBalance.setText(isHidden ? "****** VND" : realBalanceText);
+        eyeIconText.setText(isHidden ? "Hiện" : "Ẩn");
     }
 
     private void applyFilterAndSort() {

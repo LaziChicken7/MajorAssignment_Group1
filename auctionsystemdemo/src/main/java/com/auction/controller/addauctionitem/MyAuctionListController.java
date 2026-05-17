@@ -73,7 +73,7 @@ public class MyAuctionListController {
         String currentUser = SessionManager.userName;
         if (currentUser == null) return;
 
-        // Tải số dư ví
+        // 1. Tải số dư ví (Giữ nguyên)
         ApiService.getAsync("/payments/" + currentUser + "/history").thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -93,19 +93,18 @@ public class MyAuctionListController {
             });
         });
 
-        // Tải danh sách sản phẩm và lọc
-        ApiService.getAsync("/auctions").thenAccept(res -> {
+        // ========================================================
+        // 2. TẢI DANH SÁCH "SẢN PHẨM CỦA TÔI" TRỰC TIẾP TỪ DB SIÊU NHANH
+        // ========================================================
+        ApiService.getAsync("/auctions/my-auctions?username=" + currentUser).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
                     ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
                         Type listType = new TypeToken<List<AuctionModel>>(){}.getType();
-                        List<AuctionModel> allAuctions = ApiService.gson.fromJson(apiRes.result, listType);
 
-                        // CHỈ HIỂN THỊ NHỮNG SẢN PHẨM MÀ TÔI LÀ NGƯỜI BÁN
-                        List<AuctionModel> myAuctions = allAuctions.stream()
-                                .filter(a -> a.seller != null && currentUser.equals(a.seller.userName))
-                                .collect(Collectors.toList());
+                        // Lúc này Backend chỉ trả về ĐÚNG sản phẩm của bạn, siêu nhẹ!
+                        List<AuctionModel> myAuctions = ApiService.gson.fromJson(apiRes.result, listType);
 
                         ObservableList<AuctionModel> observableList = FXCollections.observableArrayList(myAuctions);
                         myAuctionListView.setItems(observableList);

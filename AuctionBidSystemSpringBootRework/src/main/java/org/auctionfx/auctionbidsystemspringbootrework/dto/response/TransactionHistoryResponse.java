@@ -9,12 +9,14 @@ public class TransactionHistoryResponse {
     private String itemName;
     private BigDecimal amount;
     private TransactionStatus status;
+    private String imageUrl; // BỔ SUNG TRƯỜNG NÀY
 
-    public TransactionHistoryResponse(String itemId, String itemName, BigDecimal amount, TransactionStatus status) {
+    public TransactionHistoryResponse(String itemId, String itemName, BigDecimal amount, TransactionStatus status, String imageUrl) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.amount = amount;
         this.status = status;
+        this.imageUrl = imageUrl;
     }
 
     // GETTER VÀ SETTER
@@ -50,5 +52,13 @@ public class TransactionHistoryResponse {
 
     public void setStatus(TransactionStatus status) {
         this.status = status;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

@@ -621,11 +621,18 @@ public class AuctionDetailController {
 
     private void addDetailRow(String label, String value) {
         String displayValue = (value == null || value.trim().isEmpty() || "null".equals(value)) ? "Đang cập nhật" : value;
+
         Label lblKey = new Label(label);
-        lblKey.setStyle("-fx-text-fill: #7f8c8d; -fx-min-width: 110px; -fx-font-size: 14px;");
+        // Gắn class chuẩn của bạn cho chữ tiêu đề (Xám mờ trong Dark Mode)
+        lblKey.getStyleClass().add("row-text-muted");
+        lblKey.setStyle("-fx-min-width: 110px; -fx-font-size: 14px;");
+
         Label lblValue = new Label(displayValue);
         lblValue.setWrapText(true);
-        lblValue.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+        // Gắn class chuẩn của bạn cho giá trị (Trắng rực rỡ trong Dark Mode)
+        lblValue.getStyleClass().add("row-title-bold");
+        lblValue.setStyle("-fx-font-size: 14px;");
+
         vboxItemDetails.getChildren().add(new HBox(10, lblKey, lblValue));
     }
 
@@ -700,21 +707,29 @@ public class AuctionDetailController {
         String user = (tx.bidder != null && tx.bidder.userName != null) ? tx.bidder.userName : "Ẩn danh";
 
         Label lblUser = new Label(user);
-        lblUser.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+        // Xóa màu cứng #2c3e50
+        lblUser.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
         Label lblTime = new Label(time);
-        lblTime.setStyle("-fx-text-fill: #95a5a6; -fx-font-size: 12px;");
+        // Xóa màu cứng, dùng class muted-text
+        lblTime.setStyle("-fx-font-size: 12px;");
+        lblTime.getStyleClass().add("muted-text");
+
         VBox leftBox = new VBox(2, lblUser, lblTime);
         leftBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // Màu cam của tiền cứ giữ nguyên vì nó là màu nhấn (Accent color)
         Label lblPrice = new Label(String.format("%,.0f đ", tx.bidAmount).replace(",", "."));
         lblPrice.setStyle("-fx-font-weight: bold; -fx-text-fill: #e67e22; -fx-font-size: 15px;");
 
         HBox row = new HBox(leftBox, spacer, lblPrice);
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        row.setStyle("-fx-background-color: white; -fx-padding: 10 15; -fx-background-radius: 8; -fx-border-color: #ecf0f1; -fx-border-radius: 8;");
+        // Thay màu nền cứng thành class custom-row
+        row.setStyle("-fx-padding: 10 15;");
+        row.getStyleClass().add("custom-row");
         return row;
     }
 

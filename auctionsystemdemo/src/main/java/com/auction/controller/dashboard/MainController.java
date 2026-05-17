@@ -42,7 +42,8 @@ public class MainController {
     // --- DARK MODE SWITCH ---
     @FXML private Rectangle switchBackground;
     @FXML private Circle switchKnob;
-    private boolean isDarkMode = false;
+
+    // Đã xóa biến isDarkMode nội bộ ở đây!
 
     // --- SIDEBAR PUSH EFFECT ---
     @FXML private VBox sidebar;
@@ -54,19 +55,19 @@ public class MainController {
     private List<Button> allMenuButtons;
     private Timeline banCheckerTimeline;
 
+    @FXML private Label lblNotifBadge;
+
     @FXML
     public void initialize() {
         allMenuButtons = Arrays.asList(btnNavHome, btnNavWallet, btnNavAuction, btnNavAdd, btnNavNotif, btnNavProfile, btnNavChat);
 
-        // ĐỂ NGUYÊN HIỂN THỊ TRÁI VÀ BẬT CHẾ ĐỘ CẮT CHỮ (CLIP)
         for (Button btn : allMenuButtons) {
             if (btn != null) {
                 btn.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
-                btn.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP); // Phép thuật nằm ở đây!
+                btn.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
             }
         }
 
-        // Cắt khung mượt mà
         Rectangle clipRect = new Rectangle();
         clipRect.widthProperty().bind(sidebar.widthProperty());
         clipRect.heightProperty().bind(sidebar.heightProperty());
@@ -76,6 +77,62 @@ public class MainController {
         showDashboard(null);
         startClock();
         startBanChecker();
+
+        // ========================================================
+        // GỌI API LẤY SỐ LƯỢNG THÔNG BÁO VÀ GẮN LÊN CÁI CHUÔNG
+        // ========================================================
+        if (SessionManager.userName != null) {
+            ApiService.getAsync("/notifications/" + SessionManager.userName).thenAccept(res -> {
+                Platform.runLater(() -> {
+                    if (res.statusCode() == 200) {
+                        try {
+                            com.auction.model.ApiResponse apiRes = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
+                            if (apiRes.code == 1000) {
+                                // Lấy danh sách thông báo trả về
+                                java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<com.auction.model.NotificationModel>>(){}.getType();
+                                List<com.auction.model.NotificationModel> list = ApiService.gson.fromJson(apiRes.result, listType);
+
+                                // Lấy độ dài mảng và cập nhật số lượng lên bong bóng
+                                int count = (list != null) ? list.size() : 0;
+                                updateNotificationCount(count);
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Lỗi parse JSON thông báo ở MainController");
+                        }
+                    }
+                });
+            });
+        }
+
+        // KIỂM TRA TRẠNG THÁI THEME VÀ BẬT NGAY LẬP TỨC KHI VÀO TRANG MAIN
+        applyCurrentTheme(false);
+    }
+
+    // ==========================================
+    // XỬ LÝ SỰ KIỆN GẠT DARK MODE (ĐÃ ĐỒNG BỘ SESSION)
+    // ==========================================
+    @FXML
+    public void handleThemeToggle() {
+        SessionManager.isDarkMode = !SessionManager.isDarkMode;
+        applyCurrentTheme(true);
+    }
+
+    private void applyCurrentTheme(boolean animate) {
+        // Nếu truyền false vào thì sẽ không có Animation (thời gian = 0)
+        TranslateTransition transition = new TranslateTransition(Duration.millis(animate ? 250 : 0), switchKnob);
+
+        if (SessionManager.isDarkMode) {
+            transition.setToX(16); // ĐÃ TĂNG BIÊN ĐỘ TỪ 10 LÊN 16 ĐỂ KÉO DÃN
+            switchBackground.setFill(Color.web("#2c3e50"));
+            if (!rootPane.getStyleClass().contains("dark-theme")) {
+                rootPane.getStyleClass().add("dark-theme");
+            }
+        } else {
+            transition.setToX(-16); // ĐÃ TĂNG BIÊN ĐỘ TỪ -10 LÊN -16 ĐỂ KÉO DÃN
+            switchBackground.setFill(Color.web("#bdc3c7"));
+            rootPane.getStyleClass().remove("dark-theme");
+        }
+        transition.play();
     }
 
     // Đổ dữ liệu Avatar
@@ -96,7 +153,6 @@ public class MainController {
                         }
 
                         String fullImageUrl = ApiService.BASE_URL + avatarPath + "?t=" + System.currentTimeMillis();
-                        // Thu nhỏ Avatar cho bằng với Icon nét viền (Bán kính 18 -> Đường kính 36px)
                         ImageView avatar = createCircularAvatar(fullImageUrl, 18);
                         btnNavProfile.setGraphic(avatar);
                     }
@@ -123,12 +179,8 @@ public class MainController {
 
     public void loadView(String fxmlPath) {
         try {
-            // ==========================================================
-            // THÊM 2 DÒNG NÀY: RESET CHAT KHI CHUYỂN BẤT KỲ TRANG NÀO
-            // ==========================================================
             com.auction.util.GlobalWebSocketManager.currentActiveChatPartner = null;
             com.auction.util.GlobalWebSocketManager.setActiveChatListener(null);
-            // ==========================================================
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Node view = loader.load();
@@ -150,9 +202,6 @@ public class MainController {
     @FXML public void showProfile(ActionEvent event) { loadView("/com/auction/view/profile/Profile.fxml"); setActiveButton(btnNavProfile); collapseSidebar(); }
     @FXML public void showChat(ActionEvent event) { loadView("/com/auction/view/chat/Chat.fxml"); setActiveButton(btnNavChat); collapseSidebar(); }
 
-    // ==========================================
-    // ANIMATION: HIỆU ỨNG PUSH MỞ RỘNG SIDEBAR
-    // ==========================================
     @FXML
     public void toggleSidebar() {
         if (isSidebarExpanded) collapseSidebar();
@@ -163,9 +212,6 @@ public class MainController {
         if (!isSidebarExpanded) {
             isSidebarExpanded = true;
             iconToggle.setContent("M 18 6 L 6 18 M 6 6 L 18 18");
-
-            // Đã xóa vòng lặp for thay đổi ContentDisplay ở đây
-
             animateSidebarWidth(280);
         }
     }
@@ -174,9 +220,6 @@ public class MainController {
         if (isSidebarExpanded) {
             isSidebarExpanded = false;
             iconToggle.setContent("M 3 12 h 18 M 3 6 h 18 M 3 18 h 18");
-
-            // Đã xóa vòng lặp for thay đổi ContentDisplay ở đây
-
             animateSidebarWidth(110);
         }
     }
@@ -190,26 +233,6 @@ public class MainController {
         KeyFrame kf = new KeyFrame(Duration.millis(250), kvPref, kvMin, kvMax);
         timeline.getKeyFrames().add(kf);
         timeline.play();
-    }
-
-    // ==========================================
-    // XỬ LÝ SỰ KIỆN GẠT DARK MODE
-    // ==========================================
-    @FXML
-    public void handleThemeToggle() {
-        isDarkMode = !isDarkMode;
-        TranslateTransition transition = new TranslateTransition(Duration.millis(250), switchKnob);
-
-        if (isDarkMode) {
-            transition.setToX(10);
-            switchBackground.setFill(Color.web("#2c3e50"));
-            rootPane.getStyleClass().add("dark-theme");
-        } else {
-            transition.setToX(-10);
-            switchBackground.setFill(Color.web("#bdc3c7"));
-            rootPane.getStyleClass().remove("dark-theme");
-        }
-        transition.play();
     }
 
     private void startBanChecker() {
@@ -279,5 +302,21 @@ public class MainController {
             contentArea.getChildren().setAll(view);
             collapseSidebar();
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // ==========================================
+    // CẬP NHẬT SỐ LƯỢNG THÔNG BÁO
+    // ==========================================
+    public void updateNotificationCount(int count) {
+        Platform.runLater(() -> {
+            if (lblNotifBadge != null) {
+                if (count > 0) {
+                    lblNotifBadge.setText(count > 99 ? "99+" : String.valueOf(count));
+                    lblNotifBadge.setVisible(true); // Có thông báo -> Hiện đỏ
+                } else {
+                    lblNotifBadge.setVisible(false); // Bằng 0 -> Ẩn đi
+                }
+            }
+        });
     }
 }

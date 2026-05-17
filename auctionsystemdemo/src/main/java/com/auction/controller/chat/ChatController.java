@@ -225,7 +225,14 @@ public class ChatController {
     private HBox createFriendItem(ConnectionModel.UserModel friend) {
         HBox item = new HBox(15);
         item.setAlignment(Pos.CENTER_LEFT);
-        item.setStyle("-fx-padding: 10 15; -fx-background-radius: 10; -fx-cursor: hand;");
+
+        // Dùng CSS xử lý Hover thay vì code Java
+        item.getStyleClass().add("friend-chat-item");
+
+        // KIỂM TRA: Nếu người này là người đang mở chat -> Tự động bôi màu đánh dấu
+        if (currentChatPartner != null && currentChatPartner.equals(friend.userName)) {
+            item.getStyleClass().add("active-chat");
+        }
 
         ImageView avt = new ImageView(new Image(ApiService.BASE_URL + friend.avatarUrl, true));
         avt.setFitWidth(45); avt.setFitHeight(45);
@@ -233,16 +240,27 @@ public class ChatController {
         avt.setClip(clip);
 
         Label name = new Label(friend.fullName != null ? friend.fullName : friend.userName);
-        name.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #2c3e50;");
+        // Dùng class row-title-bold để chữ tự đổi Đen/Trắng
+        name.getStyleClass().add("row-title-bold");
+        name.setStyle("-fx-font-weight: bold; -fx-font-size: 15px;");
 
         item.getChildren().addAll(avt, name);
 
-        // Hiệu ứng Hover
-        item.setOnMouseEntered(e -> item.setStyle("-fx-padding: 10 15; -fx-background-radius: 10; -fx-cursor: hand; -fx-background-color: #f1f2f6;"));
-        item.setOnMouseExited(e -> item.setStyle("-fx-padding: 10 15; -fx-background-radius: 10; -fx-cursor: hand; -fx-background-color: transparent;"));
+        // ===============================================
+        // XỬ LÝ SỰ KIỆN KHI BẤM VÀO BẠN BÈ
+        // ===============================================
+        item.setOnMouseClicked(e -> {
+            // 1. Xóa class 'active-chat' (bỏ bôi màu) khỏi tất cả các bạn bè khác
+            for (javafx.scene.Node node : vboxFriends.getChildren()) {
+                node.getStyleClass().remove("active-chat");
+            }
 
-        // Khi click vào bạn bè -> Mở chat
-        item.setOnMouseClicked(e -> openChatWith(friend));
+            // 2. Thêm class 'active-chat' (bôi màu) cho người vừa được bấm
+            item.getStyleClass().add("active-chat");
+
+            // 3. Gọi hàm mở giao diện chat
+            openChatWith(friend);
+        });
 
         return item;
     }
@@ -293,12 +311,13 @@ public class ChatController {
         bubble.setWrapText(true);
         bubble.setMaxWidth(400); // Giới hạn chiều rộng tin nhắn
 
+        // Phân quyền màu sắc Bong bóng cho CSS
         if (isMe) {
             row.setAlignment(Pos.CENTER_RIGHT);
-            bubble.setStyle("-fx-background-color: #0A439D; -fx-text-fill: white; -fx-padding: 10 15; -fx-background-radius: 15 15 0 15; -fx-font-size: 14.5px;");
+            bubble.getStyleClass().add("chat-bubble-me");
         } else {
             row.setAlignment(Pos.CENTER_LEFT);
-            bubble.setStyle("-fx-background-color: #f1f2f6; -fx-text-fill: #2c3e50; -fx-padding: 10 15; -fx-background-radius: 15 15 15 0; -fx-font-size: 14.5px;");
+            bubble.getStyleClass().add("chat-bubble-other");
         }
 
         row.getChildren().add(bubble);
@@ -325,28 +344,28 @@ public class ChatController {
             attachmentMenuPopup = new Popup();
             attachmentMenuPopup.setAutoHide(true); // Tự động đóng khi click ra ngoài
 
-            // Khung bên ngoài: Đồng bộ chuẩn với .combo-box-popup .list-view trong style.css
             VBox menuBox = new VBox();
-            menuBox.setStyle("-fx-background-color: white; " +
-                    "-fx-background-radius: 8; -fx-border-radius: 8; " +
-                    "-fx-border-color: #ecf0f1; " +
-                    "-fx-padding: 5; " + // Padding 5 tạo khoảng trống giữa mép và các ô bấm
-                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 3);");
+            menuBox.getStyleClass().add("card"); // Nền tự đổi màu
+            menuBox.setStyle("-fx-padding: 5; -fx-background-radius: 8; -fx-border-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 3);");
 
-            // Vector Icon: Bức ảnh
+            // ==========================================
+            // KÉO CSS VÀ DARK MODE VÀO POPUP MENU
+            // ==========================================
+            if (btnAttachment.getScene() != null) {
+                menuBox.getStylesheets().addAll(btnAttachment.getScene().getStylesheets());
+                if (btnAttachment.getScene().getRoot().getStyleClass().contains("dark-theme")) {
+                    menuBox.getStyleClass().add("dark-theme");
+                }
+            }
+
             String imgSvg = "M 21 19 V 5 c 0 -1.1 -.9 -2 -2 -2 H 5 c -1.1 0 -2 .9 -2 2 v 14 c 0 1.1 .9 2 2 2 h 14 c 1.1 0 2 -.9 2 -2 z M 8.5 13.5 l 2.5 3.01 L 14.5 12 l 4.5 6 H 5 l 3.5 -4.5 z";
-            // Vector Icon: Ghim giấy
             String clipSvg = "M 16.5 6 v 11.5 c 0 2.21 -1.79 4 -4 4 s -4 -1.79 -4 -4 V 5 a 2.5 2.5 0 0 1 5 0 v 10.5 c 0 .55 -.45 1 -1 1 s -1 -.45 -1 -1 V 6 H 10 v 9.5 a 2.5 2.5 0 0 0 5 0 V 5 c 0 -2.21 -1.79 -4 -4 -4 S 7 2.79 7 5 v 12.5 c 0 3.04 2.46 5.5 5.5 -5.5 s 5.5 -2.46 5.5 -5.5 V 6 h -1.5 z";
 
             HBox btnImage = createPopupMenuItem("Thêm ảnh", imgSvg, () -> {
-                System.out.println("Bạn vừa bấm: Thêm ảnh");
-                // TODO: Code mở chọn ảnh ở đây
                 attachmentMenuPopup.hide();
             });
 
             HBox btnFile = createPopupMenuItem("Thêm đính kèm", clipSvg, () -> {
-                System.out.println("Bạn vừa bấm: Thêm đính kèm");
-                // TODO: Code mở chọn file ở đây
                 attachmentMenuPopup.hide();
             });
 
@@ -354,46 +373,27 @@ public class ChatController {
             attachmentMenuPopup.getContent().add(menuBox);
         }
 
-        // Lấy toạ độ để hiển thị popup
         javafx.geometry.Bounds bounds = btnAttachment.localToScreen(btnAttachment.getBoundsInLocal());
         attachmentMenuPopup.show(btnAttachment, bounds.getMinX() - 10, bounds.getMinY() - 105);
     }
 
     // Hàm hỗ trợ vẽ từng dòng trong Menu (Vẽ Icon Vector + Chữ + Hiệu ứng Hover)
     private HBox createPopupMenuItem(String text, String svgPath, Runnable action) {
-        // Icon Vector
         SVGPath icon = new SVGPath();
         icon.setContent(svgPath);
-        icon.setFill(Color.web("#333333")); // Màu xám đen mặc định
+        icon.getStyleClass().add("chat-attachment-icon");
         icon.setScaleX(0.8);
         icon.setScaleY(0.8);
 
-        // Chữ
         Label label = new Label(text);
-        label.setStyle("-fx-text-fill: #333333; -fx-font-size: 14px;");
+        label.getStyleClass().add("chat-attachment-label");
 
-        // Gộp Icon và Text
         HBox box = new HBox(15, icon, label);
         box.setAlignment(Pos.CENTER_LEFT);
 
-        // Mặc định: Bo vuông góc (radius = 5) theo CSS của bạn
-        box.setStyle("-fx-padding: 8 15; -fx-background-color: transparent; -fx-background-radius: 5; -fx-cursor: hand; -fx-pref-width: 200;");
+        // Giao việc hover và đổi màu cho CSS
+        box.getStyleClass().add("chat-attachment-item");
 
-        // HIỆU ỨNG KHI DI CHUỘT VÀO: Đổi sang màu Xanh đậm (#3b5998) giống y hệt style.css
-        box.setOnMouseEntered(e -> {
-            box.setStyle("-fx-padding: 8 15; -fx-background-color: #3b5998; -fx-background-radius: 5; -fx-cursor: hand; -fx-pref-width: 200;");
-            label.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
-            icon.setFill(Color.WHITE);
-        });
-
-        // HIỆU ỨNG KHI CHUỘT RỜI ĐI
-        box.setOnMouseExited(e -> {
-            box.setStyle("-fx-padding: 8 15; -fx-background-color: transparent; -fx-background-radius: 5; -fx-cursor: hand; -fx-pref-width: 200;");
-            label.setStyle("-fx-text-fill: #333333; -fx-font-size: 14px;");
-            icon.setFill(Color.web("#333333"));
-        });
-
-        // Xử lý sự kiện bấm
         box.setOnMouseClicked(e -> action.run());
 
         return box;
