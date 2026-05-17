@@ -2,8 +2,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
-
 <?import javafx.scene.image.ImageView?>
+
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.profile.ProfileController" spacing="20" style="-fx-background-color: transparent;">
 
     <HBox alignment="CENTER_LEFT" spacing="5" styleClass="title-container">
@@ -11,48 +11,50 @@
         <Label text="Profile của tôi" styleClass="back-title" />
     </HBox>
 
-    <HBox styleClass="card" spacing="40" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+    <!-- Đã xóa inline style, dùng class card và profile-card -->
+    <HBox styleClass="card, profile-card" spacing="40" alignment="CENTER_LEFT">
         <VBox alignment="CENTER" spacing="15">
-            <!-- Đã thêm ImageView và các fx:id để Controller có thể điều khiển -->
-            <StackPane style="-fx-background-color: black; -fx-background-radius: 100;" prefWidth="200" prefHeight="200">
-                <Label fx:id="lblAvatarPlaceholder" text="👤" style="-fx-font-size: 80px; -fx-text-fill: white;"/>
+            <!-- Đã dùng class cho Avatar -->
+            <StackPane styleClass="avatar-placeholder" prefWidth="200" prefHeight="200">
+                <Label fx:id="lblAvatarPlaceholder" text="👤" styleClass="avatar-icon-text"/>
                 <ImageView fx:id="imgAvatar" fitWidth="200" fitHeight="200" preserveRatio="false"/>
             </StackPane>
 
-            <!-- Thêm sự kiện onAction="#handleUploadAvatar" -->
-            <Button text="Tải ảnh lên" onAction="#handleUploadAvatar" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 25; -fx-font-weight: bold; -fx-cursor: hand;" />
+            <Button text="Tải ảnh lên" onAction="#handleUploadAvatar" styleClass="btn-primary, btn-pill" />
         </VBox>
 
         <GridPane hgap="20" vgap="15" HBox.hgrow="ALWAYS">
-            <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField fx:id="txtUsername" editable="false" style="-fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="400"/>
+            <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="profile-label"/>
+            <!-- Dùng modern-input cho ô nhập bình thường, readonly-input cho ô bị khóa -->
+            <TextField fx:id="txtUsername" editable="false" styleClass="modern-input, readonly-input" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="400"/>
 
-            <Label text="Họ và tên:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField fx:id="txtFullName" style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Họ và tên:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="profile-label"/>
+            <TextField fx:id="txtFullName" styleClass="modern-input" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-            <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField fx:id="txtEmail" style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="profile-label"/>
+            <TextField fx:id="txtEmail" styleClass="modern-input" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-            <Label text="Số điện thoại:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField fx:id="txtPhone" editable="false" style="-fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <Label text="Số điện thoại:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="profile-label"/>
+            <TextField fx:id="txtPhone" editable="false" styleClass="modern-input, readonly-input" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
-            <Label text="CCCD:" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <TextField fx:id="txtCitizenId" editable="false" style="-fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <Label text="CCCD:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="profile-label"/>
+            <TextField fx:id="txtCitizenId" editable="false" styleClass="modern-input, readonly-input" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
-            <Label text="Mật khẩu mới:" GridPane.columnIndex="0" GridPane.rowIndex="5" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-            <PasswordField fx:id="txtPassword" promptText="Bỏ trống nếu không muốn đổi mật khẩu" style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+            <Label text="Mật khẩu mới:" GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="profile-label"/>
+            <!-- Chuyển PasswordField về class modern-input -->
+            <PasswordField fx:id="txtPassword" promptText="Bỏ trống nếu không muốn đổi mật khẩu" styleClass="modern-input" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
 
             <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="6">
-                <Button text="Xác nhận chỉnh sửa" onAction="#handleUpdateProfile" style="-fx-background-color: #0A439D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 10 20; -fx-cursor: hand;" />
+                <Button text="Xác nhận chỉnh sửa" onAction="#handleUpdateProfile" styleClass="btn-primary, btn-large-pill" />
             </HBox>
         </GridPane>
     </HBox>
 
-    <!-- HBox bọc 2 nút lại với nhau -->
     <HBox alignment="CENTER" spacing="20">
-        <!-- Nút Trung tâm điều khiển (Mặc định ẩn) -->
-        <Button fx:id="btnAdminControl" text="⚙ Trung tâm điều khiển" visible="false" managed="false" onAction="#handleOpenAdminControl" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30; -fx-cursor: hand;"/>
+        <!-- Đã tạo class btn-warning cho nút này -->
+        <Button fx:id="btnAdminControl" text="⚙ Trung tâm điều khiển" visible="false" managed="false" onAction="#handleOpenAdminControl" styleClass="btn-warning, btn-large-pill"/>
 
-        <Button text="Đăng xuất" onAction="#handleLogout" style="-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 30; -fx-cursor: hand;"/>
+        <!-- Dùng btn-danger có sẵn của bạn -->
+        <Button text="Đăng xuất" onAction="#handleLogout" styleClass="btn-danger, btn-large-pill"/>
     </HBox>
 </VBox>

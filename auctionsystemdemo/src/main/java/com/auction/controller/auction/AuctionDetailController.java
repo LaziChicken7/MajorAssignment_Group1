@@ -78,6 +78,12 @@ public class AuctionDetailController {
     @FXML private Button btnSubmitAutoBid;
     @FXML private Label lblCurrentMaxBid;
 
+
+    /* Ẩn/hiện số dư*/
+    @FXML private Label eyeIconText;
+    private String realBalanceTextDetail = "0 VND";
+    private boolean isBalanceHiddenDetail = true;
+
     @FXML
     public void initialize() {
         // Áp dụng định dạng tiền tệ (vừa gõ vừa có dấu chấm) cho cả 2 ô nhập
@@ -394,7 +400,15 @@ public class AuctionDetailController {
                     ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
                         WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
-                        if (lblBalance != null) lblBalance.setText(String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", "."));
+                        if (lblBalance != null) {
+                            realBalanceTextDetail = String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", ".");
+                            if (!isBalanceHiddenDetail) {
+                                lblBalance.setText(realBalanceTextDetail);
+                            } else {
+                                lblBalance.setText("****** VND");
+                            }
+                        }
+
                     }
                 }
             });
@@ -765,5 +779,18 @@ public class AuctionDetailController {
         star.setStrokeWidth(1.5);
         star.setStrokeLineJoin(StrokeLineJoin.ROUND);
         return star;
+    }
+
+    @FXML
+    public void toggleBalanceVisibility() {
+        isBalanceHiddenDetail = !isBalanceHiddenDetail;
+
+        if (isBalanceHiddenDetail) {
+            lblBalance.setText("****** VND");
+            eyeIconText.setText("Hiện");
+        } else {
+            lblBalance.setText(realBalanceTextDetail);
+            eyeIconText.setText("Ẩn");
+        }
     }
 }

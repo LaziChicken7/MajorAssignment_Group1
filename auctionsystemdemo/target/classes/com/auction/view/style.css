@@ -1138,10 +1138,6 @@
    28. STYLE CHO SIDEBAR TRƯỢT MƯỢT MÀ (PUSH EFFECT)
    ========================================= */
 
-/* =========================================
-   28. STYLE CHO SIDEBAR TRƯỢT MƯỢT MÀ (PUSH EFFECT)
-   ========================================= */
-
 /* 1A. Thiết lập cho CÁC NÚT MENU (Trang chủ, Ví tiền...) */
 .sidebar-btn {
     -fx-alignment: CENTER_LEFT !important;
@@ -1217,4 +1213,245 @@
 }
 .dark-theme .active-menu-btn .modern-icon {
     -fx-stroke: #60a5fa !important;
+}
+
+/* =======================================================
+   29. STYLE CHO TRANG PROFILE (LIGHT & DARK THEME)
+   ======================================================= */
+
+/* --- 1. CHẾ ĐỘ SÁNG (MẶC ĐỊNH) --- */
+
+.profile-card {
+    -fx-padding: 30;
+}
+
+.profile-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-text-fill: #333333;
+}
+
+/* Khung Avatar lúc chưa có ảnh */
+.avatar-placeholder {
+    -fx-background-color: #2c3e50; /* Xanh than tối */
+    -fx-background-radius: 100;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+.avatar-icon-text {
+    -fx-font-size: 80px;
+    -fx-text-fill: white;
+}
+
+/* Ô nhập liệu bị khóa (Không cho chỉnh sửa) */
+.readonly-input {
+    -fx-background-color: #f0f2f5 !important; /* Xám nhạt */
+    -fx-text-fill: #7f8c8d !important;        /* Chữ xám mờ */
+}
+
+/* Nút size lớn (Đăng xuất, Xác nhận) */
+.btn-large-pill {
+    -fx-padding: 10 30;
+    -fx-font-size: 15px;
+    -fx-background-radius: 20;
+}
+.btn-pill {
+    -fx-padding: 8 25;
+    -fx-background-radius: 20;
+}
+
+/* Nút Admin (Màu Cam/Vàng) */
+.btn-warning {
+    -fx-background-color: #f39c12;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-transition: 0.3s;
+}
+.btn-warning:hover { -fx-background-color: #e67e22; }
+.btn-warning:pressed { -fx-scale-x: 0.95; -fx-scale-y: 0.95; }
+
+
+/* --- 2. CHẾ ĐỘ TỐI (DARK THEME OVERRIDES) --- */
+
+/* Màu chữ của Label trong form Profile */
+.dark-theme .profile-label {
+    -fx-text-fill: #E4E4E7; /* Trắng xám dễ nhìn */
+}
+
+/* Khung Avatar tối màu hơn để chìm vào nền */
+.dark-theme .avatar-placeholder {
+    -fx-background-color: #27272A;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 5);
+}
+
+/* Ô nhập liệu bị khóa ở chế độ tối */
+.dark-theme .readonly-input {
+    -fx-background-color: #2A2A2D !important; /* Xám đen (đậm hơn nền 1 chút) */
+    -fx-text-fill: #A1A1AA !important;        /* Chữ xám */
+    -fx-border-color: #3f3f46 !important;     /* Viền nhẹ để phân biệt */
+}
+
+/* Đồng bộ Password Field khi đang ở Dark Mode (bạn dùng class modern-input nên được hưởng sái) */
+.dark-theme .modern-input {
+    -fx-prompt-text-fill: #71717A;
+}
+
+
+/* =======================================================
+   30. STYLE CHO TRANG CHAT (LIGHT & DARK THEME)
+   ======================================================= */
+
+/* --- 1. CHẾ ĐỘ SÁNG (MẶC ĐỊNH) --- */
+
+.chat-no-padding {
+    -fx-padding: 0; /* Ghi đè padding mặc định của class .card */
+}
+
+/* Các viền phân cách */
+.chat-border-bottom {
+    -fx-border-color: #ecf0f1;
+    -fx-border-width: 0 0 1 0;
+}
+.chat-border-top {
+    -fx-border-color: #ecf0f1;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Nền của Header và Footer khung chat */
+.chat-header-bg { -fx-background-color: #fcfcfd; -fx-background-radius: 15 15 0 0; }
+.chat-footer-bg { -fx-background-color: #fcfcfd; -fx-background-radius: 0 0 15 15; }
+
+/* Text */
+.chat-title-text {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+.chat-subtitle-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7f8c8d;
+}
+
+/* Nút Danh sách kết bạn */
+.btn-friend-list {
+    -fx-background-color: #e8f0fe;
+    -fx-text-fill: #1a73e8;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+}
+
+/* Ô tìm kiếm bạn bè */
+.chat-search-bg {
+    -fx-background-color: #f0f2f5;
+    -fx-background-radius: 20;
+    -fx-padding: 0 15;
+}
+.chat-search-input {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #8d949e;
+    -fx-text-fill: #050505;
+}
+
+/* Ô nhập tin nhắn chính */
+.chat-message-input {
+    -fx-background-color: #f1f2f6;
+    -fx-border-color: transparent;
+    -fx-background-radius: 25;
+    -fx-padding: 12 20;
+    -fx-font-size: 15px;
+    -fx-text-fill: #050505;
+}
+.chat-message-input:focused {
+    -fx-background-color: white;
+    -fx-border-color: #0A439D;
+    -fx-border-radius: 25;
+}
+
+/* Các nút tròn tiện ích (Gọi, Info, Attachment) */
+.btn-circle-action {
+    -fx-background-color: #f1f2f6;
+    -fx-background-radius: 50;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-cursor: hand;
+}
+.btn-circle-action:hover { -fx-background-color: #e4e6eb; }
+
+.btn-send-message {
+    -fx-background-color: #3b5998;
+    -fx-background-radius: 50;
+    -fx-min-width: 45;
+    -fx-min-height: 45;
+    -fx-cursor: hand;
+}
+.btn-send-message:hover { -fx-background-color: #2d4373; }
+
+/* SVGs Icons */
+.icon-blue { -fx-fill: #3b5998; }
+.icon-stroke-blue { -fx-stroke: #3b5998; }
+.icon-gray { -fx-fill: #8d949e; }
+.chat-waiting-icon { -fx-fill: #ecf0f1; }
+
+
+/* --- 2. CHẾ ĐỘ TỐI (DARK THEME OVERRIDES) --- */
+
+/* Đổi màu viền phân cách để hợp với nền card #1E1E1E */
+.dark-theme .chat-border-bottom,
+.dark-theme .chat-border-top {
+    -fx-border-color: #2C2C2E;
+}
+
+/* Nền Header, Footer và Các ô nhập liệu đồng bộ màu xám đen */
+.dark-theme .chat-header-bg,
+.dark-theme .chat-footer-bg {
+    -fx-background-color: #1E1E1E;
+}
+
+.dark-theme .chat-search-bg,
+.dark-theme .chat-message-input,
+.dark-theme .btn-circle-action {
+    -fx-background-color: #2C2C2E;
+}
+.dark-theme .btn-circle-action:hover {
+    -fx-background-color: #3A3A3C;
+}
+
+/* Đổi màu Text */
+.dark-theme .chat-title-text {
+    -fx-text-fill: #E4E4E7;
+}
+.dark-theme .chat-subtitle-text {
+    -fx-text-fill: #A1A1AA;
+}
+.dark-theme .chat-search-input,
+.dark-theme .chat-message-input {
+    -fx-text-fill: #E4E4E7;
+    -fx-prompt-text-fill: #71717A;
+}
+.dark-theme .chat-message-input:focused {
+    -fx-background-color: #2A2A2D;
+}
+
+/* Nút Danh sách kết bạn chế độ tối */
+.dark-theme .btn-friend-list {
+    -fx-background-color: #1e3a5f; /* Nền xanh lam sẫm */
+    -fx-text-fill: #60a5fa; /* Chữ xanh lam sáng */
+}
+.dark-theme .btn-friend-list .icon-blue {
+    -fx-fill: #60a5fa !important;
+}
+
+/* Đổi màu SVG Icon */
+.dark-theme .icon-blue { -fx-fill: #60a5fa !important; }
+.dark-theme .icon-stroke-blue { -fx-stroke: #60a5fa !important; }
+.dark-theme .icon-gray { -fx-fill: #A1A1AA !important; }
+
+/* Icon bong bóng màn hình chờ */
+.dark-theme .chat-waiting-icon {
+    -fx-fill: #2C2C2E !important;
 }

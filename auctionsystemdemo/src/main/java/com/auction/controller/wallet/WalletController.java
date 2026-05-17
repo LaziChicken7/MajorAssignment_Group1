@@ -33,6 +33,10 @@ public class WalletController {
     @FXML private VBox vboxSuccess;
     @FXML private VBox vboxFailed;
 
+    @FXML private Label eyeIconFrozenText;
+    private String realFrozenBalance = "0 VND";
+    private boolean isFrozenHidden = true;
+
     private double actualBalance = 0.0;
     private boolean isBalanceVisible = false;
 
@@ -57,7 +61,12 @@ public class WalletController {
                             this.actualBalance = walletData.moneyOnWallet;
                             updateBalanceDisplay();
 
-                            lblFrozenBalance.setText(formatMoney(walletData.moneyinFrozen));
+                            realFrozenBalance = String.format("%,.0f VND", walletData.moneyinFrozen).replace(",", ".");
+                            if (!isFrozenHidden) {
+                                lblFrozenBalance.setText(realFrozenBalance);
+                            } else {
+                                lblFrozenBalance.setText("****** VND");
+                            }
 
                             renderTransactions(walletData.successTransaction, vboxSuccess, true);
                             renderTransactions(walletData.failedTransaction, vboxFailed, false);
@@ -150,5 +159,17 @@ public class WalletController {
 
     private String formatMoney(double amount) {
         return String.format("%,.0f", amount).replace(",", ".") + " VND";
+    }
+
+    @FXML
+    public void toggleFrozenBalanceVisibility() {
+        isFrozenHidden = !isFrozenHidden;
+        if (isFrozenHidden) {
+            lblFrozenBalance.setText("****** VND");
+            eyeIconFrozenText.setText("Hiện");
+        } else {
+            lblFrozenBalance.setText(realFrozenBalance);
+            eyeIconFrozenText.setText("Ẩn");
+        }
     }
 }
