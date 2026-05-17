@@ -35,18 +35,16 @@
         <VBox alignment="CENTER_LEFT" spacing="15" HBox.hgrow="ALWAYS">
             <HBox spacing="10">
                 <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Số tài khoản:" />
-                <Label fx:id="lblBankAccount" style="-fx-font-size: 20px; -fx-text-fill: #333;" text="Đang tải..." />
+                <Label fx:id="lblBankAccount" styleClass="wallet-account-text" style="-fx-font-size: 20px;" text="Đang tải..." />
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label prefWidth="150" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Số dư" />
-                <TextField fx:id="balanceField" editable="false" prefWidth="210" style="-fx-background-radius: 20; -fx-font-size: 16px; -fx-alignment: center;" text="****** VND" />
-                <Label fx:id="eyeIconText" onMouseClicked="#toggleBalanceVisibility" style="-fx-font-size: 16px; -fx-text-fill: #0A439D; -fx-font-weight: bold; -fx-cursor: hand;" text="Hiện" />
-            </HBox>
+                <TextField fx:id="balanceField" styleClass="wallet-input" editable="false" prefWidth="210" style="-fx-background-radius: 20; -fx-font-size: 16px; -fx-alignment: center;" text="****** VND" />
+                <Label fx:id="eyeIconText" onMouseClicked="#toggleBalanceVisibility" styleClass="wallet-action-text" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Hiện" />            </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label prefWidth="150" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Số dư đóng băng" />
                 <Label fx:id="lblFrozenBalance" alignment="CENTER" prefWidth="210" style="-fx-font-size: 16px;" styleClass="auction-price" text="****** VND" />
-                <Label fx:id="eyeIconFrozenText" onMouseClicked="#toggleFrozenBalanceVisibility" style="-fx-font-size: 16px; -fx-text-fill: #0A439D; -fx-font-weight: bold; -fx-cursor: hand;" text="Hiện" />
-            </HBox>
+                <Label fx:id="eyeIconFrozenText" onMouseClicked="#toggleFrozenBalanceVisibility" styleClass="wallet-action-text" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Hiện" />            </HBox>
         </VBox>
     </HBox>
 

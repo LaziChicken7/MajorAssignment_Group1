@@ -60,7 +60,7 @@ public class AdminController {
         colItemActions.setCellFactory(param -> new TableCell<>() {
         private final Button btnCancel = new Button("Hủy SP");
         {
-            btnCancel.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 20; -fx-padding: 5 15;");
+            btnCancel.getStyleClass().addAll("btn-table", "btn-delete");
             btnCancel.setOnAction(e -> {
                 ItemModel item = getTableView().getItems().get(getIndex());
                 cancelItem(item);
@@ -161,7 +161,7 @@ public class AdminController {
         colAucActions.setCellFactory(param -> new TableCell<>() {
             private final Button btn = new Button("Lịch sử Bid");
             {
-                btn.setStyle("-fx-background-color: #3b5998; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 20; -fx-padding: 5 15; -fx-font-weight: bold;");
+                btn.getStyleClass().addAll("btn-table", "btn-history");
                 btn.setOnAction(e -> {
                     AuctionModel auction = getTableView().getItems().get(getIndex());
                     showBidHistory(auction);
@@ -242,12 +242,9 @@ public class AdminController {
                 pane.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
                 // Style chung: Bo tròn viên thuốc, KHÔNG in đậm để giống ảnh, kích thước chữ vừa phải
-                String commonStyle = "-fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 20; -fx-padding: 6 15; -fx-font-size: 13px;";
-
-                // Set màu giống ảnh
-                btnBan.setStyle("-fx-background-color: #f39c12; " + commonStyle);
-                btnDelete.setStyle("-fx-background-color: #e74c3c; " + commonStyle);
-                btnUpgrade.setStyle("-fx-background-color: #58d68d; " + commonStyle); // Xanh lá dịu
+                btnBan.getStyleClass().addAll("btn-table", "btn-ban");
+                btnDelete.getStyleClass().addAll("btn-table", "btn-delete");
+                btnUpgrade.getStyleClass().addAll("btn-table", "btn-upgrade");
 
                 btnBan.setOnAction(e -> toggleBanUser(getTableView().getItems().get(getIndex())));
                 btnDelete.setOnAction(e -> deleteUser(getTableView().getItems().get(getIndex())));
