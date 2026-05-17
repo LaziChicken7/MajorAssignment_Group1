@@ -77,7 +77,9 @@ public class HomeController {
                                 if (i < topAuctions.size()) {
                                     AuctionModel a = topAuctions.get(i);
 
-                                    row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 15; -fx-padding: 10 25; -fx-min-height: 55; -fx-cursor: hand;");
+                                    // DÙNG CLASS CSS CHO HÀNG SẢN PHẨM NỔI BẬT
+                                    row.getStyleClass().add("custom-row");
+                                    row.setStyle("-fx-padding: 10 25; -fx-min-height: 55; -fx-cursor: hand;");
 
                                     String shortId = a.bidProduct != null && a.bidProduct.id.length() >= 4
                                             ? a.bidProduct.id.substring(0, 4).toUpperCase() : "N/A";
@@ -85,10 +87,10 @@ public class HomeController {
 
                                     Label lblId = new Label("SP" + shortId);
                                     lblId.setPrefWidth(80);
-                                    lblId.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;");
+                                    lblId.getStyleClass().add("row-title-bold");
 
                                     Label lblName = new Label(name);
-                                    lblName.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
+                                    lblName.getStyleClass().add("row-text-normal");
 
                                     Region spacer = new Region();
                                     HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -101,7 +103,7 @@ public class HomeController {
                                     String targetTimeStr = "OPEN".equals(a.status) ? a.startTime : a.endTime;
 
                                     Label lblTimePrefix = new Label(prefixText);
-                                    lblTimePrefix.setStyle("-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;");
+                                    lblTimePrefix.getStyleClass().add("row-text-muted");
 
                                     Label lblTime = new Label("00:00:00");
                                     lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 20; -fx-font-weight: bold; -fx-font-size: 15px;");
@@ -157,7 +159,7 @@ public class HomeController {
 
                             if (topAuctions.isEmpty()) {
                                 Label emptyLbl = new Label("Chưa có dữ liệu thống kê.");
-                                emptyLbl.setStyle("-fx-text-fill: #888; -fx-font-style: italic; -fx-font-size: 15px;");
+                                emptyLbl.getStyleClass().add("row-text-muted");
                                 vboxStatistics.getChildren().add(emptyLbl);
                             } else {
                                 for (AuctionModel a : topAuctions) {
@@ -169,15 +171,18 @@ public class HomeController {
                                     double percent = startPrice == 0 ? 0 : (growthAmount / startPrice) * 100;
                                     double progress = startPrice == 0 ? 0 : Math.min(growthAmount / startPrice, 1.0);
 
-                                    String colorHex = (percent > 100) ? "#e74c3c" : "#2ecc71";
+                                    String colorHex = (percent > 100) ? "#FF4D4D" : "#2ECC71";
                                     String percentText = (percent > 100) ? String.format("+%.1f%% ↑", percent) : String.format("+%.1f%%", percent);
 
                                     VBox statBox = new VBox(8);
-                                    statBox.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 10; -fx-padding: 12 15;");
+                                    // DÙNG CLASS CSS CHO KHỐI THỐNG KÊ
+                                    statBox.getStyleClass().add("custom-row");
+                                    statBox.setStyle("-fx-padding: 12 15;");
 
                                     HBox header = new HBox();
                                     Label lblStatName = new Label(name);
-                                    lblStatName.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #333;");
+                                    lblStatName.getStyleClass().add("row-title-bold");
+
                                     Region statSpacer = new Region();
                                     HBox.setHgrow(statSpacer, Priority.ALWAYS);
 
@@ -189,7 +194,7 @@ public class HomeController {
                                     barRow.setAlignment(Pos.CENTER_LEFT);
 
                                     Label lblStart = new Label(String.format("Từ: %,.0f", startPrice).replace(",", "."));
-                                    lblStart.setStyle("-fx-font-size: 13px; -fx-text-fill: #7f8c8d;");
+                                    lblStart.getStyleClass().add("row-text-muted");
                                     lblStart.setPrefWidth(110);
 
                                     ProgressBar pb = new ProgressBar(progress);
@@ -246,7 +251,7 @@ public class HomeController {
 
                             if (allNotifs.isEmpty()) {
                                 Label lbl = new Label("Không có thông báo nào mới.");
-                                lbl.setStyle("-fx-font-style: italic; -fx-text-fill: #888; -fx-font-size: 15px;");
+                                lbl.getStyleClass().add("row-text-muted");
                                 vboxNotifications.getChildren().add(lbl);
                                 return;
                             }
@@ -256,14 +261,17 @@ public class HomeController {
                                 NotificationModel n = allNotifs.get(i);
                                 HBox row = new HBox(15);
                                 row.setAlignment(Pos.CENTER_LEFT);
-                                row.setStyle("-fx-background-color: #F8F9FB; -fx-background-radius: 10; -fx-padding: 15;");
+
+                                // DÙNG CLASS CSS CHO THANH THÔNG BÁO
+                                row.getStyleClass().add("custom-row");
+                                row.setStyle("-fx-padding: 15;");
 
                                 VBox textVBox = new VBox(5);
                                 Label lblTitle = new Label(n.title);
-                                lblTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #333;");
+                                lblTitle.getStyleClass().add("row-title-bold");
 
                                 Label lblDesc = new Label(n.description);
-                                lblDesc.setStyle("-fx-font-size: 13px; -fx-text-fill: #666;");
+                                lblDesc.getStyleClass().add("row-text-normal");
                                 lblDesc.setWrapText(true);
                                 lblDesc.setMaxWidth(Double.MAX_VALUE);
 
@@ -273,15 +281,12 @@ public class HomeController {
                                 Region spacer = new Region();
                                 HBox.setHgrow(spacer, Priority.ALWAYS);
 
-                                // KHU VỰC NÚT THAO TÁC (CHỈ HIỆN ICON)
                                 HBox actionBox = new HBox(5);
                                 actionBox.setAlignment(Pos.CENTER_RIGHT);
 
-                                // SỬA: Đưa "FRIEND_REQUEST" vào chung logic với "PAYMENT_VERIFICATION"
                                 if ("PAYMENT_VERIFICATION".equals(n.type) || "FRIEND_REQUEST".equals(n.type)) {
                                     Button btnAccept = new Button("✔");
                                     btnAccept.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand; -fx-font-weight: bold;");
-                                    // Truyền thêm Type để nhận biết là Kết bạn hay Thanh toán
                                     btnAccept.setOnAction(e -> processNotificationAction(n.notificationId, "accept", n.type));
 
                                     Button btnDecline = new Button("✖");
@@ -291,7 +296,8 @@ public class HomeController {
                                     actionBox.getChildren().addAll(btnAccept, btnDecline);
                                 } else {
                                     Button btnDelete = new Button("🗑");
-                                    btnDelete.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand; -fx-font-weight: bold;");
+                                    btnDelete.getStyleClass().add("btn-delete-icon");
+                                    btnDelete.setStyle("-fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand; -fx-font-weight: bold;");
                                     btnDelete.setOnAction(e -> processNotificationAction(n.notificationId, "delete", n.type));
 
                                     actionBox.getChildren().add(btnDelete);
@@ -309,13 +315,11 @@ public class HomeController {
         });
     }
 
-    // XỬ LÝ GỌI API CHO CÁC NÚT ICON VÀ TỰ ĐỘNG LOAD LẠI THÔNG BÁO (ĐÃ CẬP NHẬT CÂU CHỮ)
     private void processNotificationAction(String notifId, String actionType, String notifType) {
         String endpoint = "/notifications/" + notifId;
 
         if ("accept".equals(actionType)) {
             endpoint += "/accept";
-            // Phân biệt câu thông báo
             String msg = "FRIEND_REQUEST".equals(notifType) ? "Đã chấp nhận lời mời kết bạn!" : "Xác nhận thanh toán thành công!";
             ApiService.putAsync(endpoint, null).thenAccept(res -> handleActionResponse(res.statusCode(), msg));
 
@@ -338,7 +342,7 @@ public class HomeController {
                     alert.setContentText(successMsg);
                     alert.showAndWait();
                 }
-                loadNotifications(); // Reload lại danh sách ngay lập tức
+                loadNotifications();
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);

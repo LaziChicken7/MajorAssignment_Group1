@@ -1201,20 +1201,161 @@
     -fx-background-color: #213D7A !important; /* Xanh đậm nhưng sáng lên một xíu để có cảm giác tương tác */
 }
 
-/* 5. Áp dụng cho Dark Theme (Nếu có) */
-.dark-theme .sidebar-btn, .dark-theme .menu-toggle-btn {
-    -fx-text-fill: #E4E4E7;
+/* ========================================================= */
+/* ĐỊNH NGHĨA CHO THẺ USER CHẾ ĐỘ MẶC ĐỊNH (LIGHT THEME)   */
+/* ========================================================= */
+.user-search-card {
+    -fx-background-color: white;
 }
-.dark-theme .sidebar-btn .modern-icon, .dark-theme .menu-toggle-btn .modern-icon {
-    -fx-stroke: #E4E4E7;
+.user-card-title {
+    -fx-text-fill: #2c3e50;
 }
-.dark-theme .sidebar-btn:hover, .dark-theme .menu-toggle-btn:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
+.user-card-subtitle {
+    -fx-text-fill: #7f8c8d;
 }
-.dark-theme .active-menu-btn {
-    -fx-background-color: #374151 !important;
-    -fx-text-fill: #60a5fa !important;
+.btn-status-checking {
+    -fx-background-color: #bdc3c7;
+    -fx-text-fill: white;
 }
-.dark-theme .active-menu-btn .modern-icon {
-    -fx-stroke: #60a5fa !important;
+.btn-status-friends {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
 }
+.btn-status-pending {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+}
+.btn-status-decline {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+.btn-status-none {
+    -fx-background-color: #0A439D;
+    -fx-text-fill: white;
+}
+
+/* ========================================================= */
+/* TỰ ĐỘNG BIẾN ĐỔI SANG DARK THEME (BLACK MODE)          */
+/* ========================================================= */
+.dark-theme .user-search-card {
+    -fx-background-color: #1e1e24; /* Nền xám tối cao cấp, không bị đen kịt */
+}
+.dark-theme .user-card-title {
+    -fx-text-fill: #ffffff; /* Chữ trắng */
+}
+.dark-theme .user-card-subtitle {
+    -fx-text-fill: #a1a1aa; /* Chữ username phụ xám nhẹ */
+}
+.dark-theme .btn-status-checking {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #71717a;
+}
+.dark-theme .btn-status-pending {
+    -fx-background-color: rgba(255, 255, 255, 0.08); /* Nền mờ sang trọng cho nút "Đã gửi" */
+    -fx-text-fill: #a1a1aa;
+}
+.dark-theme .btn-status-friends {
+    -fx-background-color: #2563eb; /* Màu xanh dịu hơn cho darkmode */
+    -fx-text-fill: white;
+}
+.dark-theme .btn-status-decline {
+    -fx-background-color: #b91c1c; /* Đỏ trầm bớt chói mắt */
+    -fx-text-fill: white;
+}
+.dark-theme .btn-status-none {
+    -fx-background-color: #3b82f6; /* Xanh nút kết bạn sáng sủa nổi bật trên nền tối */
+    -fx-text-fill: white;
+}
+/* --- ĐỊNH NGHĨA BIẾN MÀU CHO TOÀN ỨNG DỤNG --- */
+.root {
+    /* Trong JavaFX, định nghĩa biến bắt đầu bằng dấu gạch ngang đơn */
+    -search-bg-main: transparent;
+    -search-bg-card: #e8f0fe;
+    -search-text-primary: #000000;
+    -search-text-secondary: #7f8c8d;
+    -search-text-keyword: #0A439D;
+    -search-svg-color: #000000;
+
+    -card-bg: #ffffff;
+}
+
+/* --- KHI BẬT DARK THEME --- */
+.dark-theme {
+    -search-bg-main: #121212;
+    -search-bg-card: #1e1e1e;
+    -search-text-primary: #ffffff;
+    -search-text-secondary: #aaaaaa;
+    -search-text-keyword: #5294e2;
+    -search-svg-color: #ffffff;
+
+    -card-bg: #1e1e1e;
+}
+
+/* ========================================================= */
+/* ÉP TABPANE & SCROLLPANE ĐỔI MÀU TRIỆT ĐỂ (XỬ LÝ NỀN TRẮNG) */
+/* ========================================================= */
+
+/* Gọi trực tiếp tên biến (không dùng hàm var) */
+.dark-theme .search-tab-pane .tab-content-area {
+    -fx-background-color: -search-bg-main !important;
+}
+
+.dark-theme .search-tab-pane .scroll-pane,
+.dark-theme .search-tab-pane .scroll-pane > .viewport {
+    -fx-background: -search-bg-main !important;
+    -fx-background-color: transparent !important;
+}
+
+.dark-theme .search-tab-pane .scroll-pane {
+    -fx-border-color: transparent !important;
+}
+
+/* ==========================================================================
+   CẤU HÌNH THANH ITEM ĐỔI MÀU ĐỘNG THEO THEME (TRANG CHỦ)
+   ========================================================================== */
+
+/* --- CHẾ ĐỘ MẶC ĐỊNH (LIGHT MODE) --- */
+.custom-row {
+    -fx-background-color: #F8F9FB; /* Nền xám nhạt/trắng khi ở chế độ sáng */
+    -fx-background-radius: 12px;
+}
+.row-title-bold {
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-text-fill: #333333; /* Chữ tối */
+}
+.row-text-normal {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555555;
+}
+.row-text-muted {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7f8c8d;
+}
+.btn-delete-icon {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+}
+
+/* --- TỰ ĐỘNG CHUYỂN KHI BẤM NÚT (DARK THEME KÍCH HOẠT) --- */
+.dark-theme .custom-row {
+    -fx-background-color: #21212B !important; /* Biến thành màu xám tối chuẩn như trang người dùng */
+}
+
+.dark-theme .row-title-bold {
+    -fx-text-fill: #FFFFFF !important; /* Chữ tiêu đề bật lên trắng sáng */
+}
+
+.dark-theme .row-text-normal {
+    -fx-text-fill: #E2E8F0 !important; /* Chữ nội dung sáng mờ mượt mà */
+}
+
+.dark-theme .row-text-muted {
+    -fx-text-fill: #94A3B8 !important; /* Chữ phụ xám xanh dịu mắt */
+}
+
+.dark-theme .btn-delete-icon {
+    -fx-background-color: #3A3A4A !important; /* Nền icon thùng rác tối đi để tiệp màu nền */
+    -fx-text-fill: #E2E8F0 !important;
+}
+
