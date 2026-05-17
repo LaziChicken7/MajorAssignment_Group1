@@ -28,6 +28,10 @@ public class MyAuctionListController {
     @FXML private ListView<AuctionModel> myAuctionListView;
     @FXML private Label lblBalance; // Biến hiển thị số dư
 
+    @FXML private Label eyeIconText; // Nút Hiện/Ẩn
+    private String realBalanceTextDetail = "0 VND";
+    private boolean isBalanceHiddenDetail = true;
+
     @FXML
     public void initialize() {
         // 1. ĐỊNH DẠNG HIỂN THỊ TỪNG DÒNG
@@ -77,7 +81,12 @@ public class MyAuctionListController {
                     if (apiRes.code == 1000) {
                         WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
                         if (lblBalance != null) {
-                            lblBalance.setText(String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", "."));
+                            realBalanceTextDetail = String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", ".");
+                            if (!isBalanceHiddenDetail) {
+                                lblBalance.setText(realBalanceTextDetail);
+                            } else {
+                                lblBalance.setText("****** VND");
+                            }
                         }
                     }
                 }
@@ -134,6 +143,19 @@ public class MyAuctionListController {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void toggleBalanceVisibility() {
+        isBalanceHiddenDetail = !isBalanceHiddenDetail; // Đảo trạng thái
+
+        if (isBalanceHiddenDetail) {
+            lblBalance.setText("****** VND"); // Giấu đi
+            eyeIconText.setText("Hiện");
+        } else {
+            lblBalance.setText(realBalanceTextDetail); // Show tiền thật
+            eyeIconText.setText("Ẩn");
         }
     }
 }

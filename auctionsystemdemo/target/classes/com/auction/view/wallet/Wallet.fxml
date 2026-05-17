@@ -44,7 +44,8 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label prefWidth="150" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Số dư đóng băng" />
-                <Label fx:id="lblFrozenBalance" alignment="CENTER" prefWidth="250" style="-fx-font-size: 16px;" styleClass="auction-price" text="0 VND" />
+                <Label fx:id="lblFrozenBalance" alignment="CENTER" prefWidth="210" style="-fx-font-size: 16px;" styleClass="auction-price" text="****** VND" />
+                <Label fx:id="eyeIconFrozenText" onMouseClicked="#toggleFrozenBalanceVisibility" style="-fx-font-size: 16px; -fx-text-fill: #0A439D; -fx-font-weight: bold; -fx-cursor: hand;" text="Hiện" />
             </HBox>
         </VBox>
     </HBox>
