@@ -10,40 +10,50 @@
 <?import javafx.scene.shape.SVGPath?>
 <?import java.net.URL?>
 
-<HBox fx:id="rootPane" prefHeight="750.0" prefWidth="1000.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.home.RegisterController">
+<HBox fx:id="rootPane" prefHeight="750.0" prefWidth="1050.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.home.RegisterController">
     <stylesheets>
         <URL value="@../style.css" />
     </stylesheets>
 
     <children>
-        <VBox alignment="CENTER" prefWidth="400.0" spacing="30.0" style="-fx-background-color: #0A439D;" HBox.hgrow="ALWAYS">
+        <!-- PANEL TRÁI: DẢI MÀU GRADIENT VÀ LOGO SVG -->
+        <VBox alignment="CENTER" prefWidth="400.0" spacing="45.0" style="-fx-background-color: linear-gradient(to bottom right, #0A439D, #1A56B8, #051A3B);" HBox.hgrow="ALWAYS">
             <children>
-                <VBox alignment="CENTER" spacing="10.0">
+                <VBox alignment="CENTER" spacing="20.0">
                     <children>
-                        <Label text="⚖" textFill="white">
-                            <font><Font name="System Bold" size="80.0" /></font>
-                        </Label>
-                        <Label text="AUCTION SYSTEM" textFill="white">
-                            <font><Font name="Segoe UI Black" size="32.0" /></font>
-                        </Label>
-                        <Separator maxWidth="150" opacity="0.3" />
-                        <Label text="Hệ thống đấu giá trực tuyến" textFill="white">
-                            <font><Font name="Segoe UI Semibold" size="18.0" /></font>
-                        </Label>
+                        <!-- KHỐI LOGO BÚA ĐẤU GIÁ NGHỆ THUẬT -->
+                        <StackPane>
+                            <Circle radius="55" fill="#ffffff" opacity="0.1"/>
+                            <Circle radius="40" fill="#ffffff" opacity="0.2"/>
+                            <SVGPath content="M 28 12 L 20 4 C 18 2 15 2 13 4 L 4 13 C 2 15 2 18 4 20 L 12 28 C 14 30 17 30 19 28 L 28 19 C 30 17 30 14 28 12 Z M 16 25 L 7 16 L 16 7 L 25 16 L 16 25 Z M 22 24 L 38 40 L 42 36 L 26 20 Z"
+                                     fill="white" scaleX="1.8" scaleY="1.8" translateX="-4" translateY="-4"/>
+                        </StackPane>
+
+                        <VBox alignment="CENTER" spacing="8">
+                            <VBox.margin><Insets top="20"/></VBox.margin>
+                            <Label text="AUCTION PRO" textFill="white" style="-fx-letter-spacing: 4;">
+                                <font><Font name="Segoe UI Black" size="34.0" /></font>
+                            </Label>
+                            <Separator maxWidth="100" style="-fx-opacity: 0.4;" />
+                            <Label text="Hệ thống Đấu giá Toàn diện" textFill="#e2e8f0">
+                                <font><Font name="Segoe UI Semibold" size="16.0" /></font>
+                            </Label>
+                        </VBox>
                     </children>
                 </VBox>
-                <Label text="Tham gia cộng đồng đấu giá ngay để nhận những ưu đãi tốt nhất." textAlignment="CENTER" textFill="#b2c7e6" wrapText="true">
+                <Label text="Tham gia cộng đồng đấu giá ngay để trải nghiệm cơ hội mua sắm đỉnh cao và an toàn tuyệt đối." textAlignment="CENTER" textFill="#93c5fd" wrapText="true" style="-fx-line-spacing: 7;">
                     <font><Font name="Segoe UI Italic" size="14.0" /></font>
                     <VBox.margin><Insets left="40.0" right="40.0" /></VBox.margin>
                 </Label>
             </children>
         </VBox>
 
-        <VBox prefWidth="600.0" HBox.hgrow="ALWAYS">
+        <!-- PANEL PHẢI: FORM ĐĂNG KÝ -->
+        <VBox prefWidth="650.0" HBox.hgrow="ALWAYS">
 
-            <!-- NÚT GẠT ĐƯỢC CHÈN Ở GÓC TRÊN BÊN PHẢI -->
+            <!-- NÚT GẠT THEME DARK/LIGHT -->
             <HBox alignment="TOP_RIGHT" style="-fx-padding: 20 20 0 0;">
-                <HBox alignment="CENTER" spacing="10" style="-fx-background-color: rgba(127,140,141,0.2); -fx-padding: 6 15; -fx-background-radius: 20; -fx-cursor: hand;" onMouseClicked="#handleThemeToggle">
+                <HBox alignment="CENTER" spacing="10" style="-fx-background-color: rgba(127,140,141,0.15); -fx-padding: 6 15; -fx-background-radius: 20; -fx-cursor: hand;" onMouseClicked="#handleThemeToggle">
                     <SVGPath content="M 12 2 V 4 M 12 20 V 22 M 4 12 H 2 M 22 12 H 20 M 4.93 4.93 L 6.34 6.34 M 19.07 19.07 L 17.66 17.66 M 4.93 19.07 L 6.34 17.66 M 19.07 4.93 L 17.66 6.34 M 12 7 A 5 5 0 1 0 12 17 A 5 5 0 1 0 12 7 Z" stroke="#7f8c8d" strokeWidth="2" strokeLineCap="ROUND" fill="TRANSPARENT" scaleX="0.65" scaleY="0.65"/>
                     <StackPane>
                         <Rectangle fx:id="switchBackground" width="56" height="22" arcWidth="22" arcHeight="22" fill="#bdc3c7"/>
@@ -54,87 +64,109 @@
             </HBox>
 
             <StackPane VBox.vgrow="ALWAYS">
-                <padding><Insets bottom="30.0" left="40.0" right="40.0" top="10.0" /></padding>
+                <padding><Insets bottom="20.0" left="50.0" right="50.0" top="10.0" /></padding>
                 <children>
-                    <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="500.0" spacing="12.0" styleClass="card">
+                    <!-- TĂNG SPACING TỪ 15 LÊN 24 ĐỂ CÁC HÀNG CÁCH XA NHAU HƠN -->
+                    <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="550.0" spacing="24.0" styleClass="card" style="-fx-background-radius: 20; -fx-padding: 45 45 50 45;">
                         <effect>
-                            <DropShadow color="#0000001a" radius="15" spread="0.05" />
+                            <DropShadow color="rgba(0,0,0,0.08)" radius="20" spread="0.01" offsetY="5" />
                         </effect>
                         <children>
-                            <VBox spacing="5.0">
+                            <VBox spacing="8.0">
                                 <children>
                                     <Label text="Tạo tài khoản mới" styleClass="section-title">
                                         <font><Font name="Segoe UI Bold" size="26.0" /></font>
                                     </Label>
-                                    <Label text="Bắt đầu hành trình đấu giá của bạn" styleClass="muted-text" />
+                                    <Label text="Chỉ mất 1 phút để bắt đầu hành trình của bạn" styleClass="muted-text" style="-fx-font-size: 14px;" />
                                 </children>
-                                <VBox.margin><Insets bottom="10.0" /></VBox.margin>
+                                <!-- TĂNG KHOẢNG CÁCH TỪ TIÊU ĐỀ XUỐNG FORM -->
+                                <VBox.margin><Insets bottom="20.0" /></VBox.margin>
                             </VBox>
 
-                            <HBox spacing="15.0">
+                            <!-- TĂNG SPACING TỪ 20 LÊN 25 GIỮA 2 CỘT INPUT -->
+                            <HBox spacing="25.0">
                                 <children>
-                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                        <Label text="Họ và tên" styleClass="row-title-bold" />
-                                        <TextField fx:id="txtFullName" prefHeight="40.0" promptText="Nhập họ và tên..." styleClass="modern-input" />
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <SVGPath content="M 12 12 C 14.21 12 16 10.21 16 8 C 16 5.79 14.21 4 12 4 C 9.79 4 8 5.79 8 8 C 8 10.21 9.79 12 12 12 Z M 12 14 C 9.33 14 4 15.34 4 18 L 4 20 L 20 20 L 20 18 C 20 15.34 14.67 14 12 14 Z" fill="#7f8c8d" scaleX="0.75" scaleY="0.75"/>
+                                            <Label text="Họ và tên" styleClass="row-title-bold" />
+                                        </HBox>
+                                        <TextField fx:id="txtFullName" prefHeight="45.0" promptText="Vd: Nguyen Van A" styleClass="modern-input" />
                                     </VBox>
-                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                        <Label text="Số điện thoại" styleClass="row-title-bold" />
-                                        <TextField fx:id="txtPhoneNumber" prefHeight="40.0" promptText="Nhập số điện thoại..." styleClass="modern-input" />
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <SVGPath content="M 6.62 10.79 C 8.06 13.62 10.38 15.93 13.21 17.38 L 15.41 15.18 C 15.68 14.91 16.08 14.82 16.43 14.94 C 17.55 15.31 18.76 15.51 20 15.51 C 20.55 15.51 21 15.96 21 16.51 L 21 20 C 21 20.55 20.55 21 20 21 C 10.61 21 3 13.39 3 4 C 3 3.45 3.45 3 4 3 L 7.5 3 C 8.05 3 8.5 3.45 8.5 4 C 8.5 5.25 8.7 6.45 9.07 7.57 C 9.18 7.92 9.1 8.31 8.82 8.59 L 6.62 10.79 Z" fill="#7f8c8d" scaleX="0.75" scaleY="0.75"/>
+                                            <Label text="Số điện thoại" styleClass="row-title-bold" />
+                                        </HBox>
+                                        <TextField fx:id="txtPhoneNumber" prefHeight="45.0" promptText="Vd: 0987654321" styleClass="modern-input" />
                                     </VBox>
                                 </children>
                             </HBox>
 
-                            <HBox spacing="15.0">
+                            <HBox spacing="25.0">
                                 <children>
-                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                        <Label text="Email" styleClass="row-title-bold" />
-                                        <TextField fx:id="txtEmail" prefHeight="40.0" promptText="example@gmail.com" styleClass="modern-input" />
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <SVGPath content="M 20 4 H 4 C 2.9 4 2.01 4.9 2.01 6 L 2 18 C 2 19.1 2.9 20 4 20 H 20 C 21.1 20 22 19.1 22 18 V 6 C 22 4.9 21.1 4 20 4 Z M 20 18 H 4 V 8 L 12 13 L 20 8 V 18 Z M 12 11 L 4 6 H 20 L 12 11 Z" fill="#7f8c8d" scaleX="0.75" scaleY="0.75"/>
+                                            <Label text="Email" styleClass="row-title-bold" />
+                                        </HBox>
+                                        <TextField fx:id="txtEmail" prefHeight="45.0" promptText="example@gmail.com" styleClass="modern-input" />
                                     </VBox>
-                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                        <Label text="Số CCCD" styleClass="row-title-bold" />
-                                        <TextField fx:id="txtCitizenId" prefHeight="40.0" promptText="Nhập CCCD..." styleClass="modern-input" />
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <SVGPath content="M 4 6 H 20 V 18 H 4 V 6 Z M 6 8 V 16 H 18 V 8 H 6 Z M 9 10 H 15 V 12 H 9 V 10 Z" fill="#7f8c8d" scaleX="0.75" scaleY="0.75"/>
+                                            <Label text="Căn cước công dân" styleClass="row-title-bold" />
+                                        </HBox>
+                                        <TextField fx:id="txtCitizenId" prefHeight="45.0" promptText="Nhập 12 số CCCD" styleClass="modern-input" />
                                     </VBox>
                                 </children>
                             </HBox>
 
-                            <VBox spacing="5.0">
+                            <VBox spacing="10.0">
                                 <children>
-                                    <Label text="Tên đăng nhập" styleClass="row-title-bold" />
-                                    <TextField fx:id="txtUsername" prefHeight="40.0" promptText="Chọn tên đăng nhập..." styleClass="modern-input" />
+                                    <HBox alignment="CENTER_LEFT" spacing="8">
+                                        <SVGPath content="M 19 3 H 5 C 3.9 3 3 3.9 3 5 V 19 C 3 20.1 3.9 21 5 21 H 19 C 20.1 21 21 20.1 21 19 V 5 C 21 3.9 20.1 3 19 3 Z M 12 13 C 10.34 13 9 11.66 9 10 C 9 8.34 10.34 7 12 7 C 13.66 7 15 8.34 15 10 C 15 11.66 13.66 13 12 13 Z M 16 17 H 8 V 16 C 8 14.67 10.67 14 12 14 C 13.33 14 16 14.67 16 16 V 17 Z" fill="#7f8c8d" scaleX="0.75" scaleY="0.75"/>
+                                        <Label text="Tên đăng nhập" styleClass="row-title-bold" />
+                                    </HBox>
+                                    <TextField fx:id="txtUsername" prefHeight="45.0" promptText="Viết liền không dấu..." styleClass="modern-input" />
                                 </children>
                             </VBox>
 
-                            <HBox spacing="15.0">
+                            <HBox spacing="25.0">
                                 <children>
-                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                         <children>
-                                            <Label text="Mật khẩu" styleClass="row-title-bold" />
-                                            <PasswordField fx:id="txtPassword" prefHeight="40.0" promptText="Mật khẩu" styleClass="modern-input" />
+                                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                                <SVGPath content="M 18 8 L 17 8 L 17 6 C 17 3.24 14.76 1 12 1 C 9.24 1 7 3.24 7 6 L 7 8 L 6 8 C 4.9 8 4 8.9 4 10 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 10 C 20 8.9 19.1 8 18 8 Z M 12 17 C 10.9 17 10 16.1 10 15 C 10 13.9 10.9 13 12 13 C 13.1 13 14 13.9 14 15 C 14 16.1 13.1 17 12 17 Z" fill="#7f8c8d" scaleX="0.75" scaleY="0.75"/>
+                                                <Label text="Mật khẩu" styleClass="row-title-bold" />
+                                            </HBox>
+                                            <PasswordField fx:id="txtPassword" prefHeight="45.0" promptText="Mật khẩu" styleClass="modern-input" />
                                         </children>
                                     </VBox>
-                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                         <children>
-                                            <Label text="Xác nhận" styleClass="row-title-bold" />
-                                            <PasswordField fx:id="txtConfirmPassword" prefHeight="40.0" promptText="Nhập lại" styleClass="modern-input" />
+                                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                                <SVGPath content="M 9 16.2 L 4.8 12 L 3.4 13.4 L 9 19 L 21 7 L 19.6 5.6 L 9 16.2 Z" fill="#7f8c8d" scaleX="0.75" scaleY="0.75"/>
+                                                <Label text="Xác nhận" styleClass="row-title-bold" />
+                                            </HBox>
+                                            <PasswordField fx:id="txtConfirmPassword" prefHeight="45.0" promptText="Nhập lại mật khẩu" styleClass="modern-input" />
                                         </children>
                                     </VBox>
                                 </children>
                             </HBox>
 
-                            <Button maxWidth="Infinity" onAction="#handleRegister" prefHeight="45.0" styleClass="btn-primary" style="-fx-font-size: 16px;" text="ĐĂNG KÝ NGAY">
-                                <VBox.margin><Insets top="10.0" /></VBox.margin>
+                            <!-- TĂNG KHOẢNG CÁCH TRÊN VÀ DƯỚI CHO NÚT BẤM -->
+                            <Button maxWidth="Infinity" onAction="#handleRegister" prefHeight="50.0" styleClass="btn-primary" style="-fx-font-size: 16px; -fx-background-radius: 25; -fx-cursor: hand;" text="ĐĂNG KÝ NGAY">
+                                <VBox.margin><Insets top="25.0" bottom="15.0" /></VBox.margin>
                             </Button>
 
-                            <HBox alignment="CENTER" spacing="5.0">
+                            <HBox alignment="CENTER" spacing="8.0">
                                 <children>
                                     <Label text="Đã có tài khoản?" styleClass="row-title-bold" />
-                                    <Hyperlink onAction="#goToLogin" style="-fx-text-fill: #3b5998; -fx-font-weight: bold;" text="Đăng nhập" />
+                                    <Hyperlink onAction="#goToLogin" style="-fx-text-fill: #3b5998; -fx-font-weight: bold; -fx-font-size: 14px;" text="Đăng nhập" />
                                 </children>
                             </HBox>
                         </children>
-                        <padding>
-                            <Insets bottom="30.0" left="35.0" right="35.0" top="30.0" />
-                        </padding>
                     </VBox>
                 </children>
             </StackPane>

@@ -21,21 +21,38 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MyAuctionListController {
 
     @FXML private ListView<AuctionModel> myAuctionListView;
-    @FXML private Label lblBalance; // Biến hiển thị số dư
+    @FXML private Label lblBalance;
 
-    @FXML private Label eyeIconText; // Nút Hiện/Ẩn
+    @FXML private Label eyeIconText;
     private String realBalanceTextDetail = "0 VND";
     private boolean isBalanceHiddenDetail = true;
 
     @FXML
     public void initialize() {
-        // 1. ĐỊNH DẠNG HIỂN THỊ TỪNG DÒNG
+        // ========================================================
+        // TỐI ƯU SIÊU TỐC: CACHE FXML NODE ĐỂ KHÔNG BỊ GIẬT LAG
+        // ========================================================
         myAuctionListView.setCellFactory(param -> new ListCell<AuctionModel>() {
+
+            // Khai báo biến lưu trữ giao diện để tái sử dụng
+            private Node view;
+            private MyAuctionItemController controller;
+
+            // KHỐI KHỞI TẠO (Block Init): Chỉ chạy ĐÚNG 1 LẦN khi JavaFX sinh ra Cell
+            {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/MyAuctionItem.fxml"));
+                    view = loader.load();
+                    controller = loader.getController();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             @Override
             protected void updateItem(AuctionModel item, boolean empty) {
                 super.updateItem(item, empty);
@@ -43,15 +60,10 @@ public class MyAuctionListController {
                     setGraphic(null);
                     setText(null);
                 } else {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/MyAuctionItem.fxml"));
-                        setGraphic(loader.load());
-
-                        MyAuctionItemController controller = loader.getController();
-                        controller.setData(item);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    // KHI CUỘN CHUỘT: TUYỆT ĐỐI KHÔNG LOAD LẠI FXML
+                    // Chỉ gọi hàm setData() để đổ dữ liệu mới vào khung giao diện cũ
+                    controller.setData(item);
+                    setGraphic(view);
                 }
             }
         });
@@ -73,7 +85,6 @@ public class MyAuctionListController {
         String currentUser = SessionManager.userName;
         if (currentUser == null) return;
 
-        // 1. Tải số dư ví (Giữ nguyên)
         ApiService.getAsync("/payments/" + currentUser + "/history").thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -93,17 +104,12 @@ public class MyAuctionListController {
             });
         });
 
-        // ========================================================
-        // 2. TẢI DANH SÁCH "SẢN PHẨM CỦA TÔI" TRỰC TIẾP TỪ DB SIÊU NHANH
-        // ========================================================
         ApiService.getAsync("/auctions/my-auctions?username=" + currentUser).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
                     ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
                         Type listType = new TypeToken<List<AuctionModel>>(){}.getType();
-
-                        // Lúc này Backend chỉ trả về ĐÚNG sản phẩm của bạn, siêu nhẹ!
                         List<AuctionModel> myAuctions = ApiService.gson.fromJson(apiRes.result, listType);
 
                         ObservableList<AuctionModel> observableList = FXCollections.observableArrayList(myAuctions);
@@ -147,13 +153,13 @@ public class MyAuctionListController {
 
     @FXML
     public void toggleBalanceVisibility() {
-        isBalanceHiddenDetail = !isBalanceHiddenDetail; // Đảo trạng thái
+        isBalanceHiddenDetail = !isBalanceHiddenDetail;
 
         if (isBalanceHiddenDetail) {
-            lblBalance.setText("****** VND"); // Giấu đi
+            lblBalance.setText("****** VND");
             eyeIconText.setText("Hiện");
         } else {
-            lblBalance.setText(realBalanceTextDetail); // Show tiền thật
+            lblBalance.setText(realBalanceTextDetail);
             eyeIconText.setText("Ẩn");
         }
     }

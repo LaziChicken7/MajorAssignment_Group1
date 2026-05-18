@@ -4,10 +4,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.effect.DropShadow?>
 
 <VBox fx:id="walletRoot" spacing="20" style="-fx-background-color: transparent;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.auction.controller.wallet.WalletController">
 
-    <!-- HEADER ĐÃ ĐƯỢC CHUẨN HÓA (Dùng title-container vì là trang chính) -->
     <HBox alignment="CENTER_LEFT">
         <HBox spacing="5" styleClass="title-container">
             <SVGPath content="M 16 4 L 6 14 L 16 24" styleClass="back-icon" />
@@ -18,37 +18,89 @@
             <Button onAction="#handleDeposit" styleClass="btn-success" text="Nạp tiền">
                 <font>
                     <Font size="14.0" />
-                </font></Button>
+                </font>
+            </Button>
             <Button onAction="#handleWithdraw" styleClass="btn-danger" text="Rút tiền">
                 <font>
                     <Font size="14.0" />
-                </font></Button>
+                </font>
+            </Button>
         </HBox>
     </HBox>
 
-    <!-- THẺ VISA & THÔNG TIN TÀI KHOẢN -->
-    <HBox alignment="CENTER_LEFT" spacing="30" styleClass="card">
-        <AnchorPane prefHeight="200" prefWidth="350" style="-fx-background-color: #0A439D; -fx-background-radius: 15;">
-            <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="VISA" textFill="white" AnchorPane.bottomAnchor="15" AnchorPane.rightAnchor="20" />
+    <HBox alignment="CENTER_LEFT" spacing="40" styleClass="card" style="-fx-padding: 30;">
+
+        <AnchorPane prefHeight="220" prefWidth="380" minHeight="220" minWidth="380" maxHeight="220" maxWidth="380" style="-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364); -fx-background-radius: 20;">
+
+            <clip>
+                <Rectangle width="380" height="220" arcWidth="40" arcHeight="40" />
+            </clip>
+
+            <effect>
+                <DropShadow color="rgba(0,0,0,0.4)" offsetY="10" radius="20" spread="0.05" />
+            </effect>
+
+            <Circle fill="rgba(255,255,255,0.03)" radius="150" AnchorPane.rightAnchor="-50" AnchorPane.topAnchor="-50" />
+            <Circle fill="rgba(255,255,255,0.02)" radius="80" AnchorPane.bottomAnchor="-20" AnchorPane.leftAnchor="-20" />
+
+            <StackPane AnchorPane.leftAnchor="30" AnchorPane.topAnchor="30">
+                <Rectangle arcHeight="15" arcWidth="15" fill="linear-gradient(to bottom right, #f6d365, #fda085)" height="42" width="55" />
+                <SVGPath content="M 15 0 v 42 M 40 0 v 42 M 0 14 h 55 M 0 28 h 55" stroke="rgba(0,0,0,0.2)" strokeWidth="1.5" />
+            </StackPane>
+
+            <SVGPath content="M 8 20 Q 12 14 8 8 M 14 24 Q 20 14 14 4 M 20 28 Q 28 14 20 0 M 26 32 Q 36 14 26 -4" fill="transparent" stroke="rgba(255,255,255,0.8)" strokeLineCap="ROUND" strokeWidth="2.5" AnchorPane.leftAnchor="105" AnchorPane.topAnchor="35" />
+
+            <Label fx:id="lblCardNumber" text="**** **** **** ****" textFill="white" AnchorPane.leftAnchor="30" AnchorPane.topAnchor="100" maxWidth="320" wrapText="true">
+                <font>
+                    <Font name="Consolas Bold" size="22.0" />
+                </font>
+                <effect><DropShadow color="rgba(0,0,0,0.5)" offsetY="1" radius="1" /></effect>
+            </Label>
+
+            <VBox spacing="2" AnchorPane.bottomAnchor="25" AnchorPane.leftAnchor="30">
+                <Label text="CARDHOLDER" style="-fx-text-fill: rgba(255,255,255,0.3); -fx-font-size: 10px; -fx-font-weight: bold;" />
+
+                <Label fx:id="lblCardName" text="VU DUC TRUNG" textFill="white" maxWidth="160" textOverrun="ELLIPSIS" style="-fx-font-size: 16px; -fx-font-weight: bold;">
+                    <effect><DropShadow color="rgba(0,0,0,0.5)" offsetY="1" radius="1" /></effect>
+                </Label>
+            </VBox>
+
+            <VBox spacing="2" AnchorPane.bottomAnchor="25" AnchorPane.rightAnchor="110">
+                <Label text="VALID THRU" style="-fx-text-fill: rgba(255,255,255,0.3); -fx-font-size: 10px; -fx-font-weight: bold;" />
+
+                <Label text="12/28" textFill="white" style="-fx-font-size: 16px; -fx-font-weight: bold;">
+                    <effect><DropShadow color="rgba(0,0,0,0.5)" offsetY="1" radius="1" /></effect>
+                </Label>
+            </VBox>
+
+            <Label text="VISA" textFill="white" AnchorPane.bottomAnchor="20" AnchorPane.rightAnchor="25">
+                <font>
+                    <Font name="System Bold Italic" size="32.0" />
+                </font>
+                <effect><DropShadow color="rgba(0,0,0,0.3)" offsetY="2" radius="2" /></effect>
+            </Label>
         </AnchorPane>
 
-        <VBox alignment="CENTER_LEFT" spacing="15" HBox.hgrow="ALWAYS">
+        <VBox alignment="CENTER_LEFT" spacing="18" HBox.hgrow="ALWAYS">
             <HBox spacing="10">
-                <Label text="Số tài khoản:" styleClass="wallet-account-text" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-                <Label fx:id="lblBankAccount" styleClass="wallet-account-text" style="-fx-font-size: 20px;" text="Đang tải..." />
+                <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" styleClass="wallet-account-text" text="Số tài khoản:" />
+                <Label fx:id="lblBankAccount" style="-fx-font-size: 20px;" styleClass="wallet-account-text" text="Đang tải..." textFill="#0a439d">
+                    <font><Font name="System Bold" size="20.0" /></font>
+                </Label>
             </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Số dư" prefWidth="150" styleClass="wallet-account-text" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-                <TextField fx:id="balanceField" styleClass="wallet-input" editable="false" prefWidth="210" style="-fx-background-radius: 20; -fx-font-size: 16px; -fx-alignment: center;" text="****** VND" />
-                <Label fx:id="eyeIconText" onMouseClicked="#toggleBalanceVisibility" styleClass="wallet-action-text" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Hiện" />            </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Số dư đóng băng" prefWidth="150" styleClass="wallet-account-text" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-                <Label fx:id="lblFrozenBalance" alignment="CENTER" prefWidth="210" style="-fx-font-size: 16px;" styleClass="auction-price" text="****** VND" />
-                <Label fx:id="eyeIconFrozenText" onMouseClicked="#toggleFrozenBalanceVisibility" styleClass="wallet-action-text" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Hiện" />            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label prefWidth="160" style="-fx-font-size: 18px; -fx-font-weight: bold;" styleClass="wallet-account-text" text="Số dư khả dụng" />
+                <TextField fx:id="balanceField" editable="false" prefWidth="230" style="-fx-background-radius: 20; -fx-font-size: 18px; -fx-alignment: center; -fx-font-weight: bold;" styleClass="wallet-input" text="****** VND" />
+                <Label fx:id="eyeIconText" onMouseClicked="#toggleBalanceVisibility" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand; -fx-text-fill: #0a439d;" styleClass="wallet-action-text" text="Hiện" />
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label prefWidth="160" style="-fx-font-size: 18px; -fx-font-weight: bold;" styleClass="wallet-account-text" text="Số dư đóng băng" />
+                <Label fx:id="lblFrozenBalance" alignment="CENTER" prefWidth="230" style="-fx-font-size: 18px;" styleClass="auction-price" text="****** VND" />
+                <Label fx:id="eyeIconFrozenText" onMouseClicked="#toggleFrozenBalanceVisibility" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand; -fx-text-fill: #0a439d;" styleClass="wallet-action-text" text="Hiện" />
+            </HBox>
         </VBox>
     </HBox>
 
-    <!-- LỊCH SỬ GIAO DỊCH -->
     <VBox fx:id="historySection" spacing="20" VBox.vgrow="ALWAYS">
         <HBox spacing="20" VBox.vgrow="ALWAYS">
             <VBox spacing="15" HBox.hgrow="ALWAYS">

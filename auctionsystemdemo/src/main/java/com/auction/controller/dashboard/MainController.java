@@ -43,8 +43,6 @@ public class MainController {
     @FXML private Rectangle switchBackground;
     @FXML private Circle switchKnob;
 
-    // Đã xóa biến isDarkMode nội bộ ở đây!
-
     // --- SIDEBAR PUSH EFFECT ---
     @FXML private VBox sidebar;
     @FXML private SVGPath iconToggle;
@@ -118,21 +116,30 @@ public class MainController {
     }
 
     private void applyCurrentTheme(boolean animate) {
-        // Nếu truyền false vào thì sẽ không có Animation (thời gian = 0)
-        TranslateTransition transition = new TranslateTransition(Duration.millis(animate ? 250 : 0), switchKnob);
-
+        // 1. Cập nhật màu nền nút gạt và CSS Theme
         if (SessionManager.isDarkMode) {
-            transition.setToX(16); // ĐÃ TĂNG BIÊN ĐỘ TỪ 10 LÊN 16 ĐỂ KÉO DÃN
             switchBackground.setFill(Color.web("#2c3e50"));
             if (!rootPane.getStyleClass().contains("dark-theme")) {
                 rootPane.getStyleClass().add("dark-theme");
             }
         } else {
-            transition.setToX(-16); // ĐÃ TĂNG BIÊN ĐỘ TỪ -10 LÊN -16 ĐỂ KÉO DÃN
             switchBackground.setFill(Color.web("#bdc3c7"));
             rootPane.getStyleClass().remove("dark-theme");
         }
-        transition.play();
+
+        // 2. Xác định vị trí của nút tròn (biên độ 16 và -16 như bạn đã chỉnh)
+        double targetX = SessionManager.isDarkMode ? 16 : -16;
+
+        // 3. Xử lý di chuyển Knob
+        if (animate) {
+            // Khi click: dùng Animation
+            TranslateTransition transition = new TranslateTransition(Duration.millis(250), switchKnob);
+            transition.setToX(targetX);
+            transition.play();
+        } else {
+            // Khi load trang: Set giá trị trực tiếp để không bị kẹt hiệu ứng 0s
+            switchKnob.setTranslateX(targetX);
+        }
     }
 
     // Đổ dữ liệu Avatar
@@ -275,6 +282,7 @@ public class MainController {
         alert.setContentText("Tài khoản của bạn vừa bị Admin khóa do vi phạm.\nBạn sẽ bị đăng xuất ngay lập tức.");
         alert.getDialogPane().setPrefSize(450, 250);
         alert.getDialogPane().setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        com.auction.util.AlertUtils.applyStyle(alert);
         alert.showAndWait();
 
         try {

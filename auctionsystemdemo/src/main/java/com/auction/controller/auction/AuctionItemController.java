@@ -6,7 +6,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
@@ -21,8 +20,29 @@ public class AuctionItemController {
     private Timeline timeline;
 
     public void setData(AuctionModel item) {
+        // ==========================================
+        // BƯỚC 1: XÓA DỮ LIỆU CŨ VÀ DỪNG TIMELINE
+        // ==========================================
+        imgThumbnail.setImage(null);
+        lblId.setText("");
+        lblName.setText("");
+        lblPrice.setText("");
+        lblTime.setText("");
+        lblStatus.setText("");
+        lblStatus.setStyle("");
+        lblTime.setStyle("");
+        if (lblTimeTitle != null) lblTimeTitle.setText("");
+
+        // CỰC KỲ QUAN TRỌNG: Dừng ngay bộ đếm thời gian của item cũ
+        if (this.timeline != null) {
+            this.timeline.stop();
+            this.timeline = null;
+        }
+        // ==========================================
+
         if (item == null) return;
 
+        // BƯỚC 2: Set text cơ bản
         if (item.bidProduct != null) {
             String shortId = item.bidProduct.id != null && item.bidProduct.id.length() >= 4 ? item.bidProduct.id.substring(0, 4).toUpperCase() : "N/A";
             lblId.setText("SP" + shortId);
@@ -31,39 +51,28 @@ public class AuctionItemController {
 
         lblPrice.setText(String.format("%,.0f VND", item.highestBid).replace(",", "."));
 
-        // ==========================================
-        // LOGIC LOAD ẢNH SIÊU TỐC VÀ BO GÓC TRÒN
-        // ==========================================
+        // BƯỚC 3: Logic load ảnh
         imgThumbnail.setCache(true);
         imgThumbnail.setCacheHint(javafx.scene.CacheHint.SPEED);
 
-        if (item.bidProduct != null && item.bidProduct.imageUrls != null && !item.bidProduct.imageUrls.isEmpty()) {
-            String fullUrl = ApiService.BASE_URL + item.bidProduct.imageUrls.get(0);
-
-            // Ép JavaFX thu nhỏ ảnh ngay lúc tải để chống lag
-            Image image = new Image(fullUrl, 130, 130, true, true, true);
-            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=Loading...", 130, 130, true, true, false));
-
-            image.progressProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal.doubleValue() == 1.0) {
-                    if (!image.isError()) {
-                        imgThumbnail.setImage(image);
-                    } else {
-                        imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=Error", 130, 130, true, true, false));
-                    }
-                }
-            });
-        } else {
-            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));
-        }
-
-        // Bo tròn các góc của ảnh 15px
         Rectangle clip = new Rectangle(120, 120);
         clip.setArcWidth(15);
         clip.setArcHeight(15);
         imgThumbnail.setClip(clip);
-        // ==========================================
 
+        if (item.bidProduct != null && item.bidProduct.imageUrls != null && !item.bidProduct.imageUrls.isEmpty()) {
+            String imagePath = item.bidProduct.imageUrls.get(0);
+            if (!imagePath.startsWith("/")) {
+                imagePath = "/" + imagePath;
+            }
+            String fullUrl = ApiService.BASE_URL + imagePath + "?w=130&h=130";
+
+            com.auction.util.ImageCacheUtils.loadImage(imgThumbnail, fullUrl, 130, 130, "https://via.placeholder.com/120?text=Loading...");
+        } else {
+            imgThumbnail.setImage(new javafx.scene.image.Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));
+        }
+
+        // BƯỚC 4: Trạng thái và Màu sắc
         String baseColor;
         switch (item.status) {
             case "RUNNING": baseColor = "#f39c12"; break;
@@ -74,7 +83,7 @@ public class AuctionItemController {
             default: baseColor = "#95a5a6"; break;
         }
 
-        lblStatus.setText(item.status);
+        lblStatus.setText(item.status != null ? item.status : "UNKNOWN");
         lblStatus.setStyle("-fx-text-fill: " + baseColor + "; -fx-font-weight: bold; -fx-font-size: 15px;");
 
         if (lblTimeTitle != null) {
@@ -83,8 +92,7 @@ public class AuctionItemController {
             else lblTimeTitle.setText("Thời gian:");
         }
 
-        if (timeline != null) timeline.stop();
-
+        // BƯỚC 5: Tạo Timeline mới đếm ngược
         if (("RUNNING".equals(item.status) && item.endTime != null) || ("OPEN".equals(item.status) && item.startTime != null)) {
             try {
                 String targetTimeStr = "OPEN".equals(item.status) ? item.startTime : item.endTime;
@@ -93,11 +101,10 @@ public class AuctionItemController {
 
                 timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
                     LocalDateTime now = LocalDateTime.now();
-
                     if (now.isAfter(targetTime)) {
                         lblTime.setText("00:00:00");
                         lblTime.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;");
-                        timeline.stop();
+                        if (timeline != null) timeline.stop();
                     } else {
                         java.time.Duration duration = java.time.Duration.between(now, targetTime);
                         long hours = duration.toHours();
@@ -105,7 +112,6 @@ public class AuctionItemController {
                         long seconds = duration.toSecondsPart();
 
                         lblTime.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
-
                         if ("RUNNING".equals(item.status) && hours == 0 && minutes < 10) {
                             lblTime.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;");
                         } else {

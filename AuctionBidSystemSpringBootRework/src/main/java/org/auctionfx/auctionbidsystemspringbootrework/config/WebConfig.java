@@ -24,14 +24,14 @@ public class WebConfig implements WebMvcConfigurer {
     //  * Khi client request URL bắt đầu bằng "/uploads/",
     //  * Spring Boot sẽ tìm file tương ứng trong thư mục "uploads/" trên server
     
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Đường dẫn đến thư mục uploads 
-        Path uploadDir = Paths.get("uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
-
-        // Map URL pattern "/uploads/**" đến thư mục vật lý
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath + "/");
-    }
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        // Đường dẫn đến thư mục uploads
+//        Path uploadDir = Paths.get("uploads");
+//        String uploadPath = uploadDir.toFile().getAbsolutePath();
+//
+//        // Map URL pattern "/uploads/**" đến thư mục vật lý
+//        registry.addResourceHandler("/uploads/**")
+//                .addResourceLocations("file:" + uploadPath + "/");
+//    }
 }

@@ -199,17 +199,16 @@ public class SearchController {
 
         Button btnSingleAction = new Button("Đang kiểm tra...");
         btnSingleAction.setDisable(true);
-        // Tái sử dụng class btn-primary
         btnSingleAction.getStyleClass().add("btn-primary");
         btnSingleAction.setStyle("-fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20;");
 
         HBox dualActionBox = new HBox(10);
         Button btnAccept = new Button("✓ Chấp nhận");
-        btnAccept.getStyleClass().add("btn-success"); // Chuẩn màu xanh
+        btnAccept.getStyleClass().add("btn-success");
         btnAccept.setStyle("-fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20;");
 
         Button btnDecline = new Button("✕ Từ chối");
-        btnDecline.getStyleClass().add("btn-danger"); // Chuẩn màu đỏ
+        btnDecline.getStyleClass().add("btn-danger");
         btnDecline.setStyle("-fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20;");
 
         dualActionBox.getChildren().addAll(btnAccept, btnDecline);
@@ -218,10 +217,13 @@ public class SearchController {
 
         StackPane actionContainer = new StackPane(btnSingleAction, dualActionBox);
 
+        // KHỐI ĐIỀU KIỆN 1: Nếu là chính mình -> Ẩn nút
         if (user.userName.equals(SessionManager.userName)) {
             actionContainer.setVisible(false);
             actionContainer.setManaged(false);
-        } else {
+        }
+        // KHỐI ĐIỀU KIỆN 2: Người khác -> Kiểm tra trạng thái và gắn sự kiện
+        else {
             ApiService.getAsync("/chat/check-connection?user1=" + SessionManager.userName + "&user2=" + user.userName).thenAccept(statusRes -> {
                 Platform.runLater(() -> {
                     if (statusRes.statusCode() == 200) {
@@ -262,13 +264,104 @@ public class SearchController {
                 });
             });
 
-            // Gắn sự kiện (giữ nguyên logic gốc của bạn)
-            btnSingleAction.setOnAction(e -> { /* Gửi kết bạn... */ });
-            btnAccept.setOnAction(e -> { /* Chấp nhận... */ });
-            btnDecline.setOnAction(e -> { /* Từ chối... */ });
-        }
+            // ==========================================
+            // 1. XỬ LÝ NÚT "➕ KẾT BẠN"
+            // ==========================================
+            btnSingleAction.setOnAction(e -> {
+                if ("➕ Kết bạn".equals(btnSingleAction.getText())) {
+                    btnSingleAction.setText("Đang gửi...");
+                    btnSingleAction.setDisable(true);
 
+                    String url = "/chat/friend-request?sender=" + SessionManager.userName + "&receiver=" + user.userName;
+
+                    ApiService.postAsync(url, null).thenAccept(res -> {
+                        Platform.runLater(() -> {
+                            if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                                btnSingleAction.setText("Đã gửi lời mời");
+                                btnSingleAction.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20;");
+                            } else {
+                                btnSingleAction.setText("➕ Kết bạn");
+                                btnSingleAction.setDisable(false);
+                                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể gửi lời mời kết bạn lúc này!");
+                            }
+                        });
+                    });
+                }
+            });
+
+            // ==========================================
+            // 2. XỬ LÝ NÚT "✓ CHẤP NHẬN"
+            // ==========================================
+            btnAccept.setOnAction(e -> {
+                btnAccept.setText("Đang xử lý...");
+                btnAccept.setDisable(true);
+
+                String url = "/chat/accept-request?sender=" + user.userName + "&receiver=" + SessionManager.userName;
+
+                ApiService.putAsync(url, null).thenAccept(res -> {
+                    Platform.runLater(() -> {
+                        if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                            dualActionBox.setVisible(false); dualActionBox.setManaged(false);
+                            btnSingleAction.setVisible(true); btnSingleAction.setManaged(true);
+                            btnSingleAction.setText("Đã là bạn bè ✓");
+                            btnSingleAction.getStyleClass().removeAll("btn-primary", "btn-danger");
+                            btnSingleAction.getStyleClass().add("btn-success");
+                            btnSingleAction.setDisable(true);
+                        } else {
+                            btnAccept.setText("✓ Chấp nhận");
+                            btnAccept.setDisable(false);
+                            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể chấp nhận kết bạn!");
+                        }
+                    });
+                });
+            });
+
+            // ==========================================
+            // 3. XỬ LÝ NÚT "✕ TỪ CHỐI"
+            // ==========================================
+            btnDecline.setOnAction(e -> {
+                btnDecline.setText("Đang xử lý...");
+                btnDecline.setDisable(true);
+
+                String url = "/chat/decline-request?sender=" + user.userName + "&receiver=" + SessionManager.userName;
+
+                ApiService.deleteAsync(url).thenAccept(res -> {
+                    Platform.runLater(() -> {
+                        if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                            dualActionBox.setVisible(false); dualActionBox.setManaged(false);
+                            btnSingleAction.setVisible(true); btnSingleAction.setManaged(true);
+                            btnSingleAction.setText("➕ Kết bạn");
+                            btnSingleAction.getStyleClass().removeAll("btn-success", "btn-danger");
+                            btnSingleAction.getStyleClass().add("btn-primary");
+                            btnSingleAction.setDisable(false);
+                        } else {
+                            btnDecline.setText("✕ Từ chối");
+                            btnDecline.setDisable(false);
+                            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể từ chối kết bạn!");
+                        }
+                    });
+                });
+            });
+
+        } // <--- ĐÃ FIX THÊM DẤU NGOẶC NÀY ĐỂ ĐÓNG KHỐI LỆNH ELSE
+
+        // Thêm UI vào row và trả về
         row.getChildren().addAll(avt, info, spacer, actionContainer);
         return row;
+    }
+
+    // ===============================================
+    // HÀM HIỂN THỊ THÔNG BÁO POPUP
+    // ===============================================
+    private void showAlert(Alert.AlertType type, String title, String msg) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+
+        // Gọi class tiện ích để áp dụng Dark Mode & Nút viên thuốc
+        com.auction.util.AlertUtils.applyStyle(alert);
+
+        alert.showAndWait();
     }
 }

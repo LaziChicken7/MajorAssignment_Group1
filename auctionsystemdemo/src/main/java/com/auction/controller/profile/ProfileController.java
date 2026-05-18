@@ -201,6 +201,7 @@ public class ProfileController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
+        com.auction.util.AlertUtils.applyStyle(alert);
         alert.showAndWait();
     }
 

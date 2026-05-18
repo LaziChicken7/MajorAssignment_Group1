@@ -6,19 +6,23 @@ import com.auction.model.WalletDataResponse;
 import com.auction.util.ApiService;
 import com.auction.util.SessionManager;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.text.Normalizer;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class WalletController {
 
@@ -33,7 +37,11 @@ public class WalletController {
     @FXML private VBox vboxSuccess;
     @FXML private VBox vboxFailed;
 
+    @FXML private Label lblCardNumber;
+    @FXML private Label lblCardName;
+
     @FXML private Label eyeIconFrozenText;
+
     private String realFrozenBalance = "0 VND";
     private boolean isFrozenHidden = true;
 
@@ -58,6 +66,25 @@ public class WalletController {
 
                             lblBankAccount.setText(walletData.bankAccountNumber != null ? walletData.bankAccountNumber : "Chưa có");
 
+                            // --- CẬP NHẬT GIAO DIỆN THẺ VISA ---
+                            if (SessionManager.fullName != null) {
+                                // Gọi thẳng hàm removeAccents private tích hợp sẵn ở cuối class
+                                lblCardName.setText(removeAccents(SessionManager.fullName).toUpperCase());
+                            } else if (SessionManager.userName != null) {
+                                lblCardName.setText(SessionManager.userName.toUpperCase());
+                            }
+
+                            // Format số tài khoản thành dạng thẻ tín dụng: cách nhau mỗi 4 số
+                            if (walletData.bankAccountNumber != null && !walletData.bankAccountNumber.isEmpty()) {
+                                String acc = walletData.bankAccountNumber;
+                                // Dùng Regex để chèn khoảng trắng sau mỗi 4 ký tự
+                                String formattedAcc = acc.replaceAll(".{4}(?!$)", "$0 ");
+                                lblCardNumber.setText(formattedAcc);
+                            } else {
+                                lblCardNumber.setText("**** **** **** ****");
+                            }
+                            // -----------------------------------
+
                             this.actualBalance = walletData.moneyOnWallet;
                             updateBalanceDisplay();
 
@@ -80,7 +107,7 @@ public class WalletController {
     }
 
     @FXML
-    public void toggleBalanceVisibility(javafx.scene.input.MouseEvent event) {
+    public void toggleBalanceVisibility(MouseEvent event) {
         isBalanceVisible = !isBalanceVisible;
         updateBalanceDisplay();
     }
@@ -97,12 +124,23 @@ public class WalletController {
         }
     }
 
+    @FXML
+    public void toggleFrozenBalanceVisibility() {
+        isFrozenHidden = !isFrozenHidden;
+        if (isFrozenHidden) {
+            lblFrozenBalance.setText("****** VND");
+            eyeIconFrozenText.setText("Hiện");
+        } else {
+            lblFrozenBalance.setText(realFrozenBalance);
+            eyeIconFrozenText.setText("Ẩn");
+        }
+    }
+
     private void renderTransactions(List<TransactionHistoryResponse> transactions, VBox container, boolean isSuccess) {
         container.getChildren().clear();
 
         if (transactions == null || transactions.isEmpty()) {
             Label lblEmpty = new Label("Chưa có giao dịch nào");
-            // DÙNG CLASS MUTED-TEXT THAY VÌ MÀU #999
             lblEmpty.getStyleClass().add("muted-text");
             lblEmpty.setStyle("-fx-font-style: italic; -fx-font-size: 14px;");
             container.getChildren().add(lblEmpty);
@@ -122,12 +160,10 @@ public class WalletController {
 
             HBox row = new HBox();
             row.setAlignment(Pos.CENTER_LEFT);
-            // THAY MÀU #F8F9FB BẰNG CLASS custom-row
             row.getStyleClass().add("custom-row");
             row.setStyle("-fx-padding: 10 20; -fx-background-radius: 25;");
 
             Label lblName = new Label(itemName);
-            // THAY CLASS ĐỂ CHỮ TỰ SÁNG TRONG DARK MODE
             lblName.getStyleClass().add("row-title-bold");
             lblName.setStyle("-fx-font-size: 14px;");
             HBox.setHgrow(lblName, Priority.ALWAYS);
@@ -143,8 +179,7 @@ public class WalletController {
         }
     }
 
-    // BẮT BUỘC DÙNG ActionEvent CHO CÁC NÚT ĐỂ CHUYỂN TRANG KHÔNG BAO GIỜ BỊ LỖI
-    private void switchView(javafx.event.ActionEvent event, String fxmlPath) {
+    private void switchView(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Node view = loader.load();
@@ -158,24 +193,23 @@ public class WalletController {
         }
     }
 
-    @FXML public void handleDeposit(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/DepositForm.fxml"); }
-    @FXML public void handleWithdraw(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/WithDrawForm.fxml"); }
-    @FXML public void handleSuccessfulTransaction(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/SuccessfulTransaction.fxml"); }
-    @FXML public void handleFailureTransaction(javafx.event.ActionEvent event) { switchView(event, "/com/auction/view/wallet/FailureTransaction.fxml"); }
+    @FXML public void handleDeposit(ActionEvent event) { switchView(event, "/com/auction/view/wallet/DepositForm.fxml"); }
+    @FXML public void handleWithdraw(ActionEvent event) { switchView(event, "/com/auction/view/wallet/WithDrawForm.fxml"); }
+    @FXML public void handleSuccessfulTransaction(ActionEvent event) { switchView(event, "/com/auction/view/wallet/SuccessfulTransaction.fxml"); }
+    @FXML public void handleFailureTransaction(ActionEvent event) { switchView(event, "/com/auction/view/wallet/FailureTransaction.fxml"); }
 
     private String formatMoney(double amount) {
         return String.format("%,.0f", amount).replace(",", ".") + " VND";
     }
 
-    @FXML
-    public void toggleFrozenBalanceVisibility() {
-        isFrozenHidden = !isFrozenHidden;
-        if (isFrozenHidden) {
-            lblFrozenBalance.setText("****** VND");
-            eyeIconFrozenText.setText("Hiện");
-        } else {
-            lblFrozenBalance.setText(realFrozenBalance);
-            eyeIconFrozenText.setText("Ẩn");
-        }
+    /**
+     * Tích hợp sẵn hàm loại bỏ dấu tiếng Việt để in hoa chuẩn xác lên thẻ Visa
+     */
+    private String removeAccents(String s) {
+        if (s == null) return "";
+        String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        String result = pattern.matcher(temp).replaceAll("");
+        return result.replace("đ", "d").replace("Đ", "D");
     }
 }

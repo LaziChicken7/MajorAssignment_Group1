@@ -2237,3 +2237,90 @@
     -fx-border-color: #60a5fa;
     -fx-effect: dropshadow(three-pass-box, rgba(96, 165, 250, 0.2), 15, 0, 0, 5);
 }
+
+/* =======================================================
+   44. ĐỒNG BỘ DARK MODE & NÚT VIÊN THUỐC CHO TẤT CẢ ALERT
+   ======================================================= */
+
+/* --- TỔNG THỂ ALERT (SÁNG) --- */
+.dialog-pane.custom-alert {
+    -fx-background-color: white;
+}
+
+/* --- CẤU HÌNH NÚT BẤM VIÊN THUỐC --- */
+.dialog-pane.custom-alert .button-bar .button {
+    -fx-background-color: #0A439D !important;
+    -fx-text-fill: white !important;
+    -fx-font-weight: bold !important;
+    -fx-padding: 8 25 !important;
+    -fx-background-radius: 20 !important;
+    -fx-cursor: hand !important;
+    -fx-border-width: 0 !important;
+}
+.dialog-pane.custom-alert .button-bar .button:hover {
+    -fx-background-color: #1A56B8 !important;
+    -fx-effect: dropshadow(three-pass-box, rgba(10, 67, 157, 0.3), 8, 0, 0, 3) !important;
+}
+
+/* --- CHỮ NỘI DUNG Ở CHẾ ĐỘ SÁNG --- */
+.dialog-pane.custom-alert > .content.label {
+    -fx-text-fill: #333333 !important;
+    -fx-font-size: 14.5px !important;
+    -fx-line-spacing: 5px !important;
+}
+
+/* ====================================
+   KHI BẬT DARK MODE (CỰC KỲ QUAN TRỌNG)
+   ==================================== */
+
+/* Đổi nền hộp thoại */
+.dialog-pane.custom-alert.dark-theme {
+    -fx-background-color: #1E1E1E !important;
+}
+
+/* Đổi màu chữ nội dung thành trắng */
+.dialog-pane.custom-alert.dark-theme > .content.label {
+    -fx-text-fill: #E4E4E7 !important;
+}
+
+/* Fix màu nền vùng Header (Phần chứa Icon chéo đỏ/chấm than) */
+.dialog-pane.custom-alert.dark-theme > .header-panel {
+    -fx-background-color: #1E1E1E !important;
+}
+.dialog-pane.custom-alert.dark-theme > .header-panel .label {
+    -fx-text-fill: #FFFFFF !important;
+}
+
+/* Fix khu vực chứa nút bấm (ButtonBar) không bị viền trắng */
+.dialog-pane.custom-alert.dark-theme > .button-bar > .container {
+    -fx-background-color: #1E1E1E !important;
+}
+
+/* Nếu Alert có nội dung báo lỗi quá dài (TextArea) */
+.dialog-pane.custom-alert.dark-theme .text-area,
+.dialog-pane.custom-alert.dark-theme .text-area .content {
+    -fx-background-color: #2A2A2D !important;
+    -fx-text-fill: #E4E4E7 !important;
+    -fx-border-width: 0 !important;
+}
+
+/* =======================================================
+   45. CẤU HÌNH Ô NHẬP LIỆU CHO TEXTINPUTDIALOG
+   ======================================================= */
+.dialog-pane.custom-alert .text-field {
+    -fx-background-radius: 8 !important;
+    -fx-padding: 8 12 !important;
+    -fx-font-size: 14px !important;
+}
+
+/* KHI BẬT DARK MODE */
+.dialog-pane.custom-alert.dark-theme .text-field {
+    -fx-background-color: #2A2A2D !important;
+    -fx-text-fill: #E4E4E7 !important;
+    -fx-border-width: 1px !important;
+    -fx-border-color: #3f3f46 !important;
+}
+.dialog-pane.custom-alert.dark-theme .text-field:focused {
+    -fx-border-color: #60a5fa !important;
+    -fx-background-color: #1E1E1E !important;
+}

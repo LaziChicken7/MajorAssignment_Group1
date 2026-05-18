@@ -82,6 +82,13 @@ public class NotificationController {
 
                         ObservableList<NotificationModel> observableList = FXCollections.observableArrayList(list);
                         lvNotifications.setItems(observableList);
+
+                        // =========================================================
+                        // THÊM 3 DÒNG NÀY: ÉP BONG BÓNG TRANG CHÍNH CẬP NHẬT TỨC THÌ
+                        // =========================================================
+                        if (com.auction.controller.dashboard.MainController.getInstance() != null) {
+                            com.auction.controller.dashboard.MainController.getInstance().updateNotificationCount(list != null ? list.size() : 0);
+                        }
                     }
                 }
             });
@@ -165,6 +172,7 @@ public class NotificationController {
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
+        com.auction.util.AlertUtils.applyStyle(alert);
         alert.showAndWait();
     }
 }

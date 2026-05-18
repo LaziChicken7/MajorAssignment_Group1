@@ -44,19 +44,31 @@ public class RegisterController {
     }
 
     private void applyCurrentTheme(boolean animate) {
-        TranslateTransition transition = new TranslateTransition(Duration.millis(animate ? 250 : 0), switchKnob);
+        // 1. Cập nhật màu nền nút gạt và CSS Theme
         if (SessionManager.isDarkMode) {
-            transition.setToX(10);
             switchBackground.setFill(Color.web("#2c3e50"));
             if (!rootPane.getStyleClass().contains("dark-theme")) {
                 rootPane.getStyleClass().add("dark-theme");
             }
         } else {
-            transition.setToX(-10);
             switchBackground.setFill(Color.web("#bdc3c7"));
             rootPane.getStyleClass().remove("dark-theme");
         }
-        transition.play();
+
+        // 2. Xác định vị trí của nút tròn
+        // (Trong FXML của bạn đang để mặc định translateX="-16", nên ta dùng 16 và -16 để cân xứng)
+        double targetX = SessionManager.isDarkMode ? 16 : -16;
+
+        // 3. Xử lý di chuyển Knob
+        if (animate) {
+            // Khi người dùng click gạt: dùng Animation mượt mà
+            TranslateTransition transition = new TranslateTransition(Duration.millis(250), switchKnob);
+            transition.setToX(targetX);
+            transition.play();
+        } else {
+            // Khi mới vào trang (hàm initialize gọi): Gán giá trị ngay lập tức, bỏ qua animation
+            switchKnob.setTranslateX(targetX);
+        }
     }
 
     @FXML
@@ -134,6 +146,7 @@ public class RegisterController {
         } else {
             alert.setContentText(content);
         }
+        com.auction.util.AlertUtils.applyStyle(alert);
         alert.showAndWait();
     }
 }

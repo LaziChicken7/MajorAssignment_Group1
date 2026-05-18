@@ -707,13 +707,12 @@ public class AuctionDetailController {
         String user = (tx.bidder != null && tx.bidder.userName != null) ? tx.bidder.userName : "Ẩn danh";
 
         Label lblUser = new Label(user);
-        // Xóa màu cứng #2c3e50
-        lblUser.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        // FIX LỖI: Gắn class "row-title-bold" để chữ màu Đen (ở Light Mode) và Trắng (ở Dark Mode)
+        lblUser.getStyleClass().add("row-title-bold");
 
         Label lblTime = new Label(time);
-        // Xóa màu cứng, dùng class muted-text
-        lblTime.setStyle("-fx-font-size: 12px;");
-        lblTime.getStyleClass().add("muted-text");
+        // FIX LỖI: Gắn class "row-text-muted" để thời gian màu Xám (ở Light Mode) và Xám nhạt (ở Dark Mode)
+        lblTime.getStyleClass().add("row-text-muted");
 
         VBox leftBox = new VBox(2, lblUser, lblTime);
         leftBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -721,14 +720,15 @@ public class AuctionDetailController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Màu cam của tiền cứ giữ nguyên vì nó là màu nhấn (Accent color)
+        // Màu cam của giá tiền luôn giữ nguyên vì nó nổi bật trên cả 2 nền
         Label lblPrice = new Label(String.format("%,.0f đ", tx.bidAmount).replace(",", "."));
         lblPrice.setStyle("-fx-font-weight: bold; -fx-text-fill: #e67e22; -fx-font-size: 15px;");
 
         HBox row = new HBox(leftBox, spacer, lblPrice);
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        // Thay màu nền cứng thành class custom-row
         row.setStyle("-fx-padding: 10 15;");
+
+        // "custom-row" quyết định màu nền xám nhạt (Light) và xám đen (Dark)
         row.getStyleClass().add("custom-row");
         return row;
     }

@@ -13,7 +13,7 @@ import javafx.scene.shape.Rectangle;
 
 public class MyAuctionItemController {
 
-    @FXML private ImageView imgThumbnail; // ĐÃ KHÔI PHỤC ẢNH
+    @FXML private ImageView imgThumbnail;
     @FXML private Label lblId;
     @FXML private Label lblName;
     @FXML private Label lblPrice;
@@ -24,6 +24,22 @@ public class MyAuctionItemController {
     private AuctionModel currentItem;
 
     public void setData(AuctionModel item) {
+        // ==========================================
+        // BƯỚC QUAN TRỌNG: XÓA DỮ LIỆU CŨ TRƯỚC KHI LOAD
+        // (Chống lỗi rác giao diện khi cuộn ListView)
+        // ==========================================
+        imgThumbnail.setImage(null);
+        lblId.setText("");
+        lblName.setText("");
+        lblPrice.setText("");
+        lblTime.setText("");
+        lblStatus.setText("");
+        lblStatus.setStyle("");
+        lblTime.setStyle("");
+        btnStartAuction.setVisible(false);
+        btnStartAuction.setManaged(false);
+        // ==========================================
+
         this.currentItem = item;
         if (item == null || item.bidProduct == null) return;
 
@@ -33,43 +49,29 @@ public class MyAuctionItemController {
         lblName.setText(item.bidProduct.name);
         lblPrice.setText(String.format("%,.0f VND", item.highestBid).replace(",", "."));
 
-        // ==========================================
-        // 2. LOGIC LOAD ẢNH SIÊU TỐC VÀ BO GÓC TRÒN
-        // ==========================================
+        // 2. Logic load ảnh
         imgThumbnail.setCache(true);
         imgThumbnail.setCacheHint(javafx.scene.CacheHint.SPEED);
 
-        if (item.bidProduct.imageUrls != null && !item.bidProduct.imageUrls.isEmpty()) {
-            String fullUrl = ApiService.BASE_URL + item.bidProduct.imageUrls.get(0);
-            Image image = new Image(fullUrl, 130, 130, true, true, true);
-            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=Loading...", 130, 130, true, true, false));
-
-            image.progressProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal.doubleValue() == 1.0) {
-                    if (!image.isError()) {
-                        imgThumbnail.setImage(image);
-                    } else {
-                        imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=Error", 130, 130, true, true, false));
-                    }
-                }
-            });
-        } else {
-            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));
-        }
-
-        // Bo tròn góc ảnh
         Rectangle clip = new Rectangle(120, 120);
         clip.setArcWidth(15);
         clip.setArcHeight(15);
         imgThumbnail.setClip(clip);
-        // ==========================================
+
+        if (item.bidProduct != null && item.bidProduct.imageUrls != null && !item.bidProduct.imageUrls.isEmpty()) {
+            String imagePath = item.bidProduct.imageUrls.get(0);
+            if (!imagePath.startsWith("/")) {
+                imagePath = "/" + imagePath;
+            }
+            String fullUrl = ApiService.BASE_URL + imagePath + "?w=130&h=130";
+
+            com.auction.util.ImageCacheUtils.loadImage(imgThumbnail, fullUrl, 130, 130, "https://via.placeholder.com/120?text=Loading...");
+        } else {
+            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));
+        }
 
         // 3. Logic Thời gian, Trạng thái & Nút bắt đầu
-        btnStartAuction.setVisible(false);
-        btnStartAuction.setManaged(false);
-
         String baseColor;
-
         switch (item.status) {
             case "OPEN":
                 baseColor = "#f39c12"; // Cam
@@ -96,7 +98,7 @@ public class MyAuctionItemController {
                 break;
             default:
                 baseColor = "#95a5a6"; // Xám
-                lblStatus.setText(item.status);
+                lblStatus.setText(item.status != null ? item.status : "UNKNOWN");
                 lblTime.setText("--:--");
                 break;
         }
@@ -150,6 +152,7 @@ public class MyAuctionItemController {
         alert.setTitle("Lỗi");
         alert.setHeaderText(null);
         alert.setContentText(message);
+        com.auction.util.AlertUtils.applyStyle(alert);
         alert.showAndWait();
     }
 }

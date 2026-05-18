@@ -113,6 +113,7 @@ public class DepositController {
         alert.setTitle("Thông báo");
         alert.setHeaderText(null);
         alert.setContentText(message);
+        com.auction.util.AlertUtils.applyStyle(alert);
         alert.showAndWait();
     }
 

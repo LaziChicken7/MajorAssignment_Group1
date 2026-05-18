@@ -75,6 +75,7 @@ public class NotificationItemController {
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
+        com.auction.util.AlertUtils.applyStyle(alert);
         alert.showAndWait();
     }
 }

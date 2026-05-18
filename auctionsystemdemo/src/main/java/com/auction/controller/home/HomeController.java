@@ -340,6 +340,7 @@ public class HomeController {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setHeaderText(null);
                     alert.setContentText(successMsg);
+                    com.auction.util.AlertUtils.applyStyle(alert);
                     alert.showAndWait();
                 }
                 loadNotifications();
@@ -347,6 +348,7 @@ public class HomeController {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
                 alert.setContentText("Thao tác thất bại! Mã lỗi: " + statusCode);
+                com.auction.util.AlertUtils.applyStyle(alert);
                 alert.showAndWait();
             }
         });
