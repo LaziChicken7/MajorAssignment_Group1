@@ -93,8 +93,8 @@ jobs:
           Copy-Item -Path $appFile.FullName -Destination "build_exe\libs\client.jar"
           
           Write-Host "=== TAO JRE TUY CHINH DE TRANH LOI AUTOMATIC MODULE ==="
-          # Đã bổ sung jdk.unsupported.desktop vào danh sách module
-          jlink --add-modules java.base,java.desktop,java.sql,java.naming,java.management,java.net.http,java.xml,java.prefs,jdk.unsupported,jdk.unsupported.desktop,jdk.accessibility,jdk.crypto.ec,jdk.crypto.cryptoki,jdk.charsets,jdk.naming.dns --output custom_jre --no-header-files --no-man-pages
+          # Đã bổ sung java.scripting vào danh sách module
+          jlink --add-modules java.base,java.desktop,java.sql,java.naming,java.management,java.net.http,java.xml,java.prefs,jdk.unsupported,jdk.unsupported.desktop,jdk.accessibility,jdk.crypto.ec,jdk.crypto.cryptoki,jdk.charsets,jdk.naming.dns,java.scripting --output custom_jre --no-header-files --no-man-pages
           
           Write-Host "=== DONG GOI APP BẢN 1.0.0 BANG JPACKAGE ==="
           jpackage --type app-image --dest output --name "Auction Bid System" --app-version 1.0.0 --runtime-image custom_jre --module-path "build_exe\libs" --module com.auction/com.auction.App --win-console
