@@ -13,7 +13,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+
 import java.io.IOException;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 
 public class WithDrawController {
 
@@ -21,6 +24,10 @@ public class WithDrawController {
     @FXML private Label lblBankAccount;
     @FXML private TextField balanceField;
     @FXML private Label lblFrozenBalance;
+
+    // --- Thêm biến cho thẻ VISA ---
+    @FXML private Label lblCardNumber;
+    @FXML private Label lblCardName;
 
     @FXML
     public void initialize() {
@@ -40,6 +47,26 @@ public class WithDrawController {
                                 lblBankAccount.setText(data.bankAccountNumber != null ? data.bankAccountNumber : "Chưa có");
                                 if (balanceField != null) balanceField.setText(formatMoney(data.moneyOnWallet));
                                 if (lblFrozenBalance != null) lblFrozenBalance.setText(formatMoney(data.moneyinFrozen));
+
+                                // --- CẬP NHẬT GIAO DIỆN THẺ VISA ---
+                                if (lblCardName != null) {
+                                    if (SessionManager.fullName != null) {
+                                        lblCardName.setText(removeAccents(SessionManager.fullName).toUpperCase());
+                                    } else if (SessionManager.userName != null) {
+                                        lblCardName.setText(SessionManager.userName.toUpperCase());
+                                    }
+                                }
+
+                                if (lblCardNumber != null) {
+                                    if (data.bankAccountNumber != null && !data.bankAccountNumber.isEmpty()) {
+                                        String acc = data.bankAccountNumber;
+                                        String formattedAcc = acc.replaceAll(".{4}(?!$)", "$0 ");
+                                        lblCardNumber.setText(formattedAcc);
+                                    } else {
+                                        lblCardNumber.setText("**** **** **** ****");
+                                    }
+                                }
+                                // -----------------------------------
                             }
                         }
                     });
@@ -116,5 +143,13 @@ public class WithDrawController {
 
     private String formatMoney(double amount) {
         return String.format("%,.0f", amount).replace(",", ".") + " VND";
+    }
+
+    private String removeAccents(String s) {
+        if (s == null) return "";
+        String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        String result = pattern.matcher(temp).replaceAll("");
+        return result.replace("đ", "d").replace("Đ", "D");
     }
 }

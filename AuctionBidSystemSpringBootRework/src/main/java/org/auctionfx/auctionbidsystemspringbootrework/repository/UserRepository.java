@@ -1,13 +1,16 @@
 package org.auctionfx.auctionbidsystemspringbootrework.repository;
 
+import jakarta.persistence.LockModeType;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
@@ -16,6 +19,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByEmail(String email);
     boolean existsByCitizenId(String citizenId);
     boolean existsByNumberPhone(String numberPhone);
+
+    Optional<User> findById(String id);
 
     User findByUserName(String userName); // Thêm hàm này để tìm User
 

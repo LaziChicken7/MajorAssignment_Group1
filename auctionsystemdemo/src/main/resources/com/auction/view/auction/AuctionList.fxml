@@ -25,25 +25,33 @@
         </HBox>
     </HBox>
 
-    <!-- BỘ LỌC VÀ SẮP XẾP ĐÃ HỖ TRỢ DARK MODE -->
+    <!-- BỘ LỌC VÀ SẮP XẾP -->
     <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 10 20;">
 
-        <!-- Đã xóa -fx-text-fill: #333; (Sẽ tự đổi màu đen/trắng theo Theme) -->
         <Label text="Lọc trạng thái:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-
-        <!-- Thay màu nền cứng bằng styleClass="modern-combo-box" -->
         <ComboBox fx:id="cbFilter" prefWidth="200" styleClass="modern-combo-box" style="-fx-cursor: hand;"/>
 
         <Region HBox.hgrow="ALWAYS" />
 
-        <!-- Đã xóa -fx-text-fill: #333; -->
         <Label text="Sắp xếp thời gian:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-
-        <!-- Thay màu nền cứng bằng styleClass="modern-combo-box" -->
         <ComboBox fx:id="cbSort" prefWidth="240" styleClass="modern-combo-box" style="-fx-cursor: hand;"/>
 
     </HBox>
 
-    <ListView fx:id="auctionListView" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS" />
+    <!-- ========================================================================= -->
+    <!-- ĐÃ FIX: STACKPANE CHỨA LISTVIEW VÀ VÒNG XOAY LOADING (fx:id="loadingOverlay") -->
+    <!-- ========================================================================= -->
+    <StackPane VBox.vgrow="ALWAYS">
+
+        <!-- ĐÃ XÓA visible="false" ĐỂ NÓ LUÔN HIỂN THỊ -->
+        <ListView fx:id="auctionListView" style="-fx-background-color: transparent; -fx-border-color: transparent;"/>
+
+        <!-- Vòng xoay Loading -->
+        <VBox fx:id="loadingOverlay" alignment="CENTER" spacing="20" style="-fx-background-color: transparent;" visible="false">
+            <ProgressIndicator prefWidth="50" prefHeight="50" style="-fx-progress-color: #3498db;" />
+            <Label text="Đang tải dữ liệu, vui lòng chờ..." style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #7f8c8d;"/>
+        </VBox>
+
+    </StackPane>
 
 </VBox>

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -370,13 +371,25 @@ public class UserService {
         return user;
     }
 
-    // Hàm sinh số tài khoản ngẫu nhiên 10 chữ số (Ví dụ: 1045628193)
+    // Hàm sinh số tài khoản ngẫu nhiên 16 chữ số
+    private final SecureRandom secureRandom = new SecureRandom();
+
     private String generateUniqueBankAccountNumber() {
         String accNo;
         do {
-            long randomNum = 1000000000L + (long)(Math.random() * 8999999999L);
-            accNo = String.valueOf(randomNum);
-        } while (bidderRepository.existsByBankAccountNumber(accNo)); // Vòng lặp chạy lại nếu bị trùng
+            StringBuilder sb = new StringBuilder(16);
+
+            // Chữ số đầu tiên từ 1-9 (đảm bảo số tài khoản không bắt đầu bằng số 0)
+            sb.append(secureRandom.nextInt(9) + 1);
+
+            // 15 chữ số tiếp theo từ 0-9
+            for (int i = 0; i < 15; i++) {
+                sb.append(secureRandom.nextInt(10));
+            }
+
+            accNo = sb.toString();
+        } while (bidderRepository.existsByBankAccountNumber(accNo));
+
         return accNo;
     }
 

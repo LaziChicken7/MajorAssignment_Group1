@@ -3,6 +3,7 @@ package org.auctionfx.auctionbidsystemspringbootrework.repository;
 import jakarta.persistence.LockModeType;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.item.Item;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.AuctionStatus;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,9 +27,14 @@ public interface AuctionRepository extends JpaRepository<Auction, String> {
     // Lấy những phiên mà tôi đã đặt giá, ĐÃ KẾT THÚC, và (tôi trượt thầu HOẶC giao dịch bị FAILED/CANCELLED)
     @Query("SELECT DISTINCT a FROM Auction a JOIN a.bidTransactions b " +
             "WHERE b.bidder.userName = :userName " +
-            "AND a.transactionStatus IS NOT NULL " +
+            // [ĐÃ SỬA]: Cho phép lấy nếu transactionStatus có dữ liệu HOẶC phiên đó bị CANCELLED
+            "AND (a.transactionStatus IS NOT NULL OR a.status = :cancelledStatus) " +
             "AND (a.winningUser IS NULL OR a.winningUser.userName != :userName OR a.transactionStatus = :failedStatus)")
-    List<Auction> findLostAuctions(@Param("userName") String userName, @Param("failedStatus") TransactionStatus failedStatus);
+    List<Auction> findLostAuctions(
+            @Param("userName") String userName,
+            @Param("failedStatus") TransactionStatus failedStatus,
+            @Param("cancelledStatus") AuctionStatus cancelledStatus // Thêm tham số này
+    );
 
     // 3. TÌM AUCTION THEO PRODUCT
     Optional<Auction> findByBidProduct(Item item);

@@ -176,13 +176,47 @@ public class SellerProfileController {
             Platform.runLater(() -> {
                 if (res.statusCode() >= 200 && res.statusCode() < 300) {
                     new Alert(Alert.AlertType.INFORMATION, "Đã gửi đánh giá thành công!").show();
-                    // Reset lại danh sách để hiện bình luận vừa đăng
+
+                    // 1. Reset lại danh sách để hiện bình luận vừa đăng
                     vboxReviews.getChildren().clear();
                     currentPage = 0;
                     btnLoadMore.setVisible(true);
                     loadReviews();
                     txtComment.clear();
                     cbStar.getSelectionModel().clearSelection();
+
+                    // ========================================================
+                    // 2. LẤY LẠI RATING MỚI NHẤT CỦA SELLER ĐỂ CẬP NHẬT UI
+                    // Bằng cách gọi lại thông tin của phiên đấu giá
+                    // ========================================================
+                    if (previousAuctionItem != null && previousAuctionItem.id != null) {
+                        ApiService.getAsync("/auctions/" + previousAuctionItem.id).thenAccept(auctionRes -> {
+                            Platform.runLater(() -> {
+                                if (auctionRes.statusCode() == 200) {
+                                    try {
+                                        ApiResponse apiResponse = ApiService.gson.fromJson(auctionRes.body(), ApiResponse.class);
+                                        if (apiResponse.code == 1000) {
+                                            // Parse ra Object Auction mới nhất
+                                            AuctionModel updatedAuction = ApiService.gson.fromJson(apiResponse.result, AuctionModel.class);
+
+                                            // Lấy điểm Rating mới cập nhật của Seller và dán lên UI
+                                            if (updatedAuction.seller != null) {
+                                                double newRating = updatedAuction.seller.rating;
+                                                lblRating.setText(newRating + "/5.0");
+
+                                                // Cập nhật luôn vào biến local để nếu Back lại trang không bị mất
+                                                seller.rating = newRating;
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        System.out.println("Lỗi khi fetch lại rating: " + e.getMessage());
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    // ========================================================
+
                 } else {
                     try {
                         ApiResponse err = ApiService.gson.fromJson(res.body(), ApiResponse.class);

@@ -17,9 +17,27 @@ import javafx.stage.Popup;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ToastNotification {
 
+    // Khai báo các loại Toast để dễ dàng phân biệt Icon
+    public enum ToastType {
+        NOTIFICATION, // Thông báo chung (Hình chuông)
+        CHAT          // Tin nhắn (Hình bong bóng chat)
+    }
+
+    private static final List<Popup> activeToasts = new ArrayList<>();
+    private static final double TOAST_SPACING = 15.0;
+
+    // Hàm gọi Mặc định (Sẽ dùng Icon Chuông) - KHÔNG LÀM LỖI CODE CŨ
     public static void show(String title, String message) {
+        show(title, message, ToastType.NOTIFICATION);
+    }
+
+    // Hàm gọi Nâng cao (Cho phép chọn loại Icon)
+    public static void show(String title, String message, ToastType type) {
         Platform.runLater(() -> {
 
             Window mainWindow = Window.getWindows().stream()
@@ -35,7 +53,6 @@ public class ToastNotification {
             VBox root = new VBox(5);
             boolean isDark = false;
 
-            // KÉO CSS VÀ KÍCH HOẠT DARK MODE
             if (mainWindow.getScene() != null) {
                 root.getStylesheets().addAll(mainWindow.getScene().getStylesheets());
                 if (mainWindow.getScene().getRoot().getStyleClass().contains("dark-theme")) {
@@ -43,9 +60,6 @@ public class ToastNotification {
                 }
             }
 
-            // ========================================================
-            // ÉP MÀU NỀN VÀ VIỀN TRỰC TIẾP ĐỂ KHÔNG BỊ LỖI KẾT THỪA CSS
-            // ========================================================
             String bgColor = isDark ? "#1E1E1E" : "#FFFFFF";
             String borderColor = isDark ? "#2C2C2E" : "#ecf0f1";
 
@@ -55,18 +69,26 @@ public class ToastNotification {
                     "-fx-border-color: " + borderColor + "; -fx-border-width: 1px; " +
                     "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 5);");
 
-            // --- HEADER: ICON + TIÊU ĐỀ + NÚT X ---
+            // --- HEADER ---
             HBox header = new HBox();
             header.setAlignment(Pos.CENTER_LEFT);
 
-            SVGPath chatIcon = new SVGPath();
-            chatIcon.setContent("M 21 15 a 2 2 0 0 1 -2 2 H 7 l -4 4 V 5 a 2 2 0 0 1 2 -2 h 14 a 2 2 0 0 1 2 2 z");
-            // Ép màu Icon: Sáng thì Xanh đậm, Tối thì Xanh da trời cho nổi bật
-            chatIcon.setFill(Color.web(isDark ? "#60a5fa" : "#0A439D"));
-            chatIcon.setScaleX(0.75); chatIcon.setScaleY(0.75);
+            // ==========================================
+            // LOGIC CHỌN ICON DỰA TRÊN TOAST TYPE
+            // ==========================================
+            SVGPath icon = new SVGPath();
+            if (type == ToastType.CHAT) {
+                // ICON BONG BÓNG CHAT
+                icon.setContent("M 21 15 a 2 2 0 0 1 -2 2 H 7 l -4 4 V 5 a 2 2 0 0 1 2 -2 h 14 a 2 2 0 0 1 2 2 z");
+                icon.setFill(Color.web(isDark ? "#34d399" : "#0984e3")); // Màu hơi hướng Messenger
+            } else {
+                // ICON CÁI CHUÔNG (MẶC ĐỊNH)
+                icon.setContent("M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z");
+                icon.setFill(Color.web(isDark ? "#60a5fa" : "#0A439D"));
+            }
+            icon.setScaleX(0.75); icon.setScaleY(0.75);
 
             Label lblTitle = new Label(title);
-            // Ép màu Tiêu đề: Sáng thì Đen, Tối thì Trắng tinh
             String titleColor = isDark ? "#FFFFFF" : "#2c3e50";
             lblTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 14.5px; -fx-padding: 0 0 0 5; -fx-text-fill: " + titleColor + ";");
 
@@ -76,7 +98,6 @@ public class ToastNotification {
             Button btnClose = new Button();
             SVGPath closeIcon = new SVGPath();
             closeIcon.setContent("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z");
-
             closeIcon.setFill(Color.web(isDark ? "#A1A1AA" : "#95a5a6"));
             closeIcon.setScaleX(0.65); closeIcon.setScaleY(0.65);
 
@@ -93,20 +114,13 @@ public class ToastNotification {
                 closeIcon.setFill(Color.web(finalIsDark ? "#A1A1AA" : "#95a5a6"));
             });
 
-            btnClose.setOnAction(e -> {
-                FadeTransition fadeOut = new FadeTransition(Duration.millis(200), root);
-                fadeOut.setFromValue(1.0);
-                fadeOut.setToValue(0.0);
-                fadeOut.setOnFinished(event -> popup.hide());
-                fadeOut.play();
-            });
+            btnClose.setOnAction(e -> removeToast(popup, root));
 
-            header.getChildren().addAll(chatIcon, lblTitle, spacer, btnClose);
+            header.getChildren().addAll(icon, lblTitle, spacer, btnClose);
 
-            // --- BODY: NỘI DUNG TIN NHẮN ---
+            // --- BODY ---
             Label lblMessage = new Label(message);
             lblMessage.setWrapText(true);
-            // Ép màu Nội dung: Sáng thì Xám đậm, Tối thì Xám sáng (Trắng xám)
             String msgColor = isDark ? "#E4E4E7" : "#576574";
             lblMessage.setStyle("-fx-font-size: 13.5px; -fx-line-spacing: 3px; -fx-text-fill: " + msgColor + ";");
             VBox.setMargin(lblMessage, new Insets(5, 0, 0, 25));
@@ -114,18 +128,24 @@ public class ToastNotification {
             root.getChildren().addAll(header, lblMessage);
             popup.getContent().add(root);
 
-            // =======================================================
-            // FIX LỖI "LỌT THỎM":
-            // =======================================================
             root.setOpacity(0);
             popup.show(mainWindow);
+
+            activeToasts.add(popup);
 
             Platform.runLater(() -> {
                 double actualWidth = root.getWidth();
                 double actualHeight = root.getHeight();
 
                 double x = mainWindow.getX() + mainWindow.getWidth() - actualWidth - 30;
-                double y = mainWindow.getY() + mainWindow.getHeight() - actualHeight - 30;
+
+                double baseY = mainWindow.getY() + mainWindow.getHeight() - 30;
+                double yOffset = 0;
+                for (int i = 0; i < activeToasts.size() - 1; i++) {
+                    yOffset += activeToasts.get(i).getContent().get(0).getBoundsInLocal().getHeight() + TOAST_SPACING;
+                }
+
+                double y = baseY - actualHeight - yOffset;
 
                 popup.setX(x);
                 popup.setY(y);
@@ -135,16 +155,23 @@ public class ToastNotification {
                 fadeIn.setToValue(1);
                 fadeIn.play();
 
-                PauseTransition delay = new PauseTransition(Duration.seconds(10));
-                delay.setOnFinished(e -> {
-                    FadeTransition fadeOut = new FadeTransition(Duration.millis(300), root);
-                    fadeOut.setFromValue(1);
-                    fadeOut.setToValue(0);
-                    fadeOut.setOnFinished(event -> popup.hide());
-                    fadeOut.play();
-                });
+                PauseTransition delay = new PauseTransition(Duration.seconds(7));
+                delay.setOnFinished(e -> removeToast(popup, root));
                 delay.play();
             });
         });
+    }
+
+    private static void removeToast(Popup popup, VBox root) {
+        if (!popup.isShowing()) return;
+
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), root);
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+        fadeOut.setOnFinished(event -> {
+            popup.hide();
+            activeToasts.remove(popup);
+        });
+        fadeOut.play();
     }
 }

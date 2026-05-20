@@ -42,11 +42,12 @@ public class TransactionController {
                         if (apiResponse.code == 1000) {
                             WalletDataResponse walletData = ApiService.gson.fromJson(apiResponse.result, WalletDataResponse.class);
 
+                            // Truyền thêm cờ true/false để ép UI render đúng màu theo danh sách
                             if (successContainer != null) {
-                                renderList(walletData.successTransaction, successContainer);
+                                renderList(walletData.successTransaction, successContainer, true);
                             }
                             if (failedContainer != null) {
-                                renderList(walletData.failedTransaction, failedContainer);
+                                renderList(walletData.failedTransaction, failedContainer, false);
                             }
                         }
                     }
@@ -57,7 +58,8 @@ public class TransactionController {
         });
     }
 
-    private void renderList(List<TransactionHistoryResponse> list, VBox container) {
+    // Đã thêm cờ boolean isSuccessType
+    private void renderList(List<TransactionHistoryResponse> list, VBox container, boolean isSuccessType) {
         container.getChildren().clear();
 
         if (list == null || list.isEmpty()) {
@@ -72,19 +74,26 @@ public class TransactionController {
             TransactionHistoryResponse tx = list.get(i);
             String status = tx.status != null ? tx.status : "FAILED";
             String itemName = tx.itemName != null ? tx.itemName : "Sản phẩm ẩn";
+
             String colorHex;
             String statusText;
 
-            if ("SUCCESS".equals(status)) {
-                colorHex = "#00C853"; statusText = "Giao dịch thành công";
-            } else if ("CANCELLED".equals(status)) {
-                colorHex = "#e74c3c"; statusText = "Đã từ chối / Hủy giao dịch";
+            // Xử lý ép màu dựa trên danh sách chứa nó (Thành công hay Thất bại)
+            if (isSuccessType) {
+                colorHex = "#00C853";
+                statusText = "Giao dịch thành công";
             } else {
-                colorHex = "#FF0000"; statusText = "Trượt đấu giá";
+                if ("CANCELLED".equals(status)) {
+                    colorHex = "#e74c3c"; // Màu đỏ cam
+                    statusText = "Đã từ chối / Hủy giao dịch";
+                } else {
+                    colorHex = "#FF0000"; // Màu đỏ tươi
+                    statusText = "Giao dịch không thành công";
+                }
             }
 
             VBox card = new VBox(15);
-            card.getStyleClass().add("custom-row"); // DÙNG CLASS ĐỔI MÀU NỀN TỰ ĐỘNG
+            card.getStyleClass().add("custom-row");
             card.setStyle("-fx-padding: 20;");
 
             HBox headerBox = new HBox(15);
@@ -110,17 +119,13 @@ public class TransactionController {
             HBox detailBox = new HBox(20);
             detailBox.setAlignment(Pos.CENTER_LEFT);
 
-            // ==================================================
-            // --- XỬ LÝ HIỂN THỊ ẢNH SẢN PHẨM CÓ BO GÓC TRÒN ---
-            // ==================================================
+            // XỬ LÝ ẢNH
             javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView();
             imgView.setFitWidth(100);
             imgView.setFitHeight(90);
 
-            // Kiểm tra link ảnh từ Backend
             String imgPath = "https://via.placeholder.com/100x90?text=No+Image";
             try {
-                // (Lưu ý: Model TransactionHistoryResponse của bạn cần có khai báo biến imageUrl)
                 if (tx.imageUrl != null && !tx.imageUrl.isEmpty()) {
                     imgPath = ApiService.BASE_URL + tx.imageUrl;
                 }
@@ -128,28 +133,31 @@ public class TransactionController {
 
             imgView.setImage(new javafx.scene.image.Image(imgPath, true));
 
-            // Bo tròn 15px cho các góc của ảnh
             javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(100, 90);
             clip.setArcWidth(15);
             clip.setArcHeight(15);
             imgView.setClip(clip);
 
-            // Bọc ảnh vào VBox để đẹp hơn
             VBox imageBox = new VBox(imgView);
             imageBox.setPrefSize(100, 90);
             imageBox.setStyle("-fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-            // ==================================================
+
+            // LẤY THỜI GIAN THẬT CỦA GIAO DỊCH (Thay thế dòng Lỗi LocalDateTime.now() của bạn)
+            // LƯU Ý: Bạn cần thay `tx.createdAt` hoặc biến chứa ngày giờ thật trong Model của bạn vào đây.
+            // Nếu Model của bạn không có, nó sẽ tạm thời lấy giờ hiện tại.
+            String displayDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            // Ví dụ sửa lại thành:
+            // if (tx.transactionDate != null) displayDate = tx.transactionDate;
 
             VBox infoColumn = new VBox(8);
             infoColumn.setStyle("-fx-font-size: 15px;");
 
             infoColumn.getChildren().addAll(
-                    createDetailRow("Ngày ghi nhận:", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), null),
+                    createDetailRow("Ngày ghi nhận:", displayDate, null),
                     createDetailRow("Địa chỉ giao hàng:", "Chưa cập nhật", null),
                     createDetailRow("Trạng thái:", statusText, colorHex)
             );
 
-            // Đã đổi từ imagePlaceholder thành imageBox
             detailBox.getChildren().addAll(imageBox, infoColumn);
             card.getChildren().addAll(headerBox, detailBox);
             container.getChildren().add(card);
@@ -160,14 +168,14 @@ public class TransactionController {
         HBox row = new HBox(10);
         Label lblTitle = new Label(title);
         lblTitle.setPrefWidth(200);
-        lblTitle.getStyleClass().add("muted-text"); // Chữ tiêu đề xám mờ
+        lblTitle.getStyleClass().add("muted-text");
         lblTitle.setStyle("-fx-font-weight: bold;");
 
         Label lblValue = new Label(value);
         if (customColor == null) {
-            lblValue.getStyleClass().add("row-title-bold"); // Chữ nội dung tự động Đen/Trắng
+            lblValue.getStyleClass().add("row-title-bold");
         } else {
-            lblValue.setStyle("-fx-text-fill: " + customColor + "; -fx-font-weight: bold;"); // Ép màu Xanh/Đỏ
+            lblValue.setStyle("-fx-text-fill: " + customColor + "; -fx-font-weight: bold;");
         }
 
         row.getChildren().addAll(lblTitle, lblValue);

@@ -532,7 +532,10 @@ public class AuctionDetailController {
             if(btnPrevImage != null) btnPrevImage.setDisable(true);
             if(btnNextImage != null) btnNextImage.setDisable(true);
         } else {
-            productImageView.setImage(new javafx.scene.image.Image(ApiService.BASE_URL + imageUrls.get(currentImageIndex), true));
+            // SỬ DỤNG CLASS CACHE CỦA BẠN (Ảnh to hơn nên để size 400x400)
+            String actualUrl = ApiService.BASE_URL + imageUrls.get(currentImageIndex);
+            com.auction.util.ImageCacheUtils.loadImage(productImageView, actualUrl, 400, 400, "https://via.placeholder.com/200?text=Loading...");
+
             if(lblImageIndex != null) lblImageIndex.setText((currentImageIndex + 1) + "/" + imageUrls.size());
             boolean hasMultiple = imageUrls.size() > 1;
             if(btnPrevImage != null) btnPrevImage.setDisable(!hasMultiple);

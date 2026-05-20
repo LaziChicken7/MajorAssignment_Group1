@@ -22,6 +22,7 @@ public class AuctionItemController {
     public void setData(AuctionModel item) {
         // ==========================================
         // BƯỚC 1: XÓA DỮ LIỆU CŨ VÀ DỪNG TIMELINE
+        // (Bắt buộc phải có để ListView không bị loạn data)
         // ==========================================
         imgThumbnail.setImage(null);
         lblId.setText("");
@@ -33,7 +34,6 @@ public class AuctionItemController {
         lblTime.setStyle("");
         if (lblTimeTitle != null) lblTimeTitle.setText("");
 
-        // CỰC KỲ QUAN TRỌNG: Dừng ngay bộ đếm thời gian của item cũ
         if (this.timeline != null) {
             this.timeline.stop();
             this.timeline = null;
@@ -51,7 +51,9 @@ public class AuctionItemController {
 
         lblPrice.setText(String.format("%,.0f VND", item.highestBid).replace(",", "."));
 
-        // BƯỚC 3: Logic load ảnh
+        // ==========================================
+        // BƯỚC 3: DÙNG LẠI HÀM IMAGE CACHE CỦA BẠN
+        // ==========================================
         imgThumbnail.setCache(true);
         imgThumbnail.setCacheHint(javafx.scene.CacheHint.SPEED);
 
@@ -67,6 +69,7 @@ public class AuctionItemController {
             }
             String fullUrl = ApiService.BASE_URL + imagePath + "?w=130&h=130";
 
+            // SỬ DỤNG CLASS IMAGE_CACHE_UTILS CỦA BẠN TẠI ĐÂY
             com.auction.util.ImageCacheUtils.loadImage(imgThumbnail, fullUrl, 130, 130, "https://via.placeholder.com/120?text=Loading...");
         } else {
             imgThumbnail.setImage(new javafx.scene.image.Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));

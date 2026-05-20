@@ -3,6 +3,7 @@ package org.auctionfx.auctionbidsystemspringbootrework.service;
 import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.response.TransactionHistoryResponse;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.AuctionStatus;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.TransactionStatus;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.AuctionRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,9 +57,16 @@ public class PaymentService {
 
     // 1. Đóng băng tiền (Khi người dùng bấm Place Bid)
     // Trừ tiền ở Ví chính -> Cộng vào Ví đóng băng
-    @Transactional(rollbackFor = Exception.class) // Nếu có lỗi xảy ra, toàn bộ tiền sẽ được rollback lại như cũ
+    @Transactional(rollbackFor = Exception.class)
     public String freezeMoney(String userId, BigDecimal amount) {
         log.info("SERVICE: Yêu cầu ĐÓNG BĂNG {} VND của User ID [{}]", amount, userId);
+
+        // BẢO MẬT: Chặn số âm hoặc bằng 0
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.error("CẢNH BÁO BẢO MẬT: Phát hiện yêu cầu đóng băng số tiền KHÔNG HỢP LỆ ({}) từ User [{}]", amount, userId);
+            throw new PaymentException(ErrorCode.PAYMENT_AMOUNT_INVALID);
+        }
+
         Bidder bidder = getBidder(userId);
 
         if (bidder.getMoneyOnWallet().compareTo(amount) < 0) {
@@ -79,6 +87,13 @@ public class PaymentService {
     @Transactional(rollbackFor = Exception.class)
     public String unFreezeMoney(String userId, BigDecimal amount) {
         log.info("SERVICE: Yêu cầu HOÀN TRẢ (Unfreeze) {} VND cho User ID [{}]", amount, userId);
+
+        // BẢO MẬT: Chặn số âm hoặc bằng 0
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.error("CẢNH BÁO BẢO MẬT: Phát hiện yêu cầu hoàn tiền KHÔNG HỢP LỆ ({}) cho User [{}]", amount, userId);
+            throw new PaymentException(ErrorCode.PAYMENT_AMOUNT_INVALID);
+        }
+
         Bidder bidder = getBidder(userId);
 
         if (bidder.getMoneyinFrozen().compareTo(amount) < 0) {
@@ -99,6 +114,13 @@ public class PaymentService {
     @Transactional(rollbackFor = Exception.class)
     public String transferMoney(String fromUserId, String toUserId, BigDecimal amount) {
         log.info("SERVICE: Yêu cầu CHUYỂN {} VND từ Ví đóng băng (Buyer ID: {}) sang Ví chính (Seller ID: {})", amount, fromUserId, toUserId);
+
+        // BẢO MẬT: Chặn số âm hoặc bằng 0
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.error("CẢNH BÁO BẢO MẬT: Yêu cầu chuyển số tiền KHÔNG HỢP LỆ ({})", amount);
+            throw new PaymentException(ErrorCode.PAYMENT_AMOUNT_INVALID);
+        }
+
         Bidder buyer = getBidder(fromUserId);
         Bidder seller = getBidder(toUserId);
 
@@ -107,7 +129,7 @@ public class PaymentService {
             throw new PaymentException(ErrorCode.NOT_ENOUGH_MONEY_IN_FROZEN);
         }
 
-        // Trừ của người mua
+        // Trừ cho người mua
         buyer.setMoneyinFrozen(buyer.getMoneyinFrozen().subtract(amount));
 
         // Cộng cho người bán
@@ -188,22 +210,34 @@ public class PaymentService {
             ));
         }
 
-        // 3. Lọc giao dịch thất bại
-        List<Auction> lostAuctions = auctionRepository.findLostAuctions(userName, TransactionStatus.FAILED);
+        // 3. Lọc giao dịch thất bại (Bao gồm cả trượt giá FAILED và Admin hủy CANCELLED)
+        List<Auction> lostAuctions = auctionRepository.findLostAuctions(userName, TransactionStatus.FAILED, AuctionStatus.CANCELLED);
         List<TransactionHistoryResponse> failedList = new ArrayList<>();
+
         for (Auction auction : lostAuctions) {
-            // Lấy ảnh đầu tiên của sản phẩm (nếu có)
             String firstImageUrl = null;
             if (auction.getBidProduct().getImageUrls() != null && !auction.getBidProduct().getImageUrls().isEmpty()) {
                 firstImageUrl = auction.getBidProduct().getImageUrls().get(0);
             }
 
+            // XỬ LÝ ĐỂ BÁO CHO FRONTEND BIẾT LÀ ADMIN HỦY HAY TRƯỢT GIÁ
+            TransactionStatus finalStatus;
+
+            if (auction.getStatus() == AuctionStatus.CANCELLED) {
+                // Nếu là Admin hủy -> Ép trạng thái thành CANCELLED để Frontend hiện màu Cam
+                // (Yêu cầu file Enum TransactionStatus.java của bạn CÓ chữ CANCELLED nhé)
+                finalStatus = TransactionStatus.CANCELLED;
+            } else {
+                // Nếu trượt giá bình thường -> Lấy FAILED
+                finalStatus = auction.getTransactionStatus() != null ? auction.getTransactionStatus() : TransactionStatus.FAILED;
+            }
+
             failedList.add(new TransactionHistoryResponse(
-                    auction.getBidProduct().getId(), // THÊM DÒNG NÀY
+                    auction.getBidProduct().getId(),
                     auction.getBidProduct().getName(),
                     auction.getHighestBid(),
-                    auction.getTransactionStatus() != null ? auction.getTransactionStatus() : TransactionStatus.FAILED,
-                    firstImageUrl // TRUYỀN THÊM LINK ẢNH VÀO ĐÂY
+                    finalStatus,
+                    firstImageUrl
             ));
         }
 

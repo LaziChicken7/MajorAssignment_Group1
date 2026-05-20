@@ -10,6 +10,7 @@
 <?import javafx.scene.shape.SVGPath?>
 <?import java.net.URL?>
 
+<?import javafx.scene.Group?>
 <HBox fx:id="rootPane" prefHeight="750.0" prefWidth="1050.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.home.LoginController">
     <stylesheets>
         <URL value="@../style.css" />
@@ -23,16 +24,40 @@
             <children>
                 <VBox alignment="CENTER" spacing="20.0">
                     <children>
+                        <!-- KHỐI LOGO BÚA ĐẤU GIÁ (GAVEL) ĐÃ ĐƯỢC VẼ LẠI CHUẨN XÁC -->
                         <StackPane>
-                            <Circle radius="55" fill="#ffffff" opacity="0.1"/>
-                            <Circle radius="40" fill="#ffffff" opacity="0.2"/>
-                            <SVGPath content="M 28 12 L 20 4 C 18 2 15 2 13 4 L 4 13 C 2 15 2 18 4 20 L 12 28 C 14 30 17 30 19 28 L 28 19 C 30 17 30 14 28 12 Z M 16 25 L 7 16 L 16 7 L 25 16 L 16 25 Z M 22 24 L 38 40 L 42 36 L 26 20 Z"
-                                     fill="white" scaleX="1.8" scaleY="1.8" translateX="-4" translateY="-4"/>
+                            <!-- Các vòng tròn phát sáng (Đã căn chỉnh lại cho cân đối với búa) -->
+                            <Circle radius="85" fill="#ffffff" opacity="0.04"/>
+                            <Circle radius="65" fill="#ffffff" opacity="0.08"/>
+                            <Circle radius="45" fill="#ffffff" opacity="0.15"/>
+
+                            <!-- Búa & Đế: Thuần trắng, căn giữa tuyệt đối -->
+                            <Group scaleX="0.75" scaleY="0.75">
+                                <!-- ĐẾ GÕ (SOUND BLOCK) -->
+                                <Group translateY="45">
+                                    <!-- Vòm khối gỗ -->
+                                    <Rectangle x="-35" y="-12" width="70" height="24" arcWidth="24" arcHeight="24" fill="white"/>
+                                    <!-- Tấm lót ngang -->
+                                    <Rectangle x="-55" y="2" width="110" height="10" arcWidth="4" arcHeight="4" fill="white"/>
+                                </Group>
+
+                                <!-- BÚA (HAMMER) - Góc 45 độ, cán vát đúng chiều, đầu đập khóa chặt tâm đế -->
+                                <Group rotate="45" translateX="12" translateY="-20">
+                                    <!-- Nắp đập trên (Trái) -->
+                                    <Rectangle x="-22" y="-40" width="44" height="12" arcWidth="6" arcHeight="6" fill="white"/>
+                                    <!-- Thân búa -->
+                                    <Rectangle x="-17" y="-28" width="34" height="56" fill="white"/>
+                                    <!-- Nắp đập dưới (Phải - Chạm đế) -->
+                                    <Rectangle x="-22" y="28" width="44" height="12" arcWidth="6" arcHeight="6" fill="white"/>
+                                    <!-- Cán búa -->
+                                    <Rectangle x="17" y="-8" width="85" height="16" arcWidth="8" arcHeight="8" fill="white"/>
+                                </Group>
+                            </Group>
                         </StackPane>
 
                         <VBox alignment="CENTER" spacing="8">
                             <VBox.margin><Insets top="20"/></VBox.margin>
-                            <Label text="AUCTION PRO" textFill="white" style="-fx-letter-spacing: 4;">
+                            <Label text="AUCTION SYSTEM" textFill="white" style="-fx-letter-spacing: 4;">
                                 <font><Font name="Segoe UI Black" size="34.0" /></font>
                             </Label>
                             <Separator maxWidth="100" style="-fx-opacity: 0.4;" />

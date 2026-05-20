@@ -210,27 +210,34 @@ public class AuctionService {
     // Để tránh việc hàm placeBid gọi triggerAutoBidProcess, rồi triggerAutoBidProcess lại gọi placeBid tạo thành một mớ bòng bong vô tận, tách cái lõi của placeBid ra thành một hàm private executeInternalBid.
     // Đây là hàm dùng chung cho cả Người Đặt và Bot Đặt
     private boolean executeInternalBid(Auction auction, Bidder bidder, BigDecimal bidAmount) {
-        // 1. Xử lý tiền (Hoàn tiền cho người cũ, đóng hoàn tiền cho người mới)
+        // 1. Lấy thông tin người dẫn đầu cũ và giá cũ
         Bidder previousWinner = auction.getWinningUser();
         BigDecimal previousBid = auction.getHighestBid();
 
-        // 2. Rút lại tiền người cũ
-        // Nếu có người dẫn đầu trước đó -> Trả lại tiền cho họ
-        if (previousWinner != null && !previousWinner.getId().equals(bidder.getId())) {
-            log.info("Thực hiện hoàn trả tiền {} VND cho người dẫn đầu cũ [{}]", previousBid, previousWinner.getUserName());
-            paymentService.unFreezeMoney(previousWinner.getId(), previousBid);
+        // 2. XỬ LÝ ĐÓNG BĂNG / RÃ ĐÔNG TIỀN (CHUẨN LOGIC TÀI CHÍNH)
+        if (previousWinner != null && previousWinner.getId().equals(bidder.getId())) {
+            // TRƯỜNG HỢP 1: TỰ ĐÈ GIÁ CHÍNH MÌNH (Self-outbid)
+            // Chỉ đóng băng thêm phần tiền chênh lệch để tránh lỗi "Thiếu số dư khả dụng ảo"
+            BigDecimal extraAmount = bidAmount.subtract(previousBid);
+            log.info("Bidder [{}] tự nâng giá. Đóng băng thêm phần chênh lệch: {} VND", bidder.getUserName(), extraAmount);
+            paymentService.freezeMoney(bidder.getId(), extraAmount);
+        } else {
+            // TRƯỜNG HỢP 2: NGƯỜI MỚI VƯỢT GIÁ NGƯỜI CŨ
+            // Rã đông trả lại toàn bộ tiền cho người cũ (nếu có)
+            if (previousWinner != null) {
+                log.info("Thực hiện hoàn trả tiền {} VND cho người dẫn đầu cũ [{}]", previousBid, previousWinner.getUserName());
+                paymentService.unFreezeMoney(previousWinner.getId(), previousBid);
+            }
+            // Đóng băng toàn bộ số tiền của người mới
+            log.info("Thực hiện đóng băng {} VND của Bidder mới [{}]", bidAmount, bidder.getUserName());
+            paymentService.freezeMoney(bidder.getId(), bidAmount);
         }
 
-        // 3. Trừ tiền người mới
-        // Đóng băng tiền của người đặt giá mới
-        log.info("Thực hiện đóng băng {} VND của Bidder mới [{}]", bidAmount, bidder.getUserName());
-        paymentService.freezeMoney(bidder.getId(), bidAmount);
-
-        // 4. Cập nhật Auction
+        // 3. Cập nhật thông tin phiên đấu giá
         auction.setHighestBid(bidAmount);
         auction.setWinningUser(bidder);
 
-        // 5. Thuật toán ANTI-SNIPPING
+        // 4. Thuật toán ANTI-SNIPPING (Chống bắn tỉa giây cuối)
         boolean isExtended = false;
         long secondsRemaining = ChronoUnit.SECONDS.between(LocalDateTime.now(), auction.getEndTime());
         if (secondsRemaining <= SNIPING_THRESHOLD_SECONDS) {
@@ -239,7 +246,7 @@ public class AuctionService {
             isExtended = true;
         }
 
-        // 6. Lưu lịch sử giao dịch
+        // 5. Lưu lịch sử giao dịch
         BidTransaction transaction = new BidTransaction();
         transaction.setAuction(auction);
         transaction.setBidder(bidder);
@@ -401,6 +408,8 @@ public class AuctionService {
         paymentService.unFreezeMoney(auction.getWinningUser().getId(), auction.getHighestBid());
 
         auction.setStatus(AuctionStatus.CANCELLED);
+        auction.setTransactionStatus(TransactionStatus.CANCELLED);
+
         auctionRepository.save(auction);
         log.info("Đã hủy phiên đấu giá thành công");
     }

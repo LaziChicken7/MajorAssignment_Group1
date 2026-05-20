@@ -2,7 +2,6 @@ G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\au
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\addauctionitem\AddProductController.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\addauctionitem\MyAuctionItemController.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\addauctionitem\MyAuctionListController.java
-G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\addauctionitem\ProductController.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\auction\AuctionChartController.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\auction\AuctionController.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\auction\AuctionDetailController.java
@@ -45,8 +44,10 @@ G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\au
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\model\UserProfile.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\model\UserUpdateRequest.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\model\WalletDataResponse.java
+G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\AlertUtils.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\ApiService.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\GlobalWebSocketManager.java
+G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\ImageCacheUtils.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\SessionManager.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\ToastNotification.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\WebSocketClientService.java

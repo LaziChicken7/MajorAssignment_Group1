@@ -21,6 +21,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+// THÊM IMPORT NÀY:
+import javafx.scene.input.KeyCode;
+
 import java.io.IOException;
 
 public class LoginController {
@@ -37,9 +40,16 @@ public class LoginController {
     @FXML
     public void initialize() {
         txtServerIp.setText(ApiService.BASE_URL);
-
-        // Tự động load Theme đang lưu trong hệ thống
         applyCurrentTheme(false);
+
+        // ==========================================
+        // BẮT SỰ KIỆN: NHẤN ENTER LÀ TỰ ĐĂNG NHẬP
+        // ==========================================
+        rootPane.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                handleLogin();
+            }
+        });
     }
 
     // ==========================================
@@ -52,7 +62,6 @@ public class LoginController {
     }
 
     private void applyCurrentTheme(boolean animate) {
-        // 1. Cập nhật màu nền nút gạt và CSS Theme
         if (SessionManager.isDarkMode) {
             switchBackground.setFill(Color.web("#2c3e50"));
             if (!rootPane.getStyleClass().contains("dark-theme")) {
@@ -63,18 +72,13 @@ public class LoginController {
             rootPane.getStyleClass().remove("dark-theme");
         }
 
-        // 2. Xác định vị trí của nút tròn
-        // (Trong FXML của bạn đang để mặc định translateX="-16", nên ta dùng 16 và -16 để cân xứng)
         double targetX = SessionManager.isDarkMode ? 16 : -16;
 
-        // 3. Xử lý di chuyển Knob
         if (animate) {
-            // Khi người dùng click gạt: dùng Animation mượt mà
             TranslateTransition transition = new TranslateTransition(Duration.millis(250), switchKnob);
             transition.setToX(targetX);
             transition.play();
         } else {
-            // Khi mới vào trang (hàm initialize gọi): Gán giá trị ngay lập tức, bỏ qua animation
             switchKnob.setTranslateX(targetX);
         }
     }
@@ -83,9 +87,7 @@ public class LoginController {
     private void handleApplyIp() {
         String serverIp = txtServerIp.getText().trim();
         if (!serverIp.isEmpty()) {
-            if (serverIp.endsWith("/")) {
-                serverIp = serverIp.substring(0, serverIp.length() - 1);
-            }
+            if (serverIp.endsWith("/")) serverIp = serverIp.substring(0, serverIp.length() - 1);
             ApiService.BASE_URL = serverIp;
             showAlert(Alert.AlertType.INFORMATION, "Cấu hình thành công", "Hệ thống sẽ kết nối đến IP:\n" + ApiService.BASE_URL);
         } else {

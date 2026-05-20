@@ -38,6 +38,7 @@ public enum ErrorCode {
     CONDITION_CANCEL_AUCTION_INVALID(6005, "Condition cancel auction invalid"),
     DEPOSIT_MONEY_INVALID(6006, "Deposit money must be more than zero"),
     WITHDRAW_MONEY_INVALID(6007, "Withdraw money must be more than zero"),
+    PAYMENT_AMOUNT_INVALID(6008, "Payment amount must be more than zero"),
     // ===========================================================================
     // AUCTION EXCEPTION
     AUCTION_NOT_FOUND(7001, "Auction not founded"),

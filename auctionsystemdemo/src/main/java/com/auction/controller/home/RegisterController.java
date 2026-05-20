@@ -20,6 +20,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+// THÊM IMPORT NÀY:
+import javafx.scene.input.KeyCode;
+
 import java.io.IOException;
 
 public class RegisterController {
@@ -35,6 +38,15 @@ public class RegisterController {
     @FXML
     public void initialize() {
         applyCurrentTheme(false);
+
+        // ==========================================
+        // BẮT SỰ KIỆN: NHẤN ENTER LÀ TỰ ĐĂNG KÝ
+        // ==========================================
+        rootPane.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                handleRegister();
+            }
+        });
     }
 
     @FXML
@@ -44,7 +56,6 @@ public class RegisterController {
     }
 
     private void applyCurrentTheme(boolean animate) {
-        // 1. Cập nhật màu nền nút gạt và CSS Theme
         if (SessionManager.isDarkMode) {
             switchBackground.setFill(Color.web("#2c3e50"));
             if (!rootPane.getStyleClass().contains("dark-theme")) {
@@ -55,18 +66,13 @@ public class RegisterController {
             rootPane.getStyleClass().remove("dark-theme");
         }
 
-        // 2. Xác định vị trí của nút tròn
-        // (Trong FXML của bạn đang để mặc định translateX="-16", nên ta dùng 16 và -16 để cân xứng)
         double targetX = SessionManager.isDarkMode ? 16 : -16;
 
-        // 3. Xử lý di chuyển Knob
         if (animate) {
-            // Khi người dùng click gạt: dùng Animation mượt mà
             TranslateTransition transition = new TranslateTransition(Duration.millis(250), switchKnob);
             transition.setToX(targetX);
             transition.play();
         } else {
-            // Khi mới vào trang (hàm initialize gọi): Gán giá trị ngay lập tức, bỏ qua animation
             switchKnob.setTranslateX(targetX);
         }
     }

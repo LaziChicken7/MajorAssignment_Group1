@@ -1,5 +1,7 @@
 package com.auction.controller.dashboard;
 
+import com.auction.controller.notification.NotificationController;
+import com.auction.model.NotificationModel;
 import com.auction.util.ApiService;
 import com.auction.util.SessionManager;
 import javafx.animation.*;
@@ -51,9 +53,15 @@ public class MainController {
     // --- CÁC NÚT MENU CHÍNH ---
     @FXML private Button btnNavHome, btnNavWallet, btnNavAuction, btnNavAdd, btnNavNotif, btnNavProfile, btnNavChat;
     private List<Button> allMenuButtons;
+
     private Timeline banCheckerTimeline;
+    private Timeline notifCheckerTimeline; // Luồng kiểm tra thông báo realtime
 
     @FXML private Label lblNotifBadge;
+
+    // BIẾN QUAN TRỌNG: Lưu lại màn hình đang hiển thị và số lượng thông báo cũ
+    private Object currentActiveController;
+    private int currentNotifCount = -1;
 
     @FXML
     public void initialize() {
@@ -74,41 +82,13 @@ public class MainController {
         loadUserInfo();
         showDashboard(null);
         startClock();
+
         startBanChecker();
+        startNotificationChecker(); // BẬT HỆ THỐNG QUÉT THÔNG BÁO REAL-TIME
 
-        // ========================================================
-        // GỌI API LẤY SỐ LƯỢNG THÔNG BÁO VÀ GẮN LÊN CÁI CHUÔNG
-        // ========================================================
-        if (SessionManager.userName != null) {
-            ApiService.getAsync("/notifications/" + SessionManager.userName).thenAccept(res -> {
-                Platform.runLater(() -> {
-                    if (res.statusCode() == 200) {
-                        try {
-                            com.auction.model.ApiResponse apiRes = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
-                            if (apiRes.code == 1000) {
-                                // Lấy danh sách thông báo trả về
-                                java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<com.auction.model.NotificationModel>>(){}.getType();
-                                List<com.auction.model.NotificationModel> list = ApiService.gson.fromJson(apiRes.result, listType);
-
-                                // Lấy độ dài mảng và cập nhật số lượng lên bong bóng
-                                int count = (list != null) ? list.size() : 0;
-                                updateNotificationCount(count);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Lỗi parse JSON thông báo ở MainController");
-                        }
-                    }
-                });
-            });
-        }
-
-        // KIỂM TRA TRẠNG THÁI THEME VÀ BẬT NGAY LẬP TỨC KHI VÀO TRANG MAIN
         applyCurrentTheme(false);
     }
 
-    // ==========================================
-    // XỬ LÝ SỰ KIỆN GẠT DARK MODE (ĐÃ ĐỒNG BỘ SESSION)
-    // ==========================================
     @FXML
     public void handleThemeToggle() {
         SessionManager.isDarkMode = !SessionManager.isDarkMode;
@@ -116,33 +96,25 @@ public class MainController {
     }
 
     private void applyCurrentTheme(boolean animate) {
-        // 1. Cập nhật màu nền nút gạt và CSS Theme
         if (SessionManager.isDarkMode) {
             switchBackground.setFill(Color.web("#2c3e50"));
-            if (!rootPane.getStyleClass().contains("dark-theme")) {
-                rootPane.getStyleClass().add("dark-theme");
-            }
+            if (!rootPane.getStyleClass().contains("dark-theme")) rootPane.getStyleClass().add("dark-theme");
         } else {
             switchBackground.setFill(Color.web("#bdc3c7"));
             rootPane.getStyleClass().remove("dark-theme");
         }
 
-        // 2. Xác định vị trí của nút tròn (biên độ 16 và -16 như bạn đã chỉnh)
         double targetX = SessionManager.isDarkMode ? 16 : -16;
 
-        // 3. Xử lý di chuyển Knob
         if (animate) {
-            // Khi click: dùng Animation
             TranslateTransition transition = new TranslateTransition(Duration.millis(250), switchKnob);
             transition.setToX(targetX);
             transition.play();
         } else {
-            // Khi load trang: Set giá trị trực tiếp để không bị kẹt hiệu ứng 0s
             switchKnob.setTranslateX(targetX);
         }
     }
 
-    // Đổ dữ liệu Avatar
     public void loadUserInfo() {
         if (btnNavProfile == null || SessionManager.userName == null) return;
         btnNavProfile.setText(SessionManager.userName);
@@ -160,8 +132,7 @@ public class MainController {
                         }
 
                         String fullImageUrl = ApiService.BASE_URL + avatarPath + "?t=" + System.currentTimeMillis();
-                        ImageView avatar = createCircularAvatar(fullImageUrl, 18);
-                        btnNavProfile.setGraphic(avatar);
+                        btnNavProfile.setGraphic(createCircularAvatar(fullImageUrl, 18));
                     }
                 }
             });
@@ -184,15 +155,53 @@ public class MainController {
         clock.play();
     }
 
+    // ==========================================
+    // HÀM LOAD VIEW NÂNG CẤP (CÓ HIỆU ỨNG LOADING TOÀN CỤC)
+    // ==========================================
     public void loadView(String fxmlPath) {
-        try {
-            com.auction.util.GlobalWebSocketManager.currentActiveChatPartner = null;
-            com.auction.util.GlobalWebSocketManager.setActiveChatListener(null);
+        // 1. TẠO MÀN HÌNH LOADING TẠM THỜI BẰNG CODE JAVA
+        VBox loadingBox = new VBox(20);
+        loadingBox.setAlignment(javafx.geometry.Pos.CENTER);
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Node view = loader.load();
-            contentArea.getChildren().setAll(view);
-        } catch (IOException e) { e.printStackTrace(); }
+        javafx.scene.control.ProgressIndicator spinner = new javafx.scene.control.ProgressIndicator();
+        spinner.setPrefSize(55, 55);
+        spinner.setStyle("-fx-progress-color: #3b5998;");
+
+        Label lblLoading = new Label("Đang xử lý, vui lòng chờ...");
+        lblLoading.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #7f8c8d;");
+
+        loadingBox.getChildren().addAll(spinner, lblLoading);
+
+        // 2. Gắn Loading vào khu vực nội dung ngay lập tức (xóa trắng trang cũ)
+        contentArea.getChildren().setAll(loadingBox);
+
+        // 3. Dùng PauseTransition nhường cho UI 50ms để nó kịp vẽ cái Vòng xoay quay tít lên màn hình
+        PauseTransition pause = new PauseTransition(Duration.millis(50));
+        pause.setOnFinished(e -> {
+            try {
+                // Reset chat listener
+                com.auction.util.GlobalWebSocketManager.currentActiveChatPartner = null;
+                com.auction.util.GlobalWebSocketManager.setActiveChatListener(null);
+
+                // Giai đoạn này gây lag nhẹ (load FXML), nhưng vòng xoay đã được vẽ ra rồi nên người dùng không thấy đơ
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                Node view = loader.load();
+
+                // LƯU LẠI CONTROLLER CỦA MÀN HÌNH ĐANG MỞ
+                currentActiveController = loader.getController();
+
+                // Nạp xong giao diện mới thì thay thế vòng xoay Loading
+                contentArea.getChildren().setAll(view);
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                Label lblError = new Label("Lỗi khi tải giao diện!");
+                lblError.setTextFill(Color.RED);
+                contentArea.getChildren().setAll(lblError);
+            }
+        });
+
+        pause.play();
     }
 
     private void setActiveButton(Button navBtn) {
@@ -264,6 +273,80 @@ public class MainController {
         banCheckerTimeline.play();
     }
 
+    // ==========================================
+    // HỆ THỐNG QUÉT THÔNG BÁO REAL-TIME
+    // ==========================================
+    private void startNotificationChecker() {
+        if (SessionManager.userName == null) return;
+
+        // Cứ 3 giây quét 1 lần
+        notifCheckerTimeline = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+            if (SessionManager.userName == null) { notifCheckerTimeline.stop(); return; }
+
+            ApiService.getAsync("/notifications/" + SessionManager.userName).thenAccept(res -> {
+                Platform.runLater(() -> {
+                    if (res.statusCode() == 200) {
+                        try {
+                            com.auction.model.ApiResponse apiRes = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
+                            if (apiRes.code == 1000) {
+                                java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<NotificationModel>>(){}.getType();
+                                List<NotificationModel> list = ApiService.gson.fromJson(apiRes.result, listType);
+
+                                int newCount = (list != null) ? list.size() : 0;
+
+                                // LẦN ĐẦU TIÊN KHỞI ĐỘNG (Set biến đếm, cập nhật UI, không nhảy Toast)
+                                if (currentNotifCount == -1) {
+                                    currentNotifCount = newCount;
+                                    updateNotificationCount(newCount);
+                                    return;
+                                }
+
+                                // CÓ THÔNG BÁO MỚI TINH (Số lượng tăng lên)
+                                if (newCount > currentNotifCount && list != null && !list.isEmpty()) {
+                                    // 1. Cập nhật số đếm ở Sidebar
+                                    updateNotificationCount(newCount);
+
+                                    // 2. Lấy cái thông báo mới nhất (đứng đầu danh sách)
+                                    NotificationModel newestNotif = list.get(0);
+
+                                    // 3. KIỂM TRA MÀN HÌNH HIỆN TẠI ĐỂ QUYẾT ĐỊNH XỬ LÝ
+                                    if (currentActiveController instanceof NotificationController) {
+                                        // Đang ở màn thông báo -> Không văng Toast -> Cập nhật list mượt mà
+                                        ((NotificationController) currentActiveController).loadData();
+                                    } else {
+                                        // Đang ở màn khác -> Bắn Toast góc màn hình
+                                        com.auction.util.ToastNotification.show(newestNotif.title, newestNotif.description);
+                                    }
+                                }
+
+                                // Có thể có người xóa thông báo, nên ta luôn update lại current count
+                                currentNotifCount = newCount;
+                                updateNotificationCount(newCount);
+                            }
+                        } catch (Exception ex) {
+                            System.out.println("Lỗi quét thông báo ngầm: " + ex.getMessage());
+                        }
+                    }
+                });
+            });
+        }));
+        notifCheckerTimeline.setCycleCount(Timeline.INDEFINITE);
+        notifCheckerTimeline.play();
+    }
+
+    public void updateNotificationCount(int count) {
+        Platform.runLater(() -> {
+            if (lblNotifBadge != null) {
+                if (count > 0) {
+                    lblNotifBadge.setText(count > 99 ? "99+" : String.valueOf(count));
+                    lblNotifBadge.setVisible(true);
+                } else {
+                    lblNotifBadge.setVisible(false);
+                }
+            }
+        });
+    }
+
     private ImageView createCircularAvatar(String imageUrl, double radius) {
         Image image = new Image(imageUrl, radius * 2, radius * 2, true, true, true);
         ImageView imageView = new ImageView(image);
@@ -274,6 +357,7 @@ public class MainController {
 
     private void forceLogoutBannedUser() {
         if (banCheckerTimeline != null) banCheckerTimeline.stop();
+        if (notifCheckerTimeline != null) notifCheckerTimeline.stop();
         SessionManager.logout();
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -302,6 +386,9 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/search/Search.fxml"));
             Node view = loader.load();
 
+            // Nhớ Controller vào biến để checker biết
+            currentActiveController = loader.getController();
+
             com.auction.controller.search.SearchController controller = loader.getController();
             controller.executeSearch(keyword);
 
@@ -310,21 +397,5 @@ public class MainController {
             contentArea.getChildren().setAll(view);
             collapseSidebar();
         } catch (Exception e) { e.printStackTrace(); }
-    }
-
-    // ==========================================
-    // CẬP NHẬT SỐ LƯỢNG THÔNG BÁO
-    // ==========================================
-    public void updateNotificationCount(int count) {
-        Platform.runLater(() -> {
-            if (lblNotifBadge != null) {
-                if (count > 0) {
-                    lblNotifBadge.setText(count > 99 ? "99+" : String.valueOf(count));
-                    lblNotifBadge.setVisible(true); // Có thông báo -> Hiện đỏ
-                } else {
-                    lblNotifBadge.setVisible(false); // Bằng 0 -> Ẩn đi
-                }
-            }
-        });
     }
 }
