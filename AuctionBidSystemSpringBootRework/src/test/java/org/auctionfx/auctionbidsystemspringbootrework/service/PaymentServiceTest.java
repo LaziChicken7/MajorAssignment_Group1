@@ -226,10 +226,13 @@ public class PaymentServiceTest {
         // Arrange
         when(userRepository.findByUserName("buyer_vip")).thenReturn(testBuyer);
 
-        // Mock 1 giao dịch thành công, 0 giao dịch thất bại
+        // 1. Mock hàm findWonAuctions (Chỉ có 2 tham số, truyền thẳng giá trị)
         when(auctionRepository.findWonAuctions("buyer_vip", TransactionStatus.SUCCESS))
                 .thenReturn(Collections.singletonList(testAuction));
-        when(auctionRepository.findLostAuctions("buyer_vip", TransactionStatus.FAILED))
+
+        // 2. Mock hàm findLostAuctions (Có 3 tham số, tham số cuối dùng any() vì ta không biết chính xác service gọi Enum gì)
+        // Lưu ý: Đã dùng any() thì các tham số kia phải bọc trong eq()
+        when(auctionRepository.findLostAuctions(eq("buyer_vip"), eq(TransactionStatus.FAILED), any()))
                 .thenReturn(Collections.emptyList());
 
         // Act
