@@ -1,6 +1,7 @@
 package org.auctionfx.auctionbidsystemspringbootrework.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.AuctionCreationRequest;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.AutoBidConfig;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -36,6 +38,7 @@ public class AuctionService {
     @Autowired private ItemRepository itemRepository;
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private AutoBidConfigRepository autoBidConfigRepository;
+    @Autowired private ApplicationContext applicationContext;
 
     // Cấu hình thuật toán Anti-Snipping
     private static final int SNIPING_THRESHOLD_SECONDS = 10; // Đấu giá trong 10s cuối
@@ -492,23 +495,31 @@ public class AuctionService {
     }
 
     // Tự động quét Auction
-    @Scheduled(fixedRate = 500) // Cứ 0.5 giây quét 1 lần
-    @Transactional
+    @Scheduled(fixedRate = 2000)
     public void autoUpdateAuctionStatus() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
         List<Auction> allAuctions = auctionRepository.findAll();
 
+        log.info("=== BẮT ĐẦU QUÉT {} PHIÊN | NOW (VN Time): {} ===", allAuctions.size(), now);
+
         for (Auction auction : allAuctions) {
-            // Đến giờ bắt đầu -> Đổi thành RUNNING
-            if (auction.getStatus() == AuctionStatus.OPEN && now.isAfter(auction.getStartTime())) {
-                log.info("SYSTEM CRONJOB: Đã đến giờ mở cửa phiên đấu giá [{}]. Đổi trạng thái sang RUNNING.", auction.getId());
-                auction.setStatus(AuctionStatus.RUNNING);
-                auctionRepository.save(auction);
-            }
-            // Đến giờ kết thúc -> Đổi thành FINISHED (Và gửi thông báo nếu muốn)
-            if (auction.getStatus() == AuctionStatus.RUNNING && now.isAfter(auction.getEndTime())) {
-                log.info("SYSTEM CRONJOB: Đã hết giờ phiên đấu giá [{}]. Tiến hành ĐÓNG phiên...", auction.getId());
-                closeAuction(auction.getId());
+            try {
+                // Lấy Proxy chuẩn của AuctionService để giữ nguyên @Transactional
+                AuctionService proxyService = applicationContext.getBean(AuctionService.class);
+
+                // Đổi thành RUNNING
+                if (auction.getStatus() == AuctionStatus.OPEN && now.isAfter(auction.getStartTime())) {
+                    log.info(">> Đã đến giờ, đổi sang RUNNING...");
+                    proxyService.startAuction(auction.getId());
+                }
+
+                // Đổi thành FINISHED
+                if (auction.getStatus() == AuctionStatus.RUNNING && (now.isAfter(auction.getEndTime()) || now.isEqual(auction.getEndTime()))) {
+                    log.info(">> Đã hết giờ, tiến hành ĐÓNG phiên...");
+                    proxyService.closeAuction(auction.getId());
+                }
+            } catch (Exception e) {
+                log.error("❌ CRONJOB LỖI ở phiên [{}]: {}", auction.getId(), e.getMessage());
             }
         }
     }

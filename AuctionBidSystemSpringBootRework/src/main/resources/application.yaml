@@ -26,6 +26,9 @@ spring:
       max-file-size: 10MB   # Chỉnh lên 10MB cho mỗi file ảnh
       max-request-size: 50MB # Cho phép tổng 1 lần đẩy nhiều ảnh lên tối đa 50MB
 
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+
 # ==========================================
 # CẤU HÌNH HỆ THỐNG LOGGING CHUYÊN NGHIỆP
 # ==========================================

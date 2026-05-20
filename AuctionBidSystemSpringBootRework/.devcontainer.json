@@ -1,0 +1,14 @@
+{
+  "name": "Spring Boot Forward Ports",
+  "portsAttributes": {
+    "8080": {
+      "label": "Spring Boot Application",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "3306": {
+      "label": "MySQL Database",
+      "visibility": "public"
+    }
+  }
+}
