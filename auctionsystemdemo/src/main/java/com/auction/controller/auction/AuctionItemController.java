@@ -20,11 +20,14 @@ public class AuctionItemController {
     private Timeline timeline;
 
     public void setData(AuctionModel item) {
+        imgThumbnail.setFitWidth(120);
+        imgThumbnail.setFitHeight(120);
+        imgThumbnail.setPreserveRatio(true);
         // ==========================================
         // BƯỚC 1: XÓA DỮ LIỆU CŨ VÀ DỪNG TIMELINE
         // (Bắt buộc phải có để ListView không bị loạn data)
         // ==========================================
-        imgThumbnail.setImage(null);
+//        imgThumbnail.setImage(null);
         lblId.setText("");
         lblName.setText("");
         lblPrice.setText("");

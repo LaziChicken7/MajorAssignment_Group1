@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,9 +38,14 @@ public class AuctionController {
     @FXML private VBox loadingOverlay;
 
     private List<AuctionModel> allAuctions = new ArrayList<>();
-
     private String realBalanceText = "0 VND";
     private boolean isHidden = true;
+
+    // =======================================================
+    // BIẾN LƯU TRỮ GIAO DIỆN RAM CACHE (CHỐNG GIẬT LAG)
+    // =======================================================
+    private Node cachedDetailView = null;
+    private AuctionDetailController cachedDetailController = null;
 
     @FXML
     public void initialize() {
@@ -57,14 +63,14 @@ public class AuctionController {
         cbFilter.setOnAction(e -> applyFilterAndSort());
         cbSort.setOnAction(e -> applyFilterAndSort());
 
-        // ========================================================
-        // TỐI ƯU SIÊU TỐC: CACHE FXML NODE ĐỂ KHÔNG BỊ GIẬT LAG
-        // ========================================================
+        // 1. TỐI ƯU GIAO DIỆN DANH SÁCH (CHỐNG VÒNG LẶP VÔ TẬN)
         auctionListView.setCellFactory(param -> new ListCell<AuctionModel>() {
             private Node view;
             private AuctionItemController controller;
 
-            // Khối khởi tạo: Chỉ chạy 1 lần duy nhất khi tạo Cell
+            // BIẾN NÀY LÀ CHÌA KHÓA CỨU SỐNG TOÀN BỘ APP CỦA BẠN
+            private AuctionModel lastItem = null;
+
             {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionItem.fxml"));
@@ -78,73 +84,122 @@ public class AuctionController {
             @Override
             protected void updateItem(AuctionModel item, boolean empty) {
                 super.updateItem(item, empty);
+
                 if (empty || item == null) {
                     setGraphic(null);
                     setText(null);
+                    lastItem = null; // Reset cờ
+                    if (controller != null) controller.setData(null);
                 } else {
-                    // Tái sử dụng lại giao diện đã load, chỉ đắp data mới vào
-                    controller.setData(item);
+                    // ==============================================================
+                    // BỨC TƯỜNG LỬA CHẶN VÒNG LẶP (IF LAST ITEM != ITEM)
+                    // Chỉ nạp lại dữ liệu và tải ảnh NẾU ĐÂY LÀ MỘT SẢN PHẨM MỚI.
+                    // Nếu JavaFX tự động gọi lại hàm này do giao diện bị co giãn,
+                    // ta sẽ KHÔNG làm gì cả để cắt đứt vòng lặp!
+                    // ==============================================================
+                    if (this.lastItem != item) {
+                        this.lastItem = item;
+                        controller.setData(item); // Nạp data, tải ảnh, tính giờ...
+                    }
+
                     setGraphic(view);
                 }
             }
         });
 
+        // Xử lý sự kiện click vào một phiên đấu giá
         auctionListView.setOnMouseClicked(event -> {
             AuctionModel selected = auctionListView.getSelectionModel().getSelectedItem();
             if (selected != null) showDetail(selected);
         });
 
+        // 2. MA THUẬT NẰM Ở ĐÂY: TẢI TRƯỚC GIAO DIỆN CHI TIẾT NGAY KHI MỞ TRANG
+        preloadDetailView();
+
+        // 3. Bắt đầu tải dữ liệu Data
         loadData();
+    }
+
+    /**
+     * Tải trước AuctionDetail.fxml ở luồng ngầm (Background Thread)
+     * và nhét nó vào RAM. Người dùng chưa bấm thì nó đã nằm chờ sẵn!
+     */
+    private void preloadDetailView() {
+        // Tải ở luồng UI nhưng ĐỢI 2 GIÂY sau khi trang mở xong mới tải,
+        // để không tranh giành tài nguyên với lúc đang load danh sách.
+        javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(2));
+        delay.setOnFinished(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
+                this.cachedDetailView = loader.load(); // Load an toàn trên UI Thread
+                this.cachedDetailController = loader.getController();
+                System.out.println("✅ Đã Cache giao diện AuctionDetail vào RAM an toàn.");
+            } catch (IOException ex) {
+                System.err.println("❌ Lỗi khi tải trước AuctionDetail.fxml");
+                ex.printStackTrace();
+            }
+        });
+        delay.play();
     }
 
     @FXML
     public void loadData() {
-        // 1. KHI BẮT ĐẦU TẢI: Hiện vòng xoay Loading lên che đi danh sách cũ
         if (loadingOverlay != null) loadingOverlay.setVisible(true);
 
-        // Load số dư ví
-        if (SessionManager.userName != null) {
-            ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(res -> {
-                Platform.runLater(() -> {
+        // CÂU GIỜ 50ms ĐỂ VÒNG XOAY KỊP XUẤT HIỆN TRÊN MÀN HÌNH RỒI MỚI LÀM VIỆC NẶNG
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(50));
+        pause.setOnFinished(event -> {
+
+            // ĐẨY TOÀN BỘ VIỆC GỌI MẠNG VÀ PHÂN TÍCH JSON SANG LUỒNG NGẦM (BACKGROUND THREAD)
+            CompletableFuture.runAsync(() -> {
+
+                // 1. Load số dư ví ở luồng ngầm
+                if (SessionManager.userName != null) {
+                    try {
+                        var res = ApiService.getAsync("/payments/" + SessionManager.userName + "/history").join();
+                        if (res.statusCode() == 200) {
+                            ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                            if (apiRes.code == 1000) {
+                                WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
+                                realBalanceText = String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", ".");
+                                Platform.runLater(() -> {
+                                    if (lblBalance != null) lblBalance.setText(isHidden ? "****** VND" : realBalanceText);
+                                });
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
+
+                // 2. Load danh sách đấu giá ở luồng ngầm
+                try {
+                    var res = ApiService.getAsync("/auctions").join(); // Dùng .join() để chờ data tải xong ngay trong luồng ngầm
                     if (res.statusCode() == 200) {
                         ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                         if (apiRes.code == 1000) {
-                            WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
-                            realBalanceText = String.format("%,.0f VND", wallet.moneyOnWallet).replace(",", ".");
-                            if (lblBalance != null) lblBalance.setText(isHidden ? "****** VND" : realBalanceText);
+                            java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<AuctionModel>>(){}.getType();
+
+                            // Dịch JSON sang List cũng ở luồng ngầm (Rất quan trọng nếu list dài)
+                            List<AuctionModel> parsedList = ApiService.gson.fromJson(apiRes.result, listType);
+
+                            // 3. Xong xuôi hết mới ném kết quả về cho UI
+                            Platform.runLater(() -> {
+                                allAuctions = parsedList;
+                                applyFilterAndSort(); // Trả về UI để vẽ
+                            });
+                        } else {
+                            Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
                         }
+                    } else {
+                        Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
                     }
-                });
-            });
-        }
-
-        // 2. GỌI API LẤY DANH SÁCH ĐẤU GIÁ
-        ApiService.getAsync("/auctions").thenAccept(res -> {
-            // Dịch JSON ở luồng ngầm (Không làm đơ vòng xoay)
-            if (res.statusCode() == 200) {
-                ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
-
-                if (apiRes.code == 1000) {
-                    java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<AuctionModel>>(){}.getType();
-                    java.util.List<AuctionModel> parsedList = ApiService.gson.fromJson(apiRes.result, listType);
-
-                    // 3. KHI TẢI XONG: Đẩy dữ liệu ra UI và TẮT vòng xoay đi
-                    Platform.runLater(() -> {
-                        allAuctions = parsedList;
-                        applyFilterAndSort(); // Render danh sách
-
-                        if (loadingOverlay != null) loadingOverlay.setVisible(false);
-                    });
-                } else {
+                } catch (Exception ex) {
                     Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
                 }
-            } else {
-                Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
-            }
-        }).exceptionally(ex -> {
-            Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
-            return null;
+            });
+
         });
+
+        pause.play(); // Bắt đầu chạy câu giờ
     }
 
     @FXML
@@ -154,23 +209,25 @@ public class AuctionController {
         eyeIconText.setText(isHidden ? "Hiện" : "Ẩn");
     }
 
+    /**
+     * Thuật toán lọc đã được gỡ bỏ Delay giả tạo.
+     * Cập nhật danh sách bằng setAll() giúp bảng giữ nguyên các Cell cũ, không bị giật.
+     */
     private void applyFilterAndSort() {
         if (allAuctions == null || allAuctions.isEmpty()) return;
 
-        // 1. HIỆN LOADING, ẨN DANH SÁCH LẬP TỨC
+        // 1. HIỆN LOADING VÀ ẨN DANH SÁCH TẠM THỜI
         if (loadingOverlay != null) loadingOverlay.setVisible(true);
-        auctionListView.setVisible(false);
+        auctionListView.setOpacity(0); // Dùng opacity=0 thay vì setVisible(false) để giữ nguyên khung layout, chống giật
 
-        // 2. NHƯỜNG LUỒNG CHO UI VẼ VÒNG XOAY (Nghỉ 50ms)
+        // 2. NHƯỜNG LUỒNG UI 50ms: Giúp vòng xoay Spinner có thời gian bắt đầu quay
         javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(50));
         pause.setOnFinished(event -> {
 
-            // 3. ĐẨY VIỆC LỌC & SẮP XẾP SANG LUỒNG NGẦM (BACKGROUND THREAD)
-            // Nhờ đó vòng xoay Loading vẫn quay mượt mà không bị đơ
-            java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-                java.util.stream.Stream<AuctionModel> stream = allAuctions.stream();
+            // 3. ĐẨY VIỆC LỌC RA LUỒNG NGẦM (BACKGROUND THREAD)
+            CompletableFuture.supplyAsync(() -> {
+                Stream<AuctionModel> stream = allAuctions.stream();
 
-                // Logic lọc trạng thái
                 String filterValue = cbFilter.getValue();
                 if (filterValue != null && !filterValue.equals("Tất cả trạng thái")) {
                     if (filterValue.contains("OPEN")) stream = stream.filter(a -> "OPEN".equals(a.status));
@@ -180,64 +237,68 @@ public class AuctionController {
                     else if (filterValue.contains("CANCELLED")) stream = stream.filter(a -> "CANCELLED".equals(a.status));
                 }
 
-                // Logic sắp xếp thời gian
                 String sortValue = cbSort.getValue();
                 if ("Kết thúc sớm nhất (Tăng dần)".equals(sortValue) || "Kết thúc muộn nhất (Giảm dần)".equals(sortValue)) {
                     stream = stream.sorted((a1, a2) -> {
                         try {
                             String timeStr1 = (a1.endTime != null) ? a1.endTime.replace(" ", "T") : "9999-12-31T23:59:59";
                             String timeStr2 = (a2.endTime != null) ? a2.endTime.replace(" ", "T") : "9999-12-31T23:59:59";
-                            java.time.LocalDateTime t1 = java.time.LocalDateTime.parse(timeStr1);
-                            java.time.LocalDateTime t2 = java.time.LocalDateTime.parse(timeStr2);
+                            LocalDateTime t1 = LocalDateTime.parse(timeStr1);
+                            LocalDateTime t2 = LocalDateTime.parse(timeStr2);
                             return "Kết thúc sớm nhất (Tăng dần)".equals(sortValue) ? t1.compareTo(t2) : t2.compareTo(t1);
-                        } catch (java.time.format.DateTimeParseException e) { return 0; }
+                        } catch (DateTimeParseException e) { return 0; }
                     });
                 }
 
-                // Trả về danh sách đã được tính toán xong
-                return stream.collect(java.util.stream.Collectors.toList());
+                return stream.collect(Collectors.toList());
 
             }).thenAccept(filteredList -> {
-                // 4. KẾT THÚC: Cập nhật lại UI, tắt Loading và hiện Danh sách
+                // 4. TRỞ LẠI LUỒNG UI: NẠP DỮ LIỆU
                 Platform.runLater(() -> {
-                    auctionListView.setItems(javafx.collections.FXCollections.observableArrayList(filteredList));
-                    if (loadingOverlay != null) loadingOverlay.setVisible(false);
-                    auctionListView.setVisible(true);
+                    if (auctionListView.getItems() == null) {
+                        auctionListView.setItems(FXCollections.observableArrayList(filteredList));
+                    } else {
+                        auctionListView.getItems().setAll(filteredList);
+                    }
+                    if (!filteredList.isEmpty()) auctionListView.scrollTo(0);
+
+                    // 5. CÂU GIỜ THÊM 100MS: Cho ListView khởi tạo xong xuôi toàn bộ Node ẩn
+                    javafx.animation.PauseTransition showPause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(100));
+                    showPause.setOnFinished(e -> {
+                        if (loadingOverlay != null) loadingOverlay.setVisible(false); // Tắt Loading
+                        auctionListView.setOpacity(1); // Hiển thị danh sách ra màn hình
+                    });
+                    showPause.play();
                 });
             });
-
         });
 
-        // Bắt đầu chạy luồng
+        // Bắt đầu chu trình
         pause.play();
     }
 
+    /**
+     * Chuyển cảnh ngay lập tức trong 1 mili-giây (Instant Transition)
+     */
     private void showDetail(AuctionModel item) {
-        // 1. Bật icon loading xoay xoay lên ngay lập tức
-        loadingOverlay.setVisible(true);
+        // KIỂM TRA XEM GIAO DIỆN ĐÃ ĐƯỢC CACHE CHƯA
+        if (cachedDetailView == null || cachedDetailController == null) {
+            System.out.println("⏳ Giao diện chi tiết đang tải, vui lòng thử lại sau giây lát...");
+            return;
+        }
 
-        // 2. Dùng PauseTransition nhường cho UI 50ms để vẽ vòng xoay loading lên màn hình
-        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(50));
-        pause.setOnFinished(e -> {
-            try {
-                // Giao diện đã hiện Loading xong -> Bắt đầu nạp trang chi tiết
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
-                Node detailView = loader.load();
-                AuctionDetailController controller = loader.getController();
-                controller.setAuctionData(item);
+        try {
+            // 1. Đổ dữ liệu mới vào Controller cũ đã được load
+            cachedDetailController.setAuctionData(item);
 
-                // Chuyển cảnh
-                StackPane contentArea = (StackPane) auctionListView.getScene().lookup("#contentArea");
-                if (contentArea != null) {
-                    contentArea.getChildren().setAll(detailView);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            } finally {
-                // 3. Nạp xong thì tắt Loading đi
-                loadingOverlay.setVisible(false);
+            // 2. Tìm khung chứa và ném cái View đã cache vào (Không cần Load lại ổ cứng)
+            StackPane contentArea = (StackPane) auctionListView.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(cachedDetailView);
             }
-        });
-        pause.play();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

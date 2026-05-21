@@ -6,7 +6,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.SVGPath?>
 
-<StackPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.dashboard.MainController" stylesheets="@../style.css" prefWidth="1200" prefHeight="750" styleClass="root-pane">
+<StackPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.controller.dashboard.MainController" stylesheets="@../style.css" prefWidth="1200" prefHeight="850" styleClass="root-pane">
 
     <BorderPane>
         <left>

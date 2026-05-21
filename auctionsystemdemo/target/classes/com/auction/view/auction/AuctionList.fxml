@@ -44,7 +44,7 @@
     <StackPane VBox.vgrow="ALWAYS">
 
         <!-- ĐÃ XÓA visible="false" ĐỂ NÓ LUÔN HIỂN THỊ -->
-        <ListView fx:id="auctionListView" style="-fx-background-color: transparent; -fx-border-color: transparent;"/>
+        <ListView fx:id="auctionListView" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;"/>
 
         <!-- Vòng xoay Loading -->
         <VBox fx:id="loadingOverlay" alignment="CENTER" spacing="20" style="-fx-background-color: transparent;" visible="false">

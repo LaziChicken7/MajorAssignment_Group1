@@ -79,4 +79,17 @@ public class GlobalWebSocketManager {
             System.err.println("❌ LỖI DỊCH JSON TOÀN CỤC");
         }
     }
+
+    // Thêm hàm này vào GlobalWebSocketManager
+    public static void disconnect() {
+        if (webSocketService != null) {
+            webSocketService.disconnect();
+            webSocketService = null; // Reset lại biến để sẵn sàng cho tài khoản khác đăng nhập
+        }
+
+        // Reset luôn các trạng thái chat hiện tại
+        currentActiveChatPartner = null;
+        activeChatListener = null;
+        System.out.println("🧹 GLOBAL STOMP: Đã dọn dẹp sạch sẽ Session Chat.");
+    }
 }

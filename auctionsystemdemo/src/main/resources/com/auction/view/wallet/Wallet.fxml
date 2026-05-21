@@ -60,7 +60,7 @@
             <VBox spacing="2" AnchorPane.bottomAnchor="25" AnchorPane.leftAnchor="30">
                 <Label text="CARDHOLDER" style="-fx-text-fill: rgba(255,255,255,0.3); -fx-font-size: 10px; -fx-font-weight: bold;" />
 
-                <Label fx:id="lblCardName" text="VU DUC TRUNG" textFill="white" maxWidth="160" textOverrun="ELLIPSIS" style="-fx-font-size: 16px; -fx-font-weight: bold;">
+                <Label fx:id="lblCardName" text="ĐANG TẢI" textFill="white" maxWidth="160" textOverrun="ELLIPSIS" style="-fx-font-size: 16px; -fx-font-weight: bold;">
                     <effect><DropShadow color="rgba(0,0,0,0.5)" offsetY="1" radius="1" /></effect>
                 </Label>
             </VBox>
@@ -90,7 +90,10 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="15">
                 <Label prefWidth="160" style="-fx-font-size: 18px; -fx-font-weight: bold;" styleClass="wallet-account-text" text="Số dư khả dụng" />
-                <TextField fx:id="balanceField" editable="false" prefWidth="230" style="-fx-background-radius: 20; -fx-font-size: 18px; -fx-alignment: center; -fx-font-weight: bold;" styleClass="wallet-input" text="****** VND" />
+
+                <!-- ĐÃ SỬA: Xóa thẻ <effect>, bỏ màu nền cứng và gọi class wallet-input-3d -->
+                <TextField fx:id="balanceField" editable="false" prefWidth="230" styleClass="wallet-input-3d" style="-fx-font-size: 18px; -fx-background-radius: 20;" text="****** VND" />
+
                 <Label fx:id="eyeIconText" onMouseClicked="#toggleBalanceVisibility" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand; -fx-text-fill: #0a439d;" styleClass="wallet-action-text" text="Hiện" />
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="15">

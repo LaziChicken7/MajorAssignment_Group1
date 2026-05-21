@@ -1,12 +1,16 @@
 package com.auction.model;
 
-import com.google.gson.annotations.SerializedName; // BẮT BUỘC PHẢI IMPORT CÁI NÀY
+import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class AuctionModel {
     public String id;
     public double highestBid;
     public String status;
+
+    // [BỔ SUNG]: Hứng trạng thái thanh toán từ Server (Ví dụ: SUCCESS, FAILED, PAID...)
+    public String transactionStatus;
+
     public String startTime;
     public String endTime;
     public ItemModel bidProduct;
@@ -29,10 +33,6 @@ public class AuctionModel {
 
         public String itemType;          // Phân loại: ART, ELECTRONIC, VEHICLE
 
-        // ========================================================
-        // FIX LỖI: THÊM @SerializedName ĐỂ GSON ÉP KIỂU ĐÚNG TỪ JSON
-        // ========================================================
-
         // 1. Dành cho mặt hàng Nghệ thuật (ART)
         @SerializedName(value = "nameAuthor", alternate = {"name_author"})
         public String nameAuthor;
@@ -41,7 +41,7 @@ public class AuctionModel {
         public Integer creationYear;
 
         // 2. Dành cho đồ Điện tử (ELECTRONIC)
-        public String brand; // brand thì 1 chữ nên không cần SerializedName
+        public String brand;
 
         @SerializedName(value = "warrantyMonths", alternate = {"warranty_months"})
         public Integer warrantyMonths;
@@ -55,11 +55,11 @@ public class AuctionModel {
 
     public static class SellerModel {
         public String userName;
-
-        // BỔ SUNG THÊM 3 TRƯỜNG NÀY ĐỂ HỨNG DATA NGƯỜI BÁN TỪ SPRING BOOT
         public String fullName;
         public String avatarUrl;
-        public double rating;
+
+        // [TỐI ƯU]: Chuyển sang Double (chữ D viết hoa) để an toàn nếu Server trả về null (chưa có ai đánh giá)
+        public Double rating;
     }
 
     public static class BidderModel {

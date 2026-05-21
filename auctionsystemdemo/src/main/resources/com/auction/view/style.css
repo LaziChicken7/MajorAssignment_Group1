@@ -2324,3 +2324,25 @@
     -fx-border-color: #60a5fa !important;
     -fx-background-color: #1E1E1E !important;
 }
+
+/* =======================================================
+   46. HIỆU ỨNG NỔI KHỐI 3D CHO Ô NHẬP LIỆU (VÍ TIỀN)
+   ======================================================= */
+
+/* --- 1. CHẾ ĐỘ SÁNG (LIGHT MODE) --- */
+.wallet-input-3d {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #333333;
+    -fx-prompt-text-fill: #95a5a6;
+    -fx-alignment: center;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 4);
+}
+
+/* --- 2. CHẾ ĐỘ TỐI (DARK MODE) --- */
+.dark-theme .wallet-input-3d {
+    -fx-background-color: #2b2d31; /* Nền xám đậm nổi lên trên nền đen */
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #888888;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 4); /* Bóng đổ đậm hơn */
+}

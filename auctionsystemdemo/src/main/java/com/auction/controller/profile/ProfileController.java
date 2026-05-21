@@ -5,6 +5,7 @@ import com.auction.model.ApiResponse;
 import com.auction.model.UserProfile;
 import com.auction.model.UserUpdateRequest;
 import com.auction.util.ApiService;
+import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -181,15 +182,32 @@ public class ProfileController {
     // ==========================================
     @FXML
     public void handleLogout(ActionEvent event) {
-        SessionManager.logout();
+        // 1. NGẮT KẾT NỐI WEBSOCKET CHỐNG TREO APP VÀ RÒ RỈ DỮ LIỆU
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/com/auction/view/dashboard/Login.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+            // Tùy vào cách bạn đang gọi class WebSocket của mình, hãy mở comment dòng phù hợp:
+            GlobalWebSocketManager.disconnect();
+            // Hoặc nếu dùng Singleton: com.auction.util.GlobalWebSocketManager.getInstance().disconnect();
+        } catch (Exception e) {
+            System.err.println("Lỗi khi ngắt kết nối WebSocket: " + e.getMessage());
+        }
+
+        // Dừng các luồng check ngầm (Nếu code này nằm trong MainController thì mở comment 2 dòng dưới)
+        // if (banCheckerTimeline != null) banCheckerTimeline.stop();
+        // if (notifCheckerTimeline != null) notifCheckerTimeline.stop();
+
+        // 2. XÓA SESSION ĐĂNG NHẬP
+        SessionManager.logout();
+
+        // 3. CHUYỂN TRANG VỀ LOGIN
+        try {
+            javafx.scene.Parent root = javafx.fxml.FXMLLoader.load(getClass().getResource("/com/auction/view/dashboard/Login.fxml"));
+            javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root));
             stage.centerOnScreen();
-        } catch (IOException e) {
+        } catch (java.io.IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Lỗi giao diện", "Không thể mở trang đăng nhập!");
+            // Lệnh showAlert này tôi giữ nguyên theo code cũ của bạn
+            showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Lỗi giao diện", "Không thể mở trang đăng nhập!");
         }
     }
 

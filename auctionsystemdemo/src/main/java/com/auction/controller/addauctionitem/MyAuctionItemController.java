@@ -7,9 +7,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 public class MyAuctionItemController {
 
@@ -22,82 +24,88 @@ public class MyAuctionItemController {
     @FXML private Button btnStartAuction;
 
     private AuctionModel currentItem;
+    private LocalDateTime parsedStartTime;
+    private LocalDateTime parsedEndTime;
 
     public void setData(AuctionModel item) {
-        // ==========================================
-        // BƯỚC QUAN TRỌNG: XÓA DỮ LIỆU CŨ TRƯỚC KHI LOAD
-        // (Chống lỗi rác giao diện khi cuộn ListView)
-        // ==========================================
-        imgThumbnail.setImage(null);
-        lblId.setText("");
-        lblName.setText("");
-        lblPrice.setText("");
-        lblTime.setText("");
-        lblStatus.setText("");
-        lblStatus.setStyle("");
-        lblTime.setStyle("");
-        btnStartAuction.setVisible(false);
-        btnStartAuction.setManaged(false);
-        // ==========================================
-
         this.currentItem = item;
+
+        // 1. Ô TRỐNG THÌ IM LẶNG THOÁT RA (Không in dòng cảnh báo rác nữa để chống lag)
         if (item == null || item.bidProduct == null) return;
 
-        // 1. Dữ liệu cơ bản
         String shortId = item.bidProduct.id != null && item.bidProduct.id.length() >= 4 ? item.bidProduct.id.substring(0, 4).toUpperCase() : "N/A";
+
+        // Parse chuỗi thời gian
+        try {
+            if (item.startTime != null) parsedStartTime = LocalDateTime.parse(item.startTime.replace(" ", "T"));
+            if (item.endTime != null) parsedEndTime = LocalDateTime.parse(item.endTime.replace(" ", "T"));
+        } catch (DateTimeParseException ignored) {
+            parsedStartTime = null; parsedEndTime = null;
+        }
+
+        // Dữ liệu cơ bản
         lblId.setText("SP" + shortId);
         lblName.setText(item.bidProduct.name);
         lblPrice.setText(String.format("%,.0f VND", item.highestBid).replace(",", "."));
 
-        // 2. Logic load ảnh
+        // Bo tròn ảnh
         imgThumbnail.setCache(true);
         imgThumbnail.setCacheHint(javafx.scene.CacheHint.SPEED);
-
         Rectangle clip = new Rectangle(120, 120);
         clip.setArcWidth(15);
         clip.setArcHeight(15);
         imgThumbnail.setClip(clip);
 
+        // =========================================================
+        // 2. GIỮ LẠI DÒNG IN LOG ĐỂ THEO DÕI LINK ẢNH
+        // =========================================================
         if (item.bidProduct != null && item.bidProduct.imageUrls != null && !item.bidProduct.imageUrls.isEmpty()) {
             String imagePath = item.bidProduct.imageUrls.get(0);
-            if (!imagePath.startsWith("/")) {
-                imagePath = "/" + imagePath;
-            }
-            String fullUrl = ApiService.BASE_URL + imagePath + "?w=130&h=130";
+            if (!imagePath.startsWith("/")) imagePath = "/" + imagePath;
+            String fullUrl = ApiService.BASE_URL + imagePath + "?w=120&h=120";
 
-            com.auction.util.ImageCacheUtils.loadImage(imgThumbnail, fullUrl, 130, 130, "https://via.placeholder.com/120?text=Loading...");
+            // In ra console để bạn dễ dàng debug
+            System.out.println("🖼️ [UI] Yêu cầu tải ảnh SP" + shortId + ": " + fullUrl);
+
+            com.auction.util.ImageCacheUtils.loadImage(
+                    imgThumbnail, fullUrl, 120, 120, "https://via.placeholder.com/120?text=Loading..."
+            );
         } else {
-            imgThumbnail.setImage(new Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));
+            System.out.println("⚠️ [UI] SP" + shortId + " không có ảnh, dùng ảnh mặc định.");
+
+            com.auction.util.ImageCacheUtils.loadImage(
+                    imgThumbnail, null, 120, 120, "https://via.placeholder.com/120?text=No+Image"
+            );
         }
 
-        // 3. Logic Thời gian, Trạng thái & Nút bắt đầu
+        // Logic Trạng thái
         String baseColor;
         switch (item.status) {
             case "OPEN":
-                baseColor = "#f39c12"; // Cam
+                baseColor = "#f39c12";
                 lblStatus.setText("SẮP MỞ");
                 lblTime.setText(item.startTime != null ? item.startTime.replace("T", " ") : "--:--");
                 btnStartAuction.setVisible(true);
                 btnStartAuction.setManaged(true);
                 break;
             case "RUNNING":
-                baseColor = "#2ecc71"; // Xanh lá
+                baseColor = "#2ecc71";
                 lblStatus.setText("ĐANG ĐẤU GIÁ");
                 lblTime.setText(item.endTime != null ? item.endTime.replace("T", " ") : "--:--");
                 break;
             case "FINISHED":
             case "PAID":
-                baseColor = "#2ecc71"; // Xanh lá
+                baseColor = "#2ecc71";
                 lblStatus.setText("ĐÃ KẾT THÚC");
                 lblTime.setText(item.endTime != null ? item.endTime.replace("T", " ") : "--:--");
                 break;
             case "CANCELLED":
-                baseColor = "#e74c3c"; // Đỏ
+                baseColor = "#e74c3c";
                 lblStatus.setText("ĐÃ HỦY");
                 lblTime.setText("--:--");
                 break;
             default:
-                baseColor = "#95a5a6"; // Xám
+                baseColor = "#95a5a6";
                 lblStatus.setText(item.status != null ? item.status : "UNKNOWN");
                 lblTime.setText("--:--");
                 break;

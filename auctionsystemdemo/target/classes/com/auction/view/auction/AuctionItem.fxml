@@ -3,15 +3,16 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.*?>
 
-<!-- Dùng HBox và class custom-row để tạo thành khối Card đổi màu theo Theme -->
-<!-- Kèm class auction-row-card để có hiệu ứng nhấc nổi khối khi di chuột qua -->
+<!-- ĐÃ THÊM: cache="true" và cacheHint="SPEED" để JavaFX vẽ khối này thành ảnh tĩnh (bitmap) -->
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.auction.AuctionItemController"
       spacing="20" alignment="CENTER_LEFT"
-      styleClass="custom-row, auction-row-card" style="-fx-padding: 20; -fx-cursor: hand;">
+      styleClass="custom-row, auction-row-card" style="-fx-padding: 20; -fx-cursor: hand;"
+      cache="true" cacheHint="SPEED">
 
     <!-- CỘT TRÁI: ẢNH SẢN PHẨM -->
     <VBox alignment="CENTER" minWidth="130" minHeight="130">
-        <ImageView fx:id="imgThumbnail" fitHeight="120.0" fitWidth="120.0" preserveRatio="true">
+        <!-- ĐÃ THÊM: smooth="true", cache="true", cacheHint="SPEED" để tối ưu render ảnh -->
+        <ImageView fx:id="imgThumbnail" fitHeight="120.0" fitWidth="120.0" preserveRatio="true" smooth="true" cache="true" cacheHint="SPEED">
             <image>
                 <Image url="https://via.placeholder.com/120?text=Loading..." />
             </image>

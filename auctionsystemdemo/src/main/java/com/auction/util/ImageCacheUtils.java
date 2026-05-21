@@ -12,12 +12,25 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ImageCacheUtils {
 
     private static final ConcurrentHashMap<String, SoftReference<Image>> memoryCache = new ConcurrentHashMap<>();
+
+    // THÊM: BỘ NHỚ ĐỆM RIÊNG DÀNH CHO ẢNH PLACEHOLDER
+    // Tránh việc spam hàng trăm request lên via.placeholder.com khi cuộn trang
+    private static final ConcurrentHashMap<String, Image> placeholderCache = new ConcurrentHashMap<>();
+
     private static final String CACHE_DIR = System.getProperty("user.home") + File.separator + ".AuctionAppCache" + File.separator + "images";
     private static final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
+
+    private static final ExecutorService IMAGE_EXECUTOR = Executors.newFixedThreadPool(10, r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
 
     static {
         File dir = new File(CACHE_DIR);
@@ -26,26 +39,35 @@ public class ImageCacheUtils {
         }
     }
 
+    // HÀM MỚI: Lấy ảnh Placeholder từ RAM (Nếu chưa có thì tải 1 lần duy nhất)
+    private static Image getCachedPlaceholder(String url, int width, int height) {
+        if (url == null || url.isEmpty()) return null;
+        String key = url + "_" + width + "x" + height;
+        // Chỉ khởi tạo new Image đúng 1 lần cho mỗi URL + Size
+        return placeholderCache.computeIfAbsent(key, k -> new Image(url, width, height, true, true, true));
+    }
+
     public static void loadImage(ImageView imageView, String imageUrl, int width, int height, String placeholderUrl) {
+        // 1. Dùng hàm getCachedPlaceholder để KHÔNG tạo kết nối HTTP mới nữa
+        Image placeholderImg = getCachedPlaceholder(placeholderUrl, width, height);
+
         if (imageUrl == null || imageUrl.isEmpty()) {
-            imageView.setImage(new Image(placeholderUrl, width, height, true, true, true));
+            imageView.setImage(placeholderImg);
             return;
         }
 
         String safeFileName = Math.abs(imageUrl.hashCode()) + ".png";
 
-        // BƯỚC 1: Kiểm tra trên RAM (Truy xuất tức thì, không gây lag UI)
         SoftReference<Image> cachedRef = memoryCache.get(safeFileName);
         if (cachedRef != null && cachedRef.get() != null) {
             imageView.setImage(cachedRef.get());
-            // System.out.println("⚡ RAM Cache Hit: " + safeFileName);
+            System.out.println("⚡ RAM Cache Hit: " + safeFileName);
             return;
         }
 
-        // BƯỚC 2: Đặt ảnh Loading... để giữ khung UI không bị giật lag nhảy loạn xạ
-        imageView.setImage(new Image(placeholderUrl, width, height, true, true, true));
+        // 2. Gán ảnh Loading từ RAM ngay lập tức (Không gây lag UI)
+        imageView.setImage(placeholderImg);
 
-        // BƯỚC 3: Đẩy HẾT mọi thao tác nặng (Kiểm tra ổ cứng, Tải mạng, Giải mã ảnh) ra luồng ngầm
         CompletableFuture.runAsync(() -> {
             try {
                 File localFile = new File(CACHE_DIR, safeFileName);
@@ -53,10 +75,6 @@ public class ImageCacheUtils {
 
                 if (localFile.exists() && localFile.length() > 0) {
                     System.out.println("✅ MỞ LẠI TỪ Ổ CỨNG (Không tải mạng): " + safeFileName);
-
-                    // MA THUẬT NẰM Ở ĐÂY: Tham số cuối cùng là FALSE.
-                    // Vì ta đang ở luồng ngầm (CompletableFuture), ta ép luồng này phải đọc và giải mã
-                    // xong xuôi bức ảnh 100% rồi mới đi tiếp. Đỡ gánh nặng hoàn toàn cho JavaFX UI Thread.
                     finalImage = new Image(localFile.toURI().toString(), width, height, true, true, false);
                 } else {
                     Object lock = fileLocks.computeIfAbsent(safeFileName, k -> new Object());
@@ -69,27 +87,53 @@ public class ImageCacheUtils {
                             }
                         }
                     }
-                    // Đọc file vừa tải xong (tham số cuối cũng = false)
                     finalImage = new Image(localFile.toURI().toString(), width, height, true, true, false);
                 }
 
-                // Lưu vào RAM
                 memoryCache.put(safeFileName, new SoftReference<>(finalImage));
-
-                // BƯỚC 4: Bức ảnh HÌNH ĐÃ ĐƯỢC GIẢI MÃ HOÀN CHỈNH, giờ chỉ việc gắn lên UI
-                // Giao diện (Platform.runLater) sẽ xử lý trong 0.001 giây, không hề bị khựng!
                 Platform.runLater(() -> imageView.setImage(finalImage));
 
             } catch (Exception e) {
                 System.err.println("❌ LỖI TẢI ẢNH: " + imageUrl + " -> " + e.getMessage());
                 File localFile = new File(CACHE_DIR, safeFileName);
-                if (localFile.exists()) localFile.delete(); // Dọn file rác nếu tải xịt
+                if (localFile.exists()) localFile.delete();
 
-                Image errorImg = new Image("https://via.placeholder.com/120?text=Error", width, height, true, true, true);
+                // 3. Tương tự, dùng Cache cho ảnh báo lỗi
+                Image errorImg = getCachedPlaceholder("https://via.placeholder.com/120?text=Error", width, height);
                 Platform.runLater(() -> imageView.setImage(errorImg));
             } finally {
                 fileLocks.remove(safeFileName);
             }
+        }, IMAGE_EXECUTOR);
+    }
+
+    public static void clearMemoryCache() {
+        memoryCache.clear();
+        placeholderCache.clear(); // Xóa luôn cache placeholder
+        System.out.println("🧹 Đã dọn sạch ảnh lưu trên RAM.");
+    }
+
+    public static void clearDiskCache() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                File dir = new File(CACHE_DIR);
+                if (dir.exists() && dir.isDirectory()) {
+                    File[] files = dir.listFiles();
+                    if (files != null) {
+                        for (File file : files) {
+                            file.delete();
+                        }
+                    }
+                }
+                System.out.println("🗑️ Đã xóa toàn bộ file ảnh rác trên Ổ CỨNG (.AuctionAppCache).");
+            } catch (Exception e) {
+                System.err.println("❌ Lỗi khi dọn dẹp ổ cứng: " + e.getMessage());
+            }
         });
+    }
+
+    public static void clearAllCaches() {
+        clearMemoryCache();
+        clearDiskCache();
     }
 }
