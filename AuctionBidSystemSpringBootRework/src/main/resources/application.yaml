@@ -5,20 +5,23 @@ server:
 
 spring:
   datasource:
-    url: "${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/AuctionBidSystemTest?createDatabaseIfNotExist=true}"
-    username: "${SPRING_DATASOURCE_USERNAME:root}"
-    password: "${SPRING_DATASOURCE_PASSWORD:root}"
-    driver-class-name: com.mysql.cj.jdbc.Driver # <-- BỔ SUNG DÒNG NÀY: Khai báo rõ dùng Driver MySQL
+    # Tự động lấy biến của Railway ghép lại thành chuỗi JDBC. Nếu chạy ở máy (không có biến) thì dùng localhost
+    url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:AuctionBidSystemTest}?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true
+    username: ${MYSQLUSER:root}
+    password: ${MYSQLPASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   sql:
     init:
       mode: always
 
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect # <-- BỔ SUNG DÒNG NÀY: Khai báo rõ dùng ngôn ngữ MySQL
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: none
     show-sql: true
+
+  # ... (các cấu hình bên dưới giữ nguyên)
 
   servlet:
     multipart:
