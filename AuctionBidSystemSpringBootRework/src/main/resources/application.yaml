@@ -12,7 +12,7 @@ spring:
 
   sql:
     init:
-      mode: never
+      mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect # <-- BỔ SUNG DÒNG NÀY: Khai báo rõ dùng ngôn ngữ MySQL
