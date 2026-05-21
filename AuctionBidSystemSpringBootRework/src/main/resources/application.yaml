@@ -6,9 +6,9 @@ server:
 spring:
   datasource:
     # Tự động tạo Database nếu chưa có
-    url: "jdbc:mysql://localhost:3306/AuctionBidSystemTest?createDatabaseIfNotExist=true"
-    username: root
-    password: root
+    url: "${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/AuctionBidSystemTest?createDatabaseIfNotExist=true}"
+    username: "${SPRING_DATASOURCE_USERNAME:root}"
+    password: "${SPRING_DATASOURCE_PASSWORD:root}"
 
   # ĐOẠN NÀY ĐỂ CHẠY FILE SCHEMA.SQL
   sql:
