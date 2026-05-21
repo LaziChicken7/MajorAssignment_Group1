@@ -5,8 +5,8 @@ server:
 
 spring:
   datasource:
-    # Tự động lấy biến của Railway ghép lại thành chuỗi JDBC. Nếu chạy ở máy (không có biến) thì dùng localhost
-    url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:AuctionBidSystemTest}?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true
+    # Chú ý phần URL đã được thêm tham số createDatabaseIfNotExist=true
+    url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:AuctionBidSystemTest}?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true
     username: ${MYSQLUSER:root}
     password: ${MYSQLPASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
