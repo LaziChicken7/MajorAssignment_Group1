@@ -5,26 +5,25 @@ server:
 
 spring:
   datasource:
-    # Tự động tạo Database nếu chưa có
     url: "${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/AuctionBidSystemTest?createDatabaseIfNotExist=true}"
     username: "${SPRING_DATASOURCE_USERNAME:root}"
     password: "${SPRING_DATASOURCE_PASSWORD:root}"
+    driver-class-name: com.mysql.cj.jdbc.Driver # <-- BỔ SUNG DÒNG NÀY: Khai báo rõ dùng Driver MySQL
 
-  # ĐOẠN NÀY ĐỂ CHẠY FILE SCHEMA.SQL
   sql:
     init:
       mode: never
 
   jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect # <-- BỔ SUNG DÒNG NÀY: Khai báo rõ dùng ngôn ngữ MySQL
     hibernate:
-      ddl-auto: none # Giữ nguyên là 'none' để tắt Hibernate tự đẻ bảng
-    show-sql: true # In ra các câu lệnh SQL trên màn hình Console
+      ddl-auto: none
+    show-sql: true
 
-  # Cấu hình giới hạn dung lượng tải file
   servlet:
     multipart:
-      max-file-size: 10MB   # Chỉnh lên 10MB cho mỗi file ảnh
-      max-request-size: 50MB # Cho phép tổng 1 lần đẩy nhiều ảnh lên tối đa 50MB
+      max-file-size: 10MB
+      max-request-size: 50MB
 
   jackson:
     time-zone: Asia/Ho_Chi_Minh
@@ -35,36 +34,19 @@ spring:
 logging:
   level:
     root: INFO
-    # Chỉ bật log chi tiết (DEBUG) cho code của riêng nhóm bạn
     org.auctionfx.auctionbidsystemspringbootrework: DEBUG
-
-    # ========================================================
-    # THÊM DÒNG NÀY VÀO ĐỂ TẮT CẢNH BÁO "NARROWING PROXY"
-    # (Chỉ hiện lỗi Error, tắt các cảnh báo xàm của Hibernate)
-    # ========================================================
     org.hibernate.orm.persistenceContext: ERROR
 
   file:
-    # File log hiện tại (hệ thống sẽ luôn ghi trực tiếp vào file này)
     name: logs/auction-server.log
 
   logback:
     rollingpolicy:
-      # Format tên file khi bị CẮT (Lưu vào thư mục archived, có thêm Ngày và Index %i)
       file-name-pattern: "logs/archived/auction-server-%d{yyyy-MM-dd}.%i.log"
-
-      # Kích thước tối đa của 1 file log. Nếu vượt qua mức này, tự cắt sang file .1, .2
       max-file-size: 10MB
-
-      # Số ngày lưu trữ tối đa (Ví dụ: Giữ log trong 30 ngày qua, sau đó tự xóa)
       max-history: 30
-
-      # Tổng dung lượng tối đa thư mục log được phép chiếm ổ cứng (Tránh sập Server do đầy ổ)
       total-size-cap: 1GB
 
   pattern:
-    # Format log hiển thị trên màn hình Console IDE (CÓ MÀU SẮC DỄ NHÌN)
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%-5level) %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %msg%n"
-
-    # Format log ghi vào file text (KHÔNG DÙNG MÀU SẮC để file .log mở ra không bị lỗi font)
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} : %msg%n"
