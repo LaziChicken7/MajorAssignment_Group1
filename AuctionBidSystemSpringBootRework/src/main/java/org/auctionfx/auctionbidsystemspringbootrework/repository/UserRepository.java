@@ -2,6 +2,7 @@ package org.auctionfx.auctionbidsystemspringbootrework.repository;
 
 import jakarta.persistence.LockModeType;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -43,4 +44,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     // 4. Tìm người dùng theo Tên đăng nhập hoặc Họ tên
     @Query("SELECT u FROM User u WHERE LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<User> searchUsers(@org.springframework.data.repository.query.Param("keyword") String keyword);
+
+    // Tìm tất cả các user có Role là ADMIN
+    List<User> findByRole(Role role);
 }

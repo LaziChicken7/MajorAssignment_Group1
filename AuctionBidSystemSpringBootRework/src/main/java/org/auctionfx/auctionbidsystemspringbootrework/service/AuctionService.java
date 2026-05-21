@@ -90,7 +90,7 @@ public class AuctionService {
     // 1. Cài đặt AutoBid
     @Transactional(rollbackFor = Exception.class)
     public String setupAutoBid(String auctionId, String bidderUserName, BigDecimal maxAmount) {
-        log.info("SERVICE: Bắt đầu xử lý luồng thêm Autobid. AuctionID={}, Username={}, Amount={}", auctionId, bidderUserName, maxAmount);
+        log.info("SERVICE: Bắt đầu xử lý luồng thêm/cập nhật Autobid. AuctionID={}, Username={}, Amount={}", auctionId, bidderUserName, maxAmount);
 
         // 1. Tìm phiên đấu giá
         Auction auction = auctionRepository.findById(auctionId)
@@ -99,7 +99,7 @@ public class AuctionService {
                     return new AuctionException(ErrorCode.AUCTION_NOT_FOUND);
                 });
 
-        // 2. TÌM VÀ KIỂM TRA NGƯỜI DÙNG (Cập nhật kiểm tra an toàn)
+        // 2. TÌM VÀ KIỂM TRA NGƯỜI DÙNG
         User user = userRepository.findByUserName(bidderUserName);
         if (user == null || !(user instanceof Bidder)) {
             log.error("Lỗi: Người dùng [{}] không tồn tại hoặc không phải là Bidder", bidderUserName);
@@ -107,15 +107,13 @@ public class AuctionService {
         }
         Bidder bidder = (Bidder) user;
 
-        // ========================================================================
-        // FIX: KIỂM TRA SELLER KHÔNG ĐƯỢC TỰ CÀI BOT CHO SẢN PHẨM CỦA MÌNH
-        // ========================================================================
+        // Kiểm tra Seller
         if (bidder.getId().equals(auction.getSeller().getId())) {
             log.warn("Cảnh báo: Seller [{}] cố tình cài đặt Bot tự đấu giá sản phẩm của chính mình!", bidder.getUserName());
             throw new AuctionException(ErrorCode.AUCTION_BIDDER_INVALID);
         }
 
-        // Kiểm tra xem tài khoản có bị cấm không
+        // Kiểm tra Banned
         if (bidder.isBanned()) {
             log.warn("Cảnh báo: Tài khoản [{}] đã bị cấm nhưng vẫn cố cài Autobid", bidderUserName);
             throw new UserException(ErrorCode.USER_BANNED);
@@ -127,29 +125,50 @@ public class AuctionService {
             throw new RuntimeException("Mức giá Auto-bid phải cao hơn giá hiện tại (" + String.format("%,d", auction.getHighestBid().longValue()).replace(",", ".") + " VND)");
         }
 
-        // ========================================================================
-        // KIỂM TRA MỨC GIÁ AUTO-BID CÓ PHẢI LÀ BỘI SỐ CỦA BƯỚC GIÁ HAY KHÔNG?
-        // ========================================================================
+        // 4. KIỂM TRA MỨC GIÁ AUTO-BID CÓ PHẢI LÀ BỘI SỐ CỦA BƯỚC GIÁ HAY KHÔNG?
         BigDecimal stepPrice = auction.getStepPrice() != null ? auction.getStepPrice() : calculateDynamicStep(auction.getBidProduct().getStartPrice());
-
-        // Phép chia lấy dư: Nếu phần dư (remainder) khác 0 => KHÔNG PHẢI LÀ BỘI SỐ
         if (maxAmount.remainder(stepPrice).compareTo(BigDecimal.ZERO) != 0) {
             String stepStr = String.format("%,d", stepPrice.longValue()).replace(",", ".");
             log.warn("Cảnh báo: Giá Auto-bid ({}) không phải là bội số của bước giá ({})", maxAmount, stepPrice);
             throw new RuntimeException("Tiền cài đặt Auto-bid phải là bội số của " + stepStr + " VND để hệ thống dễ khớp giá.");
         }
 
-        // Lưu cấu hình vào DB
-        AutoBidConfig config = new AutoBidConfig();
+        // ========================================================================
+        // [ĐÃ SỬA] 5. TÌM BOT CŨ VÀ TỰ ĐỘNG DỌN RÁC DATABASE
+        // ========================================================================
+        List<AutoBidConfig> existingConfigs = autoBidConfigRepository.findByAuctionAndBidder(auction, bidder);
+        AutoBidConfig config;
+
+        if (!existingConfigs.isEmpty()) {
+            // Lấy cái bot đầu tiên ra để dùng (tái chế)
+            config = existingConfigs.get(0);
+
+            // TÍNH NĂNG TỰ CHỮA LÀNH: Xóa hết các bot thừa thãi do lỗi code cũ tạo ra
+            if (existingConfigs.size() > 1) {
+                for (int i = 1; i < existingConfigs.size(); i++) {
+                    autoBidConfigRepository.delete(existingConfigs.get(i));
+                }
+                log.info("DỌN RÁC DB: Đã tự động xóa {} bản ghi Bot trùng lặp của user [{}]",
+                        (existingConfigs.size() - 1), bidder.getUserName());
+            }
+        } else {
+            // Nếu rỗng thật thì mới tạo cái mới
+            config = new AutoBidConfig();
+        }
+
         config.setAuction(auction);
         config.setBidder(bidder);
-        config.setMaxBidAmount(maxAmount);
+        config.setMaxBidAmount(maxAmount); // Cập nhật mức tiền mới
+
+        // ĐÁNH THỨC BOT DẬY
+        config.setActive(true);
+
         autoBidConfigRepository.save(config);
 
-        // KÍCH HOẠT AUTOBID NGAY LẬP TỨC (Nhỡ đâu lúc setup thì người khác đã đặt giá cao hơn rồi)
+        // KÍCH HOẠT AUTOBID NGAY LẬP TỨC
         triggerAutoBidProcess(auction);
 
-        return "Setup Auto-bid successfully!";
+        return "Setup/Update Auto-bid successfully!";
     }
 
     // 2. Chức năng đặt giá (Place Bid)

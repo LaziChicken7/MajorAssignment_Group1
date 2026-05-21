@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.auctionfx.auctionbidsystemspringbootrework.dto.request.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.*;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.NotificationType;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ReviewException;
@@ -46,6 +47,9 @@ public class UserService {
 
     @Autowired
     private SellerReviewRepository reviewRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // Khay chứa Mã bí mật (Key là Username, Value là Mã Token)
     private final Map<String, String> resetTokens = new ConcurrentHashMap<>();
@@ -160,7 +164,7 @@ public class UserService {
     @Transactional
     public String upgradeBidderToSeller(String userName) {
         log.info("SERVICE: Tiến hành nâng cấp User [{}] lên Seller", userName);
-        // 1. Lấy user từ DB lên (Lúc này Java vẫn coi đây là Bidder)
+        // 1. Lấy user từ DB lên
         User user = userRepository.findByUserName(userName);
 
         if (user == null) {
@@ -192,20 +196,38 @@ public class UserService {
         // 4. BƯỚC QUYẾT ĐỊNH: ĐỒNG BỘ LẠI ĐỐI TƯỢNG TRONG JAVA
         // =========================================================
 
-        // Bắt buộc đẩy ngay các lệnh SQL ở trên xuống DB ngay tắp lự
         entityManager.flush();
-
-        // Xóa sạch bộ nhớ đệm cũ (Xóa cái xác Bidder cũ đi)
         entityManager.clear();
 
-        // GỌI LẠI đối tượng từ DB lên.
-        // Lần này Spring Boot sẽ thấy dòng dữ liệu trong bảng 'sellers' và TỰ ĐỘNG khởi tạo nó là class SELLER.
         User upgradedUser = userRepository.findById(user.getId()).orElse(null);
 
-        // Code test thử để in ra màn hình Console xem nó đã thực sự là Seller chưa:
         if (upgradedUser instanceof Seller) {
             log.info("Successfully: Java has been recognized that user is Seller");
-            log.info("Seller rating now: {}", ((Seller) upgradedUser).getRating());
+
+            // =========================================================
+            // 5. GỬI THÔNG BÁO CHO NGƯỜI VỪA ĐƯỢC NÂNG CẤP (SELLER)
+            // =========================================================
+            notificationService.createNotification(
+                    upgradedUser,
+                    null, // Không liên quan đến phiên đấu giá nào
+                    NotificationType.AUCTION_SUCCESS, // Dùng tạm type SUCCESS để UI hiện icon tích xanh
+                    "Nâng cấp tài khoản thành công",
+                    "Chúc mừng! Bạn đã chính thức trở thành Người Bán (Seller). Mã cửa hàng của bạn là: " + newSellerCode
+            );
+
+            // =========================================================
+            // 6. GỬI THÔNG BÁO CHO TẤT CẢ ADMIN TRÊN HỆ THỐNG
+            // =========================================================
+            List<User> admins = userRepository.findByRole(org.auctionfx.auctionbidsystemspringbootrework.enums.Role.ADMIN);
+            for (User admin : admins) {
+                notificationService.createNotification(
+                        admin,
+                        null,
+                        NotificationType.AUCTION_SUCCESS,
+                        "Hệ thống có Người Bán mới",
+                        "Người dùng [" + upgradedUser.getUserName() + "] vừa được hệ thống nâng cấp lên quyền Người Bán."
+                );
+            }
         }
 
         return "Upgrade successfully! Your new code is: " + newSellerCode;

@@ -18,44 +18,44 @@ import java.util.Optional;
 @Repository
 public interface AuctionRepository extends JpaRepository<Auction, String> {
 
-    // 1. LỌC GIAO DỊCH THÀNH CÔNG
-    // Truyền tham số status kiểu Enum vào để Spring Boot tự hiểu
+    // 1. LỌC GIAO DỊCH THÀNH CÔNG (Đã bổ sung EntityGraph chống N+1)
+    @EntityGraph(attributePaths = {"bidProduct", "bidProduct.imageUrls", "seller"})
     @Query("SELECT a FROM Auction a WHERE a.winningUser.userName = :userName AND a.transactionStatus = :status")
     List<Auction> findWonAuctions(@Param("userName") String userName, @Param("status") TransactionStatus status);
 
-    // 2. LỌC GIAO DỊCH THẤT BẠI
-    // Lấy những phiên mà tôi đã đặt giá, ĐÃ KẾT THÚC, và (tôi trượt thầu HOẶC giao dịch bị FAILED/CANCELLED)
+    // 2. LỌC GIAO DỊCH THẤT BẠI (Đã bổ sung EntityGraph chống N+1)
+    @EntityGraph(attributePaths = {"bidProduct", "bidProduct.imageUrls", "seller"})
     @Query("SELECT DISTINCT a FROM Auction a JOIN a.bidTransactions b " +
             "WHERE b.bidder.userName = :userName " +
-            // [ĐÃ SỬA]: Cho phép lấy nếu transactionStatus có dữ liệu HOẶC phiên đó bị CANCELLED
             "AND (a.transactionStatus IS NOT NULL OR a.status = :cancelledStatus) " +
             "AND (a.winningUser IS NULL OR a.winningUser.userName != :userName OR a.transactionStatus = :failedStatus)")
     List<Auction> findLostAuctions(
             @Param("userName") String userName,
             @Param("failedStatus") TransactionStatus failedStatus,
-            @Param("cancelledStatus") AuctionStatus cancelledStatus // Thêm tham số này
+            @Param("cancelledStatus") AuctionStatus cancelledStatus
     );
 
     // 3. TÌM AUCTION THEO PRODUCT
     Optional<Auction> findByBidProduct(Item item);
 
-    // 4. Thêm annotation này để database "Khoá" dòng đấu giá này lại khi có người đặt giá.
-    // Thằng khác (hoặc bot) bay vào phải Đứng Chờ thằng trước chạy xong transaction mới được đụng vào.
+    // 4. Khoá dòng đấu giá (Lock)
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Auction a WHERE a.id = :id")
     Optional<Auction> findByIdWithLock(String id);
 
-    // =========================================================
-    // Đã bổ sung "bidProduct.imageUrls" để tránh lỗi N+1 Query
-    // =========================================================
+    // 5. Lấy tất cả (Đã chuẩn)
     @EntityGraph(attributePaths = {"bidProduct", "bidProduct.imageUrls", "seller"})
     List<Auction> findAll();
 
+    // 6. Tìm kiếm (Đã chuẩn)
     @EntityGraph(attributePaths = {"bidProduct", "bidProduct.imageUrls", "seller"})
     List<Auction> findByBidProductNameContainingIgnoreCase(String keyword);
 
-    // Thêm hàm lấy riêng sản phẩm của 1 người bán (Kèm luôn EntityGraph để tránh N+1)
-    @EntityGraph(attributePaths = {"bidProduct", "seller"})
+    // =========================================================
+    // 7. LẤY SẢN PHẨM CỦA TÔI (ĐÃ FIX LỖI THIẾU ẢNH GÂY LAG SERVER)
+    // Thêm "bidProduct.imageUrls" vào đây để lấy ảnh ngay trong 1 lần Query!
+    // =========================================================
+    @EntityGraph(attributePaths = {"bidProduct", "bidProduct.imageUrls", "seller"})
     @Query("SELECT a FROM Auction a WHERE a.seller.userName = :username")
     List<Auction> findBySellerUserName(@Param("username") String username);
 }
