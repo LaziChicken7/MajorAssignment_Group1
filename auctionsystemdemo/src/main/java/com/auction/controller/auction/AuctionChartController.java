@@ -37,13 +37,17 @@ public class AuctionChartController {
     private AuctionModel currentItem;
     private XYChart.Series<Number, Number> priceSeries;
 
-    // Biến dùng cho Kéo thả (Pan Data)
+    // Biến lưu trạng thái vòng lặp
+    private int lastProcessedIndex = 0;
+    private long lastEpochMillis = 0;
+
+    // Biến lưu MỐC THỜI GIAN GỐC để chuẩn hóa trục X (Tránh lỗi tràn số của JavaFX)
+    private long baseTime;
+
+    // Biến dùng cho Kéo thả
     private double dragStartX, dragStartY;
     private double xLowerStart, xUpperStart;
     private double yLowerStart, yUpperStart;
-
-    // GIỚI HẠN BIỂU ĐỒ (Chặn quá khứ và giá âm)
-    private long minX;
     private final double minY = 0.0;
 
     public void setAuctionData(AuctionModel item) {
@@ -61,30 +65,25 @@ public class AuctionChartController {
         priceSeries.setName("Lịch sử giá");
         priceChart.getData().add(priceSeries);
 
-        // =======================================================
-        // 1. THIẾT LẬP GIỚI HẠN THỜI GIAN BẮT ĐẦU (minX)
-        // =======================================================
+        // 1. LẤY MỐC BASE-TIME (Thời gian bắt đầu)
         String startStr = currentItem.startTime.contains("T") ? currentItem.startTime : currentItem.startTime.replace(" ", "T");
         LocalDateTime startObj = LocalDateTime.parse(startStr);
-        minX = startObj.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        baseTime = startObj.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-        // =======================================================
-        // 2. DỊCH TRỤC X (MILI-GIÂY) THÀNH CHỮ HH:mm:ss
-        // =======================================================
+        // 2. FORMAT TRỤC X: Cộng ngược baseTime vào độ lệch để in ra giờ thực tế
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         xAxis.setTickLabelFormatter(new StringConverter<Number>() {
             @Override
             public String toString(Number object) {
-                LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(object.longValue()), ZoneId.systemDefault());
+                long realEpoch = baseTime + object.longValue();
+                LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(realEpoch), ZoneId.systemDefault());
                 return time.format(formatter);
             }
             @Override
             public Number fromString(String string) { return 0; }
         });
 
-        // =======================================================
-        // 3. FETCH DỮ LIỆU TỪ API
-        // =======================================================
+        // 3. GỌI API THEO CHU KỲ
         chartTimeline = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
             ApiService.getAsync("/auctions/" + auctionId + "/price-chart").thenAccept(res -> {
                 Platform.runLater(() -> {
@@ -96,20 +95,43 @@ public class AuctionChartController {
 
                             if (txs == null || txs.isEmpty()) return;
 
-                            if (txs.size() > priceSeries.getData().size()) {
-                                for (int i = priceSeries.getData().size(); i < txs.size(); i++) {
+                            // Sắp xếp dữ liệu theo thời gian thực (Tránh chart bị đứt gãy)
+                            txs.sort((t1, t2) -> {
+                                int timeCompare = t1.bidTimestamp.compareTo(t2.bidTimestamp);
+                                if (timeCompare == 0) return Double.compare(t1.bidAmount, t2.bidAmount);
+                                return timeCompare;
+                            });
+
+                            // NẾU NGƯỜI CHƠI BID TRƯỚC CẢ GIỜ BẮT ĐẦU -> Kéo lùi mốc baseTime lại để không bị chặn
+                            String firstStr = txs.get(0).bidTimestamp.contains("T") ? txs.get(0).bidTimestamp : txs.get(0).bidTimestamp.replace(" ", "T");
+                            long firstBidEpoch = LocalDateTime.parse(firstStr).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                            if (firstBidEpoch < baseTime && lastProcessedIndex == 0) {
+                                baseTime = firstBidEpoch;
+                            }
+
+                            // Vòng lặp Add Data
+                            if (txs.size() > lastProcessedIndex) {
+                                for (int i = lastProcessedIndex; i < txs.size(); i++) {
                                     AuctionModel.BidTransactionModel tx = txs.get(i);
 
-                                    // Chuyển chuỗi thời gian thành Mili-giây (Long/Number)
                                     String timeStr = tx.bidTimestamp.contains("T") ? tx.bidTimestamp : tx.bidTimestamp.replace(" ", "T");
                                     LocalDateTime timeObj = LocalDateTime.parse(timeStr);
                                     long epochMillis = timeObj.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-                                    // Chỉ cho phép vẽ các điểm nằm sau thời gian bắt đầu
-                                    if (epochMillis >= minX && tx.bidAmount >= minY) {
-                                        priceSeries.getData().add(new XYChart.Data<>(epochMillis, tx.bidAmount));
+                                    // Xử lý 24 người bid trùng 1 giây: Cộng dồn 10ms để tách rẽ điểm
+                                    if (epochMillis <= lastEpochMillis) {
+                                        epochMillis = lastEpochMillis + 10;
+                                    }
+                                    lastEpochMillis = epochMillis;
+
+                                    // THUẬT TOÁN CHUẨN HOÁ X: Đẩy vào trục X một "độ lệch" siêu nhỏ (chỉ từ 0 đến vài nghìn)
+                                    long xValue = epochMillis - baseTime;
+
+                                    if (xValue >= 0 && tx.bidAmount >= minY) {
+                                        priceSeries.getData().add(new XYChart.Data<>(xValue, tx.bidAmount));
                                     }
                                 }
+                                lastProcessedIndex = txs.size();
                             }
                         }
                     }
@@ -122,11 +144,7 @@ public class AuctionChartController {
         enableZoomAndPan();
     }
 
-    // =====================================
-    // LOGIC ZOOM & PAN CÓ KẸP CHẶN GIỚI HẠN
-    // =====================================
     private void enableZoomAndPan() {
-        // 1. ZOOM (Lăn chuột)
         priceChart.setOnScroll(event -> {
             event.consume();
             if (event.getDeltaY() == 0) return;
@@ -136,7 +154,6 @@ public class AuctionChartController {
 
             double zoomFactor = (event.getDeltaY() > 0) ? 0.8 : 1.2;
 
-            // Tính toán giới hạn mới cho 2 trục
             double xRange = xAxis.getUpperBound() - xAxis.getLowerBound();
             double xCenter = (xAxis.getUpperBound() + xAxis.getLowerBound()) / 2.0;
             double newXLower = xCenter - (xRange * zoomFactor) / 2.0;
@@ -147,13 +164,12 @@ public class AuctionChartController {
             double newYLower = yCenter - (yRange * zoomFactor) / 2.0;
             double newYUpper = yCenter + (yRange * zoomFactor) / 2.0;
 
-            // KẸP CHẶN ZOOM (Chống lùi về trước startTime)
-            if (newXLower < minX) {
-                newXLower = minX;
-                newXUpper = newXLower + (xRange * zoomFactor); // Đẩy Upper lên để không bị bóp méo khung zoom
+            // Kẹp chặn (bây giờ mức giới hạn nhỏ nhất của trục X là 0)
+            if (newXLower < 0) {
+                newXLower = 0;
+                newXUpper = newXLower + (xRange * zoomFactor);
             }
 
-            // KẸP CHẶN ZOOM (Chống lùi về giá âm)
             if (newYLower < minY) {
                 newYLower = minY;
                 newYUpper = newYLower + (yRange * zoomFactor);
@@ -165,7 +181,6 @@ public class AuctionChartController {
             yAxis.setUpperBound(newYUpper);
         });
 
-        // 2. PAN (Kéo thả biểu đồ)
         priceChart.setOnMousePressed(event -> {
             dragStartX = event.getX();
             dragStartY = event.getY();
@@ -186,20 +201,17 @@ public class AuctionChartController {
             double dataDeltaX = deltaX / xAxis.getScale();
             double dataDeltaY = deltaY / yAxis.getScale();
 
-            // Tính khoảng dịch chuyển (Đã đảo chiều Y để chuột đi đúng hướng)
             double newXLower = xLowerStart - dataDeltaX;
             double newXUpper = xUpperStart - dataDeltaX;
             double newYLower = yLowerStart - dataDeltaY;
             double newYUpper = yUpperStart - dataDeltaY;
 
-            // KẸP CHẶN KÉO THẢ (Trục X)
-            if (newXLower < minX) {
-                double diff = minX - newXLower;
+            if (newXLower < 0) {
+                double diff = 0 - newXLower;
                 newXLower += diff;
                 newXUpper += diff;
             }
 
-            // KẸP CHẶN KÉO THẢ (Trục Y)
             if (newYLower < minY) {
                 double diff = minY - newYLower;
                 newYLower += diff;
@@ -217,29 +229,20 @@ public class AuctionChartController {
         });
     }
 
-    // =====================================
-    // NÚT KHÔI PHỤC (RESET ZOOM)
-    // =====================================
     @FXML
     private void resetZoom() {
         xAxis.setAutoRanging(true);
         yAxis.setAutoRanging(true);
     }
 
-    // =====================================
-    // NÚT QUAY LẠI TRANG CHI TIẾT
-    // =====================================
     @FXML
     private void goBack() {
         if (chartTimeline != null) chartTimeline.stop();
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
             Node view = loader.load();
-
             AuctionDetailController controller = loader.getController();
             controller.setAuctionData(currentItem);
-
             StackPane contentArea = (StackPane) priceChart.getScene().lookup("#contentArea");
             if (contentArea != null) {
                 contentArea.getChildren().setAll(view);
