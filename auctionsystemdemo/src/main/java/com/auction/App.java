@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -19,6 +20,8 @@ public class App extends Application {
             System.out.println("Lỗi: Không tìm thấy file Main.fxml. Hãy kiểm tra lại thư mục resources!");
             return;
         }
+        Image logo = new Image(getClass().getResourceAsStream("/com/auction/view/logo.png"));
+        primaryStage.getIcons().add(logo);
 
         Parent root = FXMLLoader.load(fxmlLocation);
         Scene scene = new Scene(root);
