@@ -125,6 +125,11 @@ public class AuctionService {
             throw new RuntimeException("Mức giá Auto-bid phải cao hơn giá hiện tại (" + String.format("%,d", auction.getHighestBid().longValue()).replace(",", ".") + " VND)");
         }
 
+        if (maxAmount.compareTo(bidder.getMoneyOnWallet()) > 0) {
+            log.warn("Cảnh báo: User [{}] cài AutoBid ({}) cao hơn số dư ví hiện tại ({})", bidderUserName, maxAmount, bidder.getMoneyOnWallet());
+            throw new RuntimeException("Số tiền cài đặt Auto-bid không được vượt quá số dư khả dụng trong ví của bạn!");
+        }
+
         // 4. KIỂM TRA MỨC GIÁ AUTO-BID CÓ PHẢI LÀ BỘI SỐ CỦA BƯỚC GIÁ HAY KHÔNG?
         BigDecimal stepPrice = auction.getStepPrice() != null ? auction.getStepPrice() : calculateDynamicStep(auction.getBidProduct().getStartPrice());
         if (maxAmount.remainder(stepPrice).compareTo(BigDecimal.ZERO) != 0) {
@@ -285,43 +290,101 @@ public class AuctionService {
     private void triggerAutoBidProcess(Auction auction) {
         boolean keepBidding = true;
 
-        // Vòng lặp: Bọn bot sẽ đánh nhau đến khi không ai có thể ra giá được nữa
+        // TẠO CÁI "GIỎ" ĐỂ LƯU TẠM THÔNG BÁO VÀ NGĂN SPAM
+        Map<String, BigDecimal> botHighestBids = new HashMap<>();
+        Map<String, Bidder> botUsers = new HashMap<>();
+
         while (keepBidding) {
             keepBidding = false;
 
-            // Lấy danh sách các cấu hình AutoBid đang ACTIVE của phiên này (sắp xếp theo thời gian setup cũ nhất -> ưu tiên)
             List<AutoBidConfig> autoBids = autoBidConfigRepository.findByAuctionAndIsActiveTrueOrderByCreatedAtAsc(auction);
-
-            // GỌI HÀM BƯỚC GIÁ ĐỘNG VỪA TẠO
             BigDecimal stepPrice = auction.getStepPrice() != null ? auction.getStepPrice() : calculateDynamicStep(auction.getBidProduct().getStartPrice());
+            String shortId = auction.getBidProduct().getId().substring(0, 4).toUpperCase();
 
             for (AutoBidConfig autoBid : autoBids) {
-                // Nếu người này ĐANG là người dẫn đầu rồi thì không tự bid đè lên chính mình
                 if (auction.getWinningUser() != null && auction.getWinningUser().getId().equals(autoBid.getBidder().getId())) {
                     continue;
                 }
 
-                // Tính mức giá tiếp theo cần đặt (Giá cao nhất hiện tại + Bước giá)
                 BigDecimal nextBidAmount = auction.getHighestBid().add(stepPrice);
 
-                // Nếu mức giá tiếp theo vẫn NẰM TRONG khả năng chi trả của AutoBid (<= maxAmount)
                 if (nextBidAmount.compareTo(autoBid.getMaxBidAmount()) <= 0) {
-                    log.info("AUTOBID: Kích hoạt bot của [{}] đánh giá [{}].", autoBid.getBidder().getUserName(), nextBidAmount);
+                    User freshUser = userRepository.findById(autoBid.getBidder().getId()).orElse(null);
+                    if (freshUser instanceof Bidder) {
+                        Bidder freshBidder = (Bidder) freshUser;
 
-                    // Gọi lại hàm placeBid để bot thực hiện đặt giá (như con người)
-                    // Lưu ý: Tách logic xử lý bên trong placeBid ra 1 private method để tránh vòng lặp gọi lại triggerAutoBidProcess
+                        if (freshBidder.getMoneyOnWallet().compareTo(nextBidAmount) < 0) {
+                            log.warn("AUTOBID STOP: Bot của [{}] bị tắt do thiếu tiền.", freshBidder.getUserName());
+                            autoBid.setActive(false);
+                            autoBidConfigRepository.save(autoBid);
+
+                            // Thông báo HẾT TIỀN (Chỉ bắn 1 lần khi tắt bot)
+                            Notification notif = new Notification();
+                            notif.setUser(freshBidder);
+                            notif.setAuction(auction);
+                            notif.setType(NotificationType.AUCTION_FAILED);
+                            notif.setTitle("AutoBid TẮT: Thiếu số dư (SP" + shortId + ")");
+                            notif.setDescription("Bot đã dừng. Lý do: Ví chỉ còn " + String.format("%,d", freshBidder.getMoneyOnWallet().longValue()).replace(",", ".") + " VND, không đủ để trả " + String.format("%,d", nextBidAmount.longValue()).replace(",", ".") + " VND.");
+                            notificationRepository.save(notif);
+
+                            continue;
+                        }
+                    }
+
+                    log.info("AUTOBID: Kích hoạt bot của [{}] đánh giá [{}].", autoBid.getBidder().getUserName(), nextBidAmount);
                     executeInternalBid(auction, autoBid.getBidder(), nextBidAmount);
 
-                    // Đã có giá mới, vòng lặp while sẽ chạy lại từ đầu để các bot khác đánh trả
+                    // THAY VÌ BẮN THÔNG BÁO NGAY -> LƯU TẠM VÀO GIỎ
+                    // Nếu chạy qua chạy lại 100 vòng, nó chỉ ghi đè mức giá mới nhất, không sinh ra 100 thông báo rác!
+                    botHighestBids.put(autoBid.getBidder().getId(), nextBidAmount);
+                    botUsers.put(autoBid.getBidder().getId(), autoBid.getBidder());
+
                     keepBidding = true;
-                    break; // Thoát vòng for để lấy lại danh sách mới nhất
+                    break;
                 } else {
-                    // Tiền Max đã không đọ lại được nữa -> Tắt bot của người này đi
                     log.info("AUTOBID: Bot của [{}] đã đuối sức (Max: {}). Tắt bot.", autoBid.getBidder().getUserName(), autoBid.getMaxBidAmount());
                     autoBid.setActive(false);
                     autoBidConfigRepository.save(autoBid);
+
+                    // Thông báo QUÁ MỨC TRẦN (Chỉ bắn 1 lần khi tắt bot)
+                    Notification maxNotif = new Notification();
+                    maxNotif.setUser(autoBid.getBidder());
+                    maxNotif.setAuction(auction);
+                    maxNotif.setType(NotificationType.AUCTION_FAILED);
+                    maxNotif.setTitle("AutoBid TẮT: Vượt mức trần (SP" + shortId + ")");
+                    maxNotif.setDescription("Bot đã dừng. Lý do: Mức giá cần đánh (" + String.format("%,d", nextBidAmount.longValue()).replace(",", ".") + " VND) cao hơn mức giá MAX (" + String.format("%,d", autoBid.getMaxBidAmount().longValue()).replace(",", ".") + " VND).");
+                    notificationRepository.save(maxNotif);
                 }
             }
+        }
+
+        // =================================================================================
+        // TỔNG KẾT SAU KHI KẾT THÚC VÒNG LẶP (BOT ĐÃ ĐÁNH NHAU XONG)
+        // =================================================================================
+        String finalShortId = auction.getBidProduct().getId().substring(0, 4).toUpperCase();
+        for (String userId : botHighestBids.keySet()) {
+            Bidder bidder = botUsers.get(userId);
+            BigDecimal finalAmount = botHighestBids.get(userId);
+
+            Notification successNotif = new Notification();
+            successNotif.setUser(bidder);
+            successNotif.setAuction(auction);
+            successNotif.setType(NotificationType.AUCTION_SUCCESS);
+
+            String priceFormatted = String.format("%,d", finalAmount.longValue()).replace(",", ".");
+
+            // Phân loại nội dung thông báo thông minh:
+            if (auction.getWinningUser() != null && auction.getWinningUser().getId().equals(bidder.getId())) {
+                // Nếu Bot này là kẻ chiến thắng cuối cùng
+                successNotif.setTitle("AutoBid: Dẫn đầu SP" + finalShortId);
+                successNotif.setDescription("Bot đã tự động đấu giá và bạn đang DẪN ĐẦU với mức giá " + priceFormatted + " VND.");
+            } else {
+                // Nếu Bot này có tham gia đánh, nhưng cuối cùng vẫn thua (Bị ngắt do hết tiền hoặc chạm trần)
+                successNotif.setTitle("AutoBid: Vừa hoạt động SP" + finalShortId);
+                successNotif.setDescription("Trong đợt cạnh tranh vừa rồi, Bot của bạn đã đấu giá lên tới mức " + priceFormatted + " VND.");
+            }
+
+            notificationRepository.save(successNotif);
         }
     }
 
