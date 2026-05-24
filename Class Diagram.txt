@@ -26,6 +26,22 @@ classDiagram
         ART
     }
 
+    class TransactionStatus {
+        <<enumeration>>
+        SUCCESS
+        FAILED
+        CANCELLED
+    }
+
+    class NotificationType {
+        <<enumeration>>
+        PAYMENT_VERIFICATION
+        AUCTION_SUCCESS
+        AUCTION_FAILED
+        ITEM_CANCELLED_BY_ADMIN
+        FRIEND_REQUEST
+    }
+
     %% =======================
     %% BASE ENTITY
     %% =======================
@@ -33,12 +49,14 @@ classDiagram
         <<abstract>>
         #String id
         +getId() String
+        +setId(String)
     }
 
     %% =======================
     %% USER PACKAGE
     %% =======================
     class User {
+        #String userCode
         #String userName
         #String fullName
         #String email
@@ -46,6 +64,8 @@ classDiagram
         #String numberPhone
         #String citizenId
         #Role role
+        #String avatarUrl
+        #boolean isBanned
         +encode(password) String$
         +decode(encodedPassword) String$
     }
@@ -71,6 +91,12 @@ classDiagram
         -double rating
     }
 
+    class SellerReview {
+        -int star
+        -String comment
+        -LocalDateTime createdAt
+    }
+
     class UserFactory {
         +createUser(role, ...) User$
     }
@@ -79,8 +105,12 @@ classDiagram
     User <|-- Admin
     User <|-- Bidder
     Bidder <|-- Seller
+    BaseEntity <|-- SellerReview
     User "1" *-- "1" Role
     UserFactory ..> User : creates
+
+    SellerReview "1" --> "1" Seller : seller
+    SellerReview "1" --> "1" User : reviewer
 
     %% =======================
     %% ITEM PACKAGE
@@ -91,6 +121,7 @@ classDiagram
         #LocalDateTime startTime
         #BigDecimal startPrice
         #BigDecimal endPrice
+        #ItemType itemType
     }
 
     class Art {
@@ -108,6 +139,10 @@ classDiagram
         -int mileage
     }
 
+    class ItemImageUrl {
+        -String imageUrl
+    }
+
     class ItemFactory {
         +createItem(type, ...) Item$
     }
@@ -119,6 +154,7 @@ classDiagram
     Item "*" --> "1" Seller : owned by
     ItemFactory ..> Item : creates
     ItemFactory ..> ItemType : uses
+    Item "1" o-- "*" ItemImageUrl : imageUrls
 
     %% =======================
     %% AUCTION PACKAGE
@@ -127,6 +163,10 @@ classDiagram
         -LocalDateTime startTime
         -LocalDateTime endTime
         -BigDecimal highestBid
+        -BigDecimal stepPrice
+        -AuctionStatus status
+        -TransactionStatus transactionStatus
+        -BigDecimal myHighestBid <<transient>>
         +placeBid(bidder, amount, time) boolean
         +startAuction()
         +closeAuction() boolean
@@ -143,17 +183,64 @@ classDiagram
         +handleAntiSniping(endTime, bidTimestamp)$ LocalDateTime
     }
 
+    class AutoBidConfig {
+        -BigDecimal maxBidAmount
+        -boolean isActive
+        -LocalDateTime createdAt
+    }
+
     BaseEntity <|-- Auction
     BaseEntity <|-- BidTransaction
+    BaseEntity <|-- AutoBidConfig
 
     Auction "1" *-- "1" Item : bids on
     Auction "1" o-- "*" BidTransaction : contains
     Auction "1" --> "0..1" Bidder : winningUser
     Auction "1" *-- "1" AuctionStatus : status
     Auction ..> AntiSnipping : uses
+    Auction "1" o-- "*" AutoBidConfig : autoBidConfigs
 
     BidTransaction "1" --> "1" Item : references
     BidTransaction "1" --> "1" Bidder : made by
+
+    AutoBidConfig "*" --> "1" Auction : auction
+    AutoBidConfig "*" --> "1" Bidder : bidder
+
+    %% =======================
+    %% NOTIFICATION PACKAGE
+    %% =======================
+    class Notification {
+        -String title
+        -String description
+        -NotificationType type
+        -boolean isRead
+        -LocalDateTime createdAt
+    }
+
+    BaseEntity <|-- Notification
+    Notification "*" --> "1" User : user
+    Notification "*" --> "0..1" Auction : auction
+
+    %% =======================
+    %% CHAT PACKAGE
+    %% =======================
+    class ChatMessage {
+        -String content
+        -boolean isRead
+        -LocalDateTime sendTime
+    }
+
+    class Connection {
+        -String status
+        -LocalDateTime createdAt
+    }
+
+    BaseEntity <|-- ChatMessage
+    BaseEntity <|-- Connection
+    ChatMessage "*" --> "1" User : sender
+    ChatMessage "*" --> "1" User : receiver
+    Connection "*" --> "1" User : sender
+    Connection "*" --> "1" User : receiver
 
     %% =======================
     %% SERVICE PACKAGE
@@ -176,6 +263,7 @@ classDiagram
         +ForgotPassword(...) boolean
         +update...()
         +setMoney...()
+        +banUser(...)
     }
 
     class PaymentService {
@@ -192,8 +280,23 @@ classDiagram
     class AdminService {
     }
 
+    class NotificationService {
+        +sendNotification(...)
+        +markAsRead(...)
+    }
+
+    class ChatService {
+        +sendMessage(...)
+        +createConnection(...)
+        +acceptConnection(...)
+        +blockUser(...)
+    }
+
     AuctionService "1" o-- "*" Auction : manages
     UserService "1" o-- "*" User : manages
     PaymentService ..> UserService : calls logic
     AuctionService ..> PaymentService : calls logic
     Auction ..> PaymentService : calls logic
+    NotificationService ..> Notification : manages
+    ChatService ..> ChatMessage : manages
+    ChatService ..> Connection : manages

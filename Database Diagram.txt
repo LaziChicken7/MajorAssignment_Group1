@@ -10,6 +10,8 @@ erDiagram
         VARCHAR(255) password
         VARCHAR(255) full_name
         VARCHAR(50) role "ENUM: ADMIN, BIDDER, SELLER"
+        VARCHAR(255) avatar_url "URL avatar"
+        BOOLEAN is_banned "Bị khóa tài khoản"
     }
 
     admins {
@@ -30,6 +32,15 @@ erDiagram
         DOUBLE rating
     }
 
+    seller_reviews {
+        VARCHAR(36) id PK "UUID"
+        VARCHAR(36) seller_id FK "Người bán được đánh giá"
+        VARCHAR(36) reviewer_id FK "Người đánh giá"
+        INT star "Số sao đánh giá"
+        TEXT comment "Bình luận"
+        DATETIME created_at "Thời gian đánh giá"
+    }
+
     %% BẢNG KẾ THỪA TỪ ITEM
     items {
         VARCHAR(36) id PK "UUID"
@@ -38,7 +49,13 @@ erDiagram
         DATETIME start_time
         DECIMAL start_price
         DECIMAL end_price
+        VARCHAR(50) item_type "ENUM: ART, ELECTRONICS, VEHICLE"
         VARCHAR(36) seller_id FK "Người đăng bán"
+    }
+
+    item_image_urls {
+        VARCHAR(36) item_id FK "Khóa ngoại trỏ đến items.id"
+        VARCHAR(255) image_urls "URL ảnh"
     }
 
     arts {
@@ -65,7 +82,9 @@ erDiagram
         DATETIME start_time
         DATETIME end_time
         DECIMAL highest_bid "Giá cao nhất hiện tại"
+        DECIMAL step_price "Bước giá tối thiểu"
         VARCHAR(50) status "ENUM: OPEN, RUNNING..."
+        VARCHAR(50) transaction_status "ENUM: SUCCESS, FAILED, CANCELLED"
         VARCHAR(36) item_id FK,UK "Món hàng (OneToOne)"
         VARCHAR(36) seller_id FK "Người tạo phiên"
         VARCHAR(36) winning_user_id FK "Người dẫn đầu/Thắng cuộc"
@@ -77,6 +96,43 @@ erDiagram
         DATETIME bid_timestamp "Thời điểm đặt giá"
         VARCHAR(36) bidder_id FK "Người đặt giá"
         VARCHAR(36) auction_id FK "Thuộc phiên đấu giá nào"
+    }
+
+    auto_bid_configs {
+        VARCHAR(36) id PK "UUID"
+        VARCHAR(36) auction_id FK "Phiên đấu giá"
+        VARCHAR(36) bidder_id FK "Người cài đặt"
+        DECIMAL max_bid_amount "Mức giá tối đa tự động"
+        BOOLEAN is_active "Có đang hoạt động không"
+        DATETIME created_at "Thời điểm tạo cấu hình"
+    }
+
+    notifications {
+        VARCHAR(36) id PK "UUID"
+        VARCHAR(36) user_id FK "Người nhận thông báo"
+        VARCHAR(36) auction_id FK "Phiên đấu giá liên quan"
+        VARCHAR(255) title "Tiêu đề thông báo"
+        TEXT description "Nội dung chi tiết"
+        VARCHAR(50) type "Phân loại thông báo"
+        BOOLEAN is_read "Trạng thái đã đọc"
+        DATETIME created_at "Thời điểm nhận"
+    }
+
+    connections {
+        VARCHAR(36) id PK "UUID"
+        VARCHAR(36) sender_id FK "Người gửi yêu cầu"
+        VARCHAR(36) receiver_id FK "Người nhận yêu cầu"
+        VARCHAR(50) status "Trạng thái kết nối"
+        DATETIME created_at "Thời gian tạo"
+    }
+
+    chat_messages {
+        VARCHAR(36) id PK "UUID"
+        VARCHAR(36) sender_id FK "Người gửi tin nhắn"
+        VARCHAR(36) receiver_id FK "Người nhận tin nhắn"
+        TEXT content "Nội dung cuộc chat"
+        BOOLEAN is_read "Trạng thái đọc tin"
+        DATETIME send_time "Thời gian gửi"
     }
 
     %% ==========================================
@@ -101,3 +157,14 @@ erDiagram
     
     auctions ||--o{ bid_transactions : "chứa các lượt đặt giá (1-N)"
     bidders ||--o{ bid_transactions : "thực hiện lượt đặt giá (1-N)"
+
+    %% Các quan hệ mới tích hợp:
+    items ||--o{ item_image_urls : "lưu danh sách ảnh (1-N)"
+    sellers ||--o{ seller_reviews : "được đánh giá bởi reviewer (1-N)"
+    users ||--o{ seller_reviews : "viết đánh giá (1-N)"
+    auctions ||--o{ auto_bid_configs : "cài đặt đấu giá tự động (1-N)"
+    bidders ||--o{ auto_bid_configs : "sở hữu cấu hình autobid (1-N)"
+    users ||--o{ notifications : "nhận thông báo (1-N)"
+    auctions ||--o{ notifications : "liên quan tới phiên (1-N)"
+    users ||--o{ chat_messages : "gửi/nhận tin nhắn (1-N)"
+    users ||--o{ connections : "thiết lập kết nối chat (1-N)"
