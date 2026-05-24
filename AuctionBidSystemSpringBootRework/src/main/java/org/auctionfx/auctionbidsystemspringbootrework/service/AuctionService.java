@@ -597,6 +597,12 @@ public class AuctionService {
         return auctionRepository.findBySellerUserName(username);
     }
 
+    // Lấy thông tin chi tiết của 1 phiên đấu giá
+    public Auction getAuctionById(String auctionId) {
+        return auctionRepository.findById(auctionId)
+                .orElseThrow(() -> new AuctionException(ErrorCode.AUCTION_NOT_FOUND));
+    }
+
     // Tự động quét Auction
     @Scheduled(fixedRate = 2000)
     public void autoUpdateAuctionStatus() {

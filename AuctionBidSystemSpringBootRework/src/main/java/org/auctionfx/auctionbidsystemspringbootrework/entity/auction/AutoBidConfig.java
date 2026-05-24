@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.entity.auction;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.base.BaseEntity;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;

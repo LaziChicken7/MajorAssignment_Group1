@@ -136,4 +136,13 @@ public class AuctionController {
         response.setResult(auctionService.getMyAuctions(username));
         return response;
     }
+
+    // API Lấy chi tiết 1 phiên đấu giá
+    @GetMapping("/{auctionId}")
+    public ApiResponse<Auction> getAuctionById(@PathVariable String auctionId) {
+        log.debug("API CALL: Yêu cầu lấy thông tin chi tiết phiên đấu giá [{}]", auctionId);
+        ApiResponse<Auction> response = new ApiResponse<>();
+        response.setResult(auctionService.getAuctionById(auctionId));
+        return response;
+    }
 }
