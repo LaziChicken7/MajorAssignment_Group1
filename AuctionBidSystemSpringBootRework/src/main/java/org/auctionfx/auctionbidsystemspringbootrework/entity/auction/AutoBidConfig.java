@@ -1,5 +1,6 @@
 package org.auctionfx.auctionbidsystemspringbootrework.entity.auction;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.base.BaseEntity;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Bidder;
@@ -13,6 +14,7 @@ public class AutoBidConfig extends BaseEntity {
     // Nối ngược lại với bảng Auction
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auction_id", nullable = false)
+    @JsonIgnore
     private Auction auction;
 
     // Nối với người dùng thiết lập
