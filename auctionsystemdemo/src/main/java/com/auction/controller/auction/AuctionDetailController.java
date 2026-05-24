@@ -442,17 +442,37 @@ public class AuctionDetailController {
     }
 
     private void updateUI() {
-        if (currentItem == null) return;
-        lblId.setText("SP: " + currentItem.bidProduct.id.substring(0, 4).toUpperCase());
+        if (currentItem == null || currentItem.bidProduct == null) return;
+
+        // 1. Cập nhật thông tin cơ bản
+        String shortId = currentItem.bidProduct.id != null && currentItem.bidProduct.id.length() >= 4
+                ? currentItem.bidProduct.id.substring(0, 4).toUpperCase()
+                : "N/A";
+        lblId.setText("SP: " + shortId);
         lblName.setText(currentItem.bidProduct.name);
         lblStartPrice.setText(String.format("%,.0f VND", currentItem.bidProduct.startPrice).replace(",", "."));
         lblCurrentPrice.setText(String.format("%,.0f VND", currentItem.highestBid).replace(",", "."));
 
-        if (lblHighestBidder != null) lblHighestBidder.setText(getHighestBidderName(currentItem.bidTransactions));
+        if (lblHighestBidder != null) {
+            lblHighestBidder.setText(getHighestBidderName(currentItem.bidTransactions));
+        }
 
-        double myHighestBid = currentItem.getMyHighestBid(SessionManager.userName);
-        if (lblMyBid != null) lblMyBid.setText(String.format("%,.0f VND", myHighestBid).replace(",", "."));
+        // 2. Tìm Giá của tôi (Thay vì gọi hàm ẩn, ta dùng thuật toán tìm trực tiếp cho an toàn)
+        double myHighestBid = 0;
+        if (currentItem.bidTransactions != null && SessionManager.userName != null) {
+            for (AuctionModel.BidTransactionModel tx : currentItem.bidTransactions) {
+                if (tx.bidder != null && SessionManager.userName.equalsIgnoreCase(tx.bidder.userName)) {
+                    if (tx.bidAmount > myHighestBid) {
+                        myHighestBid = tx.bidAmount;
+                    }
+                }
+            }
+        }
+        if (lblMyBid != null) {
+            lblMyBid.setText(String.format("%,.0f VND", myHighestBid).replace(",", "."));
+        }
 
+        // 3. Xử lý màu sắc dựa trên Trạng Thái
         String baseColor = "#95a5a6";
         if ("RUNNING".equals(currentItem.status)) baseColor = "#f39c12";
         else if ("OPEN".equals(currentItem.status)) baseColor = "#3498db";
@@ -465,34 +485,46 @@ public class AuctionDetailController {
             else lblTimeTitle.setText("Thời gian:");
         }
 
+        // 4. KHỞI TẠO TIMELINE ĐẾM NGƯỢC THÔNG MINH
         if (timeline != null) timeline.stop();
-        if (("RUNNING".equals(currentItem.status) && currentItem.endTime != null) || ("OPEN".equals(currentItem.status) && currentItem.startTime != null)) {
+
+        if (("RUNNING".equals(currentItem.status) && currentItem.endTime != null) ||
+                ("OPEN".equals(currentItem.status) && currentItem.startTime != null)) {
             try {
                 String targetTimeStr = "OPEN".equals(currentItem.status) ? currentItem.startTime : currentItem.endTime;
-                targetTimeStr = targetTimeStr.contains("T") ? targetTimeStr : targetTimeStr.replace(" ", "T");
 
-                // [ĐÃ SỬA]: Gán vào biến toàn cục thay vì biến cục bộ
-                currentTargetTime = LocalDateTime.parse(targetTimeStr);
+                // Dùng hàm parseTimeSafely (Đã tạo ở bài trước) để loại bỏ mili-giây rác
+                currentTargetTime = parseTimeSafely(targetTimeStr);
+
+                if (currentTargetTime == null) throw new Exception("Lỗi: Không thể phân tích thời gian!");
 
                 String finalBaseColor = baseColor;
                 timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
                     LocalDateTime now = LocalDateTime.now();
 
-                    // [ĐÃ SỬA]: So sánh với currentTargetTime (để khi nó bị +10s thì vòng lặp tự động hiểu)
-                    if (now.isAfter(currentTargetTime)) {
+                    // Nếu thời gian hiện tại đã vượt qua (hoặc bằng) thời gian kết thúc
+                    if (now.isAfter(currentTargetTime) || now.isEqual(currentTargetTime)) {
                         lblTime.setText("00:00:00");
                         lblTime.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
-                        timeline.stop();
+
+                        timeline.stop(); // Dừng đồng hồ lại
+
+                        // Khóa chặt các nút bấm vì đã hết giờ
                         btnBidAction.setDisable(true);
                         btnBidAction.setText("Đã kết thúc");
                         txtBidAmount.setDisable(true);
                         if (btnAutoBidAction != null) btnAutoBidAction.setDisable(true);
+
                     } else {
+                        // Tính toán thời gian còn lại
                         java.time.Duration duration = java.time.Duration.between(now, currentTargetTime);
                         long hours = duration.toHours();
                         long minutes = duration.toMinutesPart();
                         long seconds = duration.toSecondsPart();
+
                         lblTime.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+
+                        // Đổi màu ĐỎ cảnh báo nếu chỉ còn dưới 10 phút (Trong phiên RUNNING)
                         if ("RUNNING".equals(currentItem.status) && hours == 0 && minutes < 10) {
                             lblTime.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
                         } else {
@@ -502,15 +534,20 @@ public class AuctionDetailController {
                 }));
                 timeline.setCycleCount(Timeline.INDEFINITE);
                 timeline.play();
-            } catch (Exception ex) { lblTime.setText("Lỗi giờ"); }
+
+            } catch (Exception ex) {
+                lblTime.setText("Lỗi định dạng giờ");
+                ex.printStackTrace();
+            }
         } else {
             lblTime.setText("00:00:00");
             lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
         }
 
+        // 5. Cập nhật các hàng chi tiết động (Nghệ thuật / Điện tử / Phương tiện)
         if (vboxItemDetails != null) {
             vboxItemDetails.getChildren().clear();
-            if (currentItem.bidProduct != null && currentItem.bidProduct.itemType != null) {
+            if (currentItem.bidProduct.itemType != null) {
                 String type = currentItem.bidProduct.itemType;
                 if ("ART".equals(type)) {
                     addDetailRow("Phân loại:", "Tác phẩm Nghệ thuật");
@@ -530,17 +567,26 @@ public class AuctionDetailController {
 
         if (txtDescription != null) txtDescription.setText(currentItem.bidProduct.description);
 
-        if (currentItem.bidProduct.imageUrls != null && !currentItem.bidProduct.imageUrls.isEmpty()) this.imageUrls = currentItem.bidProduct.imageUrls;
-        else this.imageUrls.clear();
+        // 6. Cập nhật Ảnh sản phẩm
+        if (currentItem.bidProduct.imageUrls != null && !currentItem.bidProduct.imageUrls.isEmpty()) {
+            this.imageUrls = currentItem.bidProduct.imageUrls;
+        } else {
+            this.imageUrls.clear();
+        }
         this.currentImageIndex = 0;
         updateImageView();
 
+        // 7. Cập nhật thông tin Người bán (Seller)
         if (currentItem.seller != null) {
             lblSellerName.setText(currentItem.seller.fullName != null ? currentItem.seller.fullName : currentItem.seller.userName);
             lblSellerRating.setText(currentItem.seller.rating + " / 5.0");
             lblSellerRating.setGraphic(createStar());
+
             if (currentItem.seller.avatarUrl != null) {
-                imgSellerAvatar.setImage(new javafx.scene.image.Image(ApiService.BASE_URL + currentItem.seller.avatarUrl, true));
+                String avatarUrl = currentItem.seller.avatarUrl;
+                if (!avatarUrl.startsWith("/")) avatarUrl = "/" + avatarUrl;
+
+                imgSellerAvatar.setImage(new javafx.scene.image.Image(ApiService.BASE_URL + avatarUrl, true));
                 javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(45, 45);
                 clip.setArcWidth(45); clip.setArcHeight(45);
                 imgSellerAvatar.setClip(clip);
@@ -753,30 +799,63 @@ public class AuctionDetailController {
                             if (maxPrice > currentItem.highestBid) {
                                 currentItem.highestBid = maxPrice;
                                 lblCurrentPrice.setText(String.format("%,.0f VND", maxPrice).replace(",", "."));
-                                initBidData(); // Tính lại nút [+] [-]
+                                initBidData();
 
-                                // Gọi API lấy thông tin phiên đấu giá để xem "endTime" có bị cộng thêm không
+                                System.out.println("⏳ ĐANG GỌI API KIỂM TRA ANTI-SNIPE: /auctions/" + auctionId);
+
                                 ApiService.getAsync("/auctions/" + auctionId).thenAccept(infoRes -> {
+                                    System.out.println("📡 HTTP Status trả về: " + infoRes.statusCode());
+
                                     if (infoRes.statusCode() == 200) {
                                         ApiResponse infoApiRes = ApiService.gson.fromJson(infoRes.body(), ApiResponse.class);
                                         if (infoApiRes.code == 1000) {
                                             AuctionModel updatedAuction = ApiService.gson.fromJson(infoApiRes.result, AuctionModel.class);
 
                                             Platform.runLater(() -> {
-                                                // Nếu Server trả về endTime mới (tức là đã dời lịch kết thúc)
-                                                if (updatedAuction.endTime != null && !updatedAuction.endTime.equals(currentItem.endTime)) {
-                                                    currentItem.endTime = updatedAuction.endTime;
-                                                    String newTimeStr = updatedAuction.endTime.contains("T") ? updatedAuction.endTime : updatedAuction.endTime.replace(" ", "T");
+                                                LocalDateTime newEndTime = parseTimeSafely(updatedAuction.endTime);
+                                                LocalDateTime oldEndTime = parseTimeSafely(currentItem.endTime);
+                                                LocalDateTime nowTime = LocalDateTime.now();
 
-                                                    // Cập nhật lại đích đến cho hàm Đếm ngược (Timeline)
-                                                    currentTargetTime = LocalDateTime.parse(newTimeStr);
+                                                System.out.println("\n========= BẢNG BÁO CÁO ANTI-SNIPE =========");
+                                                System.out.println("🕒 Giờ hiện tại (NOW) : " + nowTime);
+                                                System.out.println("🛑 Giờ kết thúc (CŨ)  : " + oldEndTime);
+                                                System.out.println("🆕 Giờ kết thúc (MỚI) : " + newEndTime);
 
-                                                    // Chớp màu tím/đỏ để báo hiệu thời gian vừa bị dời lại
-                                                    lblTime.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
+                                                if (newEndTime != null && oldEndTime != null) {
+                                                    boolean isAfter = newEndTime.isAfter(oldEndTime);
+                                                    System.out.println("⚖️ So sánh (MỚI > CŨ) : " + isAfter);
+
+                                                    if (isAfter) {
+                                                        System.out.println("✅ THÀNH CÔNG: ĐÃ GIA HẠN THỜI GIAN!");
+                                                        currentItem.endTime = updatedAuction.endTime;
+                                                        currentTargetTime = newEndTime;
+
+                                                        if (timeline != null && timeline.getStatus() != javafx.animation.Animation.Status.RUNNING) {
+                                                            System.out.println("🔄 BẬT LẠI ĐỒNG HỒ VÀ MỞ KHÓA NÚT BẤM!");
+                                                            timeline.play();
+                                                            btnBidAction.setDisable(false);
+                                                            btnBidAction.setText("Thủ công");
+                                                            txtBidAmount.setDisable(false);
+                                                            if (btnAutoBidAction != null) btnAutoBidAction.setDisable(false);
+                                                        }
+
+                                                        lblTime.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
+                                                    } else {
+                                                        System.out.println("❌ THẤT BẠI: Thời gian mới từ Server không hề lớn hơn thời gian cũ.");
+                                                    }
+                                                } else {
+                                                    System.out.println("❌ LỖI: Biến thời gian bị NULL!");
                                                 }
+                                                System.out.println("===========================================\n");
                                             });
                                         }
+                                    } else {
+                                        System.err.println("❌ LỖI GỌI API ANTI-SNIPE: Không lấy được thông tin từ Server. HTTP Status: " + infoRes.statusCode());
+                                        System.err.println("Chi tiết lỗi: " + infoRes.body());
                                     }
+                                }).exceptionally(ex -> {
+                                    System.err.println("❌ LỖI MẠNG CHỐNG ANTI-SNIPE: " + ex.getMessage());
+                                    return null;
                                 });
                             }
                         }
@@ -892,6 +971,28 @@ public class AuctionDetailController {
         } else {
             lblBalance.setText(realBalanceTextDetail);
             eyeIconText.setText("Ẩn");
+        }
+    }
+
+    // ==============================================================
+    // HÀM XỬ LÝ THỜI GIAN AN TOÀN CHỐNG CRASH
+    // ==============================================================
+    private LocalDateTime parseTimeSafely(String timeStr) {
+        if (timeStr == null || timeStr.trim().isEmpty()) return null;
+        try {
+            timeStr = timeStr.contains("T") ? timeStr : timeStr.replace(" ", "T");
+
+            // Cắt bỏ phần thập phân của giây (ví dụ: .198321)
+            if (timeStr.contains(".")) timeStr = timeStr.substring(0, timeStr.indexOf("."));
+
+            // Cắt bỏ múi giờ Z hoặc +07:00 nếu Server lỡ gửi kèm
+            if (timeStr.endsWith("Z")) timeStr = timeStr.replace("Z", "");
+            if (timeStr.contains("+")) timeStr = timeStr.substring(0, timeStr.indexOf("+"));
+
+            return LocalDateTime.parse(timeStr);
+        } catch (Exception e) {
+            System.err.println("❌ LỖI PARSE THỜI GIAN: Chuỗi gốc [" + timeStr + "] - Lỗi: " + e.getMessage());
+            return null;
         }
     }
 }
