@@ -13,6 +13,7 @@ public class AutoBidConfig extends BaseEntity {
     // Nối ngược lại với bảng Auction
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auction_id", nullable = false)
+    @JsonIgnore
     private Auction auction;
 
     // Nối với người dùng thiết lập
