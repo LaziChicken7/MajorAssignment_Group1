@@ -179,21 +179,6 @@
             </children>
         </VBox>
 
-        <!-- LỚP 2: THÔNG BÁO TOAST -->
-        <VBox alignment="TOP_CENTER" mouseTransparent="true">
-            <padding><Insets top="15"/></padding>
-            <children>
-                <HBox fx:id="toastSuccess" visible="false" alignment="CENTER" spacing="10" maxWidth="400" style="-fx-background-color: #2ecc71; -fx-background-radius: 10; -fx-padding: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);">
-                    <Label text="✔" textFill="white" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-                    <Label text="Thao tác thành công!" textFill="white" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                </HBox>
-                <HBox fx:id="toastError" visible="false" alignment="CENTER" spacing="10" maxWidth="450" style="-fx-background-color: #e74c3c; -fx-background-radius: 10; -fx-padding: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);">
-                    <Label text="✕" textFill="white" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-                    <Label fx:id="lblToastErrorMsg" text="Lỗi hệ thống!" textFill="white" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                </HBox>
-            </children>
-        </VBox>
-
         <!-- LỚP 3: POPUP XÁC NHẬN ĐẤU GIÁ THỦ CÔNG -->
         <VBox fx:id="paneConfirm" visible="false" alignment="CENTER" style="-fx-background-color: rgba(0,0,0,0.5);">
             <VBox alignment="CENTER" spacing="20" styleClass="card" style="-fx-max-width: 450; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 20, 0, 0, 10);">
@@ -248,6 +233,21 @@
                     <Button text="Hủy bỏ" onAction="#handleCloseAutoBid" prefWidth="130" styleClass="btn-danger" style="-fx-font-size: 15px; -fx-padding: 10; -fx-background-radius: 25;"/>
                 </HBox>
             </VBox>
+        </VBox>
+
+        <!-- LỚP 2: THÔNG BÁO TOAST -->
+        <VBox alignment="TOP_CENTER" mouseTransparent="true">
+            <padding><Insets top="15"/></padding>
+            <children>
+                <HBox fx:id="toastSuccess" visible="false" alignment="CENTER" spacing="10" maxWidth="400" style="-fx-background-color: #2ecc71; -fx-background-radius: 10; -fx-padding: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);">
+                    <Label text="✔" textFill="white" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                    <Label text="Thao tác thành công!" textFill="white" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                </HBox>
+                <HBox fx:id="toastError" visible="false" alignment="CENTER" spacing="10" maxWidth="650" style="-fx-background-color: #e74c3c; -fx-background-radius: 10; -fx-padding: 12 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);">
+                    <Label text="✕" textFill="white" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                    <Label fx:id="lblToastErrorMsg" text="Lỗi hệ thống!" wrapText="true" textAlignment="CENTER" textFill="white" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                </HBox>
+            </children>
         </VBox>
 
     </children>
