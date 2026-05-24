@@ -181,4 +181,28 @@ public class NotificationService {
         log.debug("Đã lưu thành công thông báo ID: {}", savedNotification.getId());
         return savedNotification;
     }
+
+    // 6. Xóa hết toàn bộ thông báo
+    @Transactional
+    public String deleteAllNotifications(String userName) {
+        log.info("Thực hiện xóa tất cả thông báo cho user: {}", userName);
+        List<Notification> allNotifs = notificationRepository.findByUserUserNameOrderByCreatedAtDesc(userName);
+
+        List<Notification> toDelete = new ArrayList<>();
+        for (Notification notif : allNotifs) {
+            // Chỉ xóa các thông báo KHÔNG PHẢI là yêu cầu thanh toán hoặc kết bạn
+            if (notif.getType() != NotificationType.PAYMENT_VERIFICATION &&
+                    notif.getType() != NotificationType.FRIEND_REQUEST) {
+                toDelete.add(notif);
+            }
+        }
+
+        if (toDelete.isEmpty()) {
+            return "No removable notifications found!";
+        }
+
+        notificationRepository.deleteAll(toDelete);
+        log.info("Đã xóa {} thông báo rác cho user: {}", toDelete.size(), userName);
+        return "Deleted " + toDelete.size() + " notifications successfully!";
+    }
 }

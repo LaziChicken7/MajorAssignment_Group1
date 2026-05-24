@@ -10,11 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
@@ -155,6 +151,34 @@ public class NotificationController {
         if (selectedNotification == null) return;
         ApiService.deleteAsync("/notifications/" + selectedNotification.notificationId)
                 .thenAccept(res -> handleResponse(res.statusCode(), "Đã xóa thông báo!"));
+    }
+
+    @FXML
+    private void handleDeleteAll() {
+        if (SessionManager.userName == null) return;
+
+        // Hiển thị hộp thoại xác nhận trước khi xóa
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Xác nhận xóa");
+        confirmAlert.setHeaderText(null);
+        confirmAlert.setContentText("Bạn có chắc chắn muốn xóa tất cả thông báo?\n(Các yêu cầu kết bạn và thanh toán sẽ được giữ lại)");
+        com.auction.util.AlertUtils.applyStyle(confirmAlert); // Apply CSS nếu có
+
+        // Chờ người dùng chọn OK hay Cancel
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                // Gọi API xóa tất cả
+                ApiService.deleteAsync("/notifications/all/" + SessionManager.userName)
+                        .thenAccept(res -> Platform.runLater(() -> {
+                            if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã dọn dẹp các thông báo cũ!");
+                                loadData(); // Tải lại danh sách sau khi xóa
+                            } else {
+                                showAlert(Alert.AlertType.ERROR, "Lỗi", "Thao tác thất bại! Mã lỗi: " + res.statusCode());
+                            }
+                        }));
+            }
+        });
     }
 
     private void handleResponse(int statusCode, String successMsg) {

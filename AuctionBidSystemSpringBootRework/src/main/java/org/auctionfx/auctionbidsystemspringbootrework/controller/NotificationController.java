@@ -50,4 +50,14 @@ public class NotificationController {
         apiResponse.setResult(notificationService.declineNotification(notificationId));
         return apiResponse;
     }
+
+    // Thêm vào trong NotificationController (Spring Boot)
+    // Nút Xóa tất cả thông báo
+    @DeleteMapping("/all/{userName}")
+    public ApiResponse<String> deleteAllNotifications(@PathVariable String userName) {
+        log.info("API Request: Xóa tất cả thông báo cho user [{}]", userName);
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(notificationService.deleteAllNotifications(userName));
+        return apiResponse;
+    }
 }
