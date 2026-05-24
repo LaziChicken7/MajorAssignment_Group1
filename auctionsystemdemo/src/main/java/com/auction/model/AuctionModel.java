@@ -21,6 +21,8 @@ public class AuctionModel {
 
     public List<BidTransactionModel> bidTransactions;
 
+    public double myHighestBid;
+
     // ---- ĐÂY LÀ CLASS CHỨA THÔNG TIN SẢN PHẨM ----
     public static class ItemModel {
         public String id;

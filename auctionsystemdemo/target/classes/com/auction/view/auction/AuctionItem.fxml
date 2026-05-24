@@ -3,8 +3,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.*?>
 
-<!-- ĐÃ THÊM: cache="true" và cacheHint="SPEED" để JavaFX vẽ khối này thành ảnh tĩnh (bitmap) -->
-<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.auction.AuctionItemController"
+<!-- ĐÃ THÊM fx:id="rootPane" ĐỂ JAVA CÓ THỂ ĐỔI MÀU NỀN -->
+<HBox fx:id="rootPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.auction.AuctionItemController"
       spacing="20" alignment="CENTER_LEFT"
       styleClass="custom-row, auction-row-card" style="-fx-padding: 20; -fx-cursor: hand;"
       cache="true" cacheHint="SPEED">
@@ -35,14 +35,21 @@
 
         <!-- Dòng 2: Giá và Thời gian -->
         <HBox alignment="CENTER_LEFT">
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Giá hiện tại:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
-                <!-- Màu nền xanh đậm cho Giá tiền -->
-                <Label fx:id="lblPrice" text="0 VND" style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;"/>
-            </HBox>
+
+            <!-- Nhóm Cột Giá (Để xếp chồng Giá Hiện Tại và Giá Bạn Đặt) -->
+            <VBox spacing="5" alignment="CENTER_LEFT">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Giá hiện tại:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
+                    <Label fx:id="lblPrice" text="0 VND" style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;"/>
+                </HBox>
+
+                <!-- ĐÃ THÊM: Dòng hiển thị giá mình đặt (Mặc định ẩn, Java sẽ bật nó lên nếu có bid) -->
+                <Label fx:id="lblMyBid" text="Bạn đã đặt: 0 VND" visible="false" managed="false" style="-fx-text-fill: #3498db; -fx-font-weight: bold; -fx-font-size: 13.5px;" />
+            </VBox>
 
             <Region HBox.hgrow="ALWAYS"/>
 
+            <!-- Cột Thời Gian -->
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Label fx:id="lblTimeTitle" text="Thời gian còn lại:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
                 <Label fx:id="lblTime" text="00:00:00" style="-fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: white;"/>

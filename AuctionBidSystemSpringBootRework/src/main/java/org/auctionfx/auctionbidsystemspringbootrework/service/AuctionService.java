@@ -520,8 +520,29 @@ public class AuctionService {
     }
 
     // Lấy danh sách tất cả các phiên đấu giá
-    public List<Auction> getAllAuctions() {
-        return auctionRepository.findAll();
+    public List<Auction> getAllAuctions(String username) {
+        List<Auction> auctions = auctionRepository.findAll();
+
+        // Nếu có tên người dùng gửi lên, ta lướt qua xem họ có đặt giá không
+        if (username != null && !username.trim().isEmpty()) {
+            for (Auction auction : auctions) {
+                BigDecimal myMax = BigDecimal.ZERO;
+
+                // Tránh lỗi NullPointer nếu phiên chưa có ai đấu giá
+                if (auction.getBidTransactions() != null) {
+                    for (BidTransaction tx : auction.getBidTransactions()) {
+                        if (tx.getBidder() != null && username.equals(tx.getBidder().getUserName())) {
+                            if (tx.getBidAmount().compareTo(myMax) > 0) {
+                                myMax = tx.getBidAmount();
+                            }
+                        }
+                    }
+                }
+                // Gắn con số vừa tìm được vào biến ảo để gửi về cho JavaFX
+                auction.setMyHighestBid(myMax);
+            }
+        }
+        return auctions;
     }
 
     // API Lấy dữ liệu biểu đồ giá theo thời gian thực

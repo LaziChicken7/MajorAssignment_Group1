@@ -2,16 +2,22 @@ package com.auction.controller.auction;
 
 import com.auction.model.AuctionModel;
 import com.auction.util.ApiService;
+import com.auction.util.SessionManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import java.time.LocalDateTime;
 
 public class AuctionItemController {
+
+    // THÊM 2 BIẾN NÀY ĐỂ ĐIỀU KHIỂN NỀN VÀ HIỂN THỊ GIÁ CỦA TÔI
+    @FXML private Pane rootPane;
+    @FXML private Label lblMyBid;
 
     @FXML private ImageView imgThumbnail;
     @FXML private Label lblId, lblName, lblPrice, lblTime, lblTimeTitle;
@@ -23,11 +29,10 @@ public class AuctionItemController {
         imgThumbnail.setFitWidth(120);
         imgThumbnail.setFitHeight(120);
         imgThumbnail.setPreserveRatio(true);
+
         // ==========================================
         // BƯỚC 1: XÓA DỮ LIỆU CŨ VÀ DỪNG TIMELINE
-        // (Bắt buộc phải có để ListView không bị loạn data)
         // ==========================================
-//        imgThumbnail.setImage(null);
         lblId.setText("");
         lblName.setText("");
         lblPrice.setText("");
@@ -36,6 +41,18 @@ public class AuctionItemController {
         lblStatus.setStyle("");
         lblTime.setStyle("");
         if (lblTimeTitle != null) lblTimeTitle.setText("");
+
+        // Reset lại hiển thị Giá Của Tôi
+        if (lblMyBid != null) {
+            lblMyBid.setText("");
+            lblMyBid.setVisible(false);
+            lblMyBid.setManaged(false);
+        }
+
+        // Xóa Class màu xanh đi (tránh bị kẹt màu cho item khác)
+        if (rootPane != null) {
+            rootPane.getStyleClass().remove("item-bidding-active");
+        }
 
         if (this.timeline != null) {
             this.timeline.stop();
@@ -55,8 +72,26 @@ public class AuctionItemController {
         lblPrice.setText(String.format("%,.0f VND", item.highestBid).replace(",", "."));
 
         // ==========================================
-        // BƯỚC 3: DÙNG LẠI HÀM IMAGE CACHE CỦA BẠN
+        // BƯỚC MỚI: ĐỌC "MỨC GIÁ TÔI ĐANG ĐẶT" TỪ SERVER GỬI VỀ
         // ==========================================
+        double myHighestBid = item.myHighestBid; // Đọc thẳng luôn, không cần vòng lặp nữa!
+
+        // NẾU TÔI CÓ THAM GIA ĐẤU GIÁ SẢN PHẨM NÀY
+        if (myHighestBid > 0) {
+            // Hiển thị Label
+            if (lblMyBid != null) {
+                lblMyBid.setText("Bạn đã đặt: " + String.format("%,.0f VND", myHighestBid).replace(",", "."));
+                lblMyBid.setVisible(true);
+                lblMyBid.setManaged(true);
+            }
+            // Bật nền màu xanh
+            if (rootPane != null) {
+                rootPane.getStyleClass().add("item-bidding-active");
+            }
+        }
+        // ==========================================
+
+        // BƯỚC 3: XỬ LÝ ẢNH BẰNG CACHE
         imgThumbnail.setCache(true);
         imgThumbnail.setCacheHint(javafx.scene.CacheHint.SPEED);
 
@@ -71,8 +106,6 @@ public class AuctionItemController {
                 imagePath = "/" + imagePath;
             }
             String fullUrl = ApiService.BASE_URL + imagePath + "?w=130&h=130";
-
-            // SỬ DỤNG CLASS IMAGE_CACHE_UTILS CỦA BẠN TẠI ĐÂY
             com.auction.util.ImageCacheUtils.loadImage(imgThumbnail, fullUrl, 130, 130, "https://via.placeholder.com/120?text=Loading...");
         } else {
             imgThumbnail.setImage(new javafx.scene.image.Image("https://via.placeholder.com/120?text=No+Image", 130, 130, true, true, true));
@@ -98,7 +131,7 @@ public class AuctionItemController {
             else lblTimeTitle.setText("Thời gian:");
         }
 
-        // BƯỚC 5: Tạo Timeline mới đếm ngược
+        // BƯỚC 5: Tạo Timeline đếm ngược
         if (("RUNNING".equals(item.status) && item.endTime != null) || ("OPEN".equals(item.status) && item.startTime != null)) {
             try {
                 String targetTimeStr = "OPEN".equals(item.status) ? item.startTime : item.endTime;

@@ -1603,6 +1603,91 @@
 .dark-theme .chat-waiting-icon {
     -fx-fill: #2C2C2E !important;
 }
+
+/* ========================================= */
+/* Nút 3 chấm hiển thị khi Hover */
+/* ========================================= */
+.btn-chat-options {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-cursor: hand;
+    -fx-padding: 5 8;
+}
+.btn-chat-options:hover {
+    -fx-background-color: rgba(149, 165, 166, 0.2);
+}
+
+/* ========================================= */
+/* BASE: SETUP CHUNG CHO CẢ LIGHT VÀ DARK (Sửa lỗi mất góc) */
+/* ========================================= */
+.light-context-menu, .dark-context-menu {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 5px; /* Tạo viền bao quanh các nút */
+}
+.light-context-menu .menu-item, .dark-context-menu .menu-item {
+    -fx-padding: 8px 15px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+/* ========================================= */
+/* GIAO DIỆN SÁNG (LIGHT MODE) */
+/* ========================================= */
+.light-context-menu {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 5);
+}
+.light-context-menu .menu-item:hover, .light-context-menu .menu-item:focused {
+    -fx-background-color: #f1f5f9;
+}
+.light-context-menu .menu-item .label {
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.light-context-menu .menu-item-delete .label {
+    -fx-text-fill: #e74c3c;
+}
+
+/* ========================================= */
+/* GIAO DIỆN TỐI (DARK MODE) */
+/* ========================================= */
+.dark-context-menu {
+    -fx-background-color: #2C2C2E;
+    -fx-border-color: #3f3f46;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 15, 0, 0, 5);
+}
+.dark-context-menu .menu-item:hover, .dark-context-menu .menu-item:focused {
+    -fx-background-color: #3f3f46;
+}
+.dark-context-menu .menu-item .label {
+    -fx-text-fill: #E4E4E7;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.dark-context-menu .menu-item-delete .label {
+    -fx-text-fill: #ff7675;
+}
+
+/* ========================================= */
+/* MỐC THỜI GIAN */
+/* ========================================= */
+.chat-hover-time {
+    -fx-background-color: rgba(149, 165, 166, 0.2);
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3px 8px;
+    -fx-background-radius: 10px;
+}
+.chat-time-separator {
+    -fx-text-fill: #95a5a6;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
 /* =======================================================
    31. STYLE CHO BẢNG ADMIN & CÁC NÚT HÀNH ĐỘNG
    ======================================================= */
@@ -2345,4 +2430,33 @@
     -fx-text-fill: #ffffff;
     -fx-prompt-text-fill: #888888;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 4); /* Bóng đổ đậm hơn */
+}
+
+/* ================================================= */
+/* 47. HIỆU ỨNG CHO SẢN PHẨM MÌNH ĐANG THAM GIA ĐẤU GIÁ  */
+/* ================================================= */
+.item-bidding-active {
+    -fx-background-color: #ebf5ff; /* Nền xanh dương cực nhạt */
+    -fx-border-color: #3498db;     /* Viền xanh dương đậm */
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-transition: all 0.2s ease;
+}
+
+/* Khi lia chuột (Hover) vào sản phẩm mình đang bid */
+.item-bidding-active:hover {
+    -fx-background-color: #dbeafe;
+    -fx-effect: dropshadow(three-pass-box, rgba(52,152,219,0.4), 10, 0, 0, 4); /* Bóng tỏa màu xanh */
+    -fx-cursor: hand;
+}
+
+/* Dành cho Dark Mode (nếu bạn có dùng) */
+.dark-theme .item-bidding-active {
+    -fx-background-color: rgba(52, 152, 219, 0.15);
+    -fx-border-color: #2980b9;
+}
+.dark-theme .item-bidding-active:hover {
+    -fx-background-color: rgba(52, 152, 219, 0.25);
+    -fx-effect: dropshadow(three-pass-box, rgba(41,128,185,0.6), 10, 0, 0, 4);
 }

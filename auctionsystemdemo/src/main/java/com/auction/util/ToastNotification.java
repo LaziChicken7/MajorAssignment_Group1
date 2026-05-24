@@ -31,13 +31,31 @@ public class ToastNotification {
     private static final List<Popup> activeToasts = new ArrayList<>();
     private static final double TOAST_SPACING = 15.0;
 
-    // Hàm gọi Mặc định (Sẽ dùng Icon Chuông) - KHÔNG LÀM LỖI CODE CŨ
+    // =======================================================
+    // 1. Hàm mặc định (Giữ nguyên cho các code cũ không bị lỗi)
+    // =======================================================
     public static void show(String title, String message) {
-        show(title, message, ToastType.NOTIFICATION);
+        show(title, message, ToastType.NOTIFICATION, null);
     }
 
-    // Hàm gọi Nâng cao (Cho phép chọn loại Icon)
+    // =======================================================
+    // 2. Hàm có đổi Icon (Ví dụ: truyền vào ToastType.CHAT)
+    // =======================================================
     public static void show(String title, String message, ToastType type) {
+        show(title, message, type, null);
+    }
+
+    // =======================================================
+    // 3. Hàm có Click chuột (Mặc định icon Chuông)
+    // =======================================================
+    public static void show(String title, String message, Runnable onClickAction) {
+        show(title, message, ToastType.NOTIFICATION, onClickAction);
+    }
+
+    // =======================================================
+    // 4. HÀM CHÍNH (Xử lý toàn bộ logic)
+    // =======================================================
+    public static void show(String title, String message, ToastType type, Runnable onClickAction) {
         Platform.runLater(() -> {
 
             Window mainWindow = Window.getWindows().stream()
@@ -63,19 +81,28 @@ public class ToastNotification {
             String bgColor = isDark ? "#1E1E1E" : "#FFFFFF";
             String borderColor = isDark ? "#2C2C2E" : "#ecf0f1";
 
-            root.setStyle("-fx-padding: 15; -fx-min-width: 320; -fx-max-width: 320; " +
+            String rootStyle = "-fx-padding: 15; -fx-min-width: 320; -fx-max-width: 320; " +
                     "-fx-background-color: " + bgColor + "; " +
                     "-fx-background-radius: 10; -fx-border-radius: 10; " +
                     "-fx-border-color: " + borderColor + "; -fx-border-width: 1px; " +
-                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 5);");
+                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 5);";
+
+            // BẮT SỰ KIỆN CLICK CHUỘT VÀO THÔNG BÁO
+            if (onClickAction != null) {
+                rootStyle += " -fx-cursor: hand;";
+                root.setOnMouseClicked(e -> {
+                    onClickAction.run(); // Chạy lệnh được truyền vào
+                    removeToast(popup, root); // Ẩn Toast đi ngay lập tức cho mượt
+                });
+            }
+
+            root.setStyle(rootStyle);
 
             // --- HEADER ---
             HBox header = new HBox();
             header.setAlignment(Pos.CENTER_LEFT);
 
-            // ==========================================
             // LOGIC CHỌN ICON DỰA TRÊN TOAST TYPE
-            // ==========================================
             SVGPath icon = new SVGPath();
             if (type == ToastType.CHAT) {
                 // ICON BONG BÓNG CHAT
@@ -114,7 +141,10 @@ public class ToastNotification {
                 closeIcon.setFill(Color.web(finalIsDark ? "#A1A1AA" : "#95a5a6"));
             });
 
-            btnClose.setOnAction(e -> removeToast(popup, root));
+            btnClose.setOnAction(e -> {
+                e.consume(); // CHẶN LỖI: Bấm nút X thì không bị nhận nhầm là click vào màn hình Toast
+                removeToast(popup, root);
+            });
 
             header.getChildren().addAll(icon, lblTitle, spacer, btnClose);
 

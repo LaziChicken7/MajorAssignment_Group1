@@ -172,7 +172,12 @@ public class AuctionController {
 
                 // 2. Load danh sách đấu giá ở luồng ngầm
                 try {
-                    var res = ApiService.getAsync("/auctions").join(); // Dùng .join() để chờ data tải xong ngay trong luồng ngầm
+                    // Nếu đã đăng nhập, gửi kèm tên user lên để Server tính sẵn mức giá bạn đang tham gia.
+                    String url = "/auctions";
+                    if (SessionManager.userName != null && !SessionManager.userName.isEmpty()) {
+                        url += "?username=" + SessionManager.userName;
+                    }
+                    var res = ApiService.getAsync(url).join(); // Dùng .join() để chờ data tải xong ngay trong luồng ngầm
                     if (res.statusCode() == 200) {
                         ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                         if (apiRes.code == 1000) {

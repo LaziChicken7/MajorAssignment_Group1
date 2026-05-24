@@ -8,8 +8,11 @@ import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import com.auction.util.WebSocketClientService;
 import com.google.gson.reflect.TypeToken;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -24,7 +27,11 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Popup;
+import javafx.util.Duration;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +50,6 @@ public class ChatController {
     @FXML private Button btnAttachment;
     @FXML private Button btnInfo;
 
-    // ... Các biến cũ giữ nguyên
     @FXML private VBox paneFriendList, paneChatInfo, paneMainChat;
     @FXML private SVGPath iconOnlineStatus;
     @FXML private Label lblOnlineStatus;
@@ -51,18 +57,21 @@ public class ChatController {
     @FXML private ImageView imgInfoAvatar;
     @FXML private Label lblInfoName, lblInfoRole;
 
-    private boolean isInfoPanelOpen = false; // Biến theo dõi trạng thái cột Info// Khai báo nút Info
+    private boolean isInfoPanelOpen = false;
 
     private List<ConnectionModel> allFriendsList = new ArrayList<>();
     private WebSocketClientService webSocketService;
     private String currentChatPartner = null;
     private Popup attachmentMenuPopup;
 
-    // =======================================================
-    // TÍNH NĂNG MỚI: THEO DÕI GHIM VÀ CHƯA ĐỌC
-    // =======================================================
+    public static String targetUsernameToOpen = null;
     private Set<String> pinnedUsers = new HashSet<>();
-    private Set<String> unreadUsers = new HashSet<>();
+    private Timeline onlineStatusTimeline;
+
+    // =======================================================
+    // BIẾN LƯU THỜI GIAN CỦA TIN NHẮN CUỐI CÙNG TRÊN MÀN HÌNH
+    // =======================================================
+    private LocalDateTime lastMessageTime = null;
 
     @FXML
     public void initialize() {
@@ -74,6 +83,7 @@ public class ChatController {
             if (newScene == null) {
                 GlobalWebSocketManager.currentActiveChatPartner = null;
                 GlobalWebSocketManager.setActiveChatListener(null);
+                if (onlineStatusTimeline != null) onlineStatusTimeline.stop();
             }
         });
     }
@@ -83,6 +93,8 @@ public class ChatController {
         try {
             GlobalWebSocketManager.currentActiveChatPartner = null;
             GlobalWebSocketManager.setActiveChatListener(null);
+            if (onlineStatusTimeline != null) onlineStatusTimeline.stop();
+
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/auction/view/home/Home.fxml"));
             javafx.scene.Node view = loader.load();
             javafx.scene.Node source = (javafx.scene.Node) event.getSource();
@@ -95,57 +107,43 @@ public class ChatController {
 
     private void handleIncomingMessageUI(ChatMessageModel msg) {
         if (msg == null) return;
-        processNewMessageState(msg);
+        Platform.runLater(() -> processNewMessageState(msg));
     }
 
-    private void handleIncomingMessage(String jsonPayload) {
-        Platform.runLater(() -> {
-            try {
-                String cleanJson = jsonPayload.trim();
-                ChatMessageModel msg = null;
-
-                if (cleanJson.startsWith("[")) {
-                    java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<ChatMessageModel>>(){}.getType();
-                    java.util.List<ChatMessageModel> list = ApiService.gson.fromJson(cleanJson, listType);
-                    if (list != null && !list.isEmpty()) msg = list.get(0);
-                } else {
-                    msg = ApiService.gson.fromJson(cleanJson, ChatMessageModel.class);
-                }
-
-                if (msg != null) processNewMessageState(msg);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    // =======================================================
-    // XỬ LÝ TIN NHẮN ĐẾN: ĐẨY LÊN ĐẦU & ĐÁNH DẤU CHƯA ĐỌC
-    // =======================================================
     private void processNewMessageState(ChatMessageModel msg) {
         String senderName = msg.sender.userName;
+
         boolean isRelevantChat =
-                (senderName.equals(SessionManager.userName) && msg.receiver.userName.equals(currentChatPartner)) ||
-                        (senderName.equals(currentChatPartner) && msg.receiver.userName.equals(SessionManager.userName));
+                (senderName.equalsIgnoreCase(SessionManager.userName) && msg.receiver.userName.equalsIgnoreCase(currentChatPartner)) ||
+                        (senderName.equalsIgnoreCase(currentChatPartner) && msg.receiver.userName.equalsIgnoreCase(SessionManager.userName));
 
         if (isRelevantChat) {
-            // Nếu đang mở đoạn chat đó -> In ra luôn
-            boolean isMe = senderName.equals(SessionManager.userName);
-            vboxMessages.getChildren().add(createChatBubble(msg.content, isMe));
+            // Lấy thời gian của tin nhắn mới
+            LocalDateTime msgTime = parseTime(msg.sendTime);
+
+            // Nếu cách tin trước đó quá 30 phút -> Chèn dải thời gian ở giữa
+            if (lastMessageTime == null || ChronoUnit.MINUTES.between(lastMessageTime, msgTime) > 30) {
+                vboxMessages.getChildren().add(createTimeSeparator(msgTime));
+            }
+
+            boolean isMe = senderName.equalsIgnoreCase(SessionManager.userName);
+            vboxMessages.getChildren().add(createChatBubble(msg.content, isMe, msgTime));
+
+            // Cập nhật lại mốc thời gian cuối
+            lastMessageTime = msgTime;
+
         } else {
-            // Nếu là tin nhắn từ người khác (mình không mở) -> Đánh dấu chấm đỏ chưa đọc
-            if (!senderName.equals(SessionManager.userName)) {
-                unreadUsers.add(senderName);
+            if (!senderName.equalsIgnoreCase(SessionManager.userName)) {
+                GlobalWebSocketManager.globalUnreadUsers.add(senderName.toLowerCase());
             }
         }
 
-        // Kéo người dùng có tin nhắn mới lên đầu danh sách gốc
-        String targetUser = senderName.equals(SessionManager.userName) ? msg.receiver.userName : senderName;
+        // Kéo người dùng lên đầu danh sách bạn bè
+        String targetUser = senderName.equalsIgnoreCase(SessionManager.userName) ? msg.receiver.userName : senderName;
         ConnectionModel targetConn = null;
         for (ConnectionModel conn : allFriendsList) {
-            ConnectionModel.UserModel friend = conn.sender.userName.equals(SessionManager.userName) ? conn.receiver : conn.sender;
-            if (friend.userName.equals(targetUser)) {
+            ConnectionModel.UserModel friend = conn.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn.receiver : conn.sender;
+            if (friend.userName.equalsIgnoreCase(targetUser)) {
                 targetConn = conn;
                 break;
             }
@@ -153,12 +151,112 @@ public class ChatController {
 
         if (targetConn != null) {
             allFriendsList.remove(targetConn);
-            allFriendsList.add(0, targetConn); // Cắm lên đầu List
-            // Nếu không đang dùng ô tìm kiếm, render lại UI ngay lập tức
-            if (txtSearchFriend.getText().trim().isEmpty()) {
+            allFriendsList.add(0, targetConn);
+            String searchKeyword = txtSearchFriend.getText();
+            if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
                 renderFriendsList(allFriendsList);
             }
         }
+    }
+
+    // =======================================================
+    // CÁC HÀM XỬ LÝ FORMAT THỜI GIAN
+    // =======================================================
+    private LocalDateTime parseTime(String timeString) {
+        if (timeString == null || timeString.isEmpty()) return LocalDateTime.now();
+        try {
+            return LocalDateTime.parse(timeString);
+        } catch (Exception e) {
+            return LocalDateTime.now();
+        }
+    }
+
+    private String formatSeparatorTime(LocalDateTime time) {
+        LocalDateTime now = LocalDateTime.now();
+        if (time.toLocalDate().equals(now.toLocalDate())) {
+            // Cùng ngày -> Chỉ hiện giờ (VD: 17:46)
+            return time.format(DateTimeFormatter.ofPattern("HH:mm"));
+        } else {
+            // Khác ngày -> Hiện Full (VD: 11 Thg 05 2026, 22:21)
+            return time.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm"));
+        }
+    }
+
+    private HBox createTimeSeparator(LocalDateTime time) {
+        HBox box = new HBox();
+        box.setAlignment(Pos.CENTER);
+        Label lblTime = new Label(formatSeparatorTime(time));
+        lblTime.getStyleClass().add("chat-time-separator");
+        box.getChildren().add(lblTime);
+        VBox.setMargin(box, new Insets(15, 0, 5, 0));
+        return box;
+    }
+
+    // =======================================================
+    // TẠO BONG BÓNG CHAT + CHỨC NĂNG HOVER HIỆN GIỜ
+    // =======================================================
+    private HBox createChatBubble(String text, boolean isMe, LocalDateTime time) {
+        HBox row = new HBox(8); // Khoảng cách giữa bong bóng và giờ
+
+        Label bubble = new Label(text);
+        bubble.setWrapText(true);
+        bubble.setMaxWidth(400);
+
+        // Nút thời gian hiện ra khi Hover
+        Label lblHoverTime = new Label(time.format(DateTimeFormatter.ofPattern("HH:mm")));
+        lblHoverTime.getStyleClass().add("chat-hover-time");
+        lblHoverTime.setVisible(false); // Mặc định ẩn
+
+        if (isMe) {
+            row.setAlignment(Pos.CENTER_RIGHT);
+            bubble.getStyleClass().add("chat-bubble-me");
+            // Mình nhắn thì Giờ nằm bên TRÁI bong bóng
+            row.getChildren().addAll(lblHoverTime, bubble);
+        } else {
+            row.setAlignment(Pos.CENTER_LEFT);
+            bubble.getStyleClass().add("chat-bubble-other");
+            // Người khác nhắn thì Giờ nằm bên PHẢI bong bóng
+            row.getChildren().addAll(bubble, lblHoverTime);
+        }
+
+        // Hiệu ứng Hover hiện giờ
+        row.setOnMouseEntered(e -> lblHoverTime.setVisible(true));
+        row.setOnMouseExited(e -> lblHoverTime.setVisible(false));
+
+        return row;
+    }
+
+    private void loadChatHistory() {
+        vboxMessages.getChildren().clear();
+        lastMessageTime = null; // Reset lại biến đếm thời gian khi mở chat mới
+
+        ApiService.getAsync("/chat/history?user1=" + SessionManager.userName + "&user2=" + currentChatPartner).thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() == 200) {
+                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        java.lang.reflect.Type listType = new TypeToken<List<ChatMessageModel>>(){}.getType();
+                        List<ChatMessageModel> history = ApiService.gson.fromJson(apiRes.result, listType);
+
+                        for (ChatMessageModel msg : history) {
+                            LocalDateTime msgTime = parseTime(msg.sendTime);
+                            boolean isMe = msg.sender.userName.equalsIgnoreCase(SessionManager.userName);
+
+                            // Nếu cách nhau > 30 phút thì chèn vạch thời gian
+                            if (lastMessageTime == null || ChronoUnit.MINUTES.between(lastMessageTime, msgTime) > 30) {
+                                vboxMessages.getChildren().add(createTimeSeparator(msgTime));
+                            }
+
+                            vboxMessages.getChildren().add(createChatBubble(msg.content, isMe, msgTime));
+                            lastMessageTime = msgTime; // Lưu lại để tính cho vòng lặp tiếp theo
+                        }
+
+                        // Tự động cuộn xuống cuối (Đôi khi lịch sử quá dài, scrollbar chưa kịp ăn)
+                        Platform.runLater(() -> scrollMessages.setVvalue(1.0));
+                    }
+                }
+            });
+        });
     }
 
     private void loadFriendsList() {
@@ -171,15 +269,25 @@ public class ChatController {
                         allFriendsList = ApiService.gson.fromJson(apiRes.result, listType);
                         renderFriendsList(allFriendsList);
                         setupSearchFeature();
+
+                        if (targetUsernameToOpen != null) {
+                            for (ConnectionModel conn : allFriendsList) {
+                                ConnectionModel.UserModel friend = conn.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn.receiver : conn.sender;
+                                if (friend.userName.equalsIgnoreCase(targetUsernameToOpen)) {
+                                    GlobalWebSocketManager.globalUnreadUsers.remove(friend.userName.toLowerCase());
+                                    renderFriendsList(allFriendsList);
+                                    openChatWith(friend);
+                                    break;
+                                }
+                            }
+                            targetUsernameToOpen = null;
+                        }
                     }
                 }
             });
         });
     }
 
-    // =======================================================
-    // RENDER BẠN BÈ: TỰ ĐỘNG SẮP XẾP GHIM & CHƯA ĐỌC LÊN TRÊN
-    // =======================================================
     private void renderFriendsList(List<ConnectionModel> listToRender) {
         vboxFriends.getChildren().clear();
         if (listToRender == null || listToRender.isEmpty()) {
@@ -189,25 +297,24 @@ public class ChatController {
             return;
         }
 
-        // Thuật toán sắp xếp trước khi vẽ (Ghim -> Chưa đọc -> Thứ tự tin nhắn mới nhất)
         List<ConnectionModel> sortedList = new ArrayList<>(listToRender);
         sortedList.sort((conn1, conn2) -> {
-            ConnectionModel.UserModel f1 = conn1.sender.userName.equals(SessionManager.userName) ? conn1.receiver : conn1.sender;
-            ConnectionModel.UserModel f2 = conn2.sender.userName.equals(SessionManager.userName) ? conn2.receiver : conn2.sender;
+            ConnectionModel.UserModel f1 = conn1.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn1.receiver : conn1.sender;
+            ConnectionModel.UserModel f2 = conn2.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn2.receiver : conn2.sender;
 
-            boolean p1 = pinnedUsers.contains(f1.userName);
-            boolean p2 = pinnedUsers.contains(f2.userName);
-            if (p1 != p2) return p1 ? -1 : 1; // Pinned ưu tiên cao nhất
+            boolean p1 = pinnedUsers.contains(f1.userName.toLowerCase());
+            boolean p2 = pinnedUsers.contains(f2.userName.toLowerCase());
+            if (p1 != p2) return p1 ? -1 : 1;
 
-            boolean u1 = unreadUsers.contains(f1.userName);
-            boolean u2 = unreadUsers.contains(f2.userName);
-            if (u1 != u2) return u1 ? -1 : 1; // Chưa đọc ưu tiên số 2
+            boolean u1 = GlobalWebSocketManager.globalUnreadUsers.contains(f1.userName.toLowerCase());
+            boolean u2 = GlobalWebSocketManager.globalUnreadUsers.contains(f2.userName.toLowerCase());
+            if (u1 != u2) return u1 ? -1 : 1;
 
-            return 0; // Giữ nguyên vị trí ban đầu (Tin nhắn mới nhất)
+            return 0;
         });
 
         for (ConnectionModel conn : sortedList) {
-            ConnectionModel.UserModel friend = conn.sender.userName.equals(SessionManager.userName) ? conn.receiver : conn.sender;
+            ConnectionModel.UserModel friend = conn.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn.receiver : conn.sender;
             vboxFriends.getChildren().add(createFriendItem(friend));
         }
     }
@@ -219,7 +326,7 @@ public class ChatController {
             } else {
                 String keyword = newValue.toLowerCase().trim();
                 List<ConnectionModel> filteredList = allFriendsList.stream().filter(conn -> {
-                    ConnectionModel.UserModel friend = conn.sender.userName.equals(SessionManager.userName) ? conn.receiver : conn.sender;
+                    ConnectionModel.UserModel friend = conn.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn.receiver : conn.sender;
                     String friendName = friend.fullName != null ? friend.fullName : friend.userName;
                     return friendName.toLowerCase().contains(keyword);
                 }).collect(Collectors.toList());
@@ -228,15 +335,12 @@ public class ChatController {
         });
     }
 
-    // =======================================================
-    // TẠO ITEM BẠN BÈ: CÓ MENU CHUỘT PHẢI ĐỂ GHIM, CHẤM ĐỎ CHƯA ĐỌC
-    // =======================================================
     private HBox createFriendItem(ConnectionModel.UserModel friend) {
         HBox item = new HBox(15);
         item.setAlignment(Pos.CENTER_LEFT);
         item.getStyleClass().add("friend-chat-item");
 
-        if (currentChatPartner != null && currentChatPartner.equals(friend.userName)) {
+        if (currentChatPartner != null && currentChatPartner.equalsIgnoreCase(friend.userName)) {
             item.getStyleClass().add("active-chat");
         }
 
@@ -247,47 +351,121 @@ public class ChatController {
 
         Label name = new Label(friend.fullName != null ? friend.fullName : friend.userName);
         name.getStyleClass().add("row-title-bold");
-        name.setStyle("-fx-font-weight: bold; -fx-font-size: 15px;");
 
-        // UI: Icon Ghim (Màu vàng)
+        boolean isPinned = pinnedUsers.contains(friend.userName.toLowerCase());
         SVGPath pinIcon = new SVGPath();
         pinIcon.setContent("M 16 12 V 4 h 1 V 2 H 7 v 2 h 1 v 8 l -2 2 v 2 h 5.2 v 6 h 1.6 v -6 H 18 v -2 l -2 -2 z");
         pinIcon.setFill(Color.web("#f39c12"));
         pinIcon.setScaleX(0.7); pinIcon.setScaleY(0.7);
-        pinIcon.setVisible(pinnedUsers.contains(friend.userName));
-        pinIcon.setManaged(pinnedUsers.contains(friend.userName));
+        pinIcon.setVisible(isPinned);
+        pinIcon.setManaged(isPinned);
 
-        // UI: Chấm đỏ chưa đọc
-        Circle unreadDot = new Circle(5, Color.web("#e74c3c"));
-        unreadDot.setVisible(unreadUsers.contains(friend.userName));
-        unreadDot.setManaged(unreadUsers.contains(friend.userName));
+        boolean isUnread = GlobalWebSocketManager.globalUnreadUsers.contains(friend.userName.toLowerCase());
+        Circle unreadDot = new Circle(5, Color.web("#0084ff"));
+        unreadDot.setVisible(isUnread);
+        unreadDot.setManaged(isUnread);
+
+        if (isUnread) {
+            name.setStyle("-fx-font-weight: 900; -fx-font-size: 15px; -fx-text-fill: #0084ff;");
+        } else {
+            name.setStyle("-fx-font-weight: bold; -fx-font-size: 15px;");
+        }
+
+        HBox nameContainer = new HBox(6);
+        nameContainer.setAlignment(Pos.CENTER_LEFT);
+        nameContainer.getChildren().addAll(name, unreadDot);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        item.getChildren().addAll(avt, name, spacer, pinIcon, unreadDot);
+        Button btnOptions = new Button();
+        btnOptions.getStyleClass().add("btn-chat-options");
+        SVGPath dotsIcon = new SVGPath();
+        dotsIcon.setContent("M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z");
+        dotsIcon.setFill(Color.web("#95a5a6"));
+        dotsIcon.setScaleX(0.9); dotsIcon.setScaleY(0.9);
+        btnOptions.setGraphic(dotsIcon);
 
-        // Chuột phải (ContextMenu) để Ghim/Bỏ ghim
+        btnOptions.setVisible(false);
+        btnOptions.setManaged(false);
+
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem pinItem = new MenuItem(pinnedUsers.contains(friend.userName) ? "Bỏ ghim hội thoại" : "📌 Ghim hội thoại");
+
+        MenuItem pinItem = new MenuItem(isPinned ? "📌 Bỏ ghim tin nhắn" : "📌 Ghim tin nhắn");
         pinItem.setOnAction(e -> {
-            if (pinnedUsers.contains(friend.userName)) {
-                pinnedUsers.remove(friend.userName);
-            } else {
-                pinnedUsers.add(friend.userName);
-            }
-            renderFriendsList(allFriendsList); // Sắp xếp lại ngay
+            if (isPinned) pinnedUsers.remove(friend.userName.toLowerCase());
+            else pinnedUsers.add(friend.userName.toLowerCase());
+            renderFriendsList(allFriendsList);
         });
-        contextMenu.getItems().add(pinItem);
 
-        item.setOnContextMenuRequested(e -> contextMenu.show(item, e.getScreenX(), e.getScreenY()));
+        MenuItem muteItem = new MenuItem("🔕 Tắt thông báo");
+        muteItem.setOnAction(e -> com.auction.util.ToastNotification.show("Tính năng", "Tính năng Tắt thông báo đang được cập nhật!"));
 
-        // Chuột trái để Chat
+        MenuItem deleteChatItem = new MenuItem("🗑 Xóa tin nhắn");
+        deleteChatItem.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Bạn có chắc chắn muốn xóa toàn bộ tin nhắn với " + friend.fullName + " không?", ButtonType.YES, ButtonType.NO);
+            com.auction.util.AlertUtils.applyStyle(alert);
+            alert.showAndWait().ifPresent(res -> {
+                if (res == ButtonType.YES) {
+                    if (currentChatPartner != null && currentChatPartner.equalsIgnoreCase(friend.userName)) {
+                        vboxMessages.getChildren().clear();
+                        lastMessageTime = null;
+                    }
+                    com.auction.util.ToastNotification.show("Thành công", "Đã xóa lịch sử tin nhắn!");
+                }
+            });
+        });
+
+        MenuItem unfriendItem = new MenuItem("❌ Hủy kết bạn");
+        unfriendItem.getStyleClass().add("menu-item-delete");
+        unfriendItem.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Bạn có chắc chắn muốn hủy kết bạn với " + friend.fullName + "?", ButtonType.YES, ButtonType.NO);
+            com.auction.util.AlertUtils.applyStyle(alert);
+            alert.showAndWait().ifPresent(res -> {
+                if (res == ButtonType.YES) executeUnfriend(friend.userName);
+            });
+        });
+
+        contextMenu.getItems().addAll(pinItem, muteItem, deleteChatItem, new SeparatorMenuItem(), unfriendItem);
+
+        item.setOnMouseEntered(e -> {
+            btnOptions.setVisible(true);
+            btnOptions.setManaged(true);
+        });
+
+        item.setOnMouseExited(e -> {
+            if (!contextMenu.isShowing()) {
+                btnOptions.setVisible(false);
+                btnOptions.setManaged(false);
+            }
+        });
+
+        contextMenu.setOnHidden(e -> {
+            if (!item.isHover()) {
+                btnOptions.setVisible(false);
+                btnOptions.setManaged(false);
+            }
+        });
+
+        btnOptions.setOnAction(e -> {
+            e.consume();
+            contextMenu.getStyleClass().removeAll("dark-context-menu", "light-context-menu");
+            if (SessionManager.isDarkMode) {
+                contextMenu.getStyleClass().add("dark-context-menu");
+            } else {
+                contextMenu.getStyleClass().add("light-context-menu");
+            }
+            contextMenu.show(btnOptions, javafx.geometry.Side.BOTTOM, -130, 5);
+        });
+
+        btnOptions.setOnMouseClicked(javafx.scene.input.MouseEvent::consume);
+
+        item.getChildren().addAll(avt, nameContainer, spacer, pinIcon, btnOptions);
+
         item.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
-                // Xóa trạng thái chưa đọc
-                if (unreadUsers.contains(friend.userName)) {
-                    unreadUsers.remove(friend.userName);
+                if (isUnread) {
+                    GlobalWebSocketManager.globalUnreadUsers.remove(friend.userName.toLowerCase());
                     renderFriendsList(allFriendsList);
                 } else {
                     for (javafx.scene.Node node : vboxFriends.getChildren()) {
@@ -317,40 +495,59 @@ public class ChatController {
         paneInput.setVisible(true); paneInput.setManaged(true);
 
         loadChatHistory();
+        startOnlineStatusChecker(friend.userName);
 
-        // KIỂM TRA TRẠNG THÁI ONLINE
-        checkOnlineStatus(friend.userName);
-
-        // NẾU CỘT THÔNG TIN BÊN PHẢI ĐANG MỞ, THÌ LOAD LẠI DATA LUÔN
         if (isInfoPanelOpen) {
             updateInfoPanelData(friend);
         }
     }
 
-    // =======================================================
-    // TÍNH NĂNG MỚI: HIỂN THỊ THÔNG TIN KHI BẤM NÚT CHỮ "i"
-    // =======================================================
+    private void startOnlineStatusChecker(String username) {
+        if (onlineStatusTimeline != null) {
+            onlineStatusTimeline.stop();
+        }
+
+        setOnlineStatusUI(false);
+        fetchOnlineStatus(username);
+
+        onlineStatusTimeline = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+            if (currentChatPartner != null && currentChatPartner.equalsIgnoreCase(username)) {
+                fetchOnlineStatus(username);
+            }
+        }));
+
+        onlineStatusTimeline.setCycleCount(Timeline.INDEFINITE);
+        onlineStatusTimeline.play();
+    }
+
+    private void fetchOnlineStatus(String username) {
+        ApiService.getAsync("/users/" + username + "/status").thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() == 200) {
+                    boolean isOnline = res.body().contains("true") || res.body().toUpperCase().contains("ONLINE");
+                    setOnlineStatusUI(isOnline);
+                }
+            });
+        }).exceptionally(ex -> {
+            return null;
+        });
+    }
+
     @FXML
     private void showChatInfo() {
         if (currentChatPartner == null) return;
 
-        // Đảo ngược trạng thái
         isInfoPanelOpen = !isInfoPanelOpen;
-
-        // Nếu mở Info -> Tắt List bạn bè đi, Hiện Info lên
         paneFriendList.setVisible(!isInfoPanelOpen);
         paneFriendList.setManaged(!isInfoPanelOpen);
-
         paneChatInfo.setVisible(isInfoPanelOpen);
         paneChatInfo.setManaged(isInfoPanelOpen);
 
-        // Đổ dữ liệu vào bảng Info nếu nó đang mở
         if (isInfoPanelOpen) {
-            // Tìm thông tin người đang chat
             ConnectionModel.UserModel partner = null;
             for (ConnectionModel conn : allFriendsList) {
-                ConnectionModel.UserModel friend = conn.sender.userName.equals(SessionManager.userName) ? conn.receiver : conn.sender;
-                if (friend.userName.equals(currentChatPartner)) {
+                ConnectionModel.UserModel friend = conn.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn.receiver : conn.sender;
+                if (friend.userName.equalsIgnoreCase(currentChatPartner)) {
                     partner = friend;
                     break;
                 }
@@ -359,71 +556,83 @@ public class ChatController {
         }
     }
 
+    @FXML
+    private void closeChatInfo() {
+        isInfoPanelOpen = false;
+        paneChatInfo.setVisible(false);
+        paneChatInfo.setManaged(false);
+        paneFriendList.setVisible(true);
+        paneFriendList.setManaged(true);
+    }
+
+    @FXML
+    private void handleViewProfile() {
+        com.auction.util.ToastNotification.show("Tính năng", "Tính năng xem trang cá nhân đang được cập nhật!");
+    }
+
+    @FXML
+    private void handleUnfriend() {
+        if (currentChatPartner == null) return;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Hủy kết bạn với người này?", ButtonType.YES, ButtonType.NO);
+        com.auction.util.AlertUtils.applyStyle(alert);
+        alert.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.YES) executeUnfriend(currentChatPartner);
+        });
+    }
+
+    private void executeUnfriend(String targetUsername) {
+        String url = "/chat/decline-request?sender=" + SessionManager.userName + "&receiver=" + targetUsername;
+        ApiService.deleteAsync(url).thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                    com.auction.util.ToastNotification.show("Thành công", "Đã xóa bạn bè!", com.auction.util.ToastNotification.ToastType.NOTIFICATION);
+                    if (currentChatPartner != null && currentChatPartner.equalsIgnoreCase(targetUsername)) {
+                        paneWaiting.setVisible(true); paneWaiting.setManaged(true);
+                        chatHeader.setVisible(false); chatHeader.setManaged(false);
+                        scrollMessages.setVisible(false); scrollMessages.setManaged(false);
+                        paneInput.setVisible(false); paneInput.setManaged(false);
+                        currentChatPartner = null;
+                        closeChatInfo();
+                    }
+                    loadFriendsList();
+                } else {
+                    com.auction.util.ToastNotification.show("Lỗi", "Không thể xóa bạn bè lúc này!");
+                }
+            });
+        });
+    }
+
     private void updateInfoPanelData(ConnectionModel.UserModel partner) {
         lblInfoName.setText(partner.fullName != null ? partner.fullName : partner.userName);
         imgInfoAvatar.setImage(new Image(ApiService.BASE_URL + partner.avatarUrl, true));
 
-        // Bo tròn Avatar bên cột Info
         Rectangle clip = new Rectangle(100, 100);
         clip.setArcWidth(100); clip.setArcHeight(100);
         imgInfoAvatar.setClip(clip);
 
         lblInfoRole.setText("Đang tải...");
 
-        // Gọi API lấy Role chính xác (Giống cách cũ, nhưng đổ chữ vào Label thay vì hiện Alert)
-        ApiService.getAsync("/users/" + partner.userName).thenAccept(res -> {
+        ApiService.getAsync("/users/profile/" + partner.userName).thenAccept(res -> {
             Platform.runLater(() -> {
-                String roleDisplay = "Thành viên (User)";
+                String roleDisplay = "Thành viên (Bidder)";
                 if (res.statusCode() >= 200 && res.statusCode() < 300) {
                     try {
                         ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                         if (apiRes.code == 1000) {
                             com.auction.model.UserModel fullUser = ApiService.gson.fromJson(apiRes.result, com.auction.model.UserModel.class);
-                            if ("SELLER".equals(fullUser.role)) roleDisplay = "Người bán (Seller)";
-                            else if ("ADMIN".equals(fullUser.role)) roleDisplay = "Quản trị viên (Admin)";
+                            if ("SELLER".equals(fullUser.role)) {
+                                roleDisplay = "Người bán (Seller)";
+                            } else if ("ADMIN".equals(fullUser.role)) {
+                                roleDisplay = "Quản trị viên (Admin)";
+                            }
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception e) {
+                        System.err.println("Lỗi đọc JSON Role: " + e.getMessage());
+                    }
                 }
                 lblInfoRole.setText(roleDisplay);
             });
         });
-    }
-
-    private void loadChatHistory() {
-        vboxMessages.getChildren().clear();
-        ApiService.getAsync("/chat/history?user1=" + SessionManager.userName + "&user2=" + currentChatPartner).thenAccept(res -> {
-            Platform.runLater(() -> {
-                if (res.statusCode() == 200) {
-                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
-                    if (apiRes.code == 1000) {
-                        java.lang.reflect.Type listType = new TypeToken<List<ChatMessageModel>>(){}.getType();
-                        List<ChatMessageModel> history = ApiService.gson.fromJson(apiRes.result, listType);
-
-                        for (ChatMessageModel msg : history) {
-                            boolean isMe = msg.sender.userName.equals(SessionManager.userName);
-                            vboxMessages.getChildren().add(createChatBubble(msg.content, isMe));
-                        }
-                    }
-                }
-            });
-        });
-    }
-
-    private HBox createChatBubble(String text, boolean isMe) {
-        HBox row = new HBox();
-        Label bubble = new Label(text);
-        bubble.setWrapText(true);
-        bubble.setMaxWidth(400);
-
-        if (isMe) {
-            row.setAlignment(Pos.CENTER_RIGHT);
-            bubble.getStyleClass().add("chat-bubble-me");
-        } else {
-            row.setAlignment(Pos.CENTER_LEFT);
-            bubble.getStyleClass().add("chat-bubble-other");
-        }
-        row.getChildren().add(bubble);
-        return row;
     }
 
     @FXML
@@ -432,11 +641,10 @@ public class ChatController {
         if (text.isEmpty() || currentChatPartner == null) return;
         GlobalWebSocketManager.sendMessage(SessionManager.userName, currentChatPartner, text);
 
-        // Đẩy chính mình lên đầu khi mình vừa gửi tin
         ConnectionModel targetConn = null;
         for (ConnectionModel conn : allFriendsList) {
-            ConnectionModel.UserModel friend = conn.sender.userName.equals(SessionManager.userName) ? conn.receiver : conn.sender;
-            if (friend.userName.equals(currentChatPartner)) {
+            ConnectionModel.UserModel friend = conn.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn.receiver : conn.sender;
+            if (friend.userName.equalsIgnoreCase(currentChatPartner)) {
                 targetConn = conn;
                 break;
             }
@@ -444,7 +652,11 @@ public class ChatController {
         if (targetConn != null) {
             allFriendsList.remove(targetConn);
             allFriendsList.add(0, targetConn);
-            if (txtSearchFriend.getText().trim().isEmpty()) renderFriendsList(allFriendsList);
+
+            String searchKeyword = txtSearchFriend.getText();
+            if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
+                renderFriendsList(allFriendsList);
+            }
         }
 
         txtMessage.clear();
@@ -456,15 +668,12 @@ public class ChatController {
             attachmentMenuPopup = new Popup();
             attachmentMenuPopup.setAutoHide(true);
 
-            VBox menuBox = new VBox();
-            menuBox.getStyleClass().add("card");
-            menuBox.setStyle("-fx-padding: 5; -fx-background-radius: 8; -fx-border-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 3);");
+            VBox attachmentMenuBox = new VBox();
+            attachmentMenuBox.getStyleClass().add("card");
+            attachmentMenuBox.setStyle("-fx-padding: 5; -fx-background-radius: 8; -fx-border-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 3);");
 
             if (btnAttachment.getScene() != null) {
-                menuBox.getStylesheets().addAll(btnAttachment.getScene().getStylesheets());
-                if (btnAttachment.getScene().getRoot().getStyleClass().contains("dark-theme")) {
-                    menuBox.getStyleClass().add("dark-theme");
-                }
+                attachmentMenuBox.getStylesheets().addAll(btnAttachment.getScene().getStylesheets());
             }
 
             String imgSvg = "M 21 19 V 5 c 0 -1.1 -.9 -2 -2 -2 H 5 c -1.1 0 -2 .9 -2 2 v 14 c 0 1.1 .9 2 2 2 h 14 c 1.1 0 2 -.9 2 -2 z M 8.5 13.5 l 2.5 3.01 L 14.5 12 l 4.5 6 H 5 l 3.5 -4.5 z";
@@ -473,8 +682,14 @@ public class ChatController {
             HBox btnImage = createPopupMenuItem("Thêm ảnh", imgSvg, () -> attachmentMenuPopup.hide());
             HBox btnFile = createPopupMenuItem("Thêm đính kèm", clipSvg, () -> attachmentMenuPopup.hide());
 
-            menuBox.getChildren().addAll(btnImage, btnFile);
-            attachmentMenuPopup.getContent().add(menuBox);
+            attachmentMenuBox.getChildren().addAll(btnImage, btnFile);
+            attachmentMenuPopup.getContent().add(attachmentMenuBox);
+        }
+
+        VBox box = (VBox) attachmentMenuPopup.getContent().get(0);
+        box.getStyleClass().remove("dark-theme");
+        if (SessionManager.isDarkMode) {
+            box.getStyleClass().add("dark-theme");
         }
 
         javafx.geometry.Bounds bounds = btnAttachment.localToScreen(btnAttachment.getBoundsInLocal());
@@ -503,6 +718,8 @@ public class ChatController {
         try {
             GlobalWebSocketManager.currentActiveChatPartner = null;
             GlobalWebSocketManager.setActiveChatListener(null);
+            if (onlineStatusTimeline != null) onlineStatusTimeline.stop();
+
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/auction/view/chat/FriendList.fxml"));
             javafx.scene.Node view = loader.load();
             javafx.scene.Node source = (javafx.scene.Node) event.getSource();
@@ -513,30 +730,12 @@ public class ChatController {
         }
     }
 
-    private void checkOnlineStatus(String username) {
-        // Mặc định cho hiển thị Ngoại tuyến (Màu xám) trong lúc chờ Server
-        setOnlineStatusUI(false);
-
-        // Gọi API lên Server kiểm tra (Ví dụ đường dẫn API là /users/{username}/status)
-        ApiService.getAsync("/users/" + username + "/status").thenAccept(res -> {
-            Platform.runLater(() -> {
-                if (res.statusCode() == 200) {
-                    // Giả sử API trả về chuỗi "ONLINE" hoặc "true"
-                    boolean isOnline = res.body().contains("true") || res.body().toUpperCase().contains("ONLINE");
-                    setOnlineStatusUI(isOnline);
-                }
-            });
-        }).exceptionally(ex -> {
-            return null; // Im lặng nếu API chưa được làm ở Backend
-        });
-    }
-
     private void setOnlineStatusUI(boolean isOnline) {
         if (isOnline) {
-            iconOnlineStatus.setFill(Color.web("#2ecc71")); // Xanh lá mạ
+            iconOnlineStatus.setFill(Color.web("#2ecc71"));
             lblOnlineStatus.setText("Đang hoạt động");
         } else {
-            iconOnlineStatus.setFill(Color.web("#95a5a6")); // Màu Xám
+            iconOnlineStatus.setFill(Color.web("#95a5a6"));
             lblOnlineStatus.setText("Ngoại tuyến");
         }
     }

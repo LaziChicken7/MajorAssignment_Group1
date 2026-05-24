@@ -1,8 +1,10 @@
 package com.auction.controller.dashboard;
 
+import com.auction.controller.chat.ChatController;
 import com.auction.controller.notification.NotificationController;
 import com.auction.model.NotificationModel;
 import com.auction.util.ApiService;
+import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import javafx.animation.*;
 import javafx.application.Platform;
@@ -85,6 +87,8 @@ public class MainController {
 
         startBanChecker();
         startNotificationChecker(); // BẬT HỆ THỐNG QUÉT THÔNG BÁO REAL-TIME
+
+        GlobalWebSocketManager.initConnection();
 
         applyCurrentTheme(false);
     }
@@ -397,5 +401,16 @@ public class MainController {
             contentArea.getChildren().setAll(view);
             collapseSidebar();
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // ==========================================
+    // HÀM CHUYỂN NHANH ĐẾN ĐOẠN CHAT CỤ THỂ
+    // ==========================================
+    public void openSpecificChat(String targetUsername) {
+        // 1. Gắn tên người cần mở vào biến tĩnh (static) của ChatController
+        com.auction.controller.chat.ChatController.targetUsernameToOpen = targetUsername;
+
+        // 2. Chuyển UI sang tab Chat (giống như khi bấm nút Chat ở Sidebar)
+        showChat(null);
     }
 }

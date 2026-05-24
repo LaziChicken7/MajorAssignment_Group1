@@ -56,6 +56,9 @@ public class Auction extends BaseEntity {
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<AutoBidConfig> autoBidConfigs = new ArrayList<>();
 
+    @Transient // Cờ này báo cho DB biết: "Đừng tạo cột này trong MySQL nhé, biến ảo thôi"
+    private BigDecimal myHighestBid;
+
     // GETTER VÀ SETTER
 
     public Bidder getWinningUser() {
@@ -136,5 +139,21 @@ public class Auction extends BaseEntity {
 
     public void setStepPrice(BigDecimal stepPrice) {
         this.stepPrice = stepPrice;
+    }
+
+    public List<AutoBidConfig> getAutoBidConfigs() {
+        return autoBidConfigs;
+    }
+
+    public void setAutoBidConfigs(List<AutoBidConfig> autoBidConfigs) {
+        this.autoBidConfigs = autoBidConfigs;
+    }
+
+    public BigDecimal getMyHighestBid() {
+        return myHighestBid;
+    }
+
+    public void setMyHighestBid(BigDecimal myHighestBid) {
+        this.myHighestBid = myHighestBid;
     }
 }

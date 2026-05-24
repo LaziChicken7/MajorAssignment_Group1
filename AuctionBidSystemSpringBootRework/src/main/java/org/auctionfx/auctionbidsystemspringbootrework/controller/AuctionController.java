@@ -86,10 +86,10 @@ public class AuctionController {
 
     // API Lấy danh sách đấu giá
     @GetMapping
-    public ApiResponse<List<Auction>> getAllAuctions() {
-        log.debug("API CALL: Yêu cầu lấy danh sách toàn bộ phiên đấu giá");
+    public ApiResponse<List<Auction>> getAllAuctions(@RequestParam(required = false) String username) {
+        log.debug("API CALL: Yêu cầu lấy danh sách toàn bộ phiên đấu giá cho User [{}]", username);
         ApiResponse<List<Auction>> response = new ApiResponse<>();
-        response.setResult(auctionService.getAllAuctions());
+        response.setResult(auctionService.getAllAuctions(username));
         return response;
     }
 

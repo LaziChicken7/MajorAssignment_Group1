@@ -99,15 +99,26 @@
         </VBox>
 
         <!-- 3. CỘT PHẢI: BẢNG THÔNG TIN CHI TIẾT (MẶC ĐỊNH ẨN) -->
-        <VBox fx:id="paneChatInfo" prefWidth="280" styleClass="card, chat-no-padding" visible="false" managed="false" alignment="TOP_CENTER" spacing="15" style="-fx-padding: 30 20;">
+        <VBox fx:id="paneChatInfo" prefWidth="280" styleClass="card, chat-no-padding" visible="false" managed="false" alignment="TOP_CENTER" spacing="15" style="-fx-padding: 15 20 30 20;">
+
+            <!-- THÊM NÚT X ĐỂ ĐÓNG BẢNG THÔNG TIN -->
+            <HBox alignment="CENTER_RIGHT" style="-fx-pref-width: 100%;">
+                <Button onAction="#closeChatInfo" styleClass="btn-circle-action">
+                    <graphic>
+                        <SVGPath content="M 19 6.41 L 17.59 5 L 12 10.59 L 6.41 5 L 5 6.41 L 10.59 12 L 5 17.59 L 6.41 19 L 12 13.41 L 17.59 19 L 19 17.59 L 13.41 12 Z" fill="#95a5a6" scaleX="0.7" scaleY="0.7"/>
+                    </graphic>
+                </Button>
+            </HBox>
+
             <ImageView fx:id="imgInfoAvatar" fitWidth="100" fitHeight="100"/>
             <Label fx:id="lblInfoName" text="Tên bạn bè" styleClass="chat-title-text" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
             <Label fx:id="lblInfoRole" text="Thành viên" styleClass="chat-subtitle-text" style="-fx-font-size: 14px;"/>
 
-            <Region style="-fx-pref-height: 10;"/> <!-- Khoảng trống -->
+            <Region style="-fx-pref-height: 10;"/>
 
-            <Button text="Trang cá nhân" styleClass="btn-pill-refresh" style="-fx-pref-width: 200; -fx-font-size: 13px;"/>
-            <Button text="Chặn người dùng" styleClass="btn-pill-delete" style="-fx-pref-width: 200; -fx-background-color: #ffeaea; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 20;"/>
+            <!-- ĐÃ ĐỔI TÊN HÀM VÀ CHỮ -->
+            <Button text="Trang cá nhân" onAction="#handleViewProfile" styleClass="btn-pill-refresh" style="-fx-pref-width: 200; -fx-font-size: 13px;"/>
+            <Button text="Xóa bạn bè" onAction="#handleUnfriend" styleClass="btn-pill-delete" style="-fx-pref-width: 200; -fx-background-color: #ffeaea; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 20;"/>
         </VBox>
     </HBox>
 </VBox>

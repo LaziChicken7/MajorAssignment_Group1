@@ -8,12 +8,11 @@ import java.util.function.Consumer;
 public class GlobalWebSocketManager {
 
     private static WebSocketClientService webSocketService;
-
-    // Nơi để ChatController đăng ký nhận tin nhắn khi đang mở trang Chat
     private static Consumer<ChatMessageModel> activeChatListener = null;
-
-    // Biến lưu trữ xem người dùng đang chat với ai (để không hiện thông báo nếu đang mở khung chat của người đó)
     public static String currentActiveChatPartner = null;
+
+    // KHO CHỨA DANH SÁCH CHẤM XANH TOÀN CỤC
+    public static final java.util.Set<String> globalUnreadUsers = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     public static void initConnection() {
         if (webSocketService == null && SessionManager.userName != null) {
@@ -33,8 +32,6 @@ public class GlobalWebSocketManager {
     }
 
     private static void handleIncomingMessage(String jsonPayload) {
-        System.out.println("📩 GLOBAL STOMP NHẬN ĐƯỢC: " + jsonPayload);
-
         try {
             String cleanJson = jsonPayload.trim();
             ChatMessageModel msg = null;
@@ -50,46 +47,51 @@ public class GlobalWebSocketManager {
             if (msg != null) {
                 final ChatMessageModel finalMsg = msg;
                 Platform.runLater(() -> {
-                    // Nếu tôi là người nhận tin nhắn (người khác nhắn cho tôi)
-                    if (finalMsg.receiver.userName.equals(SessionManager.userName)) {
-
-                        // Kịch bản 1: Đang mở đúng trang chat của người này -> Ném vào UI Chat, KHÔNG HIỆN TOAST
-                        if (finalMsg.sender.userName.equals(currentActiveChatPartner) && activeChatListener != null) {
+                    // KỊCH BẢN 1: MÀN HÌNH CHAT ĐANG MỞ
+                    if (activeChatListener != null) {
+                        try {
                             activeChatListener.accept(finalMsg);
-                        }
-                        // Kịch bản 2: Đang ở trang khác HOẶC đang chat với người khác -> HIỆN TOAST GLOBAL
-                        else {
-                            String senderName = finalMsg.sender.fullName != null ? finalMsg.sender.fullName : finalMsg.sender.userName;
-                            ToastNotification.show("Tin nhắn từ " + senderName, finalMsg.content);
-
-                            // Nếu vẫn đang mở trang Chat nhưng chat với người khác, cứ gửi msg vào UI (nếu cần xử lý thẻ bạn bè)
-                            if (activeChatListener != null) {
-                                activeChatListener.accept(finalMsg);
-                            }
-                        }
+                        } catch (Exception e) { e.printStackTrace(); }
                     }
-                    // Kịch bản 3: Mình là người gửi (đồng bộ tab) -> Chỉ đẩy vào UI nếu đang mở chat
-                    else if (finalMsg.sender.userName.equals(SessionManager.userName) && activeChatListener != null) {
-                        activeChatListener.accept(finalMsg);
+                    // KỊCH BẢN 2: MÀN HÌNH CHAT ĐANG ĐÓNG (Ở Trang chủ, Ví...)
+                    else {
+                        if (finalMsg.receiver.userName.equalsIgnoreCase(SessionManager.userName)) {
+
+                            // LƯU LẠI TÊN NGƯỜI NHẮN ĐỂ TẠO CHẤM XANH KHI MỞ CHAT LÊN
+                            globalUnreadUsers.add(finalMsg.sender.userName.toLowerCase());
+
+                            try {
+                                String senderName = finalMsg.sender.fullName != null ? finalMsg.sender.fullName : finalMsg.sender.userName;
+
+                                // ========================================================
+                                // GỌI TOAST CHAT CÓ ICON BONG BÓNG VÀ SỰ KIỆN CLICK CHUỘT
+                                // ========================================================
+                                ToastNotification.show(
+                                        "Tin nhắn từ " + senderName,
+                                        finalMsg.content,
+                                        ToastNotification.ToastType.CHAT, // Ép hiển thị Icon Bong Bóng
+                                        () -> {
+                                            // Xử lý khi click vào Toast -> Gọi hàm mở Chat
+                                            if (com.auction.controller.dashboard.MainController.getInstance() != null) {
+                                                com.auction.controller.dashboard.MainController.getInstance().openSpecificChat(finalMsg.sender.userName);
+                                            }
+                                        }
+                                );
+                            } catch (Exception e) { e.printStackTrace(); }
+                        }
                     }
                 });
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("❌ LỖI DỊCH JSON TOÀN CỤC");
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // Thêm hàm này vào GlobalWebSocketManager
     public static void disconnect() {
         if (webSocketService != null) {
             webSocketService.disconnect();
-            webSocketService = null; // Reset lại biến để sẵn sàng cho tài khoản khác đăng nhập
+            webSocketService = null;
         }
-
-        // Reset luôn các trạng thái chat hiện tại
         currentActiveChatPartner = null;
         activeChatListener = null;
-        System.out.println("🧹 GLOBAL STOMP: Đã dọn dẹp sạch sẽ Session Chat.");
+        globalUnreadUsers.clear();
     }
 }
