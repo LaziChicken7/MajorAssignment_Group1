@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,6 +54,9 @@ public class UserService {
 
     // Khay chứa Mã bí mật (Key là Username, Value là Mã Token)
     private final Map<String, String> resetTokens = new ConcurrentHashMap<>();
+
+    // Lưu trữ danh sách các user đang online
+    private final Set<String> onlineUsers = ConcurrentHashMap.newKeySet();
 
     // CREATE
     // Request: Những thông tin cần thiết để tạo ra User
@@ -581,6 +585,30 @@ public class UserService {
 
         log.debug("Lấy thành công {} bình luận của Seller [{}]", reviews.size(), sellerUsername);
         return reviews;
+    }
+
+    // ======================================================
+    // XỬ LÝ TRẠNG THÁI HOẠT ĐỘNG
+    // ======================================================
+
+    // Gọi hàm này khi User kết nối WebSocket (Đăng nhập / Mở app)
+    public void setUserOnline(String userName) {
+        onlineUsers.add(userName);
+        log.info("🟢 TRẠNG THÁI: User [{}] vừa ONLINE", userName);
+    }
+
+    // Gọi hàm này khi User ngắt kết nối WebSocket (Đăng xuất / Tắt app)
+    public void setUserOffline(String userName) {
+        onlineUsers.remove(userName);
+        log.info("🔴 TRẠNG THÁI: User [{}] đã OFFLINE", userName);
+    }
+
+    // API sẽ gọi hàm này để hỏi xem User có đang online không
+    public String getUserStatus(String userName) {
+        if (!userRepository.existsByUserName(userName)) {
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
+        return onlineUsers.contains(userName) ? "ONLINE" : "OFFLINE";
     }
 }
 

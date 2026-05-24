@@ -12,5 +12,7 @@ public class ConnectionModel {
         public String userName;
         public String fullName;
         public String avatarUrl;
+
+        public String role; // <-- BẠN THÊM DÒNG NÀY VÀO LÀ HẾT BÁO LỖI
     }
 }

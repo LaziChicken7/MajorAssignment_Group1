@@ -73,7 +73,13 @@ public class WebSocketClientService {
             }
         };
 
-        stompClient.connectAsync(wsUrl, sessionHandler);
+        // TẠO HEADER ĐỂ BÁO DANH TÍNH CHO SERVER BIẾT AI ĐANG KẾT NỐI
+        org.springframework.web.socket.WebSocketHttpHeaders handshakeHeaders = new org.springframework.web.socket.WebSocketHttpHeaders();
+        StompHeaders connectHeaders = new StompHeaders();
+        connectHeaders.add("username", username); // Nhét tên user đang đăng nhập vào đây
+
+        // NỐI KÈM THEO HEADER
+        stompClient.connectAsync(wsUrl, handshakeHeaders, connectHeaders, sessionHandler);
     }
 
     /**

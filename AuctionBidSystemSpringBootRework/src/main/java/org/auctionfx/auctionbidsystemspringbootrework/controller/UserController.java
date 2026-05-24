@@ -182,4 +182,14 @@ public class UserController {
         response.setResult(searchService.searchUsers(keyword));
         return response;
     }
+
+    // API: Kiểm tra tình trạng online/offline của user
+    @GetMapping("/{userName}/status")
+    public ApiResponse<String> getUserStatus(@PathVariable String userName) {
+        // Không dùng log.info ở đây để tránh làm trôi log console do Client gọi liên tục
+        log.debug("API CALL: Kiểm tra trạng thái hoạt động của User [{}]", userName);
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setResult(userService.getUserStatus(userName));
+        return response;
+    }
 }
