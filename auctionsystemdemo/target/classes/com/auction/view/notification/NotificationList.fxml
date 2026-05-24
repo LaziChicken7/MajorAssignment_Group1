@@ -16,8 +16,12 @@
 
             <Region HBox.hgrow="ALWAYS" />
             <HBox spacing="15" alignment="CENTER_LEFT">
+                <!-- THÊM NÚT XÓA TẤT CẢ TẠI ĐÂY -->
+                <Button text="🗑 Xóa tất cả" onAction="#handleDeleteAll" styleClass="btn-pill-delete"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 20; -fx-padding: 5 15; -fx-cursor: hand;"/>
+
                 <!-- Dùng class có sẵn btn-pill-refresh -->
-                <Button text="🔄 Làm mới" onAction="#loadData" styleClass="btn-pill-refresh" style="-fx-font-size: 14px;"/>
+                <Button text="🔄 Làm mới" onAction="#loadData" styleClass="btn-pill-refresh" style="-fx-font-size: 14px; -fx-padding: 5 15;"/>
             </HBox>
         </HBox>
 

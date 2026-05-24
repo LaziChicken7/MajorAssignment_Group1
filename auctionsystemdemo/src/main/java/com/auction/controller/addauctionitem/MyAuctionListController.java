@@ -186,12 +186,54 @@ public class MyAuctionListController {
 
     @FXML
     public void goToAddProduct() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/addauctionitem/AddProduct.fxml"));
-            Node view = loader.load();
-            StackPane contentArea = (StackPane) myAuctionListView.getScene().lookup("#contentArea");
-            if (contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        if (SessionManager.userName == null) return;
+
+        // ===================================================================
+        // TỰ ĐỘNG CẬP NHẬT QUYỀN HẠN TỪ SERVER TRƯỚC KHI CHUYỂN TRANG
+        // ===================================================================
+
+        // Hiện vòng xoay loading (nếu có) để user biết đang xử lý
+        if (loadingOverlay != null) loadingOverlay.setVisible(true);
+
+        // Gọi API lấy thông tin mới nhất của user đang đăng nhập
+        ApiService.getAsync("/users/" + SessionManager.userName).thenAccept(res -> {
+            Platform.runLater(() -> {
+                // Tắt vòng xoay loading
+                if (loadingOverlay != null) loadingOverlay.setVisible(false);
+
+                if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        // Giải mã thông tin user mới nhất
+                        com.auction.model.UserModel currentUser = ApiService.gson.fromJson(apiRes.result, com.auction.model.UserModel.class);
+
+                        // LÀM MỚI QUYỀN TRONG RAM MÀ KHÔNG CẦN ĐĂNG XUẤT
+                        SessionManager.role = currentUser.role;
+                    }
+                }
+
+                // Sau khi đã làm mới RAM, tiến hành kiểm tra quyền
+                if ("SELLER".equals(SessionManager.role) || "ADMIN".equals(SessionManager.role)) {
+                    // Đã là Seller -> Mở trang thêm sản phẩm
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/addauctionitem/AddProduct.fxml"));
+                        Node view = loader.load();
+                        StackPane contentArea = (StackPane) myAuctionListView.getScene().lookup("#contentArea");
+                        if (contentArea != null) contentArea.getChildren().setAll(view);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    // Chưa là Seller -> Chặn lại và hiện thông báo
+                    javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+                    alert.setTitle("Từ chối truy cập");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Bạn chưa có quyền SELLER để đưa sản phẩm lên sàn!\nVui lòng liên hệ Admin để được nâng cấp tài khoản.");
+                    com.auction.util.AlertUtils.applyStyle(alert); // Gọi CSS nếu có
+                    alert.showAndWait();
+                }
+            });
+        });
     }
 
     @FXML
