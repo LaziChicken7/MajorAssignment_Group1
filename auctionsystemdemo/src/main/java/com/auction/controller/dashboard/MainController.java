@@ -61,6 +61,8 @@ public class MainController {
 
     @FXML private Label lblNotifBadge;
 
+    @FXML private Label lblChatBadge;
+
     // BIẾN QUAN TRỌNG: Lưu lại màn hình đang hiển thị và số lượng thông báo cũ
     private Object currentActiveController;
     private int currentNotifCount = -1;
@@ -346,6 +348,27 @@ public class MainController {
                     lblNotifBadge.setVisible(true);
                 } else {
                     lblNotifBadge.setVisible(false);
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // HÀM CẬP NHẬT SỐ LƯỢNG TIN NHẮN CHƯA ĐỌC
+    // ==========================================
+    public void updateChatBadgeCount() {
+        Platform.runLater(() -> {
+            if (lblChatBadge != null) {
+                // Đếm xem có bao nhiêu người đang có chấm xanh
+                int count = com.auction.util.GlobalWebSocketManager.globalUnreadUsers.size();
+
+                if (count > 0) {
+                    lblChatBadge.setText(count > 99 ? "99+" : String.valueOf(count));
+                    lblChatBadge.setVisible(true);
+                    lblChatBadge.setManaged(true);
+                } else {
+                    lblChatBadge.setVisible(false);
+                    lblChatBadge.setManaged(false);
                 }
             }
         });

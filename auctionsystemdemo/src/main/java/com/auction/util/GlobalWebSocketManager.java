@@ -57,26 +57,22 @@ public class GlobalWebSocketManager {
                     else {
                         if (finalMsg.receiver.userName.equalsIgnoreCase(SessionManager.userName)) {
 
-                            // LƯU LẠI TÊN NGƯỜI NHẮN ĐỂ TẠO CHẤM XANH KHI MỞ CHAT LÊN
+                            // 1. Thêm người gửi vào kho chấm xanh
                             globalUnreadUsers.add(finalMsg.sender.userName.toLowerCase());
 
+                            // 2. GỌI MAIN CONTROLLER ĐỂ CẬP NHẬT CÁI SỐ ĐỎ BÊN THANH SIDEBAR
+                            if (com.auction.controller.dashboard.MainController.getInstance() != null) {
+                                com.auction.controller.dashboard.MainController.getInstance().updateChatBadgeCount();
+                            }
+
+                            // 3. Hiện Toast
                             try {
                                 String senderName = finalMsg.sender.fullName != null ? finalMsg.sender.fullName : finalMsg.sender.userName;
-
-                                // ========================================================
-                                // GỌI TOAST CHAT CÓ ICON BONG BÓNG VÀ SỰ KIỆN CLICK CHUỘT
-                                // ========================================================
-                                ToastNotification.show(
-                                        "Tin nhắn từ " + senderName,
-                                        finalMsg.content,
-                                        ToastNotification.ToastType.CHAT, // Ép hiển thị Icon Bong Bóng
-                                        () -> {
-                                            // Xử lý khi click vào Toast -> Gọi hàm mở Chat
-                                            if (com.auction.controller.dashboard.MainController.getInstance() != null) {
-                                                com.auction.controller.dashboard.MainController.getInstance().openSpecificChat(finalMsg.sender.userName);
-                                            }
-                                        }
-                                );
+                                ToastNotification.show("Tin nhắn từ " + senderName, finalMsg.content, ToastNotification.ToastType.CHAT, () -> {
+                                    if (com.auction.controller.dashboard.MainController.getInstance() != null) {
+                                        com.auction.controller.dashboard.MainController.getInstance().openSpecificChat(finalMsg.sender.userName);
+                                    }
+                                });
                             } catch (Exception e) { e.printStackTrace(); }
                         }
                     }

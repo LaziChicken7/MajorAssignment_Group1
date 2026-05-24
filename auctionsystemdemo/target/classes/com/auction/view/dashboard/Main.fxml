@@ -60,6 +60,9 @@
                         <graphic>
                             <StackPane prefWidth="35" alignment="CENTER">
                                 <SVGPath content="M 21 15 a 2 2 0 0 1 -2 2 H 7 l -4 4 V 5 a 2 2 0 0 1 2 -2 h 14 a 2 2 0 0 1 2 2 z" styleClass="modern-icon"/>
+
+                                <!-- BONG BÓNG ĐẾM SỐ TIN NHẮN CHƯA ĐỌC (ĐÃ THÊM VÀO ĐÂY) -->
+                                <Label fx:id="lblChatBadge" text="0" styleClass="notification-badge" visible="false" managed="false" StackPane.alignment="TOP_RIGHT" translateX="12" translateY="-5"/>
                             </StackPane>
                         </graphic>
                     </Button>

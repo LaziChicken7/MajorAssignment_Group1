@@ -270,11 +270,20 @@ public class ChatController {
                         renderFriendsList(allFriendsList);
                         setupSearchFeature();
 
+                        // TỰ ĐỘNG MỞ ĐOẠN CHAT NẾU ĐƯỢC CHUYỂN HƯỚNG TỪ TRANG CHỦ
                         if (targetUsernameToOpen != null) {
                             for (ConnectionModel conn : allFriendsList) {
                                 ConnectionModel.UserModel friend = conn.sender.userName.equalsIgnoreCase(SessionManager.userName) ? conn.receiver : conn.sender;
                                 if (friend.userName.equalsIgnoreCase(targetUsernameToOpen)) {
+
+                                    // 1. Xóa chấm xanh của người này khỏi Global
                                     GlobalWebSocketManager.globalUnreadUsers.remove(friend.userName.toLowerCase());
+
+                                    // 2. GỌI MAIN CONTROLLER ĐỂ GIẢM SỐ TRÊN SIDEBAR
+                                    if (com.auction.controller.dashboard.MainController.getInstance() != null) {
+                                        com.auction.controller.dashboard.MainController.getInstance().updateChatBadgeCount();
+                                    }
+
                                     renderFriendsList(allFriendsList);
                                     openChatWith(friend);
                                     break;
@@ -464,8 +473,18 @@ public class ChatController {
 
         item.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
-                if (isUnread) {
+
+                // Kiểm tra trực tiếp xem người này có chấm xanh trong Global không
+                if (GlobalWebSocketManager.globalUnreadUsers.contains(friend.userName.toLowerCase())) {
+
+                    // 1. Xóa chấm xanh của người này khỏi Global
                     GlobalWebSocketManager.globalUnreadUsers.remove(friend.userName.toLowerCase());
+
+                    // 2. GỌI MAIN CONTROLLER ĐỂ GIẢM SỐ TRÊN SIDEBAR XUỐNG
+                    if (com.auction.controller.dashboard.MainController.getInstance() != null) {
+                        com.auction.controller.dashboard.MainController.getInstance().updateChatBadgeCount();
+                    }
+
                     renderFriendsList(allFriendsList);
                 } else {
                     for (javafx.scene.Node node : vboxFriends.getChildren()) {
