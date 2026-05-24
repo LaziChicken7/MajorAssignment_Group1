@@ -194,9 +194,8 @@ public class MyAuctionListController {
 
         // Hiện vòng xoay loading (nếu có) để user biết đang xử lý
         if (loadingOverlay != null) loadingOverlay.setVisible(true);
-
-        // Gọi API lấy thông tin mới nhất của user đang đăng nhập
-        ApiService.getAsync("/users/" + SessionManager.userName).thenAccept(res -> {
+        
+        ApiService.getAsync("/users/profile/" + SessionManager.userName).thenAccept(res -> {
             Platform.runLater(() -> {
                 // Tắt vòng xoay loading
                 if (loadingOverlay != null) loadingOverlay.setVisible(false);
@@ -210,6 +209,8 @@ public class MyAuctionListController {
                         // LÀM MỚI QUYỀN TRONG RAM MÀ KHÔNG CẦN ĐĂNG XUẤT
                         SessionManager.role = currentUser.role;
                     }
+                } else {
+                    System.err.println("Lỗi gọi API check quyền: " + res.statusCode());
                 }
 
                 // Sau khi đã làm mới RAM, tiến hành kiểm tra quyền
