@@ -18,7 +18,7 @@
     </properties>
 
     <dependencies>
-        <!-- JavaFX Modules -->
+         <!-- JavaFX Modules (Bản mặc định tự phát hiện OS khi code tại máy) -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -39,6 +39,30 @@
             <artifactId>javafx-swing</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+
+        <!-- ========================================================================= -->
+        <!-- BỔ SUNG: Khai báo rõ ràng các Classifier để Maven tải đủ Native Libs -->
+        <!-- Giúp đóng gói ra 1 file client.jar chạy được trên cả Windows, macOS và Linux -->
+        <!-- ========================================================================= -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>mac</classifier>
+        </dependency>
+        <!-- ========================================================================= -->
 
         <!-- JSON Serialization (Gson & Jackson) -->
         <dependency>

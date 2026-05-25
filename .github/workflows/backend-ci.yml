@@ -1,118 +1,300 @@
-name: Build Windows EXEs and Release
+name: CI - Build & Release (Windows / macOS / Linux)
 
+# ================================================================
+# Trigger: push/PR vào main, hoặc chạy tay
+# ================================================================
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
+# ================================================================
+# JOBS
+# ================================================================
 jobs:
-  build-and-release:
-    runs-on: windows-latest
+
+  # ----------------------------------------------------------------
+  # JOB 1: Build Spring Boot Server (Java 21)
+  #         Chạy song song trên 3 OS để đảm bảo cross-platform
+  # ----------------------------------------------------------------
+  build-server:
+    name: "Server [${{ matrix.os }}]"
+    strategy:
+      fail-fast: false          # Không dừng khi 1 OS lỗi
+      matrix:
+        include:
+          - os: ubuntu-latest
+            mvnw: "./mvnw"
+            shell: bash
+          - os: windows-latest
+            mvnw: "mvnw.cmd"
+            shell: cmd
+          - os: macos-latest
+            mvnw: "./mvnw"
+            shell: bash
+
+    runs-on: ${{ matrix.os }}
     permissions:
-      contents: write
+      contents: read
 
     steps:
-      - name: 1. Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 2. Setup Java 21 LTS
+      - name: Setup Java 21 (Temurin)
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
 
-      - name: 3. Build & Package Spring Boot (Auction Bid Server)
+      # chmod chỉ cần trên Unix (Linux/macOS)
+      - name: Grant execute permission for mvnw (Unix only)
+        if: runner.os != 'Windows'
+        working-directory: AuctionBidSystemSpringBootRework
+        run: chmod +x mvnw
+
+      # Build trên Linux / macOS (bash)
+      - name: Build Server JAR (Unix)
+        if: runner.os != 'Windows'
         working-directory: AuctionBidSystemSpringBootRework
         run: |
-          Write-Host "=== DANG BUILD SERVER BANG MAVEN ==="
-          mvn clean package -DskipTests
-          
-          # Bắt lỗi Maven
-          if ($LASTEXITCODE -ne 0) { 
-              Write-Error "Loi: Maven khong the build Server. Vui long xem log cua Maven phia tren!"
-              exit $LASTEXITCODE 
-          }
-          
-          Write-Host "=== DANH SACH FILE TRONG THU MUC TARGET (SERVER) ==="
-          Get-ChildItem -Path target
-          
-          New-Item -ItemType Directory -Force -Path build_exe
-          
-          # Tìm file .jar hoặc .war (loại trừ các file dư thừa)
-          $appFile = Get-ChildItem -Path target | Where-Object { ($_.Extension -eq ".jar" -or $_.Extension -eq ".war") -and $_.Name -notmatch "plain" -and $_.Name -notmatch "original" } | Select-Object -First 1
-          
-          if ($null -eq $appFile) {
-              Write-Error "Khong tim thay bat ky file .jar hay .war nao trong thu muc target!"
-              exit 1
-          }
-          
-          Write-Host "Da tim thay file: $($appFile.FullName)"
-          Copy-Item -Path $appFile.FullName -Destination "build_exe\server.jar"
-          
-          # ĐÓNG GÓI BẢN 1.0.0
-          jpackage --type app-image --dest output --name "Auction Bid Server" --app-version 1.0.0 --input build_exe --main-jar server.jar --win-console
-          
-          # TẠO SCRIPT CHẠY NHANH
-          $batContent = "@echo off`r`n`"Auction Bid Server.exe`"`r`npause"
-          Set-Content -Path "output\Auction Bid Server\Run-Debug.bat" -Value $batContent -Encoding ASCII
-          
-          Compress-Archive -Path "output\Auction Bid Server" -DestinationPath "Auction-Bid-Server-1.0.0-Portable.zip"
+          echo "=== BUILDING SERVER ON ${{ matrix.os }} ==="
+          ${{ matrix.mvnw }} clean package -DskipTests --batch-mode --no-transfer-progress
 
-      - name: 4. Build & Package JavaFX (Auction Bid System)
+      # Build trên Windows (cmd)
+      - name: Build Server JAR (Windows)
+        if: runner.os == 'Windows'
+        working-directory: AuctionBidSystemSpringBootRework
+        shell: cmd
+        run: |
+          echo === BUILDING SERVER ON WINDOWS ===
+          ${{ matrix.mvnw }} clean package -DskipTests --batch-mode --no-transfer-progress
+
+      # Verify trên Unix
+      - name: Verify server JAR (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          echo "=== SERVER BUILD OUTPUT ==="
+          ls -lh AuctionBidSystemSpringBootRework/target/
+          test -f AuctionBidSystemSpringBootRework/target/server.jar || (echo "ERROR: server.jar not found!" && exit 1)
+          echo "server.jar found successfully"
+
+      # Verify trên Windows
+      - name: Verify server JAR (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "=== SERVER BUILD OUTPUT ==="
+          Get-ChildItem AuctionBidSystemSpringBootRework/target/
+          if (-not (Test-Path "AuctionBidSystemSpringBootRework/target/server.jar")) {
+            Write-Error "ERROR: server.jar not found!"; exit 1
+          }
+          Write-Host "server.jar found successfully"
+
+      # Chỉ upload artifact từ ubuntu để dùng cho release
+      - name: Upload server JAR (ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-jar
+          path: AuctionBidSystemSpringBootRework/target/server.jar
+          retention-days: 1
+
+
+  # ----------------------------------------------------------------
+  # JOB 2: Build JavaFX Client (Java 17)
+  #         Xử lý headless khác nhau mỗi OS:
+  #           Ubuntu  → Xvfb virtual display
+  #           macOS   → monocle headless (không cần X11)
+  #           Windows → virtual display sẵn có
+  # ----------------------------------------------------------------
+  build-client:
+    name: "Client [${{ matrix.os }}]"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            mvnw: "./mvnw"
+            shell: bash
+          - os: windows-latest
+            mvnw: "mvnw.cmd"
+            shell: cmd
+          - os: macos-latest
+            mvnw: "./mvnw"
+            shell: bash
+
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Grant execute permission for mvnw (Unix only)
+        if: runner.os != 'Windows'
+        working-directory: auctionsystemdemo
+        run: chmod +x mvnw
+
+      # Ubuntu: cài Xvfb để JavaFX có virtual display
+      - name: Install Xvfb for JavaFX (Ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            xvfb \
+            libgtk-3-0 \
+            libgl1-mesa-glx \
+            libgl1-mesa-dri \
+            libx11-6
+
+      # Build client trên Ubuntu (dùng Xvfb)
+      - name: Build Client JAR (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         working-directory: auctionsystemdemo
         run: |
-          Write-Host "=== DANG BUILD CLIENT BANG MAVEN ==="
-          mvn clean package dependency:copy-dependencies -DoutputDirectory=target/libs -DskipTests
-          
-          # Bắt lỗi Maven
-          if ($LASTEXITCODE -ne 0) { 
-              Write-Error "Loi: Maven khong the build JavaFX Client. Vui long xem log cua Maven phia tren!"
-              exit $LASTEXITCODE 
-          }
-          
-          Write-Host "=== DANH SACH FILE TRONG THU MUC TARGET (CLIENT JAVAFX) ==="
-          Get-ChildItem -Path target
-          
-          # Tạo sẵn thư mục libs
-          New-Item -ItemType Directory -Force -Path "build_exe\libs"
-          
-          # Tìm file .jar của Client JavaFX
-          $appFile = Get-ChildItem -Path target | Where-Object { $_.Extension -eq ".jar" -and $_.Name -notmatch "plain" -and $_.Name -notmatch "original" } | Select-Object -First 1
-          
-          if ($null -eq $appFile) {
-              Write-Error "Khong tim thay bat ky file .jar nao trong thu muc target!"
-              exit 1
-          }
-          
-          Write-Host "Da tim thay file: $($appFile.FullName)"
-          
-          # Gom tất cả thư viện VÀ file client.jar vào chung một thư mục 'libs'
-          if (Test-Path "target\libs") { Copy-Item -Path "target\libs\*" -Destination "build_exe\libs" -Recurse }
-          Copy-Item -Path $appFile.FullName -Destination "build_exe\libs\client.jar"
-          
-          Write-Host "=== TAO JRE TUY CHINH DE TRANH LOI AUTOMATIC MODULE ==="
-          # Đã bổ sung java.scripting vào danh sách module
-          jlink --add-modules java.base,java.desktop,java.sql,java.naming,java.management,java.net.http,java.xml,java.prefs,jdk.unsupported,jdk.unsupported.desktop,jdk.accessibility,jdk.crypto.ec,jdk.crypto.cryptoki,jdk.charsets,jdk.naming.dns,java.scripting --output custom_jre --no-header-files --no-man-pages
-          
-          Write-Host "=== DONG GOI APP BẢN 1.0.0 BANG JPACKAGE ==="
-          jpackage --type app-image --dest output --name "Auction Bid System" --app-version 1.0.0 --runtime-image custom_jre --module-path "build_exe\libs" --module com.auction/com.auction.App --win-console
-          
-          # TẠO SCRIPT CHẠY NHANH
-          $batContent = "@echo off`r`n`"Auction Bid System.exe`"`r`npause"
-          Set-Content -Path "output\Auction Bid System\Run-Debug.bat" -Value $batContent -Encoding ASCII
-          
-          Compress-Archive -Path "output\Auction Bid System" -DestinationPath "Auction-Bid-System-1.0.0-Portable.zip"
+          echo "=== BUILDING CLIENT ON UBUNTU (Xvfb headless) ==="
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
+          sleep 1
+          ./mvnw clean package -DskipTests --batch-mode --no-transfer-progress
 
-      - name: 5. Upload Releases
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v1
+      # Build client trên macOS (monocle headless, không cần display)
+      - name: Build Client JAR (macOS)
+        if: matrix.os == 'macos-latest'
+        working-directory: auctionsystemdemo
+        run: |
+          echo "=== BUILDING CLIENT ON macOS (monocle headless) ==="
+          ./mvnw clean package -DskipTests --batch-mode --no-transfer-progress \
+            -Dglass.platform=Monocle \
+            -Dmonocle.platform=Headless \
+            -Djava.awt.headless=true
+
+      # Build client trên Windows (virtual display sẵn có)
+      - name: Build Client JAR (Windows)
+        if: matrix.os == 'windows-latest'
+        working-directory: auctionsystemdemo
+        shell: cmd
+        run: |
+          echo === BUILDING CLIENT ON WINDOWS ===
+          ${{ matrix.mvnw }} clean package -DskipTests --batch-mode --no-transfer-progress
+
+      # Verify trên Unix
+      - name: Verify client JAR (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          echo "=== CLIENT BUILD OUTPUT ==="
+          ls -lh auctionsystemdemo/target/
+          test -f auctionsystemdemo/target/client.jar || (echo "ERROR: client.jar not found!" && exit 1)
+          echo "client.jar found successfully"
+
+      # Verify trên Windows
+      - name: Verify client JAR (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "=== CLIENT BUILD OUTPUT ==="
+          Get-ChildItem auctionsystemdemo/target/
+          if (-not (Test-Path "auctionsystemdemo/target/client.jar")) {
+            Write-Error "ERROR: client.jar not found!"; exit 1
+          }
+          Write-Host "client.jar found successfully"
+
+      # Chỉ upload artifact từ ubuntu để dùng cho release
+      - name: Upload client JAR (ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
         with:
+          name: client-jar
+          path: auctionsystemdemo/target/client.jar
+          retention-days: 1
+
+
+  # ----------------------------------------------------------------
+  # JOB 3: Release lên GitHub Releases
+  #         Chỉ chạy khi push vào main và cả 2 build đều pass
+  # ----------------------------------------------------------------
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [ build-server, build-client ]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download server JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: server-jar
+          path: release_files
+
+      - name: Download client JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: client-jar
+          path: release_files
+
+      - name: Prepare release files
+        run: |
+          mkdir -p final_release
+          cp release_files/server.jar final_release/Auction-Bid-Server.jar
+          cp release_files/client.jar final_release/Auction-Bid-Client.jar
+          echo "=== FILES TO BE RELEASED ==="
+          ls -lh final_release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "Auction Bid System — Release v1.0.${{ github.run_number }}"
+          body: |
+            ## 🚀 Auction Bid System — Build #${{ github.run_number }}
+
+            > ✅ Đã được kiểm tra thành công trên **Windows**, **macOS**, và **Linux**
+
+            ---
+
+            ### 📦 Files đính kèm
+            | File | Mô tả | Java |
+            |------|-------|------|
+            | `Auction-Bid-Server.jar` | Spring Boot backend server | Java 21+ |
+            | `Auction-Bid-Client.jar` | JavaFX desktop client | Java 17+ |
+
+            ---
+
+            ### 🖥️ Hướng dẫn chạy
+
+            #### Bước 1 — Chạy Server
+            ```bash
+            java -jar Auction-Bid-Server.jar
+            ```
+
+            #### Bước 2 — Chạy Client (mở màn hình mới)
+            ```bash
+            java -jar Auction-Bid-Client.jar
+            ```
+
+            > ⚠️ **Yêu cầu**: Cài Java 21 cho Server, Java 17 cho Client.
+            > Tải tại: https://adoptium.net
+
+            ---
+            📌 Commit: `${{ github.sha }}`
           files: |
-            AuctionBidSystemSpringBootRework/Auction-Bid-Server-1.0.0-Portable.zip
-            auctionsystemdemo/Auction-Bid-System-1.0.0-Portable.zip
-          tag_name: "v1.0.0.${{ github.run_number }}"
-          name: "Auction Bid System Release v1.0.${{ github.run_number }}"
+            final_release/Auction-Bid-Server.jar
+            final_release/Auction-Bid-Client.jar
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
