@@ -207,3 +207,31 @@ CREATE TABLE chat_messages (
                                CONSTRAINT fk_chat_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
                                CONSTRAINT fk_chat_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- ==============================================================================
+-- 7. KHỞI TẠO DỮ LIỆU MẪU (SEED DATA)
+-- ==============================================================================
+
+-- Tạo một ID cố định (đúng chuẩn 36 ký tự) để dễ dàng đồng bộ giữa các bảng
+SET @admin_id = 'admin-id-0000-0000-0000-000000000000';
+
+-- 1. Insert thông tin chung vào bảng gốc 'users'
+INSERT INTO users (
+    id, user_code, user_name, password, full_name,
+    email, number_phone, citizen_id, role, is_banned
+) VALUES (
+             @admin_id,
+             'ADMIN_001',             -- user_code (bắt buộc vì NOT NULL và UNIQUE)
+             'admin',                 -- userName
+             '$2a$12$N9.hO.9/x/NqLq9t9U5I.e4B9q.9.9.9.9.9.9.9.9.9.9.9.9.9',              -- password
+             'Admin',                 -- fullName
+             'admin@example.com',     -- email
+             '0941234567',            -- numberPhone
+             '005093123456',          -- citizenId
+             'ADMIN',                 -- role
+             FALSE
+         );
+
+-- 2. Insert ID đó vào bảng con 'admins' để xác nhận đây là một Admin
+INSERT INTO admins (id, department)
+VALUES (@admin_id, 'System Administration');
