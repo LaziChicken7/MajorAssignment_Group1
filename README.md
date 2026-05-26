@@ -87,7 +87,8 @@ MajorAssignment_Group1/
 > **CI/CD tự động build và đẩy JAR lên GitHub Releases sau mỗi lần push lên `main`.**  
 > Không cần tự build — tải thẳng từ Releases là chạy được.
 
-*** Tải tại:** [https://github.com/LaziChicken7/MajorAssignment_Group1/releases](https://github.com/LaziChicken7/MajorAssignment_Group1/releases)
+** Tải tại:** [https://github.com/LaziChicken7/MajorAssignment_Group1/releases](https://github.com/LaziChicken7/MajorAssignment_Group1/releases)
+*** Nhập tìm kiếm "server.jar" và "client.jar" để tìm trong releases ***
 
 | File         | Mô tả                                                    |
 |--------------|----------------------------------------------------------|
@@ -140,26 +141,33 @@ java -jar client.jar
 
 ---
 
-## 👤 Hướng dẫn tạo tài khoản
+## Hướng dẫn tạo tài khoản
 
 | Role       | Cách tạo                                                |
 |------------|---------------------------------------------------------|
 | **Bidder** | Tự đăng ký trực tiếp trên giao diện client              |
 | **Seller** | Đăng ký Bidder → nhờ Admin nâng cấp qua giao diện Admin |
-| **Admin**  | Tạo qua API (xem bên dưới)                              |
+| **Admin**  | Sử dụng tài khoản mặc định hoặc tạo qua API             |
 
-### Tạo tài khoản Admin (lần đầu)
+### 1.Tạo tài khoản Admin (lần đầu) : 
+Khi khởi chạy server lần đầu tiên, hệ thống sẽ tự động khởi tạo database và cung cấp 1 tài khoản
+Admin mặc định để có thể đăng nhập ngay lập tức:
+* **Username** : admin
+* **Password** : admin123
 
-Sau khi server đã chạy, gọi API đăng ký:
+### 2. Tạo tài khoản Admin mới (qua API)
+* Trong trường hợp muốn cấp thêm tài khoản Admin cho người khác, sau khi server đã chạy, hãy gọi API đăng kí dưới đây:
 
 ```bash
 curl -X POST http://<SERVER_IP>:8080/auction/users/register \
   -H "Content-Type: application/json" \
   -d '{
-    "userName": "admin",
+    "userName": "adminnew",
     "password": "admin123",
-    "fullName": "Administrator",
-    "email": "admin@example.com",
+    "fullName": "Admin",
+    "email": "admin2@example.com",
+    "numberPhone": "0941234999",
+    "citizenId": "005093123999",
     "role": "ADMIN"
   }'
 ```
