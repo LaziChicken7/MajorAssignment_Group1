@@ -15,7 +15,9 @@ import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NotificationController {
 
@@ -79,9 +81,7 @@ public class NotificationController {
                         ObservableList<NotificationModel> observableList = FXCollections.observableArrayList(list);
                         lvNotifications.setItems(observableList);
 
-                        // =========================================================
-                        // THÊM 3 DÒNG NÀY: ÉP BONG BÓNG TRANG CHÍNH CẬP NHẬT TỨC THÌ
-                        // =========================================================
+                        // ÉP BONG BÓNG TRANG CHÍNH CẬP NHẬT TỨC THÌ
                         if (com.auction.controller.dashboard.MainController.getInstance() != null) {
                             com.auction.controller.dashboard.MainController.getInstance().updateNotificationCount(list != null ? list.size() : 0);
                         }
@@ -103,9 +103,9 @@ public class NotificationController {
         lblPopupTime.setText(item.createdAt != null ? item.createdAt.replace("T", " ") : "");
 
         // =======================================================
-        // BỔ SUNG FRIEND_REQUEST
+        // BỔ SUNG UPGRADE_REQUEST VÀO ĐIỀU KIỆN HIỆN NÚT
         // =======================================================
-        if ("PAYMENT_VERIFICATION".equals(item.type) || "FRIEND_REQUEST".equals(item.type)) {
+        if ("PAYMENT_VERIFICATION".equals(item.type) || "FRIEND_REQUEST".equals(item.type) || "UPGRADE_REQUEST".equals(item.type)) {
             btnPopupAccept.setVisible(true); btnPopupAccept.setManaged(true);
             btnPopupDecline.setVisible(true); btnPopupDecline.setManaged(true);
             btnPopupDelete.setVisible(false); btnPopupDelete.setManaged(false);
@@ -125,24 +125,64 @@ public class NotificationController {
         selectedNotification = null;
     }
 
-    // Xử lý khi ấn nút Xác nhận trên Popup
+    // ==========================================
+    // XỬ LÝ KHI ẤN NÚT XÁC NHẬN TRÊN POPUP
+    // ==========================================
     @FXML
     private void handlePopupAccept() {
         if (selectedNotification == null) return;
-        String msg = "FRIEND_REQUEST".equals(selectedNotification.type) ? "Đã chấp nhận kết bạn!" : "Xác nhận thanh toán thành công!";
+
+        String tempMsg = "Xác nhận thành công!";
+        if ("UPGRADE_REQUEST".equals(selectedNotification.type)) {
+            tempMsg = "Đã phê duyệt yêu cầu lên Seller!";
+        } else if ("FRIEND_REQUEST".equals(selectedNotification.type)) {
+            tempMsg = "Đã chấp nhận kết bạn!";
+        } else if ("PAYMENT_VERIFICATION".equals(selectedNotification.type)) {
+            tempMsg = "Xác nhận thanh toán thành công!";
+        }
+
+        final String finalMsg = tempMsg; // FIX LỖI LAMBDA
 
         ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/accept", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), msg));
+                .thenAccept(res -> handleResponse(res.statusCode(), finalMsg));
     }
 
-    // Xử lý khi ấn nút Từ chối trên Popup
+    // ==========================================
+    // XỬ LÝ KHI ẤN NÚT TỪ CHỐI TRÊN POPUP
+    // ==========================================
     @FXML
     private void handlePopupDecline() {
         if (selectedNotification == null) return;
-        String msg = "FRIEND_REQUEST".equals(selectedNotification.type) ? "Đã từ chối kết bạn!" : "Đã từ chối thanh toán!";
 
-        ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/decline", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), msg));
+        // NẾU LÀ YÊU CẦU LÊN SELLER -> BẬT HỘP THOẠI HỎI LÝ DO
+        if ("UPGRADE_REQUEST".equals(selectedNotification.type)) {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Từ chối yêu cầu");
+            dialog.setHeaderText("Từ chối cấp quyền Seller");
+            dialog.setContentText("Nhập lý do từ chối (Sẽ gửi cho người dùng):");
+            com.auction.util.AlertUtils.applyStyle(dialog); // CSS Dark/Light mode
+
+            dialog.showAndWait().ifPresent(reason -> {
+                if (reason.trim().isEmpty()) {
+                    showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Bạn bắt buộc phải nhập lý do từ chối!");
+                    return;
+                }
+
+                Map<String, String> body = new HashMap<>();
+                body.put("reason", reason.trim());
+
+                ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/decline", body)
+                        .thenAccept(res -> handleResponse(res.statusCode(), "Đã gửi thông báo từ chối tới người dùng!"));
+            });
+        }
+        // CÁC LOẠI TỪ CHỐI KHÁC (THANH TOÁN / KẾT BẠN)
+        else {
+            String tempMsg = "FRIEND_REQUEST".equals(selectedNotification.type) ? "Đã từ chối kết bạn!" : "Đã từ chối thanh toán!";
+            final String finalMsg = tempMsg; // FIX LỖI LAMBDA
+
+            ApiService.putAsync("/notifications/" + selectedNotification.notificationId + "/decline", null)
+                    .thenAccept(res -> handleResponse(res.statusCode(), finalMsg));
+        }
     }
 
     // Xử lý khi ấn nút Xóa trên Popup
@@ -157,22 +197,19 @@ public class NotificationController {
     private void handleDeleteAll() {
         if (SessionManager.userName == null) return;
 
-        // Hiển thị hộp thoại xác nhận trước khi xóa
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Xác nhận xóa");
         confirmAlert.setHeaderText(null);
         confirmAlert.setContentText("Bạn có chắc chắn muốn xóa tất cả thông báo?\n(Các yêu cầu kết bạn và thanh toán sẽ được giữ lại)");
-        com.auction.util.AlertUtils.applyStyle(confirmAlert); // Apply CSS nếu có
+        com.auction.util.AlertUtils.applyStyle(confirmAlert);
 
-        // Chờ người dùng chọn OK hay Cancel
         confirmAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                // Gọi API xóa tất cả
                 ApiService.deleteAsync("/notifications/all/" + SessionManager.userName)
                         .thenAccept(res -> Platform.runLater(() -> {
                             if (res.statusCode() >= 200 && res.statusCode() < 300) {
                                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã dọn dẹp các thông báo cũ!");
-                                loadData(); // Tải lại danh sách sau khi xóa
+                                loadData();
                             } else {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Thao tác thất bại! Mã lỗi: " + res.statusCode());
                             }

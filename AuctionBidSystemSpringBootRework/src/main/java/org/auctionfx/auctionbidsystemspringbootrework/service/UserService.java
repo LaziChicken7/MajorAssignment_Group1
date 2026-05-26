@@ -587,6 +587,28 @@ public class UserService {
         return reviews;
     }
 
+    // Tạo yêu cầu nâng cấp seller cho admin
+    @Transactional
+    public String requestUpgradeToSeller(String userName) {
+        log.info("SERVICE: User [{}] gửi yêu cầu nâng cấp lên Seller", userName);
+        User user = userRepository.findByUserName(userName);
+
+        if (user == null) throw new UserException(ErrorCode.USER_NOT_FOUND);
+        if (user.getRole() == Role.SELLER || user.getRole() == Role.ADMIN) {
+            return "Bạn đã có quyền Seller hoặc Admin rồi!";
+        }
+
+        // Bắn thông báo cho toàn bộ Admin
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
+        String title = "Yêu cầu lên Seller từ: " + userName;
+        String desc = "Người dùng " + user.getFullName() + " (" + user.getEmail() + ") đang yêu cầu nâng cấp tài khoản lên Người bán (Seller).";
+
+        for (User admin : admins) {
+            notificationService.createNotification(admin, null, NotificationType.UPGRADE_REQUEST, title, desc);
+        }
+        return "Đã gửi yêu cầu cấp quyền đến Ban quản trị! Vui lòng chờ phê duyệt.";
+    }
+
     // ======================================================
     // XỬ LÝ TRẠNG THÁI HOẠT ĐỘNG
     // ======================================================

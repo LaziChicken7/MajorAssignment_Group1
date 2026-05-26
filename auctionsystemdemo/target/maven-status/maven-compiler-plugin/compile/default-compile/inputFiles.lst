@@ -24,6 +24,7 @@ G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\au
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\wallet\TransactionController.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\wallet\WalletController.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\controller\wallet\WithDrawController.java
+G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\Launcher.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\model\ApiResponse.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\model\AuctionCreationRequest.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\model\AuctionModel.java
@@ -51,4 +52,3 @@ G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\au
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\SessionManager.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\ToastNotification.java
 G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\com\auction\util\WebSocketClientService.java
-G:\My Drive\Github\MajorAssignment_Group1\auctionsystemdemo\src\main\java\module-info.java

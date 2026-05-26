@@ -53,15 +53,18 @@ public class ProfileController {
     @FXML private Button btnAdminControl;
     @FXML private ImageView imgAvatar;
     @FXML private Label lblAvatarPlaceholder;
+    @FXML private Button btnRequestSeller;
 
     @FXML
     public void initialize() {
         loadUserData();
 
-        // KIỂM TRA QUYỀN ADMIN ĐỂ HIỆN NÚT
         if ("ADMIN".equals(SessionManager.role)) {
-            btnAdminControl.setVisible(true);
-            btnAdminControl.setManaged(true);
+            btnAdminControl.setVisible(true); btnAdminControl.setManaged(true);
+        }
+        // CHỈ HIỆN NÚT YÊU CẦU NẾU LÀ BIDDER HOẶC USER BÌNH THƯỜNG
+        else if (!"SELLER".equals(SessionManager.role)) {
+            btnRequestSeller.setVisible(true); btnRequestSeller.setManaged(true);
         }
     }
 
@@ -515,5 +518,26 @@ public class ProfileController {
         if (lblAvatarPlaceholder != null) {
             lblAvatarPlaceholder.setVisible(false);
         }
+    }
+
+    // 9. THÊM HÀM GỬI YÊU CẦU
+    @FXML
+    public void handleRequestSeller(ActionEvent event) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Bạn có chắc chắn muốn gửi yêu cầu nâng cấp lên Seller cho Ban quản trị?", ButtonType.YES, ButtonType.NO);
+        com.auction.util.AlertUtils.applyStyle(confirm);
+        confirm.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.YES) {
+                ApiService.postAsync("/users/request-upgrade/" + SessionManager.userName, null).thenAccept(response -> {
+                    Platform.runLater(() -> {
+                        if (response.statusCode() == 200) {
+                            showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi yêu cầu! Vui lòng chờ Ban quản trị xét duyệt.");
+                            btnRequestSeller.setDisable(true); // Gửi xong thì làm mờ nút đi để khỏi bấm 2 lần
+                        } else {
+                            showAlert(Alert.AlertType.ERROR, "Lỗi", "Gửi yêu cầu thất bại!");
+                        }
+                    });
+                });
+            }
+        });
     }
 }

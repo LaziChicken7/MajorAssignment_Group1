@@ -192,4 +192,13 @@ public class UserController {
         response.setResult(userService.getUserStatus(userName));
         return response;
     }
+
+    // API: Nút Yêu cầu lên Seller
+    @PostMapping("/request-upgrade/{userName}")
+    public ApiResponse<String> requestUpgradeToSeller(@PathVariable String userName) {
+        log.info("API CALL: User [{}] yêu cầu nâng cấp lên SELLER", userName);
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.requestUpgradeToSeller(userName));
+        return apiResponse;
+    }
 }

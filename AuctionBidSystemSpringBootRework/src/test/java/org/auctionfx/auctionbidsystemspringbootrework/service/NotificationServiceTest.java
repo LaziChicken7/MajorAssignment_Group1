@@ -6,6 +6,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.notification.Notifi
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.Seller;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.NotificationType;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.NotificationRepository;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,8 +43,13 @@ public class NotificationServiceTest {
     @Mock
     private ChatService chatService;
 
+    // THÊM MOCK CHO UserService VÌ TÍNH NĂNG UPGRADE SELLER CẦN GỌI ĐẾN NÓ
+    @Mock
+    private UserService userService;
+
     private Notification verificationNotif;
     private Notification friendRequestNotif;
+    private Notification upgradeRequestNotif; // Thông báo yêu cầu lên Seller
 
     @BeforeEach
     void setUp() {
@@ -57,7 +65,7 @@ public class NotificationServiceTest {
         seller.setFullName("Trần Văn Bán");
 
         Item item = new Item();
-        item.setId("ITEM_999"); // Bắt buộc ID phải từ 4 kí tự trở lên để hàm substring(0,4) không bị lỗi
+        item.setId("ITEM_999");
         item.setName("iPhone 15 Pro Max");
 
         Auction auction = new Auction();
@@ -83,25 +91,30 @@ public class NotificationServiceTest {
         friendRequestNotif.setType(NotificationType.FRIEND_REQUEST);
         friendRequestNotif.setTitle("Yêu cầu kết bạn từ: sender_user");
         friendRequestNotif.setUser(receiver);
+
+        // -----------------------------------------------------
+        // SETUP: DỮ LIỆU GIẢ CHO YÊU CẦU LÊN SELLER (UPGRADE REQUEST)
+        // -----------------------------------------------------
+        upgradeRequestNotif = new Notification();
+        upgradeRequestNotif.setId("NOTIF-UPGRADE");
+        upgradeRequestNotif.setType(NotificationType.UPGRADE_REQUEST);
+        upgradeRequestNotif.setTitle("Yêu cầu lên Seller từ: bidder_user");
+        upgradeRequestNotif.setUser(receiver); // Receiver ở đây đóng vai trò là 1 Admin nhận được thông báo
     }
 
     // ========================================================
-    // KỊCH BẢN: CHẤP NHẬN THANH TOÁN (ACCEPT PAYMENT)
+    // KỊCH BẢN 1: CHẤP NHẬN THANH TOÁN
     // ========================================================
     @Test
     void acceptNotification_PaymentVerification_Success() {
-        // Arrange
         when(notificationRepository.findById("NOTIF-VERIFY")).thenReturn(Optional.of(verificationNotif));
 
-        // FIX LỖI NPE: Dạy cho Mockito biết phải trả về 1 object có ID khi gọi hàm save()
         Notification mockSavedNotif = new Notification();
         mockSavedNotif.setId("SAVED-MOCK-ID");
         when(notificationRepository.save(any(Notification.class))).thenReturn(mockSavedNotif);
 
-        // Act
         String result = notificationService.acceptNotification("NOTIF-VERIFY");
 
-        // Assert
         assertEquals("Accept payment successfully!", result);
         verify(auctionService, times(1)).acceptPayment("AUC-123");
         verify(notificationRepository, times(2)).save(any(Notification.class));
@@ -109,22 +122,19 @@ public class NotificationServiceTest {
     }
 
     // ========================================================
-    // KỊCH BẢN: TỪ CHỐI THANH TOÁN (DECLINE PAYMENT)
+    // KỊCH BẢN 2: TỪ CHỐI THANH TOÁN
     // ========================================================
     @Test
     void declineNotification_PaymentVerification_Success() {
-        // Arrange
         when(notificationRepository.findById("NOTIF-VERIFY")).thenReturn(Optional.of(verificationNotif));
 
-        // FIX LỖI NPE: Dạy cho Mockito biết phải trả về 1 object có ID khi gọi hàm save()
         Notification mockSavedNotif = new Notification();
         mockSavedNotif.setId("SAVED-MOCK-ID");
         when(notificationRepository.save(any(Notification.class))).thenReturn(mockSavedNotif);
 
-        // Act
-        String result = notificationService.declineNotification("NOTIF-VERIFY");
+        // Đã sửa: Truyền thêm tham số "reason" (dù logic cũ ko dùng tới)
+        String result = notificationService.declineNotification("NOTIF-VERIFY", "Tôi không muốn mua nữa");
 
-        // Assert
         assertEquals("Decline payment successfully!", result);
         verify(auctionService, times(1)).declinePayment("AUC-123");
         verify(notificationRepository, times(2)).save(any(Notification.class));
@@ -132,26 +142,22 @@ public class NotificationServiceTest {
     }
 
     // ========================================================
-    // KỊCH BẢN BỔ SUNG: CHẤP NHẬN KẾT BẠN (ACCEPT FRIEND REQUEST)
+    // KỊCH BẢN 3: CHẤP NHẬN KẾT BẠN
     // ========================================================
     @Test
     void acceptNotification_FriendRequest_Success() {
-        // Arrange
         when(notificationRepository.findById("NOTIF-FRIEND")).thenReturn(Optional.of(friendRequestNotif));
 
         User sender = new User();
         sender.setUserName("sender_user");
         when(userRepository.findByUserName("sender_user")).thenReturn(sender);
 
-        // FIX LỖI NPE: Dạy cho Mockito biết phải trả về 1 object có ID khi gọi hàm save()
         Notification mockSavedNotif = new Notification();
         mockSavedNotif.setId("SAVED-MOCK-ID");
         when(notificationRepository.save(any(Notification.class))).thenReturn(mockSavedNotif);
 
-        // Act
         String result = notificationService.acceptNotification("NOTIF-FRIEND");
 
-        // Assert
         assertEquals("Accept friend request successfully!", result);
         verify(chatService, times(1)).acceptFriendRequest("sender_user", "receiver_user");
         verify(notificationRepository, times(1)).save(any(Notification.class));
@@ -159,21 +165,69 @@ public class NotificationServiceTest {
     }
 
     // ========================================================
-    // KỊCH BẢN BỔ SUNG: TỪ CHỐI KẾT BẠN (DECLINE FRIEND REQUEST)
+    // KỊCH BẢN 4: TỪ CHỐI KẾT BẠN
     // ========================================================
     @Test
     void declineNotification_FriendRequest_Success() {
-        // Arrange
         when(notificationRepository.findById("NOTIF-FRIEND")).thenReturn(Optional.of(friendRequestNotif));
 
-        // Act
-        String result = notificationService.declineNotification("NOTIF-FRIEND");
+        // Đã sửa: Truyền thêm tham số "reason"
+        String result = notificationService.declineNotification("NOTIF-FRIEND", "Không thích kết bạn");
 
-        // Assert
         assertEquals("Decline friend request successfully!", result);
-
-        // Từ chối kết bạn chỉ cần xóa thông báo, không lưu thêm thông báo nào mới
         verify(notificationRepository, never()).save(any(Notification.class));
         verify(notificationRepository, times(1)).delete(friendRequestNotif);
+    }
+
+    // ========================================================
+    // KỊCH BẢN 5: DUYỆT CẤP QUYỀN SELLER (MỚI)
+    // ========================================================
+    @Test
+    void acceptNotification_UpgradeRequest_Success() {
+        when(notificationRepository.findById("NOTIF-UPGRADE")).thenReturn(Optional.of(upgradeRequestNotif));
+
+        // Giả lập tìm thấy 3 thông báo chờ duyệt trong máy các Admin khác
+        when(notificationRepository.findByTitle("Yêu cầu lên Seller từ: bidder_user"))
+                .thenReturn(List.of(upgradeRequestNotif, new Notification(), new Notification()));
+
+        String result = notificationService.acceptNotification("NOTIF-UPGRADE");
+
+        assertEquals("Đã phê duyệt yêu cầu lên Seller!", result);
+        verify(userService, times(1)).upgradeBidderToSeller("bidder_user");
+        verify(notificationRepository, times(1)).deleteAll(anyList()); // Đảm bảo đã gọi hàm dọn dẹp hòm thư
+    }
+
+    // ========================================================
+    // KỊCH BẢN 6: TỪ CHỐI CẤP QUYỀN SELLER KÈM LÝ DO (MỚI)
+    // ========================================================
+    @Test
+    void declineNotification_UpgradeRequest_Success() {
+        when(notificationRepository.findById("NOTIF-UPGRADE")).thenReturn(Optional.of(upgradeRequestNotif));
+
+        User bidder = new User();
+        bidder.setUserName("bidder_user");
+        when(userRepository.findByUserName("bidder_user")).thenReturn(bidder);
+
+        User admin1 = new User();
+        admin1.setUserName("admin1");
+        when(userRepository.findByRole(Role.ADMIN)).thenReturn(List.of(admin1));
+
+        Notification mockSavedNotif = new Notification();
+        mockSavedNotif.setId("SAVED-MOCK-ID");
+        when(notificationRepository.save(any(Notification.class))).thenReturn(mockSavedNotif);
+
+        // Giả lập tìm thấy thông báo để xóa
+        when(notificationRepository.findByTitle("Yêu cầu lên Seller từ: bidder_user"))
+                .thenReturn(List.of(upgradeRequestNotif));
+
+        // Thực hiện từ chối
+        String reason = "Thông tin không rõ ràng";
+        String result = notificationService.declineNotification("NOTIF-UPGRADE", reason);
+
+        assertEquals("Đã từ chối yêu cầu!", result);
+
+        // Sẽ lưu 2 thông báo: 1 cho Bidder báo thất bại, 1 cho các Admin báo là đã xử lý
+        verify(notificationRepository, times(2)).save(any(Notification.class));
+        verify(notificationRepository, times(1)).deleteAll(anyList()); // Đảm bảo đã xóa rác
     }
 }

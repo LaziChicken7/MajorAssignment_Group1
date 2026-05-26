@@ -7,6 +7,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class NotificationItemController {
 
@@ -27,9 +31,9 @@ public class NotificationItemController {
         lblTime.setText(time);
 
         // =======================================================
-        // BỔ SUNG: NẾU LÀ YÊU CẦU KẾT BẠN THÌ CŨNG HIỆN 2 NÚT XANH ĐỎ
+        // ĐIỀU KIỆN HIỆN NÚT DUYỆT (THÊM UPGRADE_REQUEST)
         // =======================================================
-        if ("PAYMENT_VERIFICATION".equals(item.type) || "FRIEND_REQUEST".equals(item.type)) {
+        if ("PAYMENT_VERIFICATION".equals(item.type) || "FRIEND_REQUEST".equals(item.type) || "UPGRADE_REQUEST".equals(item.type)) {
             btnAccept.setVisible(true); btnAccept.setManaged(true);
             btnDecline.setVisible(true); btnDecline.setManaged(true);
             btnDelete.setVisible(false); btnDelete.setManaged(false);
@@ -42,16 +46,52 @@ public class NotificationItemController {
 
     @FXML
     private void handleAccept() {
-        String msg = "FRIEND_REQUEST".equals(currentItem.type) ? "Đã chấp nhận kết bạn!" : "Xác nhận thanh toán thành công!";
+        String tempMsg = "Xác nhận thành công!";
+        if ("UPGRADE_REQUEST".equals(currentItem.type)) {
+            tempMsg = "Đã phê duyệt yêu cầu lên Seller!";
+        } else if ("FRIEND_REQUEST".equals(currentItem.type)) {
+            tempMsg = "Đã chấp nhận kết bạn!";
+        } else if ("PAYMENT_VERIFICATION".equals(currentItem.type)) {
+            tempMsg = "Xác nhận thanh toán thành công!";
+        }
+
+        // CHỐT CHẶN: Gán vào biến final để Java cho phép dùng trong Lambda
+        final String finalMsg = tempMsg;
+
         ApiService.putAsync("/notifications/" + currentItem.notificationId + "/accept", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), msg));
+                .thenAccept(res -> handleResponse(res.statusCode(), finalMsg));
     }
 
     @FXML
     private void handleDecline() {
-        String msg = "FRIEND_REQUEST".equals(currentItem.type) ? "Đã từ chối kết bạn!" : "Đã từ chối thanh toán!";
-        ApiService.putAsync("/notifications/" + currentItem.notificationId + "/decline", null)
-                .thenAccept(res -> handleResponse(res.statusCode(), msg));
+        // NẾU LÀ YÊU CẦU LÊN SELLER -> BẬT HỘP THOẠI HỎI LÝ DO
+        if ("UPGRADE_REQUEST".equals(currentItem.type)) {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Từ chối yêu cầu");
+            dialog.setHeaderText("Từ chối cấp quyền Seller");
+            dialog.setContentText("Nhập lý do từ chối (Sẽ gửi cho người dùng):");
+            com.auction.util.AlertUtils.applyStyle(dialog); // CSS Dark/Light mode
+
+            dialog.showAndWait().ifPresent(reason -> {
+                if (reason.trim().isEmpty()) {
+                    showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Bạn bắt buộc phải nhập lý do từ chối!");
+                    return;
+                }
+
+                // Gói lý do vào file JSON
+                Map<String, String> body = new HashMap<>();
+                body.put("reason", reason.trim());
+
+                ApiService.putAsync("/notifications/" + currentItem.notificationId + "/decline", body)
+                        .thenAccept(res -> handleResponse(res.statusCode(), "Đã gửi thông báo từ chối tới người dùng!"));
+            });
+        }
+        // CÁC LOẠI TỪ CHỐI KHÁC (THANH TOÁN / KẾT BẠN) THÌ KHÔNG CẦN LÝ DO
+        else {
+            String msg = "FRIEND_REQUEST".equals(currentItem.type) ? "Đã từ chối kết bạn!" : "Đã từ chối thanh toán!";
+            ApiService.putAsync("/notifications/" + currentItem.notificationId + "/decline", null)
+                    .thenAccept(res -> handleResponse(res.statusCode(), msg));
+        }
     }
 
     @FXML

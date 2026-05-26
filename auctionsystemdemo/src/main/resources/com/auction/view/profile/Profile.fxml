@@ -51,10 +51,13 @@
     </HBox>
 
     <HBox alignment="CENTER" spacing="20">
-        <!-- Đã tạo class btn-warning cho nút này -->
+        <!-- Nút Admin Control giữ nguyên -->
         <Button fx:id="btnAdminControl" text="⚙ Trung tâm điều khiển" visible="false" managed="false" onAction="#handleOpenAdminControl" styleClass="btn-warning, btn-large-pill"/>
 
-        <!-- Dùng btn-danger có sẵn của bạn -->
+        <!-- NÚT MỚI THÊM: Yêu cầu lên Seller -->
+        <Button fx:id="btnRequestSeller" text="🚀 Yêu cầu lên Seller" visible="false" managed="false" onAction="#handleRequestSeller" styleClass="btn-primary, btn-large-pill" style="-fx-background-color: #2ecc71;"/>
+
+        <!-- Nút Đăng xuất giữ nguyên -->
         <Button text="Đăng xuất" onAction="#handleLogout" styleClass="btn-danger, btn-large-pill"/>
     </HBox>
 </VBox>

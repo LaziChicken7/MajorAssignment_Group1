@@ -43,11 +43,17 @@ public class NotificationController {
         return apiResponse;
     }
 
-    // Nút Chữ X đỏ: Từ chối thanh toán
+    // Nút Chữ X đỏ: Từ chối (thanh toán / up seller)
     @PutMapping("/{notificationId}/decline")
-    public ApiResponse<String> declineNotification(@PathVariable String notificationId) {
+    public ApiResponse<String> declineNotification(
+            @PathVariable String notificationId,
+            @RequestBody(required = false) java.util.Map<String, String> payload) {
+
+        // Trích xuất lý do (nếu có)
+        String reason = (payload != null && payload.containsKey("reason")) ? payload.get("reason") : "Không đủ điều kiện";
+
         ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(notificationService.declineNotification(notificationId));
+        apiResponse.setResult(notificationService.declineNotification(notificationId, reason));
         return apiResponse;
     }
 

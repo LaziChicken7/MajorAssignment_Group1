@@ -8,4 +8,6 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification, String> {
     // Lấy danh sách thông báo của 1 user, sắp xếp mới nhất lên đầu
     List<Notification> findByUserUserNameOrderByCreatedAtDesc(String userName);
+    
+    List<Notification> findByTitle(String title);
 }

@@ -6,6 +6,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.entity.auction.Auction;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.notification.Notification;
 import org.auctionfx.auctionbidsystemspringbootrework.entity.user.User;
 import org.auctionfx.auctionbidsystemspringbootrework.enums.NotificationType;
+import org.auctionfx.auctionbidsystemspringbootrework.enums.Role;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.NotificationException;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.NotificationRepository;
@@ -30,6 +31,10 @@ public class NotificationService {
 
     @Autowired
     private AuctionService auctionService;
+
+    @Autowired
+    @Lazy
+    private UserService userService;
 
     // Kéo ChatService vào để xử lý kết bạn
     @Autowired
@@ -66,8 +71,10 @@ public class NotificationService {
                     return new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND);
                 });
 
-        // Không cho phép xóa thông báo chưa xác nhận (Cả Thanh toán lẫn Kết bạn)
-        if (notif.getType() == NotificationType.PAYMENT_VERIFICATION || notif.getType() == NotificationType.FRIEND_REQUEST) {
+        // BỔ SUNG UPGRADE_REQUEST VÀO DANH SÁCH CẤM XÓA NGANG
+        if (notif.getType() == NotificationType.PAYMENT_VERIFICATION ||
+                notif.getType() == NotificationType.FRIEND_REQUEST ||
+                notif.getType() == NotificationType.UPGRADE_REQUEST) {
             log.warn("Không thể xóa thông báo ID: {} vì nó yêu cầu hành động Xác nhận/Từ chối", notificationId);
             throw new NotificationException(ErrorCode.NOTIFICATION_DELETE_INVALID);
         }
@@ -126,6 +133,20 @@ public class NotificationService {
             return "Accept friend request successfully!";
         }
 
+        // 3.C. DUYỆT LÊN SELLER (MỚI)
+        else if (oldNotif.getType() == NotificationType.UPGRADE_REQUEST) {
+            String bidderUsername = oldNotif.getTitle().replace("Yêu cầu lên Seller từ: ", "").trim();
+
+            // Gọi hàm up Seller (Hàm này của bạn đã có sẵn code bắn thông báo chúc mừng cho Bidder và các Admin khác rồi)
+            userService.upgradeBidderToSeller(bidderUsername);
+
+            // Xóa tất cả các thông báo yêu cầu này trong hòm thư của các Admin khác (Để họ không bấm nhầm nữa)
+            List<Notification> relatedNotifs = notificationRepository.findByTitle(oldNotif.getTitle());
+            notificationRepository.deleteAll(relatedNotifs);
+
+            return "Đã phê duyệt yêu cầu lên Seller!";
+        }
+
         throw new NotificationException(ErrorCode.NOTIFICATION_ACCEPT_PAYMENT_INVALID);
     }
 
@@ -133,7 +154,7 @@ public class NotificationService {
     // 4. XỬ LÝ NÚT CHỮ X ĐỎ (TỪ CHỐI ĐA NĂNG)
     // =========================================================================
     @Transactional
-    public String declineNotification(String notificationId) {
+    public String declineNotification(String notificationId, String reason) {
         log.info("Xử lý TỪ CHỐI hành động cho thông báo ID: {}", notificationId);
         Notification oldNotif = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new NotificationException(ErrorCode.NOTIFICATION_NOT_FOUND));
@@ -160,6 +181,32 @@ public class NotificationService {
             // Từ chối thì không cần gọi DB Connection nữa (kệ cho nó PENDING mãi mãi hoặc xóa đi), chỉ việc xóa thông báo này.
             notificationRepository.delete(oldNotif);
             return "Decline friend request successfully!";
+        }
+
+        // 4.C. TỪ CHỐI LÊN SELLER (MỚI)
+        else if (oldNotif.getType() == NotificationType.UPGRADE_REQUEST) {
+            String bidderUsername = oldNotif.getTitle().replace("Yêu cầu lên Seller từ: ", "").trim();
+            User bidder = userRepository.findByUserName(bidderUsername);
+
+            if (bidder != null) {
+                createNotification(bidder, null, NotificationType.AUCTION_FAILED,
+                        "Từ chối yêu cầu lên Seller",
+                        "Ban quản trị đã từ chối yêu cầu nâng cấp của bạn. Lý do: " + reason);
+            }
+
+            // Gửi thông báo cho TẤT CẢ các admin khác biết là ca này đã bị từ chối rồi, khỏi mất công check
+            List<User> admins = userRepository.findByRole(Role.ADMIN);
+            for (User admin : admins) {
+                createNotification(admin, null, NotificationType.SYSTEM,
+                        "Đã từ chối cấp quyền",
+                        "Admin đã từ chối cấp quyền Seller cho user [" + bidderUsername + "]. Lý do: " + reason);
+            }
+
+            // Xóa rác: Quét sạch các thông báo chờ duyệt trong máy các Admin khác
+            List<Notification> relatedNotifs = notificationRepository.findByTitle(oldNotif.getTitle());
+            notificationRepository.deleteAll(relatedNotifs);
+
+            return "Đã từ chối yêu cầu!";
         }
 
         throw new NotificationException(ErrorCode.NOTIFICATION_DECLINE_PAYMENT_INVALID);
@@ -190,9 +237,10 @@ public class NotificationService {
 
         List<Notification> toDelete = new ArrayList<>();
         for (Notification notif : allNotifs) {
-            // Chỉ xóa các thông báo KHÔNG PHẢI là yêu cầu thanh toán hoặc kết bạn
+            // BỔ SUNG UPGRADE_REQUEST VÀO DANH SÁCH GIỮ LẠI
             if (notif.getType() != NotificationType.PAYMENT_VERIFICATION &&
-                    notif.getType() != NotificationType.FRIEND_REQUEST) {
+                    notif.getType() != NotificationType.FRIEND_REQUEST &&
+                    notif.getType() != NotificationType.UPGRADE_REQUEST) {
                 toDelete.add(notif);
             }
         }
