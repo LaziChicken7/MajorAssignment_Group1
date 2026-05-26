@@ -223,7 +223,7 @@ INSERT INTO users (
              @admin_id,
              'ADMIN_001',             -- user_code (bắt buộc vì NOT NULL và UNIQUE)
              'admin',                 -- userName
-             '$2a$12$N9.hO.9/x/NqLq9t9U5I.e4B9q.9.9.9.9.9.9.9.9.9.9.9.9.9',              -- password
+             '$2a$12$e8sMHIM2juO3p1s3nwwZsuAvz2FdfFS9D1nYwtkpZSSoAngyYuQTa',              -- password
              'Admin',                 -- fullName
              'admin@example.com',     -- email
              '0941234567',            -- numberPhone
