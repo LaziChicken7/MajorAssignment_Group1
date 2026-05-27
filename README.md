@@ -35,7 +35,7 @@ Hệ thống hỗ trợ nhiều client kết nối đồng thời đến một s
 | Database | MySQL 8.0+ |
 | Real-time | Spring WebSocket + STOMP |
 | Security | Spring Security |
-| Build | Maven (`maven-shade-plugin` → fat JAR) |
+| Build | Maven (`spring-boot-maven-plugin` → fat JAR) |
 
 ### Frontend
 | Thành phần | Công nghệ |
@@ -49,10 +49,10 @@ Hệ thống hỗ trợ nhiều client kết nối đồng thời đến một s
 
 ### Môi trường chạy / Yêu cầu cài đặt
 
-| Yêu cầu | Phiên bản |
-|---|---|
-| **Java JRE/JDK** | **17+** (đủ để chạy cả 2 file JAR) |
-| **MySQL** | 8.0+ (chạy trên máy server) |
+| Yêu cầu          | Phiên bản | Ghi chú                                          |
+|------------------|---        |--------------------------------------------------|
+| **Java JRE/JDK** | **17+** | Đủ để chạy cả 2 file JAR (Khuyến khích Java 21 cho Backend)  |
+| **MySQL**        | 8.0+ | Chạy trên máy server hoặc cấu hình kết nối từ xa |
 
 ```bash
 # Kiểm tra Java
@@ -87,15 +87,15 @@ MajorAssignment_Group1/
 > **CI/CD tự động build và đẩy JAR lên GitHub Releases sau mỗi lần push lên `main`.**  
 > Không cần tự build — tải thẳng từ Releases là chạy được.
 
-** Tải tại:** [https://github.com/LaziChicken7/MajorAssignment_Group1/releases](https://github.com/LaziChicken7/MajorAssignment_Group1/releases)
-*** Nhập tìm kiếm "server.jar" và "client.jar" để tìm trong releases ***
+> Tải tại : [Link](https://github.com/LaziChicken7/MajorAssignment_Group1/releases)  < Nhập tìm kiếm "server.jar" hoặc "client.jar tại releases"
+
 
 | File         | Mô tả                                                    |
 |--------------|----------------------------------------------------------|
 | `server.jar` | Backend Spring Boot – fat JAR                            |
 | `client.jar` | Frontend JavaFX – fat JAR                                |
 
-Sau khi tải, để 2 file ở bất kỳ thư mục nào tùy thích — **không cần nằm trong project**.
+> Sau khi tải, để 2 file ở bất kỳ thư mục nào tùy thích — **không cần nằm trong project**.
 
 ---
 
@@ -157,7 +157,7 @@ Admin mặc định để có thể đăng nhập ngay lập tức:
 
 ### 2. Tạo tài khoản Admin mới (qua API)
 * Trong trường hợp muốn cấp thêm tài khoản Admin cho người khác, sau khi server đã chạy, hãy gọi API đăng kí dưới đây:
-
+> (Có thể sửa các thông tin tùy thích, dưới đây chỉ là API mẫu )
 ```bash
 curl -X POST http://<SERVER_IP>:8080/auction/users/register \
   -H "Content-Type: application/json" \
@@ -216,12 +216,12 @@ curl -X POST http://<SERVER_IP>:8080/auction/users/register \
 
 ## Tài liệu & Demo
 
-| Nội dung              | Link                                                                        |
-|-----------------------|-----------------------------------------------------------------------------|
-| Báo cáo PDF           | *(cập nhật trước deadline)*                                                 |
-| Video Demo            | *(cập nhật trước deadline)*                                                 |
-| GitHub Releases (JAR) | [Releases](https://github.com/LaziChicken7/MajorAssignment_Group1/releases) |
-
+| Nội dung              | Link                                                                       |
+|-----------------------|----------------------------------------------------------------------------|
+| Báo cáo PDF           | *(cập nhật trước deadline)*                                                |
+| Video Demo            | *(cập nhật trước deadline)*                                                |
+| GitHub Releases (JAR) | [Releases](https://github.com/LaziChicken7/MajorAssignment_Group1/releases)|
+| GitHub Link           | [Link](https://github.com/LaziChicken7/MajorAssignment_Group1)             |
 ---
 
 ## Troubleshooting
