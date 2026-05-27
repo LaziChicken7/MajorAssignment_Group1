@@ -16,9 +16,8 @@
         </HBox>
         <Region HBox.hgrow="ALWAYS" />
         <HBox alignment="CENTER_LEFT" spacing="15">
-            <!-- ĐÃ FIX: Xóa thẻ <font> dư thừa, thêm btn-large-pill để nút mập mạp và đều nhau -->
-            <Button onAction="#handleDeposit" styleClass="btn-success, btn-large-pill" text="Nạp tiền" />
-            <Button onAction="#handleWithdraw" styleClass="btn-danger, btn-large-pill" text="Rút tiền" />
+            <Button onAction="#handleDeposit" styleClass="btn-success" text="Nạp tiền" style="-fx-pref-width: 100;" />
+            <Button onAction="#handleWithdraw" styleClass="btn-danger" text="Rút tiền" style="-fx-pref-width: 100;" />
         </HBox>
     </HBox>
 

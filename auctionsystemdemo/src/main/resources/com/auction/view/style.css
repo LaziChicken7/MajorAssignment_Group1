@@ -123,42 +123,75 @@
 }
 
 /* =========================================
-   6. NÚT BẤM CƠ BẢN
+   6. NÚT BẤM CƠ BẢN (KHÓA BACKGROUND INSETS CHỐNG CO RÚM)
    ========================================= */
+
+/* --- NÚT MÀU XANH ĐẬM (MẶC ĐỊNH) --- */
 .btn-primary {
-    -fx-background-color: #0A439D;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 20;
-    -fx-padding: 8 20 8 20;
-    -fx-cursor: hand;
+    -fx-background-color: #0A439D !important;
+    -fx-text-fill: white !important;
+    -fx-font-size: 14px !important;
+    -fx-font-weight: bold !important;
+    -fx-background-radius: 20 !important;
+    -fx-background-insets: 0 !important;
+    -fx-padding: 8 20 !important;
+    -fx-cursor: hand !important;
 }
-.btn-primary:hover { -fx-background-color: #1A56B8; }
+.btn-primary:hover {
+    -fx-background-color: #1A56B8 !important;
+}
 
+/* --- NÚT MÀU XANH LÁ (NẠP TIỀN) --- */
 .btn-success {
-    -fx-background-color: #00C853;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-radius: 20;
-    -fx-padding: 8 20 8 20;
-    -fx-cursor: hand;
-    -fx-transition: 0.3s;
+    -fx-background-color: #00C853 !important;
+    -fx-text-fill: white !important;
+    -fx-font-weight: bold !important;
+    -fx-font-size: 14px !important; /* CHỮ TO BẰNG NÚT XEM THÊM */
+    -fx-background-radius: 20 !important;
+    -fx-background-insets: 0 !important;
+    -fx-padding: 8 20 !important; /* CHIỀU CAO MẬP LÊN BẰNG NÚT XEM THÊM */
+    -fx-cursor: hand !important;
+    -fx-scale-x: 1 !important;
+    -fx-scale-y: 1 !important;
+    -fx-translate-y: 0 !important;
 }
-.btn-success:hover { -fx-background-color: linear-gradient(to bottom, #00E676, #00C853); }
-.btn-success:pressed { -fx-scale-x: 0.95; -fx-scale-y: 0.95; }
+.btn-success:hover {
+    -fx-background-color: #00E676 !important;
+    -fx-scale-x: 1 !important;
+    -fx-scale-y: 1 !important;
+}
+.btn-success:pressed {
+    -fx-background-color: #00A644 !important;
+    -fx-scale-x: 1 !important;
+    -fx-scale-y: 1 !important;
+    -fx-translate-y: 2px !important;
+}
 
+/* --- NÚT MÀU ĐỎ (RÚT TIỀN) --- */
 .btn-danger {
-    -fx-background-color: #FF0000;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-radius: 20;
-    -fx-padding: 8 20 8 20;
-    -fx-cursor: hand;
-    -fx-transition: 0.3s;
+    -fx-background-color: #FF0000 !important;
+    -fx-text-fill: white !important;
+    -fx-font-weight: bold !important;
+    -fx-font-size: 14px !important; /* CHỮ TO BẰNG NÚT XEM THÊM */
+    -fx-background-radius: 20 !important;
+    -fx-background-insets: 0 !important;
+    -fx-padding: 8 20 !important; /* CHIỀU CAO MẬP LÊN BẰNG NÚT XEM THÊM */
+    -fx-cursor: hand !important;
+    -fx-scale-x: 1 !important;
+    -fx-scale-y: 1 !important;
+    -fx-translate-y: 0 !important;
 }
-.btn-danger:hover { -fx-background-color: linear-gradient(to bottom, #FF5252, #FF0000); }
-.btn-danger:pressed { -fx-scale-x: 0.95; -fx-scale-y: 0.95; }
+.btn-danger:hover {
+    -fx-background-color: #FF5252 !important;
+    -fx-scale-x: 1 !important;
+    -fx-scale-y: 1 !important;
+}
+.btn-danger:pressed {
+    -fx-background-color: #D50000 !important;
+    -fx-scale-x: 1 !important;
+    -fx-scale-y: 1 !important;
+    -fx-translate-y: 2px !important;
+}
 
 /* =========================================
    7. LIST VÀ CÁC DÒNG ĐẤU GIÁ
