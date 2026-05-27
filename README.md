@@ -216,12 +216,12 @@ curl -X POST http://<SERVER_IP>:8080/auction/users/register \
 
 ## Tài liệu & Demo
 
-| Nội dung              | Link                                                                       |
-|-----------------------|----------------------------------------------------------------------------|
-| Báo cáo PDF           | *(cập nhật trước deadline)*                                                |
-| Video Demo            | *(cập nhật trước deadline)*                                                |
-| GitHub Releases (JAR) | [Releases](https://github.com/LaziChicken7/MajorAssignment_Group1/releases)|
-| GitHub Link           | [Link](https://github.com/LaziChicken7/MajorAssignment_Group1)             |
+| Nội dung              | Link                                                                                                  |
+|-----------------------|-------------------------------------------------------------------------------------------------------|
+| Báo cáo PDF           | *(cập nhật trước deadline)*                                                                           |
+| Video Demo            | [Link video_demo](https://drive.google.com/file/d/1U9xH9XaMhpnihG-q2LE9dTs0fU03_Z-5/view?usp=sharing) |
+| GitHub Releases (JAR) | [Releases](https://github.com/LaziChicken7/MajorAssignment_Group1/releases)                           |
+| GitHub Link           | [Link](https://github.com/LaziChicken7/MajorAssignment_Group1)                                        |
 ---
 
 ## Troubleshooting
