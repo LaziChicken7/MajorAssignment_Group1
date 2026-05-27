@@ -8,4 +8,5 @@ public class UserProfile {
     public String citizenId;
     public boolean banned;
     public String avatarUrl;
+    public String role;
 }

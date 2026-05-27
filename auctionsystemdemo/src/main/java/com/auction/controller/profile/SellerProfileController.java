@@ -44,7 +44,6 @@ public class SellerProfileController {
 
     @FXML
     public void initialize() {
-        // Thay emoji rườm rà bằng text chuyên nghiệp
         cbStar.getItems().addAll("5 Sao - Tuyệt vời", "4 Sao - Rất tốt", "3 Sao - Tốt", "2 Sao - Trung bình", "1 Sao - Tệ");
     }
 
@@ -54,7 +53,7 @@ public class SellerProfileController {
 
         lblName.setText(seller.fullName != null ? seller.fullName : seller.userName);
         lblRating.setText(seller.rating + "/5.0");
-        lblRating.setGraphic(createStar()); // Gắn ngôi sao xịn vào
+        lblRating.setGraphic(createStar());
 
         if (seller.avatarUrl != null) {
             imgAvatar.setImage(new Image(ApiService.BASE_URL + seller.avatarUrl, true));
@@ -63,13 +62,11 @@ public class SellerProfileController {
             imgAvatar.setClip(clip);
         }
 
-        // Nếu đang xem profile của chính mình thì ẨN nút Kết bạn đi
         if (SessionManager.userName.equals(seller.userName)) {
             btnAddFriend.setVisible(false);
             btnAddFriend.setManaged(false);
         }
 
-        // Tải 5 bình luận đầu tiên
         loadReviews();
     }
 
@@ -84,31 +81,25 @@ public class SellerProfileController {
                     ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
 
-                        // ========================================================
-                        // ĐÃ SỬA LỖI Ở ĐÂY:
-                        // Backend trả về List trực tiếp, KHÔNG phải Page object.
-                        // Đọc thẳng mảng từ apiRes.result luôn.
-                        // ========================================================
                         java.lang.reflect.Type listType = new TypeToken<List<SellerReviewModel>>(){}.getType();
                         List<SellerReviewModel> list = ApiService.gson.fromJson(apiRes.result, listType);
 
                         if (list == null || list.isEmpty()) {
                             if (currentPage == 0) {
                                 Label emptyLabel = new Label("Chưa có đánh giá nào.");
-                                emptyLabel.getStyleClass().add("muted-text"); // Gắn class để chữ xám ở Light, sáng ở Dark
+                                emptyLabel.getStyleClass().add("muted-text");
                                 emptyLabel.setStyle("-fx-font-size: 15px; -fx-font-style: italic;");
                                 vboxReviews.getChildren().add(emptyLabel);
                             }
-                            btnLoadMore.setVisible(false); // Hết dữ liệu thì ẩn nút đi
+                            btnLoadMore.setVisible(false);
                         } else {
                             for (SellerReviewModel r : list) {
                                 vboxReviews.getChildren().add(createReviewNode(r));
                             }
-                            currentPage++; // Tăng trang cho lần click sau
+                            currentPage++;
                             btnLoadMore.setText("Tải thêm bình luận ▾");
                             btnLoadMore.setDisable(false);
 
-                            // Nếu list trả về < 5, nghĩa là đã đến trang cuối cùng
                             if (list.size() < 5) btnLoadMore.setVisible(false);
                         }
                     }
@@ -119,7 +110,6 @@ public class SellerProfileController {
 
     private Node createReviewNode(SellerReviewModel r) {
         VBox box = new VBox(5);
-        // Xóa màu nền cứng, dùng class custom-row thần thánh của bạn
         box.getStyleClass().add("custom-row");
         box.setStyle("-fx-padding: 15;");
 
@@ -133,7 +123,6 @@ public class SellerProfileController {
 
         VBox info = new VBox(2);
         Label name = new Label(r.reviewer.fullName != null ? r.reviewer.fullName : r.reviewer.userName);
-        // Dùng class row-title-bold
         name.getStyleClass().add("row-title-bold");
         name.setStyle("-fx-font-size: 15px;");
 
@@ -146,14 +135,12 @@ public class SellerProfileController {
 
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
         Label date = new Label(r.createdAt.replace("T", " ").substring(0, 16));
-        // Dùng class row-text-muted
         date.getStyleClass().add("row-text-muted");
 
         header.getChildren().addAll(avt, info, spacer, date);
 
         Label cmt = new Label(r.comment);
         cmt.setWrapText(true);
-        // Dùng class row-text-normal
         cmt.getStyleClass().add("row-text-normal");
         cmt.setStyle("-fx-padding: 10 0 0 0;");
 
@@ -164,20 +151,18 @@ public class SellerProfileController {
     @FXML
     private void handleSubmitReview() {
         if (cbStar.getValue() == null || txtComment.getText().trim().isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Vui lòng chọn số sao và nhập bình luận!").show();
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn số sao và nhập bình luận!");
             return;
         }
 
-        // Cắt lấy ký tự đầu tiên của "5 Sao - Tuyệt vời" rồi biến thành số Integer
         int star = Integer.parseInt(cbStar.getValue().substring(0, 1));
         ReviewRequest req = new ReviewRequest(SessionManager.userName, seller.userName, star, txtComment.getText().trim());
 
         ApiService.postAsync("/users/reviews", req).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() >= 200 && res.statusCode() < 300) {
-                    new Alert(Alert.AlertType.INFORMATION, "Đã gửi đánh giá thành công!").show();
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi đánh giá thành công!");
 
-                    // 1. Reset lại danh sách để hiện bình luận vừa đăng
                     vboxReviews.getChildren().clear();
                     currentPage = 0;
                     btnLoadMore.setVisible(true);
@@ -185,10 +170,6 @@ public class SellerProfileController {
                     txtComment.clear();
                     cbStar.getSelectionModel().clearSelection();
 
-                    // ========================================================
-                    // 2. LẤY LẠI RATING MỚI NHẤT CỦA SELLER ĐỂ CẬP NHẬT UI
-                    // Bằng cách gọi lại thông tin của phiên đấu giá
-                    // ========================================================
                     if (previousAuctionItem != null && previousAuctionItem.id != null) {
                         ApiService.getAsync("/auctions/" + previousAuctionItem.id).thenAccept(auctionRes -> {
                             Platform.runLater(() -> {
@@ -196,16 +177,14 @@ public class SellerProfileController {
                                     try {
                                         ApiResponse apiResponse = ApiService.gson.fromJson(auctionRes.body(), ApiResponse.class);
                                         if (apiResponse.code == 1000) {
-                                            // Parse ra Object Auction mới nhất
                                             AuctionModel updatedAuction = ApiService.gson.fromJson(apiResponse.result, AuctionModel.class);
-
-                                            // Lấy điểm Rating mới cập nhật của Seller và dán lên UI
                                             if (updatedAuction.seller != null) {
                                                 double newRating = updatedAuction.seller.rating;
                                                 lblRating.setText(newRating + "/5.0");
-
-                                                // Cập nhật luôn vào biến local để nếu Back lại trang không bị mất
                                                 seller.rating = newRating;
+                                                if (previousAuctionItem.seller != null) {
+                                                    previousAuctionItem.seller.rating = newRating;
+                                                }
                                             }
                                         }
                                     } catch (Exception e) {
@@ -215,14 +194,13 @@ public class SellerProfileController {
                             });
                         });
                     }
-                    // ========================================================
 
                 } else {
                     try {
                         ApiResponse err = ApiService.gson.fromJson(res.body(), ApiResponse.class);
-                        new Alert(Alert.AlertType.ERROR, err.message).show();
+                        showAlert(Alert.AlertType.ERROR, "Lỗi", err.message);
                     } catch (Exception e) {
-                        new Alert(Alert.AlertType.ERROR, "Lỗi Server").show();
+                        showAlert(Alert.AlertType.ERROR, "Lỗi Server", "Không thể gửi đánh giá ngay lúc này.");
                     }
                 }
             });
@@ -236,47 +214,55 @@ public class SellerProfileController {
             Node view = loader.load();
 
             AuctionDetailController controller = loader.getController();
-            controller.setAuctionData(previousAuctionItem); // Ném ngược dữ liệu về trang cũ
+            controller.setAuctionData(previousAuctionItem);
 
             StackPane contentArea = (StackPane) lblName.getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // Hàm vẽ Ngôi sao Vector bo tròn siêu mượt
     private SVGPath createStar() {
         SVGPath star = new SVGPath();
-        // Tọa độ hình ngôi sao chuẩn 16x16
         star.setContent("M 8 0 L 10.46 5.36 L 16 6.24 L 12 10.36 L 12.94 16 L 8 13.24 L 3.06 16 L 4 10.36 L 0 6.24 L 5.54 5.36 Z");
-        star.setFill(Color.web("#f39c12")); // Tô màu cam vàng
-        star.setStroke(Color.web("#f39c12")); // Viền màu cam vàng
+        star.setFill(Color.web("#f39c12"));
+        star.setStroke(Color.web("#f39c12"));
         star.setStrokeWidth(1.5);
-        star.setStrokeLineJoin(StrokeLineJoin.ROUND); // ĐÂY LÀ PHÉP THUẬT: Tự động bo tròn 5 góc nhọn của ngôi sao
+        star.setStrokeLineJoin(StrokeLineJoin.ROUND);
         return star;
     }
 
-    // THÊM HÀM NÀY VÀO CUỐI FILE ĐỂ GỌI API KẾT BẠN
     @FXML
     private void handleSendFriendRequest() {
-        // Gọi API POST /chat/friend-request?sender=...&receiver=...
         String url = "/chat/friend-request?sender=" + SessionManager.userName + "&receiver=" + seller.userName;
 
         ApiService.postAsync(url, null).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() >= 200 && res.statusCode() < 300) {
-                    new Alert(Alert.AlertType.INFORMATION, "Đã gửi lời mời kết bạn!").show();
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi lời mời kết bạn!");
                     btnAddFriend.setText("Đã gửi lời mời ✓");
                     btnAddFriend.setDisable(true);
                     btnAddFriend.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 20;");
                 } else {
                     try {
-                        com.auction.model.ApiResponse err = ApiService.gson.fromJson(res.body(), com.auction.model.ApiResponse.class);
-                        new Alert(Alert.AlertType.ERROR, err.message).show();
+                        ApiResponse err = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                        showAlert(Alert.AlertType.ERROR, "Lỗi", err.message);
                     } catch (Exception e) {
-                        new Alert(Alert.AlertType.ERROR, "Lỗi khi gửi kết bạn!").show();
+                        showAlert(Alert.AlertType.ERROR, "Lỗi", "Gặp sự cố khi gửi kết bạn!");
                     }
                 }
             });
         });
+    }
+
+    // ==========================================
+    // HÀM HIỂN THỊ THÔNG BÁO TÙY CHỈNH (CSS ALERT)
+    // ==========================================
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        com.auction.util.AlertUtils.applyStyle(alert); // Gọi CSS Dark Mode & Nút viên thuốc
+        alert.showAndWait();
     }
 }

@@ -214,27 +214,39 @@ public class ChatService {
 
     @Transactional
     public String declineOrRemoveConnection(String senderUsername, String receiverUsername) {
-        log.info("SERVICE: [{}] thực hiện xóa kết nối với [{}]", receiverUsername, senderUsername);
+        // senderUsername: Người chủ động bấm nút (Hủy/Từ chối)
+        // receiverUsername: Người bị hủy/bị từ chối
+        log.info("SERVICE: [{}] thực hiện xóa kết nối với [{}]", senderUsername, receiverUsername);
 
-        User user1 = userRepository.findByUserName(senderUsername);
-        User user2 = userRepository.findByUserName(receiverUsername);
+        User actionUser = userRepository.findByUserName(senderUsername);
+        User targetUser = userRepository.findByUserName(receiverUsername);
 
-        if (user1 == null || user2 == null) {
+        if (actionUser == null || targetUser == null) {
             throw new UserException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // Tìm connection giữa 2 người (không phân biệt ai gửi trước)
-        Connection existConn = connectionRepository.findExistingConnection(user1, user2);
+        // Tìm liên kết giữa 2 người
+        Connection existConn = connectionRepository.findExistingConnection(actionUser, targetUser);
 
         if (existConn == null) {
             throw new RuntimeException("Không tìm thấy yêu cầu kết bạn hoặc liên kết bạn bè!");
         }
 
-        // Xóa bản ghi khỏi database
+        String currentStatus = existConn.getStatus();
+
+        // 1. Xóa bản ghi khỏi Database (Chấm dứt hoàn toàn liên kết)
         connectionRepository.delete(existConn);
 
-        // (Tùy chọn) Nếu muốn chuyên nghiệp hơn, bạn có thể tạo thông báo cho người kia
-        // notificationService.createNotification(user1, null, NotificationType.SYSTEM, "Thông báo", user2.getFullName() + " đã từ chối/hủy kết bạn.");
+        // =====================================================================
+        // 2. GỬI THÔNG BÁO CHO NGƯỜI BỊ TỪ CHỐI / HỦY KẾT BẠN
+        // Dùng NotificationType.SYSTEM để nó hiện cái Thùng rác (Chỉ đọc)
+        // =====================================================================
+        String title = "PENDING".equals(currentStatus) ? "Từ chối kết bạn" : "Hủy kết bạn";
+        String msg = "PENDING".equals(currentStatus) ?
+                "Người dùng " + actionUser.getFullName() + " đã từ chối lời mời kết bạn của bạn." :
+                "Người dùng " + actionUser.getFullName() + " đã hủy kết bạn với bạn.";
+
+        notificationService.createNotification(targetUser, null, NotificationType.SYSTEM, title, msg);
 
         return "Đã xóa yêu cầu kết bạn hoặc hủy kết bạn thành công.";
     }

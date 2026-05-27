@@ -219,7 +219,15 @@ public class AuctionController {
      * Cập nhật danh sách bằng setAll() giúp bảng giữ nguyên các Cell cũ, không bị giật.
      */
     private void applyFilterAndSort() {
-        if (allAuctions == null || allAuctions.isEmpty()) return;
+        // NẾU DANH SÁCH GỐC BỊ RỖNG (TRƯỜNG HỢP DATABASE KHÔNG CÓ SẢN PHẨM NÀO)
+        if (allAuctions == null || allAuctions.isEmpty()) {
+            Platform.runLater(() -> {
+                auctionListView.getItems().clear(); // Xóa sạch danh sách cũ trên màn hình
+                if (loadingOverlay != null) loadingOverlay.setVisible(false); // Tắt loading ngay lập tức
+                auctionListView.setOpacity(1); // Hiển thị lại khung nhìn
+            });
+            return;
+        }
 
         // 1. HIỆN LOADING VÀ ẨN DANH SÁCH TẠM THỜI
         if (loadingOverlay != null) loadingOverlay.setVisible(true);
@@ -265,13 +273,17 @@ public class AuctionController {
                     } else {
                         auctionListView.getItems().setAll(filteredList);
                     }
-                    if (!filteredList.isEmpty()) auctionListView.scrollTo(0);
+
+                    if (!filteredList.isEmpty()) {
+                        auctionListView.scrollTo(0);
+                    }
 
                     // 5. CÂU GIỜ THÊM 100MS: Cho ListView khởi tạo xong xuôi toàn bộ Node ẩn
                     javafx.animation.PauseTransition showPause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(100));
                     showPause.setOnFinished(e -> {
-                        if (loadingOverlay != null) loadingOverlay.setVisible(false); // Tắt Loading
-                        auctionListView.setOpacity(1); // Hiển thị danh sách ra màn hình
+                        // FIX: Tắt loading bất kể filteredList có dữ liệu hay rỗng
+                        if (loadingOverlay != null) loadingOverlay.setVisible(false);
+                        auctionListView.setOpacity(1);
                     });
                     showPause.play();
                 });

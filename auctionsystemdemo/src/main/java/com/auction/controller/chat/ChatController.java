@@ -505,7 +505,7 @@ public class ChatController {
 
         lblChatName.setText(friend.fullName != null ? friend.fullName : friend.userName);
         imgChatAvatar.setImage(new Image(ApiService.BASE_URL + friend.avatarUrl, true));
-        Rectangle clip = new Rectangle(45, 45); clip.setArcWidth(45); clip.setArcHeight(45);
+        Rectangle clip = new Rectangle(50, 50); clip.setArcWidth(50); clip.setArcHeight(50);
         imgChatAvatar.setClip(clip);
 
         paneWaiting.setVisible(false); paneWaiting.setManaged(false);

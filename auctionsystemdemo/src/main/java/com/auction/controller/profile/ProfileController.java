@@ -57,14 +57,47 @@ public class ProfileController {
 
     @FXML
     public void initialize() {
+        // 1. Cập nhật hiển thị nút dựa theo RAM hiện tại (Để giao diện mượt không bị nháy)
+        updateRoleButtons();
+
+        // 2. Load dữ liệu từ Server (sẽ tự động check lại Role 1 lần nữa)
         loadUserData();
+    }
+
+    // HÀM MỚI: Xử lý chuyên biệt việc ẩn/hiện nút theo quyền
+    private void updateRoleButtons() {
+        if (btnAdminControl != null) {
+            btnAdminControl.setVisible(false);
+            btnAdminControl.setManaged(false);
+        }
+        if (btnRequestSeller != null) {
+            btnRequestSeller.setVisible(false);
+            btnRequestSeller.setManaged(false);
+        }
 
         if ("ADMIN".equals(SessionManager.role)) {
-            btnAdminControl.setVisible(true); btnAdminControl.setManaged(true);
-        }
-        // CHỈ HIỆN NÚT YÊU CẦU NẾU LÀ BIDDER HOẶC USER BÌNH THƯỜNG
-        else if (!"SELLER".equals(SessionManager.role)) {
-            btnRequestSeller.setVisible(true); btnRequestSeller.setManaged(true);
+            if (btnAdminControl != null) {
+                btnAdminControl.setVisible(true);
+                btnAdminControl.setManaged(true);
+            }
+        } else if (!"SELLER".equals(SessionManager.role)) {
+            if (btnRequestSeller != null) {
+                btnRequestSeller.setVisible(true);
+                btnRequestSeller.setManaged(true);
+
+                // =========================================================
+                // NẾU ĐÃ BẤM YÊU CẦU -> KHÓA NÚT LẠI VÀ ĐỔI CHỮ THÀNH MÀU XÁM
+                // =========================================================
+                if (SessionManager.isUpgradePending) {
+                    btnRequestSeller.setDisable(true);
+                    btnRequestSeller.setText("Đang chờ duyệt...");
+                    btnRequestSeller.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-opacity: 0.8;");
+                } else {
+                    btnRequestSeller.setDisable(false);
+                    btnRequestSeller.setText("Yêu cầu lên Seller");
+                    btnRequestSeller.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white;");
+                }
+            }
         }
     }
 
@@ -82,11 +115,14 @@ public class ProfileController {
     // ==========================================
     // 1. HÀM LẤY DỮ LIỆU TỪ SERVER ĐỔ VÀO UI
     // ==========================================
+    // ==========================================
+    // 1. HÀM LẤY DỮ LIỆU TỪ SERVER ĐỔ VÀO UI
+    // ==========================================
     private void loadUserData() {
         String currentUser = SessionManager.userName;
         if (currentUser == null) return;
 
-        // Gọi API GET lấy thông tin profile
+        // LUỒNG 1: LẤY THÔNG TIN PROFILE VÀ KIỂM TRA QUYỀN HIỆN TẠI
         ApiService.getAsync("/users/profile/" + currentUser)
                 .thenAccept(response -> {
                     Platform.runLater(() -> {
@@ -101,17 +137,19 @@ public class ProfileController {
                                 txtPhone.setText(profile.numberPhone);
                                 txtCitizenId.setText(profile.citizenId);
 
+                                // --- CẬP NHẬT LẠI QUYỀN HẠN TỪ SERVER VÀ VẼ LẠI NÚT BẤM ---
+                                if (profile.role != null) {
+                                    SessionManager.role = profile.role;
+                                    updateRoleButtons();
+                                }
+
                                 // --- HIỂN THỊ AVATAR ---
                                 String avatarPath = profile.avatarUrl;
                                 if (avatarPath == null || !avatarPath.startsWith("/uploads") || avatarPath.contains("default-")) {
                                     avatarPath = "/uploads/images/avatar/avatarmacdinh.png";
                                 }
 
-                                // 1. SỬ DỤNG ApiService.BASE_URL (Đừng dùng localhost)
-                                // 2. Thêm "?t=" + System.currentTimeMillis() để ép JavaFX phải tải lại ảnh mới nhất từ Server, không được dùng Cache
                                 String fullImageUrl = ApiService.BASE_URL + avatarPath + "?t=" + System.currentTimeMillis();
-
-                                // Gọi hàm bo tròn ảnh
                                 displayCircularAvatar(fullImageUrl);
 
                             } else {
@@ -126,6 +164,38 @@ public class ProfileController {
                     Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi mạng", "Không thể kết nối đến máy chủ."));
                     return null;
                 });
+
+        // =================================================================
+        // LUỒNG 2: KIỂM TRA XEM ADMIN ĐÃ TỪ CHỐI YÊU CẦU LÊN SELLER CHƯA?
+        // (Nếu Admin từ chối, ta sẽ mở khóa lại nút Yêu cầu lên Seller)
+        // =================================================================
+        if (SessionManager.isUpgradePending) {
+            ApiService.getAsync("/notifications/" + currentUser).thenAccept(resNotif -> {
+                if (resNotif.statusCode() == 200) {
+                    try {
+                        ApiResponse apiRes = ApiService.gson.fromJson(resNotif.body(), ApiResponse.class);
+                        if (apiRes.code == 1000) {
+                            java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<com.auction.model.NotificationModel>>(){}.getType();
+                            java.util.List<com.auction.model.NotificationModel> notifs = ApiService.gson.fromJson(apiRes.result, listType);
+
+                            if (notifs != null) {
+                                for (com.auction.model.NotificationModel n : notifs) {
+                                    // Nếu tìm thấy thư báo Từ chối trong hòm thư
+                                    if ("Từ chối yêu cầu lên Seller".equals(n.title)) {
+                                        // Gỡ lệnh cấm và mở lại nút bấm cho người dùng
+                                        SessionManager.isUpgradePending = false;
+                                        Platform.runLater(this::updateRoleButtons);
+                                        break; // Tìm thấy 1 cái là đủ, thoát vòng lặp
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Lỗi quét thư từ chối: " + e.getMessage());
+                    }
+                }
+            });
+        }
     }
 
     // ==========================================
@@ -531,12 +601,47 @@ public class ProfileController {
                     Platform.runLater(() -> {
                         if (response.statusCode() == 200) {
                             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi yêu cầu! Vui lòng chờ Ban quản trị xét duyệt.");
-                            btnRequestSeller.setDisable(true); // Gửi xong thì làm mờ nút đi để khỏi bấm 2 lần
+
+                            // =========================================================
+                            // GHI NHỚ VÀO RAM VÀ GỌI HÀM CẬP NHẬT ĐỂ KHÓA NÚT LẠI
+                            // =========================================================
+                            SessionManager.isUpgradePending = true;
+                            updateRoleButtons();
+
                         } else {
                             showAlert(Alert.AlertType.ERROR, "Lỗi", "Gửi yêu cầu thất bại!");
                         }
                     });
                 });
+            }
+        });
+    }
+
+
+    // ==========================================
+    // 10. HÀM DỌN DẸP BỘ NHỚ ĐỆM (CACHE ẢNH)
+    // ==========================================
+    @FXML
+    public void handleClearCache(ActionEvent event) {
+        // Hiện hộp thoại cảnh báo trước khi xóa
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận dọn dẹp");
+        confirm.setHeaderText("Dọn dẹp ảnh lưu tạm?");
+        confirm.setContentText("Hành động này sẽ giải phóng RAM và xóa các file ảnh cũ lưu trong ổ cứng máy tính.\nCác ảnh sẽ mất một chút thời gian để tải lại ở lần xem tiếp theo. Bạn có muốn tiếp tục?");
+
+        com.auction.util.AlertUtils.applyStyle(confirm); // Ép theo Dark Mode nếu có
+
+        confirm.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK || res == ButtonType.YES) {
+                // Gọi tới class tiện ích của bạn để dọn dẹp
+                com.auction.util.ImageCacheUtils.clearAllCaches();
+
+                // Bắn thông báo Toast màu xanh (Dùng thư viện Toast xịn xò của bạn)
+                com.auction.util.ToastNotification.show(
+                        "Thành công",
+                        "Đã dọn dẹp sạch sẽ bộ nhớ đệm!",
+                        com.auction.util.ToastNotification.ToastType.NOTIFICATION
+                );
             }
         });
     }

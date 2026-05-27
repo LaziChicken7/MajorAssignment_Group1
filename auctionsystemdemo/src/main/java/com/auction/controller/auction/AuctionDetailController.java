@@ -601,9 +601,12 @@ public class AuctionDetailController {
             if(btnPrevImage != null) btnPrevImage.setDisable(true);
             if(btnNextImage != null) btnNextImage.setDisable(true);
         } else {
-            // SỬ DỤNG CLASS CACHE CỦA BẠN (Ảnh to hơn nên để size 400x400)
             String actualUrl = ApiService.BASE_URL + imageUrls.get(currentImageIndex);
-            com.auction.util.ImageCacheUtils.loadImage(productImageView, actualUrl, 400, 400, "https://via.placeholder.com/200?text=Loading...");
+
+            // =================================================================
+            // ĐÃ SỬA LỖI MỜ ẢNH: Truyền 0, 0 để giữ độ phân giải GỐC siêu nét
+            // =================================================================
+            com.auction.util.ImageCacheUtils.loadImage(productImageView, actualUrl, 0, 0, "https://via.placeholder.com/400?text=Loading...");
 
             if(lblImageIndex != null) lblImageIndex.setText((currentImageIndex + 1) + "/" + imageUrls.size());
             boolean hasMultiple = imageUrls.size() > 1;

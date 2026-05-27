@@ -50,14 +50,36 @@
         </GridPane>
     </HBox>
 
+    <!-- KHU VỰC CÁC NÚT BẤM (DƯỚI CÙNG) -->
     <HBox alignment="CENTER" spacing="20">
-        <!-- Nút Admin Control giữ nguyên -->
-        <Button fx:id="btnAdminControl" text="⚙ Trung tâm điều khiển" visible="false" managed="false" onAction="#handleOpenAdminControl" styleClass="btn-warning, btn-large-pill"/>
 
-        <!-- NÚT MỚI THÊM: Yêu cầu lên Seller -->
-        <Button fx:id="btnRequestSeller" text="🚀 Yêu cầu lên Seller" visible="false" managed="false" onAction="#handleRequestSeller" styleClass="btn-primary, btn-large-pill" style="-fx-background-color: #2ecc71;"/>
+        <!-- 1. Nút Admin Control (Bánh răng) -->
+        <Button fx:id="btnAdminControl" text="Trung tâm điều khiển" graphicTextGap="8" visible="false" managed="false" onAction="#handleOpenAdminControl" styleClass="btn-warning, btn-large-pill">
+            <graphic>
+                <SVGPath content="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" fill="white" scaleX="0.8" scaleY="0.8"/>
+            </graphic>
+        </Button>
 
-        <!-- Nút Đăng xuất giữ nguyên -->
-        <Button text="Đăng xuất" onAction="#handleLogout" styleClass="btn-danger, btn-large-pill"/>
+        <!-- 2. Yêu cầu lên Seller (Mũi tên đi lên) -->
+        <Button fx:id="btnRequestSeller" text="Yêu cầu lên Seller" graphicTextGap="8" visible="false" managed="false" onAction="#handleRequestSeller" styleClass="btn-primary, btn-large-pill" style="-fx-background-color: #2ecc71;">
+            <graphic>
+                <SVGPath content="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z" fill="white" scaleX="0.85" scaleY="0.85"/>
+            </graphic>
+        </Button>
+
+        <!-- 3. Dọn bộ nhớ (Cây chổi xỉa) -->
+        <Button text="Dọn bộ nhớ" graphicTextGap="8" onAction="#handleClearCache" styleClass="btn-large-pill" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+            <graphic>
+                <SVGPath content="M 18 4 A 1 1 0 0 1 19.5 5.5 L 13.5 13.5 C 15.5 14 17 17 17 20 L 5 20 C 5 17 6.5 14 12 12 Z M 8 20 L 8.5 20 L 10 15 L 9.5 15 Z M 13 20 L 13.5 20 L 12 15 L 11.5 15 Z" fill="white" scaleX="0.85" scaleY="0.85" translateY="-1"/>
+            </graphic>
+        </Button>
+
+        <!-- 4. Đăng xuất (Cửa đi ra ngoài) -->
+        <Button text="Đăng xuất" graphicTextGap="8" onAction="#handleLogout" styleClass="btn-danger, btn-large-pill">
+            <graphic>
+                <SVGPath content="M 17 7 L 15.59 8.41 L 18.17 11 H 8 v 2 h 10.17 l -2.58 2.58 L 17 17 l 5 -5 z M 4 5 h 8 V 3 H 4 c -1.1 0 -2 .9 -2 2 v 14 c 0 1.1 .9 2 2 2 h 8 v -2 H 4 V 5 z" fill="white" scaleX="0.8" scaleY="0.8"/>
+            </graphic>
+        </Button>
+
     </HBox>
 </VBox>

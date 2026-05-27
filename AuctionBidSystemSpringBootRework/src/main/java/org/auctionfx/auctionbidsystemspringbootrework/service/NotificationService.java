@@ -178,7 +178,19 @@ public class NotificationService {
 
         // 4.B: TỪ CHỐI KẾT BẠN
         else if (oldNotif.getType() == NotificationType.FRIEND_REQUEST) {
-            // Từ chối thì không cần gọi DB Connection nữa (kệ cho nó PENDING mãi mãi hoặc xóa đi), chỉ việc xóa thông báo này.
+            // Lấy ra tên người gửi và người nhận
+            String senderUsername = oldNotif.getTitle().replace("Yêu cầu kết bạn từ: ", "").trim();
+            String receiverUsername = oldNotif.getUser().getUserName();
+
+            // GỌI SANG CHAT SERVICE ĐỂ XÓA TẬN GỐC DỮ LIỆU PENDING TRONG DATABASE
+            try {
+                // receiverUsername là người chủ động bấm từ chối, sender là người bị từ chối
+                chatService.declineOrRemoveConnection(receiverUsername, senderUsername);
+            } catch (Exception e) {
+                log.warn("Bỏ qua lỗi xóa Connection: {}", e.getMessage());
+            }
+
+            // Xóa thông báo trên màn hình đi
             notificationRepository.delete(oldNotif);
             return "Decline friend request successfully!";
         }
