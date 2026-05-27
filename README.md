@@ -40,8 +40,8 @@ Hệ thống hỗ trợ nhiều client kết nối đồng thời đến một s
 ### Frontend
 | Thành phần | Công nghệ |
 |---|---|
-| Ngôn ngữ | Java 17+ |
-| UI Framework | JavaFX 17 |
+| Ngôn ngữ | Java 21 |
+| UI Framework | JavaFX 21 |
 | HTTP Client | Java HttpClient (built-in) |
 | WebSocket | Tyrus WebSocket Client |
 | JSON | Gson, Jackson |
@@ -51,7 +51,7 @@ Hệ thống hỗ trợ nhiều client kết nối đồng thời đến một s
 
 | Yêu cầu          | Phiên bản | Ghi chú                                          |
 |------------------|---        |--------------------------------------------------|
-| **Java JRE/JDK** | **17+** | Đủ để chạy cả 2 file JAR (Khuyến khích Java 21 cho Backend)  |
+| **Java JRE/JDK** | **21+** | Đủ để chạy cả 2 file JAR |
 | **MySQL**        | 8.0+ | Chạy trên máy server hoặc cấu hình kết nối từ xa |
 
 ```bash
