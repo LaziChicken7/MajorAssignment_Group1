@@ -90,4 +90,33 @@ public class GlobalWebSocketManager {
         activeChatListener = null;
         globalUnreadUsers.clear();
     }
+
+    // ==============================================================
+    // GỌI HÀM NGHE ĐẤU GIÁ TỪ WEBSOCKET SERVICE
+    // ==============================================================
+    public static void listenToAuction(String auctionId, Runnable onNewBid) {
+        if (webSocketService != null) {
+            webSocketService.subscribeToAuction(auctionId, onNewBid);
+        }
+    }
+
+    public static void stopListeningAuction() {
+        if (webSocketService != null) {
+            webSocketService.unsubscribeAuction();
+        }
+    }
+
+    // ==============================================================
+    // GỌI HÀM NGHE TOÀN CẦU
+    // ==============================================================
+    public static void listenToGlobalAuctions(Runnable onUpdate) {
+        if (webSocketService != null) {
+            webSocketService.subscribeToGlobalAuctions(onUpdate);
+        }
+    }
+    public static void stopListeningGlobalAuctions() {
+        if (webSocketService != null) {
+            webSocketService.unsubscribeGlobalAuctions();
+        }
+    }
 }

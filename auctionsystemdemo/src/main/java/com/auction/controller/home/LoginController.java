@@ -124,7 +124,6 @@ public class LoginController {
                         SessionManager.role = resultObj.get("role").getAsString();
 
                         System.out.println("Đăng nhập thành công: " + SessionManager.userName);
-                        GlobalWebSocketManager.initConnection();
                         switchToMain();
                     } else {
                         showAlert(Alert.AlertType.ERROR, "Lỗi đăng nhập", apiResponse.message);

@@ -3,14 +3,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.*?>
 
-<!-- Dùng HBox để xếp ảnh bên trái, thông tin bên phải -->
-<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.addauctionitem.MyAuctionItemController"
+<HBox fx:id="rootPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.controller.addauctionitem.MyAuctionItemController"
       spacing="20" alignment="CENTER_LEFT"
-      styleClass="custom-row, auction-row-card" style="-fx-padding: 20; -fx-cursor: hand;">
+      styleClass="custom-row, auction-row-card" style="-fx-padding: 20; -fx-cursor: hand;"
+      cache="true" cacheHint="SPEED">
 
     <!-- CỘT TRÁI: ẢNH SẢN PHẨM -->
     <VBox alignment="CENTER" minWidth="130" minHeight="130">
-        <ImageView fx:id="imgThumbnail" fitHeight="120.0" fitWidth="120.0" preserveRatio="true">
+        <ImageView fx:id="imgThumbnail" fitHeight="120.0" fitWidth="120.0" preserveRatio="true" smooth="true" cache="true" cacheHint="SPEED">
             <image>
                 <Image url="https://via.placeholder.com/120?text=Loading..." />
             </image>
@@ -34,7 +34,7 @@
         <!-- Dòng 2: Giá và Thời gian -->
         <HBox alignment="CENTER_LEFT">
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Giá hiện tại:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
+                <Label text="Giá cao nhất:" styleClass="muted-text" style="-fx-font-size: 15px;"/>
                 <Label fx:id="lblPrice" text="0 VND" style="-fx-background-color: #3b5998; -fx-text-fill: white; -fx-padding: 5 20; -fx-background-radius: 15; -fx-font-weight: bold; -fx-font-size: 15px;"/>
 
                 <!-- Nút Bắt đầu phiên (Mặc định ẩn) -->

@@ -5,9 +5,11 @@ import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
 import com.auction.model.NotificationModel;
 import com.auction.util.ApiService;
+import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import com.google.gson.reflect.TypeToken;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -19,6 +21,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -30,7 +33,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HomeController {
@@ -41,11 +46,38 @@ public class HomeController {
     @FXML private VBox vboxStatistics;
 
     private Timeline masterTimeline;
+    private PauseTransition wsDebouncer = new PauseTransition(Duration.millis(400));
 
     @FXML
     public void initialize() {
+        // 1. Tải dữ liệu API lần đầu như bình thường
         loadAuctionsAndStats();
         loadNotifications();
+
+        // =================================================================
+        // 2. DELAY 1 GIÂY ĐỂ ĐẢM BẢO WEBSOCKET ĐÃ KẾT NỐI XONG HOÀN TOÀN
+        // =================================================================
+        PauseTransition delayWS = new PauseTransition(Duration.seconds(1));
+        delayWS.setOnFinished(event -> {
+            GlobalWebSocketManager.listenToGlobalAuctions(() -> {
+                Platform.runLater(() -> {
+                    wsDebouncer.setOnFinished(e -> {
+                        System.out.println("⚡ WS HOME: Có giá mới, đang cập nhật lại Trang chủ ngầm...");
+                        loadAuctionsAndStats();
+                    });
+                    wsDebouncer.playFromStart();
+                });
+            });
+        });
+        delayWS.play(); // Bắt đầu đếm ngược 1 giây
+
+        // 3. Tự động gỡ kết nối khi người dùng rời khỏi trang chủ
+        vboxFeaturedAuctions.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                GlobalWebSocketManager.stopListeningGlobalAuctions();
+                if (masterTimeline != null) masterTimeline.stop();
+            }
+        });
     }
 
     private void loadAuctionsAndStats() {
@@ -77,7 +109,6 @@ public class HomeController {
                                 if (i < topAuctions.size()) {
                                     AuctionModel a = topAuctions.get(i);
 
-                                    // DÙNG CLASS CSS CHO HÀNG SẢN PHẨM NỔI BẬT
                                     row.getStyleClass().add("custom-row");
                                     row.setStyle("-fx-padding: 10 25; -fx-min-height: 55; -fx-cursor: hand;");
 
@@ -110,15 +141,23 @@ public class HomeController {
 
                                     if (targetTimeStr != null) {
                                         String timeStr = targetTimeStr.contains("T") ? targetTimeStr : targetTimeStr.replace(" ", "T");
-                                        LocalDateTime targetTime = LocalDateTime.parse(timeStr);
+                                        // DÙNG HÀM XỬ LÝ THỜI GIAN AN TOÀN TRÁNH CRASH (Giống Detail)
+                                        LocalDateTime targetTime;
+                                        try {
+                                            if (timeStr.contains(".")) timeStr = timeStr.substring(0, timeStr.indexOf("."));
+                                            if (timeStr.endsWith("Z")) timeStr = timeStr.replace("Z", "");
+                                            if (timeStr.contains("+")) timeStr = timeStr.substring(0, timeStr.indexOf("+"));
+                                            targetTime = LocalDateTime.parse(timeStr);
+                                        } catch (Exception e) { targetTime = LocalDateTime.now(); }
 
+                                        LocalDateTime finalTargetTime = targetTime;
                                         timerTasks.add(() -> {
                                             LocalDateTime now = LocalDateTime.now();
-                                            if (now.isAfter(targetTime)) {
+                                            if (now.isAfter(finalTargetTime)) {
                                                 lblTime.setText("00:00:00");
                                                 lblTime.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 20; -fx-font-weight: bold; -fx-font-size: 15px;");
                                             } else {
-                                                java.time.Duration duration = java.time.Duration.between(now, targetTime);
+                                                java.time.Duration duration = java.time.Duration.between(now, finalTargetTime);
                                                 long hours = duration.toHours();
                                                 long minutes = duration.toMinutesPart();
                                                 long seconds = duration.toSecondsPart();
@@ -133,6 +172,7 @@ public class HomeController {
 
                                     row.setOnMouseClicked(event -> {
                                         try {
+                                            GlobalWebSocketManager.stopListeningGlobalAuctions(); // Ngắt cáp mạng khi qua chi tiết
                                             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
                                             Node view = loader.load();
 
@@ -145,7 +185,6 @@ public class HomeController {
                                             }
                                         } catch (IOException e) {
                                             e.printStackTrace();
-                                            System.out.println("Lỗi khi mở trang chi tiết sản phẩm!");
                                         }
                                     });
 
@@ -175,7 +214,6 @@ public class HomeController {
                                     String percentText = (percent > 100) ? String.format("+%.1f%% ↑", percent) : String.format("+%.1f%%", percent);
 
                                     VBox statBox = new VBox(8);
-                                    // DÙNG CLASS CSS CHO KHỐI THỐNG KÊ
                                     statBox.getStyleClass().add("custom-row");
                                     statBox.setStyle("-fx-padding: 12 15;");
 
@@ -201,7 +239,7 @@ public class HomeController {
                                     pb.setMaxWidth(Double.MAX_VALUE);
                                     HBox.setHgrow(pb, Priority.ALWAYS);
 
-                                    pb.getStyleClass().removeAll("modern-progress-bar", "progress-alert", "progress-normal");
+                                    pb.getStyleClass().removeAll("modern-progress-bar", "progress-alert", "progress-normal", "red-progress-bar");
                                     pb.getStyleClass().add(percent > 100 ? "progress-alert" : "progress-normal");
 
                                     Label lblPercent = new Label(percentText);
@@ -262,7 +300,6 @@ public class HomeController {
                                 HBox row = new HBox(15);
                                 row.setAlignment(Pos.CENTER_LEFT);
 
-                                // DÙNG CLASS CSS CHO THANH THÔNG BÁO
                                 row.getStyleClass().add("custom-row");
                                 row.setStyle("-fx-padding: 15;");
 
@@ -284,7 +321,7 @@ public class HomeController {
                                 HBox actionBox = new HBox(5);
                                 actionBox.setAlignment(Pos.CENTER_RIGHT);
 
-                                if ("PAYMENT_VERIFICATION".equals(n.type) || "FRIEND_REQUEST".equals(n.type)) {
+                                if ("PAYMENT_VERIFICATION".equals(n.type) || "FRIEND_REQUEST".equals(n.type) || "UPGRADE_REQUEST".equals(n.type)) {
                                     Button btnAccept = new Button("✔");
                                     btnAccept.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 30; -fx-min-height: 30; -fx-cursor: hand; -fx-font-weight: bold;");
                                     btnAccept.setOnAction(e -> processNotificationAction(n.notificationId, "accept", n.type));
@@ -320,14 +357,41 @@ public class HomeController {
 
         if ("accept".equals(actionType)) {
             endpoint += "/accept";
-            String msg = "FRIEND_REQUEST".equals(notifType) ? "Đã chấp nhận lời mời kết bạn!" : "Xác nhận thanh toán thành công!";
-            ApiService.putAsync(endpoint, null).thenAccept(res -> handleActionResponse(res.statusCode(), msg));
+            String tempMsg = "Xác nhận thành công!";
+            if ("UPGRADE_REQUEST".equals(notifType)) tempMsg = "Đã phê duyệt yêu cầu lên Seller!";
+            else if ("FRIEND_REQUEST".equals(notifType)) tempMsg = "Đã chấp nhận kết bạn!";
+            else if ("PAYMENT_VERIFICATION".equals(notifType)) tempMsg = "Xác nhận thanh toán thành công!";
+
+            final String finalMsg = tempMsg;
+            ApiService.putAsync(endpoint, null).thenAccept(res -> handleActionResponse(res.statusCode(), finalMsg));
 
         } else if ("decline".equals(actionType)) {
-            endpoint += "/decline";
-            String msg = "FRIEND_REQUEST".equals(notifType) ? "Đã từ chối lời mời kết bạn!" : "Đã từ chối thanh toán!";
-            ApiService.putAsync(endpoint, null).thenAccept(res -> handleActionResponse(res.statusCode(), msg));
+            if ("UPGRADE_REQUEST".equals(notifType)) {
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Từ chối yêu cầu");
+                dialog.setHeaderText("Từ chối cấp quyền Seller");
+                dialog.setContentText("Nhập lý do từ chối:");
+                com.auction.util.AlertUtils.applyStyle(dialog);
 
+                dialog.showAndWait().ifPresent(reason -> {
+                    if (reason.trim().isEmpty()) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING, "Bạn bắt buộc phải nhập lý do!");
+                        com.auction.util.AlertUtils.applyStyle(alert);
+                        alert.showAndWait();
+                        return;
+                    }
+                    Map<String, String> body = new HashMap<>();
+                    body.put("reason", reason.trim());
+
+                    ApiService.putAsync("/notifications/" + notifId + "/decline", body)
+                            .thenAccept(res -> handleActionResponse(res.statusCode(), "Đã gửi thông báo từ chối tới người dùng!"));
+                });
+            } else {
+                endpoint += "/decline";
+                String tempMsg = "FRIEND_REQUEST".equals(notifType) ? "Đã từ chối kết bạn!" : "Đã từ chối thanh toán!";
+                final String finalMsg = tempMsg;
+                ApiService.putAsync(endpoint, null).thenAccept(res -> handleActionResponse(res.statusCode(), finalMsg));
+            }
         } else if ("delete".equals(actionType)) {
             ApiService.deleteAsync(endpoint).thenAccept(res -> handleActionResponse(res.statusCode(), null));
         }
@@ -355,6 +419,7 @@ public class HomeController {
     }
 
     private void switchView(ActionEvent event, String fxmlPath) {
+        GlobalWebSocketManager.stopListeningGlobalAuctions(); // Ngắt WebSocket khi chuyển trang
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Node view = loader.load();

@@ -3,8 +3,8 @@ package com.auction.controller.auction;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
 import com.auction.util.ApiService;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import com.auction.util.GlobalWebSocketManager;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,7 +33,6 @@ public class AuctionChartController {
     @FXML private NumberAxis yAxis;
     @FXML private Label lblChartTitle;
 
-    private Timeline chartTimeline;
     private AuctionModel currentItem;
     private XYChart.Series<Number, Number> priceSeries;
 
@@ -49,6 +48,9 @@ public class AuctionChartController {
     private double xLowerStart, xUpperStart;
     private double yLowerStart, yUpperStart;
     private final double minY = 0.0;
+
+    // BỘ ĐẾM CHỜ CHỐNG SPAM WEBSOCKET
+    private PauseTransition wsDebouncer = new PauseTransition(Duration.millis(400));
 
     public void setAuctionData(AuctionModel item) {
         this.currentItem = item;
@@ -83,65 +85,77 @@ public class AuctionChartController {
             public Number fromString(String string) { return 0; }
         });
 
-        // 3. GỌI API THEO CHU KỲ
-        chartTimeline = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
-            ApiService.getAsync("/auctions/" + auctionId + "/price-chart").thenAccept(res -> {
-                Platform.runLater(() -> {
-                    if (res.statusCode() == 200) {
-                        ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
-                        if (apiRes.code == 1000) {
-                            java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<AuctionModel.BidTransactionModel>>(){}.getType();
-                            List<AuctionModel.BidTransactionModel> txs = ApiService.gson.fromJson(apiRes.result, listType);
+        // ==============================================================
+        // 3. TẢI DỮ LIỆU LẦN ĐẦU VÀ KÍCH HOẠT WEBSOCKET LẮNG NGHE REAL-TIME
+        // ==============================================================
+        fetchChartDataFromServer(auctionId); // Lần tải mồi đầu tiên
 
-                            if (txs == null || txs.isEmpty()) return;
-
-                            // Sắp xếp dữ liệu theo thời gian thực (Tránh chart bị đứt gãy)
-                            txs.sort((t1, t2) -> {
-                                int timeCompare = t1.bidTimestamp.compareTo(t2.bidTimestamp);
-                                if (timeCompare == 0) return Double.compare(t1.bidAmount, t2.bidAmount);
-                                return timeCompare;
-                            });
-
-                            // NẾU NGƯỜI CHƠI BID TRƯỚC CẢ GIỜ BẮT ĐẦU -> Kéo lùi mốc baseTime lại để không bị chặn
-                            String firstStr = txs.get(0).bidTimestamp.contains("T") ? txs.get(0).bidTimestamp : txs.get(0).bidTimestamp.replace(" ", "T");
-                            long firstBidEpoch = LocalDateTime.parse(firstStr).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                            if (firstBidEpoch < baseTime && lastProcessedIndex == 0) {
-                                baseTime = firstBidEpoch;
-                            }
-
-                            // Vòng lặp Add Data
-                            if (txs.size() > lastProcessedIndex) {
-                                for (int i = lastProcessedIndex; i < txs.size(); i++) {
-                                    AuctionModel.BidTransactionModel tx = txs.get(i);
-
-                                    String timeStr = tx.bidTimestamp.contains("T") ? tx.bidTimestamp : tx.bidTimestamp.replace(" ", "T");
-                                    LocalDateTime timeObj = LocalDateTime.parse(timeStr);
-                                    long epochMillis = timeObj.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
-                                    // Xử lý 24 người bid trùng 1 giây: Cộng dồn 10ms để tách rẽ điểm
-                                    if (epochMillis <= lastEpochMillis) {
-                                        epochMillis = lastEpochMillis + 10;
-                                    }
-                                    lastEpochMillis = epochMillis;
-
-                                    // THUẬT TOÁN CHUẨN HOÁ X: Đẩy vào trục X một "độ lệch" siêu nhỏ (chỉ từ 0 đến vài nghìn)
-                                    long xValue = epochMillis - baseTime;
-
-                                    if (xValue >= 0 && tx.bidAmount >= minY) {
-                                        priceSeries.getData().add(new XYChart.Data<>(xValue, tx.bidAmount));
-                                    }
-                                }
-                                lastProcessedIndex = txs.size();
-                            }
-                        }
-                    }
+        GlobalWebSocketManager.listenToAuction(auctionId, () -> {
+            Platform.runLater(() -> {
+                wsDebouncer.setOnFinished(e -> {
+                    fetchChartDataFromServer(auctionId);
                 });
+                wsDebouncer.playFromStart();
             });
-        }));
-        chartTimeline.setCycleCount(Timeline.INDEFINITE);
-        chartTimeline.play();
+        });
 
         enableZoomAndPan();
+    }
+
+    // Hàm gọi API lấy dữ liệu và vẽ lên biểu đồ
+    private void fetchChartDataFromServer(String auctionId) {
+        ApiService.getAsync("/auctions/" + auctionId + "/price-chart").thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() == 200) {
+                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<List<AuctionModel.BidTransactionModel>>(){}.getType();
+                        List<AuctionModel.BidTransactionModel> txs = ApiService.gson.fromJson(apiRes.result, listType);
+
+                        if (txs == null || txs.isEmpty()) return;
+
+                        // Sắp xếp dữ liệu theo thời gian thực (Tránh chart bị đứt gãy)
+                        txs.sort((t1, t2) -> {
+                            int timeCompare = t1.bidTimestamp.compareTo(t2.bidTimestamp);
+                            if (timeCompare == 0) return Double.compare(t1.bidAmount, t2.bidAmount);
+                            return timeCompare;
+                        });
+
+                        // NẾU NGƯỜI CHƠI BID TRƯỚC CẢ GIỜ BẮT ĐẦU -> Kéo lùi mốc baseTime lại để không bị chặn
+                        String firstStr = txs.get(0).bidTimestamp.contains("T") ? txs.get(0).bidTimestamp : txs.get(0).bidTimestamp.replace(" ", "T");
+                        long firstBidEpoch = LocalDateTime.parse(firstStr).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                        if (firstBidEpoch < baseTime && lastProcessedIndex == 0) {
+                            baseTime = firstBidEpoch;
+                        }
+
+                        // Vòng lặp Add Data (Chỉ vẽ tiếp những điểm mới)
+                        if (txs.size() > lastProcessedIndex) {
+                            for (int i = lastProcessedIndex; i < txs.size(); i++) {
+                                AuctionModel.BidTransactionModel tx = txs.get(i);
+
+                                String timeStr = tx.bidTimestamp.contains("T") ? tx.bidTimestamp : tx.bidTimestamp.replace(" ", "T");
+                                LocalDateTime timeObj = LocalDateTime.parse(timeStr);
+                                long epochMillis = timeObj.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+                                // Xử lý nhiều người bid trùng 1 giây: Cộng dồn 10ms để tách rẽ điểm
+                                if (epochMillis <= lastEpochMillis) {
+                                    epochMillis = lastEpochMillis + 10;
+                                }
+                                lastEpochMillis = epochMillis;
+
+                                // Thuật toán Chuẩn hoá X
+                                long xValue = epochMillis - baseTime;
+
+                                if (xValue >= 0 && tx.bidAmount >= minY) {
+                                    priceSeries.getData().add(new XYChart.Data<>(xValue, tx.bidAmount));
+                                }
+                            }
+                            lastProcessedIndex = txs.size(); // Ghi nhớ tổng số điểm đã vẽ
+                        }
+                    }
+                }
+            });
+        });
     }
 
     private void enableZoomAndPan() {
@@ -237,7 +251,11 @@ public class AuctionChartController {
 
     @FXML
     private void goBack() {
-        if (chartTimeline != null) chartTimeline.stop();
+        // =======================================================
+        // ĐÓNG WEBSOCKET KHI QUAY LẠI ĐỂ TIẾT KIỆM TÀI NGUYÊN MẠNG
+        // =======================================================
+        GlobalWebSocketManager.stopListeningAuction();
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
             Node view = loader.load();

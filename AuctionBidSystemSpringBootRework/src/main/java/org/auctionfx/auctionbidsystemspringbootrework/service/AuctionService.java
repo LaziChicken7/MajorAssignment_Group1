@@ -18,6 +18,7 @@ import org.auctionfx.auctionbidsystemspringbootrework.exception.ErrorCode;
 import org.auctionfx.auctionbidsystemspringbootrework.exception.UserException;
 import org.auctionfx.auctionbidsystemspringbootrework.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ public class AuctionService {
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private AutoBidConfigRepository autoBidConfigRepository;
     @Autowired private ApplicationContext applicationContext;
+    @Autowired private SimpMessagingTemplate messagingTemplate;
 
     // Cấu hình thuật toán Anti-Snipping
     private static final int SNIPING_THRESHOLD_SECONDS = 10; // Đấu giá trong 10s cuối
@@ -283,6 +285,17 @@ public class AuctionService {
         bidTransactionRepository.save(transaction);
         auctionRepository.save(auction);
 
+        // =========================================================
+        // WEBSOCKET: BẮN TÍN HIỆU CÓ GIÁ MỚI CHO TẤT CẢ AI ĐANG XEM
+        // =========================================================
+        try {
+            messagingTemplate.convertAndSend("/topic/auctions/" + auction.getId(), "NEW_BID");
+            messagingTemplate.convertAndSend("/topic/auctions/global", "UPDATE");
+            log.info("📢 WEBSOCKET: Đã phát tín hiệu có giá mới cho phiên [{}]", auction.getId());
+        } catch (Exception e) {
+            log.error("Lỗi gửi WebSocket: ", e);
+        }
+
         return isExtended;
     }
 
@@ -395,6 +408,13 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow();
         auction.setStatus(AuctionStatus.RUNNING);
         auctionRepository.save(auction);
+
+        // THÊM 3 DÒNG NÀY ĐỂ BÁO JAVAFX MỞ KHÓA NÚT BẤM
+        try {
+            messagingTemplate.convertAndSend("/topic/auctions/" + auctionId, "STATUS_UPDATE");
+            // Bắn tín hiệu Toàn cầu cho màn hình Danh sách (AuctionList) biết để cập nhật ngầm
+            messagingTemplate.convertAndSend("/topic/auctions/global", "UPDATE");
+        } catch (Exception e) { log.error("Lỗi WS: ", e); }
     }
 
     @Transactional
@@ -404,8 +424,11 @@ public class AuctionService {
         auction.setStatus(AuctionStatus.FINISHED);
         String shortId = auction.getBidProduct().getId().substring(0, 4).toUpperCase();
 
+        String resultMessage;
+
         if (auction.getWinningUser() != null) {
             log.info("Phiên đấu giá [{}] kết thúc thành công. Người thắng: [{}]", auctionId, auction.getWinningUser().getUserName());
+
             // 1. Thông báo cho người mua xác thực thanh toán
             Notification winnerNotif = new Notification();
             winnerNotif.setUser(auction.getWinningUser());
@@ -415,22 +438,21 @@ public class AuctionService {
             winnerNotif.setDescription(auction.getBidProduct().getName() + " - Giá tiền: " + auction.getHighestBid() + " VND");
             notificationRepository.save(winnerNotif);
 
-            // 2. BỔ SUNG: Thông báo cho Người bán (Biết đã có người thắng)
+            // 2. Thông báo cho Người bán (Biết đã có người thắng)
             Notification sellerNotif = new Notification();
             sellerNotif.setUser(auction.getSeller());
             sellerNotif.setAuction(auction);
-            sellerNotif.setType(NotificationType.AUCTION_SUCCESS); // Cứ coi là thông báo thông tin
+            sellerNotif.setType(NotificationType.AUCTION_SUCCESS);
             sellerNotif.setTitle("Phiên đấu giá kết thúc: SP" + shortId);
             sellerNotif.setDescription("Người thắng: " + auction.getWinningUser().getFullName() + " với giá " + auction.getHighestBid() + " VND. Đang chờ người mua xác thực thanh toán.");
             notificationRepository.save(sellerNotif);
 
-            auctionRepository.save(auction);
-            return "Session ended! Winner is: " + auction.getWinningUser().getFullName();
+            resultMessage = "Session ended! Winner is: " + auction.getWinningUser().getFullName();
         } else {
-            log.info("Phiên đấu giá [{}] kết thúc nhưng Ế (Không ai đấu giá)", auctionId);
+            log.info("Phiên đấu giá [{}] kết thúc nhưng không ai đấu giá", auctionId);
             auction.setTransactionStatus(TransactionStatus.FAILED);
 
-            // 3. BỔ SUNG: Thông báo cho Người bán (Báo ế / Không ai mua)
+            // 3. Thông báo cho Người bán (Báo ế)
             Notification sellerFailNotif = new Notification();
             sellerFailNotif.setUser(auction.getSeller());
             sellerFailNotif.setAuction(auction);
@@ -439,9 +461,24 @@ public class AuctionService {
             sellerFailNotif.setDescription("Sản phẩm " + auction.getBidProduct().getName() + " đã hết thời gian nhưng không có ai tham gia trả giá.");
             notificationRepository.save(sellerFailNotif);
 
-            auctionRepository.save(auction);
-            return "Session ended! No one winner";
+            resultMessage = "Session ended! No one winner";
         }
+
+        // Lưu thông tin vào DB một lần duy nhất cho cả 2 nhánh
+        auctionRepository.save(auction);
+
+        // ========================================================
+        // BẮN WEBSOCKET BÁO CHO JAVAFX KHÓA NÚT NGAY LẬP TỨC
+        // ========================================================
+        try {
+            messagingTemplate.convertAndSend("/topic/auctions/" + auctionId, "STATUS_UPDATE");
+            // Bắn tín hiệu Toàn cầu cho màn hình Danh sách (AuctionList) biết để cập nhật ngầm
+            messagingTemplate.convertAndSend("/topic/auctions/global", "UPDATE");
+        } catch (Exception e) {
+            log.error("Lỗi WS khi đóng phiên đấu giá: ", e);
+        }
+
+        return resultMessage;
     }
 
     // 4. Chấp nhận trả tiền và từ chối trả tiền

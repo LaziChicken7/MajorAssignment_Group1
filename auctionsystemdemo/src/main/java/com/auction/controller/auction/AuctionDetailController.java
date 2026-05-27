@@ -6,6 +6,7 @@ import com.auction.model.AuctionModel;
 import com.auction.model.PlaceBidRequest;
 import com.auction.model.WalletDataResponse;
 import com.auction.util.ApiService;
+import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
@@ -46,7 +47,6 @@ public class AuctionDetailController {
     @FXML private LineChart<String, Number> priceChart;
     @FXML private ImageView productImageView;
     @FXML private Label btnPrevImage, btnNextImage, lblImageIndex;
-    private Timeline chartTimeline;
     private List<String> imageUrls = new ArrayList<>();
     private int currentImageIndex = 0;
 
@@ -85,24 +85,21 @@ public class AuctionDetailController {
     private String realBalanceTextDetail = "0 VND";
     private boolean isBalanceHiddenDetail = true;
 
+    // BỘ ĐẾM CHỜ CHỐNG SPAM WEBSOCKET
+    private PauseTransition wsDebouncer = new PauseTransition(Duration.millis(400));
+
     @FXML
     public void initialize() {
-        // Áp dụng định dạng tiền tệ (vừa gõ vừa có dấu chấm) cho cả 2 ô nhập
         if (txtBidAmount != null) applyCurrencyFormat(txtBidAmount, value -> currentBidValue = value);
         if (txtAutoBidMaxAmount != null) applyCurrencyFormat(txtAutoBidMaxAmount, null);
     }
 
-    /**
-     * Hàm ma thuật: Vừa gõ vừa tự động định dạng 1.000.000 (Ngăn cách hàng nghìn)
-     * Giữ nguyên vị trí con trỏ chuột không bị nhảy lung tung
-     */
     private void applyCurrencyFormat(TextField textField, java.util.function.Consumer<Long> variableSetter) {
         textField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.isEmpty()) {
                 if (variableSetter != null) variableSetter.accept(0L);
                 return;
             }
-            // Chỉ giữ lại số
             String cleanString = newVal.replaceAll("[^\\d]", "");
             if (cleanString.isEmpty()) {
                 textField.setText("");
@@ -114,7 +111,6 @@ public class AuctionDetailController {
                 long parsed = Long.parseLong(cleanString);
                 if (variableSetter != null) variableSetter.accept(parsed);
 
-                // Format kiểu VN: 1.000.000
                 String formatted = String.format("%,d", parsed).replace(",", ".");
 
                 if (!formatted.equals(newVal)) {
@@ -131,9 +127,6 @@ public class AuctionDetailController {
         });
     }
 
-    // ==============================================
-    // THUẬT TOÁN TÍNH BƯỚC GIÁ ĐỘNG (1-2-5 RULE)
-    // ==============================================
     private long calculateDynamicStep(double startPrice) {
         if (startPrice <= 0) return 10000;
         double rawStep = startPrice * 0.02; // 2% giá gốc
@@ -192,23 +185,19 @@ public class AuctionDetailController {
             this.currentStepValue = calculateDynamicStep(currentItem.bidProduct.startPrice);
             this.currentHighestBid = (long) currentItem.highestBid;
 
-            // LÀM TRÒN: Tính giá trị hợp lệ thấp nhất tiếp theo
             long remainder = this.currentHighestBid % currentStepValue;
-            long nextValidBid = this.currentHighestBid - remainder + currentStepValue; // Ép lên số tròn luôn
+            long nextValidBid = this.currentHighestBid - remainder + currentStepValue;
 
             this.currentBidValue = nextValidBid;
             updateBidTextField();
         }
     }
 
-    // ==============================================
-    // LOGIC NÚT + / - CHO ĐẤU GIÁ THỦ CÔNG
-    // ==============================================
     @FXML
     public void increaseBid() {
         long remainder = currentBidValue % currentStepValue;
         if (remainder != 0) {
-            currentBidValue = currentBidValue - remainder + currentStepValue; // Đang số lẻ -> Về số chẵn
+            currentBidValue = currentBidValue - remainder + currentStepValue;
         } else {
             currentBidValue += currentStepValue;
         }
@@ -222,12 +211,11 @@ public class AuctionDetailController {
 
         long remainder = currentBidValue % currentStepValue;
         if (remainder != 0) {
-            currentBidValue = currentBidValue - remainder; // Đang số lẻ -> Về số chẵn phía dưới
+            currentBidValue = currentBidValue - remainder;
         } else {
             currentBidValue -= currentStepValue;
         }
 
-        // Chặn không cho rớt qua giá tối thiểu
         if (currentBidValue < minValidBid) {
             currentBidValue = minValidBid;
         }
@@ -238,14 +226,10 @@ public class AuctionDetailController {
         if (txtBidAmount != null) txtBidAmount.setText(String.format("%,d", currentBidValue).replace(",", "."));
     }
 
-    // ==============================================
-    // TÍNH NĂNG CÀI ĐẶT AUTOBID (BOT)
-    // ==============================================
     @FXML
     private void handleOpenAutoBid() {
         if (SessionManager.userName != null && currentItem.seller != null && SessionManager.userName.equals(currentItem.seller.userName)) return;
 
-        // 1. Setup giao diện mặc định (Giả định user chưa cài bot bao giờ)
         if (txtAutoBidMaxAmount != null && lblAutoBidStep != null) {
             long highestRemainder = currentHighestBid % currentStepValue;
             long nextValidBid = currentHighestBid - highestRemainder + currentStepValue;
@@ -255,7 +239,7 @@ public class AuctionDetailController {
             txtAutoBidMaxAmount.setText(String.format("%,d", suggestMax).replace(",", "."));
 
             lblCurrentBotStatus.setText("Trạng thái: Chưa cài đặt");
-            lblCurrentBotStatus.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #95a5a6;"); // Xám
+            lblCurrentBotStatus.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #95a5a6;");
 
             if (lblCurrentMaxBid != null) {
                 lblCurrentMaxBid.setVisible(false);
@@ -266,7 +250,6 @@ public class AuctionDetailController {
 
         paneAutoBidConfig.setVisible(true);
 
-        // 2. GỌI API KIỂM TRA BOT CỦA MÌNH
         ApiService.getAsync("/auctions/" + currentItem.id + "/my-autobid?username=" + SessionManager.userName).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -276,14 +259,10 @@ public class AuctionDetailController {
                         try {
                             long currentMax = 0;
 
-                            // BẮT LỖI TẤT CẢ CÁC TRƯỜNG HỢP JSON TRẢ VỀ:
                             if (apiRes.result.isJsonPrimitive()) {
-                                // TH1: Server trả về một con số trần trụi (Ví dụ: 500000)
                                 currentMax = apiRes.result.getAsLong();
                             }
                             else if (apiRes.result.isJsonObject()) {
-                                // TH2: Server trả về 1 cục JSON Object (Ví dụ: {"maxAmount": 500000, ...})
-                                // Tự động dò tìm biến maxAmount bên trong cục đó!
                                 com.google.gson.JsonObject jsonObj = apiRes.result.getAsJsonObject();
                                 if (jsonObj.has("maxAmount")) {
                                     currentMax = jsonObj.get("maxAmount").getAsLong();
@@ -292,10 +271,9 @@ public class AuctionDetailController {
                                 }
                             }
 
-                            // NẾU TÌM THẤY SỐ TIỀN > 0 THÌ CẬP NHẬT LÊN GIAO DIỆN
                             if (currentMax > 0) {
                                 lblCurrentBotStatus.setText("Trạng thái: Đang hoạt động");
-                                lblCurrentBotStatus.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;"); // Xanh lá
+                                lblCurrentBotStatus.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;");
 
                                 if (lblCurrentMaxBid != null) {
                                     lblCurrentMaxBid.setText("Mức trần đang cài: " + String.format("%,d", currentMax).replace(",", ".") + " VND");
@@ -307,9 +285,7 @@ public class AuctionDetailController {
                                 if (btnSubmitAutoBid != null) btnSubmitAutoBid.setText("Cập nhật Bot");
                             }
                         } catch (Exception e) {
-                            // In ra Console để nếu vẫn xịt thì bạn copy dòng này gửi tôi xem cấu trúc Backend trả về là gì
                             System.err.println("❌ Lỗi Parse API Bot: " + e.getMessage());
-                            System.err.println("❌ JSON thực tế từ Server: " + apiRes.result.toString());
                         }
                     }
                 }
@@ -323,7 +299,7 @@ public class AuctionDetailController {
             long current = Long.parseLong(txtAutoBidMaxAmount.getText().replaceAll("[^\\d]", ""));
             long remainder = current % currentStepValue;
             if (remainder != 0) {
-                current = current - remainder + currentStepValue; // Làm tròn lên
+                current = current - remainder + currentStepValue;
             } else {
                 current += currentStepValue;
             }
@@ -337,17 +313,16 @@ public class AuctionDetailController {
             long current = Long.parseLong(txtAutoBidMaxAmount.getText().replaceAll("[^\\d]", ""));
             long remainder = current % currentStepValue;
             if (remainder != 0) {
-                current = current - remainder; // Làm tròn xuống
+                current = current - remainder;
             } else {
                 current -= currentStepValue;
             }
 
-            // Tính giá trị thấp nhất hợp lệ
             long highestRemainder = currentHighestBid % currentStepValue;
             long minValidBid = currentHighestBid - highestRemainder + currentStepValue;
 
             if (current < minValidBid) {
-                current = minValidBid; // Không cho tụt quá mức
+                current = minValidBid;
             }
             txtAutoBidMaxAmount.setText(String.format("%,d", current).replace(",", "."));
         } catch (Exception e) {}
@@ -372,23 +347,19 @@ public class AuctionDetailController {
             ApiService.postAsync(url, null).thenAccept(res -> {
                 Platform.runLater(() -> {
                     if (res.statusCode() >= 200 && res.statusCode() < 300) {
-                        paneAutoBidConfig.setVisible(false); // Thành công thì mới đóng Popup
+                        paneAutoBidConfig.setVisible(false);
                         ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                         if (apiRes.code == 1000) {
                             showToastSuccess();
-                            initBidHistory(currentItem.id);
+                            // WEBSOCKET SẼ TỰ LÀM MỚI BIỂU ĐỒ GIÁ
                         } else {
                             showToastError(apiRes.message);
                         }
                     } else {
-                        // THẤT BẠI: KHÔNG ĐÓNG POPUP ĐỂ USER SỬA SỐ, ĐỌC LỖI TỪ BACKEND
                         try {
-                            // Spring Boot mặc định khi văng RuntimeException sẽ trả về chuỗi JSON chứa biến "message"
-                            // Gson sẽ tự động hứng và nhét vào biến errRes.message
                             ApiResponse errRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
-
                             if (errRes != null && errRes.message != null && !errRes.message.isEmpty()) {
-                                showToastError(errRes.message); // Hiện câu lỗi "Không phải là bội số...", "Phải cao hơn giá hiện tại..."
+                                showToastError(errRes.message);
                             } else {
                                 showToastError("Lỗi kích hoạt Bot: " + res.statusCode());
                             }
@@ -408,9 +379,6 @@ public class AuctionDetailController {
 
     @FXML private void handleCloseAutoBid() { paneAutoBidConfig.setVisible(false); }
 
-    // ==============================================
-    // CÁC HÀM CŨ GIỮ NGUYÊN (LOAD DATA, XÁC NHẬN BID, MỞ LỊCH SỬ...)
-    // ==============================================
     private void loadBalance() {
         if (SessionManager.userName == null) return;
         ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(res -> {
@@ -427,7 +395,6 @@ public class AuctionDetailController {
                                 lblBalance.setText("****** VND");
                             }
                         }
-
                     }
                 }
             });
@@ -444,7 +411,6 @@ public class AuctionDetailController {
     private void updateUI() {
         if (currentItem == null || currentItem.bidProduct == null) return;
 
-        // 1. Cập nhật thông tin cơ bản
         String shortId = currentItem.bidProduct.id != null && currentItem.bidProduct.id.length() >= 4
                 ? currentItem.bidProduct.id.substring(0, 4).toUpperCase()
                 : "N/A";
@@ -457,7 +423,6 @@ public class AuctionDetailController {
             lblHighestBidder.setText(getHighestBidderName(currentItem.bidTransactions));
         }
 
-        // 2. Tìm Giá của tôi (Thay vì gọi hàm ẩn, ta dùng thuật toán tìm trực tiếp cho an toàn)
         double myHighestBid = 0;
         if (currentItem.bidTransactions != null && SessionManager.userName != null) {
             for (AuctionModel.BidTransactionModel tx : currentItem.bidTransactions) {
@@ -472,51 +437,37 @@ public class AuctionDetailController {
             lblMyBid.setText(String.format("%,.0f VND", myHighestBid).replace(",", "."));
         }
 
-        // 3. Xử lý màu sắc dựa trên Trạng Thái
-        String baseColor = "#95a5a6";
-        if ("RUNNING".equals(currentItem.status)) baseColor = "#f39c12";
-        else if ("OPEN".equals(currentItem.status)) baseColor = "#3498db";
-        else if ("FINISHED".equals(currentItem.status) || "PAID".equals(currentItem.status)) baseColor = "#2ecc71";
-        else if ("CANCELLED".equals(currentItem.status)) baseColor = "#e74c3c";
-
         if (lblTimeTitle != null) {
             if ("OPEN".equals(currentItem.status)) lblTimeTitle.setText("Sắp bắt đầu sau:");
             else if ("RUNNING".equals(currentItem.status)) lblTimeTitle.setText("Thời gian còn lại:");
             else lblTimeTitle.setText("Thời gian:");
         }
 
-        // 4. KHỞI TẠO TIMELINE ĐẾM NGƯỢC THÔNG MINH
         if (timeline != null) timeline.stop();
 
         if (("RUNNING".equals(currentItem.status) && currentItem.endTime != null) ||
                 ("OPEN".equals(currentItem.status) && currentItem.startTime != null)) {
             try {
                 String targetTimeStr = "OPEN".equals(currentItem.status) ? currentItem.startTime : currentItem.endTime;
-
-                // Dùng hàm parseTimeSafely (Đã tạo ở bài trước) để loại bỏ mili-giây rác
                 currentTargetTime = parseTimeSafely(targetTimeStr);
 
                 if (currentTargetTime == null) throw new Exception("Lỗi: Không thể phân tích thời gian!");
 
-                String finalBaseColor = baseColor;
                 timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
                     LocalDateTime now = LocalDateTime.now();
 
-                    // Nếu thời gian hiện tại đã vượt qua (hoặc bằng) thời gian kết thúc
                     if (now.isAfter(currentTargetTime) || now.isEqual(currentTargetTime)) {
                         lblTime.setText("00:00:00");
                         lblTime.setStyle("-fx-background-color: #bdc3c7; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
 
-                        timeline.stop(); // Dừng đồng hồ lại
+                        timeline.stop();
 
-                        // Khóa chặt các nút bấm vì đã hết giờ
                         btnBidAction.setDisable(true);
                         btnBidAction.setText("Đã kết thúc");
                         txtBidAmount.setDisable(true);
                         if (btnAutoBidAction != null) btnAutoBidAction.setDisable(true);
 
                     } else {
-                        // Tính toán thời gian còn lại
                         java.time.Duration duration = java.time.Duration.between(now, currentTargetTime);
                         long hours = duration.toHours();
                         long minutes = duration.toMinutesPart();
@@ -524,11 +475,16 @@ public class AuctionDetailController {
 
                         lblTime.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 
-                        // Đổi màu ĐỎ cảnh báo nếu chỉ còn dưới 10 phút (Trong phiên RUNNING)
+                        String baseColor = "#95a5a6";
+                        if ("RUNNING".equals(currentItem.status)) baseColor = "#f39c12";
+                        else if ("OPEN".equals(currentItem.status)) baseColor = "#3498db";
+                        else if ("FINISHED".equals(currentItem.status) || "PAID".equals(currentItem.status)) baseColor = "#2ecc71";
+                        else if ("CANCELLED".equals(currentItem.status)) baseColor = "#e74c3c";
+
                         if ("RUNNING".equals(currentItem.status) && hours == 0 && minutes < 10) {
                             lblTime.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
                         } else {
-                            lblTime.setStyle("-fx-background-color: " + finalBaseColor + "; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
+                            lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
                         }
                     }
                 }));
@@ -540,11 +496,16 @@ public class AuctionDetailController {
                 ex.printStackTrace();
             }
         } else {
+            String baseColor = "#95a5a6";
+            if ("RUNNING".equals(currentItem.status)) baseColor = "#f39c12";
+            else if ("OPEN".equals(currentItem.status)) baseColor = "#3498db";
+            else if ("FINISHED".equals(currentItem.status) || "PAID".equals(currentItem.status)) baseColor = "#2ecc71";
+            else if ("CANCELLED".equals(currentItem.status)) baseColor = "#e74c3c";
+
             lblTime.setText("00:00:00");
             lblTime.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
         }
 
-        // 5. Cập nhật các hàng chi tiết động (Nghệ thuật / Điện tử / Phương tiện)
         if (vboxItemDetails != null) {
             vboxItemDetails.getChildren().clear();
             if (currentItem.bidProduct.itemType != null) {
@@ -567,7 +528,6 @@ public class AuctionDetailController {
 
         if (txtDescription != null) txtDescription.setText(currentItem.bidProduct.description);
 
-        // 6. Cập nhật Ảnh sản phẩm
         if (currentItem.bidProduct.imageUrls != null && !currentItem.bidProduct.imageUrls.isEmpty()) {
             this.imageUrls = currentItem.bidProduct.imageUrls;
         } else {
@@ -576,7 +536,6 @@ public class AuctionDetailController {
         this.currentImageIndex = 0;
         updateImageView();
 
-        // 7. Cập nhật thông tin Người bán (Seller)
         if (currentItem.seller != null) {
             lblSellerName.setText(currentItem.seller.fullName != null ? currentItem.seller.fullName : currentItem.seller.userName);
             lblSellerRating.setText(currentItem.seller.rating + " / 5.0");
@@ -602,10 +561,6 @@ public class AuctionDetailController {
             if(btnNextImage != null) btnNextImage.setDisable(true);
         } else {
             String actualUrl = ApiService.BASE_URL + imageUrls.get(currentImageIndex);
-
-            // =================================================================
-            // ĐÃ SỬA LỖI MỜ ẢNH: Truyền 0, 0 để giữ độ phân giải GỐC siêu nét
-            // =================================================================
             com.auction.util.ImageCacheUtils.loadImage(productImageView, actualUrl, 0, 0, "https://via.placeholder.com/400?text=Loading...");
 
             if(lblImageIndex != null) lblImageIndex.setText((currentImageIndex + 1) + "/" + imageUrls.size());
@@ -652,11 +607,9 @@ public class AuctionDetailController {
                 if (res.statusCode() >= 200 && res.statusCode() < 300) {
                     ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
-                        initBidHistory(currentItem.id);
-                        updateUI();
-                        loadBalance();
                         showToastSuccess();
-                        initBidData();
+                        loadBalance(); // Gọi để cập nhật lại số dư ví sau khi đặt tiền cọc
+                        // WEBSOCKET SẼ TỰ GỌI fetchBidDataFromServer ĐỂ CẬP NHẬT GIÁ
                     } else showToastError(apiRes.message);
                 } else {
                     try { showToastError(ApiService.gson.fromJson(res.body(), ApiResponse.class).message); }
@@ -683,28 +636,15 @@ public class AuctionDetailController {
         delay.play();
     }
 
-    @FXML
-    private void goBack() {
-        if (timeline != null) timeline.stop();
-        if (chartTimeline != null) chartTimeline.stop();
-        try {
-            Node view = FXMLLoader.load(getClass().getResource("/com/auction/view/auction/AuctionList.fxml"));
-            StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
-            if(contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
     private void addDetailRow(String label, String value) {
         String displayValue = (value == null || value.trim().isEmpty() || "null".equals(value)) ? "Đang cập nhật" : value;
 
         Label lblKey = new Label(label);
-        // Gắn class chuẩn của bạn cho chữ tiêu đề (Xám mờ trong Dark Mode)
         lblKey.getStyleClass().add("row-text-muted");
         lblKey.setStyle("-fx-min-width: 110px; -fx-font-size: 14px;");
 
         Label lblValue = new Label(displayValue);
         lblValue.setWrapText(true);
-        // Gắn class chuẩn của bạn cho giá trị (Trắng rực rỡ trong Dark Mode)
         lblValue.getStyleClass().add("row-title-bold");
         lblValue.setStyle("-fx-font-size: 14px;");
 
@@ -712,162 +652,97 @@ public class AuctionDetailController {
     }
 
     // ==============================================================
-    // HÀM KHỞI TẠO LỊCH SỬ ĐẤU GIÁ (TỰ ĐỘNG LÀM MỚI MỖI 2 GIÂY)
-    // Bao gồm: Cập nhật "Giá của tôi", Thanh Tiến Trình & Chống Snipe
+    // HÀM KHỞI TẠO LỊCH SỬ ĐẤU GIÁ BẰNG WEBSOCKET REAL-TIME
     // ==============================================================
     private void initBidHistory(String auctionId) {
-        if (chartTimeline != null) chartTimeline.stop();
         lblHistoryName.setText(currentItem.bidProduct.name);
         lblHistoryStartPrice.setText("Từ: " + String.format("%,.0f", currentItem.bidProduct.startPrice).replace(",", "."));
 
-        chartTimeline = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
-            ApiService.getAsync("/auctions/" + auctionId + "/price-chart").thenAccept(res -> {
-                Platform.runLater(() -> {
-                    if (res.statusCode() == 200) {
-                        ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
-                        if (apiRes.code == 1000) {
-                            java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<AuctionModel.BidTransactionModel>>(){}.getType();
-                            java.util.List<AuctionModel.BidTransactionModel> txs = ApiService.gson.fromJson(apiRes.result, listType);
+        // 1. Tải dữ liệu lần đầu tiên khi mở trang
+        fetchBidDataFromServer(auctionId);
 
-                            double startPrice = currentItem.bidProduct.startPrice;
-                            double maxPrice = startPrice;
-                            vboxBidHistory.getChildren().clear();
+        // 2. KÍCH HOẠT WEBSOCKET LẮNG NGHE REAL-TIME (CÓ CHỐNG SPAM)
+        GlobalWebSocketManager.listenToAuction(auctionId, () -> {
+            Platform.runLater(() -> {
+                // Đợi 0.4s để chắc chắn Database Server đã lưu xong lệnh của Bot
+                wsDebouncer.setOnFinished(e -> {
+                    System.out.println("⚡ WEBSOCKET: Máy chủ đã lưu xong, tải lại dữ liệu mới nhất!");
+                    fetchBidDataFromServer(auctionId);
+                    syncTimeAndStatusRealtime(auctionId);
+                });
+                wsDebouncer.playFromStart(); // Nếu có 10 tin nhắn tới cùng lúc, nó chỉ tải 1 lần!
+            });
+        });
+    }
 
-                            if (txs != null && !txs.isEmpty()) {
-                                // 1. Cập nhật danh sách mới vào biến gốc
-                                currentItem.bidTransactions = txs;
+    // Tách phần lõi tải dữ liệu ra 1 hàm riêng để gọi đi gọi lại cho dễ
+    private void fetchBidDataFromServer(String auctionId) {
+        ApiService.getAsync("/auctions/" + auctionId + "/price-chart").thenAccept(res -> {
+            Platform.runLater(() -> {
+                if (res.statusCode() == 200) {
+                    ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
+                    if (apiRes.code == 1000) {
+                        java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<AuctionModel.BidTransactionModel>>(){}.getType();
+                        java.util.List<AuctionModel.BidTransactionModel> txs = ApiService.gson.fromJson(apiRes.result, listType);
 
-                                txs.sort((t1, t2) -> Double.compare(t1.bidAmount, t2.bidAmount));
+                        double startPrice = currentItem.bidProduct.startPrice;
+                        double maxPrice = startPrice;
+                        vboxBidHistory.getChildren().clear();
 
-                                double myNewHighestBid = 0; // Biến tìm giá của TÔI
+                        if (txs != null && !txs.isEmpty()) {
+                            currentItem.bidTransactions = txs;
+                            txs.sort((t1, t2) -> Double.compare(t1.bidAmount, t2.bidAmount));
 
-                                for (AuctionModel.BidTransactionModel tx : txs) {
-                                    // Tìm giá cao nhất tổng
-                                    if (tx.bidAmount > maxPrice) {
-                                        maxPrice = tx.bidAmount;
-                                    }
-
-                                    // TÌM GIÁ CAO NHẤT CỦA TÔI
-                                    if (SessionManager.userName != null
-                                            && tx.bidder != null
-                                            && tx.bidder.userName != null
-                                            && SessionManager.userName.equalsIgnoreCase(tx.bidder.userName)) {
-                                        if (tx.bidAmount > myNewHighestBid) {
-                                            myNewHighestBid = tx.bidAmount;
-                                        }
-                                    }
+                            double myNewHighestBid = 0;
+                            for (AuctionModel.BidTransactionModel tx : txs) {
+                                if (tx.bidAmount > maxPrice) maxPrice = tx.bidAmount;
+                                if (SessionManager.userName != null && tx.bidder != null && tx.bidder.userName != null && SessionManager.userName.equalsIgnoreCase(tx.bidder.userName)) {
+                                    if (tx.bidAmount > myNewHighestBid) myNewHighestBid = tx.bidAmount;
                                 }
-
-                                // 2. CẬP NHẬT LÊN MÀN HÌNH "GIÁ CỦA TÔI"
-                                if (lblMyBid != null) {
-                                    lblMyBid.setText(String.format("%,.0f VND", myNewHighestBid).replace(",", "."));
-                                }
-
-                                // 3. Hiển thị 5 người đặt giá gần nhất
-                                int displayCount = 0;
-                                for (int i = txs.size() - 1; i >= 0; i--) {
-                                    if (displayCount >= 5) break;
-                                    vboxBidHistory.getChildren().add(createHistoryRow(txs.get(i)));
-                                    displayCount++;
-                                }
-                            } else {
-                                Label lblEmpty = new Label("Chưa có lượt đấu giá nào.");
-                                lblEmpty.setStyle("-fx-text-fill: #95a5a6; -fx-font-style: italic; -fx-padding: 10;");
-                                vboxBidHistory.getChildren().add(lblEmpty);
                             }
 
-                            // 4. CẬP NHẬT PROGRESS BAR VÀ THỐNG KÊ
-                            double growthAmount = maxPrice - startPrice;
-                            double percent = startPrice == 0 ? 0 : (growthAmount / startPrice) * 100;
-                            double progress = startPrice == 0 ? 0 : Math.min(growthAmount / startPrice, 1.0);
+                            if (lblMyBid != null) lblMyBid.setText(String.format("%,.0f VND", myNewHighestBid).replace(",", "."));
 
-                            String colorHex = (percent > 100) ? "#e74c3c" : "#2ecc71";
-                            String percentText = (percent > 100) ? String.format("+%.1f%% ↑", percent) : String.format("+%.1f%%", percent);
-
-                            lblHistoryCurrentPrice.setText("+" + String.format("%,.0f VND", growthAmount).replace(",", "."));
-                            lblHistoryCurrentPrice.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: " + colorHex + ";");
-
-                            lblHistoryPercent.setText(percentText);
-                            lblHistoryPercent.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-min-width: 65px; -fx-alignment: center-right; -fx-text-fill: " + colorHex + ";");
-
-                            bidProgressBar.setProgress(progress);
-                            bidProgressBar.getStyleClass().removeAll("modern-progress-bar", "progress-alert", "progress-normal", "red-progress-bar");
-                            bidProgressBar.getStyleClass().add(percent > 100 ? "progress-alert" : "progress-normal");
-
-                            if (lblHighestBidder != null) lblHighestBidder.setText(getHighestBidderName(txs));
-
-                            // =========================================================
-                            // 5. NẾU CÓ NGƯỜI VỪA ĐẶT GIÁ MỚI -> KIỂM TRA ANTI-SNIPE
-                            // =========================================================
-                            if (maxPrice > currentItem.highestBid) {
-                                currentItem.highestBid = maxPrice;
-                                lblCurrentPrice.setText(String.format("%,.0f VND", maxPrice).replace(",", "."));
-                                initBidData();
-
-                                System.out.println("⏳ ĐANG GỌI API KIỂM TRA ANTI-SNIPE: /auctions/" + auctionId);
-
-                                ApiService.getAsync("/auctions/" + auctionId).thenAccept(infoRes -> {
-                                    System.out.println("📡 HTTP Status trả về: " + infoRes.statusCode());
-
-                                    if (infoRes.statusCode() == 200) {
-                                        ApiResponse infoApiRes = ApiService.gson.fromJson(infoRes.body(), ApiResponse.class);
-                                        if (infoApiRes.code == 1000) {
-                                            AuctionModel updatedAuction = ApiService.gson.fromJson(infoApiRes.result, AuctionModel.class);
-
-                                            Platform.runLater(() -> {
-                                                LocalDateTime newEndTime = parseTimeSafely(updatedAuction.endTime);
-                                                LocalDateTime oldEndTime = parseTimeSafely(currentItem.endTime);
-                                                LocalDateTime nowTime = LocalDateTime.now();
-
-                                                System.out.println("\n========= BẢNG BÁO CÁO ANTI-SNIPE =========");
-                                                System.out.println("🕒 Giờ hiện tại (NOW) : " + nowTime);
-                                                System.out.println("🛑 Giờ kết thúc (CŨ)  : " + oldEndTime);
-                                                System.out.println("🆕 Giờ kết thúc (MỚI) : " + newEndTime);
-
-                                                if (newEndTime != null && oldEndTime != null) {
-                                                    boolean isAfter = newEndTime.isAfter(oldEndTime);
-                                                    System.out.println("⚖️ So sánh (MỚI > CŨ) : " + isAfter);
-
-                                                    if (isAfter) {
-                                                        System.out.println("✅ THÀNH CÔNG: ĐÃ GIA HẠN THỜI GIAN!");
-                                                        currentItem.endTime = updatedAuction.endTime;
-                                                        currentTargetTime = newEndTime;
-
-                                                        if (timeline != null && timeline.getStatus() != javafx.animation.Animation.Status.RUNNING) {
-                                                            System.out.println("🔄 BẬT LẠI ĐỒNG HỒ VÀ MỞ KHÓA NÚT BẤM!");
-                                                            timeline.play();
-                                                            btnBidAction.setDisable(false);
-                                                            btnBidAction.setText("Thủ công");
-                                                            txtBidAmount.setDisable(false);
-                                                            if (btnAutoBidAction != null) btnAutoBidAction.setDisable(false);
-                                                        }
-
-                                                        lblTime.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
-                                                    } else {
-                                                        System.out.println("❌ THẤT BẠI: Thời gian mới từ Server không hề lớn hơn thời gian cũ.");
-                                                    }
-                                                } else {
-                                                    System.out.println("❌ LỖI: Biến thời gian bị NULL!");
-                                                }
-                                                System.out.println("===========================================\n");
-                                            });
-                                        }
-                                    } else {
-                                        System.err.println("❌ LỖI GỌI API ANTI-SNIPE: Không lấy được thông tin từ Server. HTTP Status: " + infoRes.statusCode());
-                                        System.err.println("Chi tiết lỗi: " + infoRes.body());
-                                    }
-                                }).exceptionally(ex -> {
-                                    System.err.println("❌ LỖI MẠNG CHỐNG ANTI-SNIPE: " + ex.getMessage());
-                                    return null;
-                                });
+                            int displayCount = 0;
+                            for (int i = txs.size() - 1; i >= 0; i--) {
+                                if (displayCount >= 5) break;
+                                vboxBidHistory.getChildren().add(createHistoryRow(txs.get(i)));
+                                displayCount++;
                             }
+                        } else {
+                            Label lblEmpty = new Label("Chưa có lượt đấu giá nào.");
+                            lblEmpty.setStyle("-fx-text-fill: #95a5a6; -fx-font-style: italic; -fx-padding: 10;");
+                            vboxBidHistory.getChildren().add(lblEmpty);
+                        }
+
+                        double growthAmount = maxPrice - startPrice;
+                        double percent = startPrice == 0 ? 0 : (growthAmount / startPrice) * 100;
+                        double progress = startPrice == 0 ? 0 : Math.min(growthAmount / startPrice, 1.0);
+
+                        String colorHex = (percent > 100) ? "#e74c3c" : "#2ecc71";
+                        String percentText = (percent > 100) ? String.format("+%.1f%% ↑", percent) : String.format("+%.1f%%", percent);
+
+                        lblHistoryCurrentPrice.setText("+" + String.format("%,.0f VND", growthAmount).replace(",", "."));
+                        lblHistoryCurrentPrice.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: " + colorHex + ";");
+
+                        lblHistoryPercent.setText(percentText);
+                        lblHistoryPercent.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-min-width: 65px; -fx-alignment: center-right; -fx-text-fill: " + colorHex + ";");
+
+                        bidProgressBar.setProgress(progress);
+                        bidProgressBar.getStyleClass().removeAll("modern-progress-bar", "progress-alert", "progress-normal", "red-progress-bar");
+                        bidProgressBar.getStyleClass().add(percent > 100 ? "progress-alert" : "progress-normal");
+
+                        if (lblHighestBidder != null) lblHighestBidder.setText(getHighestBidderName(txs));
+
+                        if (maxPrice > currentItem.highestBid) {
+                            currentItem.highestBid = maxPrice;
+                            lblCurrentPrice.setText(String.format("%,.0f VND", maxPrice).replace(",", "."));
+                            initBidData();
                         }
                     }
-                });
+                }
             });
-        }));
-        chartTimeline.setCycleCount(Timeline.INDEFINITE);
-        chartTimeline.play();
+        });
     }
 
     private HBox createHistoryRow(AuctionModel.BidTransactionModel tx) {
@@ -875,11 +750,9 @@ public class AuctionDetailController {
         String user = (tx.bidder != null && tx.bidder.userName != null) ? tx.bidder.userName : "Ẩn danh";
 
         Label lblUser = new Label(user);
-        // FIX LỖI: Gắn class "row-title-bold" để chữ màu Đen (ở Light Mode) và Trắng (ở Dark Mode)
         lblUser.getStyleClass().add("row-title-bold");
 
         Label lblTime = new Label(time);
-        // FIX LỖI: Gắn class "row-text-muted" để thời gian màu Xám (ở Light Mode) và Xám nhạt (ở Dark Mode)
         lblTime.getStyleClass().add("row-text-muted");
 
         VBox leftBox = new VBox(2, lblUser, lblTime);
@@ -888,7 +761,6 @@ public class AuctionDetailController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Màu cam của giá tiền luôn giữ nguyên vì nó nổi bật trên cả 2 nền
         Label lblPrice = new Label(String.format("%,.0f đ", tx.bidAmount).replace(",", "."));
         lblPrice.setStyle("-fx-font-weight: bold; -fx-text-fill: #e67e22; -fx-font-size: 15px;");
 
@@ -896,7 +768,6 @@ public class AuctionDetailController {
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         row.setStyle("-fx-padding: 10 15;");
 
-        // "custom-row" quyết định màu nền xám nhạt (Light) và xám đen (Dark)
         row.getStyleClass().add("custom-row");
         return row;
     }
@@ -905,19 +776,17 @@ public class AuctionDetailController {
         if (productImageView.getImage() != null) {
             zoomedImageView.setImage(productImageView.getImage());
             paneImageZoom.setVisible(true);
-            if (chartTimeline != null) chartTimeline.pause();
         }
     }
 
     @FXML private void handleCloseImageZoom() {
         paneImageZoom.setVisible(false);
         zoomedImageView.setImage(null);
-        if (chartTimeline != null) chartTimeline.play();
     }
 
     @FXML private void handleOpenChart() {
         if (timeline != null) timeline.stop();
-        if (chartTimeline != null) chartTimeline.stop();
+        GlobalWebSocketManager.stopListeningAuction(); // Đóng kết nối mạng
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionChart.fxml"));
             Node view = loader.load();
@@ -930,7 +799,7 @@ public class AuctionDetailController {
 
     @FXML private void handleOpenHistory() {
         if (timeline != null) timeline.stop();
-        if (chartTimeline != null) chartTimeline.stop();
+        GlobalWebSocketManager.stopListeningAuction(); // Đóng kết nối mạng
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionHistory.fxml"));
             Node view = loader.load();
@@ -943,12 +812,24 @@ public class AuctionDetailController {
 
     @FXML private void handleOpenSellerProfile() {
         if (timeline != null) timeline.stop();
-        if (chartTimeline != null) chartTimeline.stop();
+        GlobalWebSocketManager.stopListeningAuction(); // Đóng kết nối mạng
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/profile/SellerProfile.fxml"));
             Node view = loader.load();
             SellerProfileController controller = loader.getController();
             controller.setSellerData(currentItem.seller, currentItem);
+            StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
+            if(contentArea != null) contentArea.getChildren().setAll(view);
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    private void goBack() {
+        if (timeline != null) timeline.stop();
+        GlobalWebSocketManager.stopListeningAuction();
+
+        try {
+            Node view = FXMLLoader.load(getClass().getResource("/com/auction/view/auction/AuctionList.fxml"));
             StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) { e.printStackTrace(); }
@@ -984,18 +865,61 @@ public class AuctionDetailController {
         if (timeStr == null || timeStr.trim().isEmpty()) return null;
         try {
             timeStr = timeStr.contains("T") ? timeStr : timeStr.replace(" ", "T");
-
-            // Cắt bỏ phần thập phân của giây (ví dụ: .198321)
             if (timeStr.contains(".")) timeStr = timeStr.substring(0, timeStr.indexOf("."));
-
-            // Cắt bỏ múi giờ Z hoặc +07:00 nếu Server lỡ gửi kèm
             if (timeStr.endsWith("Z")) timeStr = timeStr.replace("Z", "");
             if (timeStr.contains("+")) timeStr = timeStr.substring(0, timeStr.indexOf("+"));
-
             return LocalDateTime.parse(timeStr);
         } catch (Exception e) {
             System.err.println("❌ LỖI PARSE THỜI GIAN: Chuỗi gốc [" + timeStr + "] - Lỗi: " + e.getMessage());
             return null;
         }
+    }
+
+    // ==============================================================
+    // ĐỒNG BỘ TRẠNG THÁI VÀ THỜI GIAN QUA WEBSOCKET
+    // ==============================================================
+    private void syncTimeAndStatusRealtime(String auctionId) {
+        ApiService.getAsync("/auctions/" + auctionId).thenAccept(infoRes -> {
+            Platform.runLater(() -> {
+                if (infoRes.statusCode() == 200) {
+                    ApiResponse infoApiRes = ApiService.gson.fromJson(infoRes.body(), ApiResponse.class);
+                    if (infoApiRes.code == 1000) {
+                        AuctionModel updated = ApiService.gson.fromJson(infoApiRes.result, AuctionModel.class);
+
+                        currentItem.status = updated.status;
+                        currentItem.startTime = updated.startTime;
+                        currentItem.endTime = updated.endTime;
+
+                        if ("RUNNING".equals(currentItem.status)) {
+                            btnBidAction.setDisable(false);
+                            btnBidAction.setText("Thủ công");
+                            txtBidAmount.setDisable(false);
+                            if (btnAutoBidAction != null) btnAutoBidAction.setDisable(false);
+                        } else {
+                            btnBidAction.setDisable(true);
+                            btnBidAction.setText("OPEN".equals(currentItem.status) ? "Chưa đến phiên" : "Đã kết thúc");
+                            txtBidAmount.setDisable(true);
+                            if (btnAutoBidAction != null) btnAutoBidAction.setDisable(true);
+                        }
+
+                        String targetTimeStr = "OPEN".equals(currentItem.status) ? currentItem.startTime : currentItem.endTime;
+                        LocalDateTime newTarget = parseTimeSafely(targetTimeStr);
+
+                        if (newTarget != null && currentTargetTime != null && newTarget.isAfter(currentTargetTime)) {
+                            currentTargetTime = newTarget;
+                            lblTime.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-padding: 5 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 16px;");
+                        } else {
+                            currentTargetTime = newTarget;
+                        }
+
+                        if (timeline != null && timeline.getStatus() != javafx.animation.Animation.Status.RUNNING) {
+                            if ("RUNNING".equals(currentItem.status) || "OPEN".equals(currentItem.status)) {
+                                timeline.play();
+                            }
+                        }
+                    }
+                }
+            });
+        });
     }
 }

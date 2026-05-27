@@ -69,6 +69,11 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        // ========================================================
+        // 1. ĐƯA LỆNH NÀY LÊN TRÊN CÙNG ĐỂ NÓ TRANH THỦ KẾT NỐI MẠNG
+        // ========================================================
+        GlobalWebSocketManager.initConnection();
+
         allMenuButtons = Arrays.asList(btnNavHome, btnNavWallet, btnNavAuction, btnNavAdd, btnNavNotif, btnNavProfile, btnNavChat);
 
         for (Button btn : allMenuButtons) {
@@ -84,13 +89,13 @@ public class MainController {
         sidebar.setClip(clipRect);
 
         loadUserInfo();
+
+        // 2. KHI GỌI SHOW DASHBOARD, MẠNG ĐÃ ĐANG ĐƯỢC KẾT NỐI RỒI
         showDashboard(null);
+
         startClock();
-
         startBanChecker();
-        startNotificationChecker(); // BẬT HỆ THỐNG QUÉT THÔNG BÁO REAL-TIME
-
-        GlobalWebSocketManager.initConnection();
+        startNotificationChecker();
 
         applyCurrentTheme(false);
     }
@@ -422,7 +427,7 @@ public class MainController {
             for (Button btn : allMenuButtons) if (btn != null) btn.getStyleClass().remove("active-menu-btn");
 
             contentArea.getChildren().setAll(view);
-            
+
         } catch (Exception e) { e.printStackTrace(); }
     }
 

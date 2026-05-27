@@ -128,6 +128,7 @@ public class WebSocketClientService {
         }
     }
 
+
     public void disconnect() {
         // Đánh dấu cờ này = TRUE để hệ thống Reconnect biết là "Chủ nhân muốn ngắt, đừng tự nối lại nữa"
         intentionallyDisconnected = true;
@@ -139,6 +140,65 @@ public class WebSocketClientService {
             stompClient.stop();
         }
         System.out.println("🛑 STOMP: Đã ngắt kết nối hoàn toàn.");
+    }
+
+    // ==============================================================
+    // KÊNH LẮNG NGHE ĐẤU GIÁ REAL-TIME
+    // ==============================================================
+    private StompSession.Subscription auctionSubscription;
+
+    public void subscribeToAuction(String auctionId, Runnable onNewBidReceived) {
+        if (stompSession != null && stompSession.isConnected()) {
+            // Hủy đăng ký cũ nếu có (Tránh nghe 2 phòng cùng lúc)
+            unsubscribeAuction();
+
+            // Đăng ký nghe vào phòng đấu giá này
+            String destination = "/topic/auctions/" + auctionId;
+            auctionSubscription = stompSession.subscribe(destination, new StompFrameHandler() {
+                @Override
+                public Type getPayloadType(StompHeaders headers) { return String.class; }
+
+                @Override
+                public void handleFrame(StompHeaders headers, Object payload) {
+                    if ("NEW_BID".equals(payload)) {
+                        onNewBidReceived.run(); // Chạy hàm cập nhật giao diện
+                    }
+                }
+            });
+            System.out.println("🎧 STOMP: Đã kết nối vào phòng Đấu giá [" + auctionId + "]");
+        }
+    }
+
+    public void unsubscribeAuction() {
+        if (auctionSubscription != null) {
+            auctionSubscription.unsubscribe();
+            auctionSubscription = null;
+            System.out.println("🔇 STOMP: Đã rời khỏi phòng Đấu giá.");
+        }
+    }
+
+    // ==============================================================
+    // KÊNH LẮNG NGHE TOÀN CỤC CHO MÀN HÌNH DANH SÁCH
+    // ==============================================================
+    private StompSession.Subscription globalAuctionSubscription;
+
+    public void subscribeToGlobalAuctions(Runnable onUpdate) {
+        if (stompSession != null && stompSession.isConnected()) {
+            unsubscribeGlobalAuctions(); // Xóa đăng ký cũ nếu có
+            globalAuctionSubscription = stompSession.subscribe("/topic/auctions/global", new StompFrameHandler() {
+                @Override public Type getPayloadType(StompHeaders headers) { return String.class; }
+                @Override public void handleFrame(StompHeaders headers, Object payload) {
+                    onUpdate.run(); // Chạy hàm cập nhật ngầm
+                }
+            });
+        }
+    }
+
+    public void unsubscribeGlobalAuctions() {
+        if (globalAuctionSubscription != null) {
+            globalAuctionSubscription.unsubscribe();
+            globalAuctionSubscription = null;
+        }
     }
 
     // Đã xóa hàm showErrorToUI vì không cần dùng tới nữa

@@ -5,22 +5,24 @@ import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
 import com.auction.model.WalletDataResponse;
 import com.auction.util.ApiService;
+import com.auction.util.GlobalWebSocketManager;
 import com.auction.util.SessionManager;
 import com.google.gson.reflect.TypeToken;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,51 +31,44 @@ public class MyAuctionListController {
     @FXML private ListView<AuctionModel> myAuctionListView;
     @FXML private Label lblBalance;
     @FXML private Label eyeIconText;
-
-    // THÊM BIẾN NÀY ĐỂ HIỂN THỊ VÒNG XOAY LOADING
     @FXML private VBox loadingOverlay;
 
     private String realBalanceTextDetail = "0 VND";
     private boolean isBalanceHiddenDetail = true;
+    private List<AuctionModel> allMyAuctions = new ArrayList<>();
+
+    // BỘ ĐẾM CHỜ CHỐNG SPAM WEBSOCKET
+    private PauseTransition wsDebouncer = new PauseTransition(Duration.millis(400));
 
     @FXML
     public void initialize() {
-        // ========================================================
-        // TỐI ƯU SIÊU TỐC: CACHE FXML NODE VÀ CHỐNG VÒNG LẶP VÔ TẬN
-        // ========================================================
         myAuctionListView.setCellFactory(param -> new ListCell<AuctionModel>() {
             private Node view;
             private MyAuctionItemController controller;
-            private AuctionModel lastItem = null; // CHÌA KHÓA CHỐNG GIẬT LAG
+            private AuctionModel lastItem = null;
 
             {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/MyAuctionItem.fxml"));
                     view = loader.load();
                     controller = loader.getController();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                } catch (IOException e) { e.printStackTrace(); }
             }
 
             @Override
             protected void updateItem(AuctionModel item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    // CÁCH TỐI ƯU NHẤT: Chỉ cần giấu nguyên cái khung FXML đi là xong.
-                    // Toàn bộ Label, Hình ảnh bên trong sẽ tàng hình theo, không tốn 1 giọt CPU nào.
                     setGraphic(null);
                     setText(null);
                     lastItem = null;
-
-                    // XÓA BỎ HOÀN TOÀN DÒNG NÀY (Không gọi setData(null) nữa):
-                    // if (controller != null) controller.setData(null);
+                    if (controller != null) controller.setData(null);
                 } else {
-                    if (this.lastItem != item) {
+                    // Update nếu là item mới HOẶC giá/trạng thái có thay đổi
+                    if (this.lastItem != item || this.lastItem.highestBid != item.highestBid || !this.lastItem.status.equals(item.status)) {
                         this.lastItem = item;
                         controller.setData(item);
                     }
-                    // Hiện lại khung FXML sau khi đã nạp data mới
                     setGraphic(view);
                 }
             }
@@ -81,46 +76,58 @@ public class MyAuctionListController {
 
         myAuctionListView.setOnMouseClicked(event -> {
             AuctionModel selected = myAuctionListView.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                showProductDetail(selected);
-            }
+            if (selected != null) showProductDetail(selected);
         });
 
+        // 1. Tải lần đầu (Có vòng xoay Loading)
         loadData();
+
+        // =================================================================
+        // 2. WEBSOCKET REAL-TIME: NGỒI CHỜ SERVER BÁO CÓ NGƯỜI ĐẶT GIÁ MỚI
+        // =================================================================
+        GlobalWebSocketManager.listenToGlobalAuctions(() -> {
+            Platform.runLater(() -> {
+                wsDebouncer.setOnFinished(e -> {
+                    System.out.println("⚡ WS MY-AUCTIONS: Có biến! Đang tải lại ngầm...");
+                    loadDataSilently();
+                });
+                wsDebouncer.playFromStart();
+            });
+        });
+
+        // Gỡ lắng nghe khi chuyển trang
+        myAuctionListView.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) GlobalWebSocketManager.stopListeningGlobalAuctions();
+        });
     }
 
     @FXML
     public void loadData() {
+        if (loadingOverlay != null) loadingOverlay.setVisible(true);
+        myAuctionListView.setOpacity(0);
+        fetchDataFromServer(true);
+    }
+
+    private void loadDataSilently() {
+        fetchDataFromServer(false);
+    }
+
+    private void fetchDataFromServer(boolean showLoading) {
         String currentUser = SessionManager.userName;
         if (currentUser == null) return;
 
-        if (loadingOverlay != null) loadingOverlay.setVisible(true);
-        myAuctionListView.getItems().clear();
-
-        // Đánh dấu thời gian bắt đầu tải
-        long startTime = System.currentTimeMillis();
-
         CompletableFuture.runAsync(() -> {
             try {
-                long apiStart = System.currentTimeMillis();
-
-                // =========================================================
-                // 1. GỌI CẢ 2 API CÙNG MỘT LÚC (Gấp đôi tốc độ)
-                // =========================================================
+                // Tải số dư
                 var balanceReq = ApiService.getAsync("/payments/" + currentUser + "/history");
                 var auctionsReq = ApiService.getAsync("/auctions/my-auctions?username=" + currentUser);
 
-                // Lệnh này bắt luồng ngầm phải chờ ĐẾN KHI CẢ 2 API ĐỀU TRẢ VỀ KẾT QUẢ
                 CompletableFuture.allOf(balanceReq, auctionsReq).join();
 
-                System.out.println("⏳ [ĐO LƯỜNG] Thời gian Server phản hồi 2 API: " + (System.currentTimeMillis() - apiStart) + "ms");
-
-                // =========================================================
-                // 2. XỬ LÝ SỐ DƯ
-                // =========================================================
+                // Xử lý số dư
                 var resBalance = balanceReq.get();
                 if (resBalance.statusCode() == 200) {
-                    com.auction.model.ApiResponse apiRes = ApiService.gson.fromJson(resBalance.body(), com.auction.model.ApiResponse.class);
+                    ApiResponse apiRes = ApiService.gson.fromJson(resBalance.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
                         WalletDataResponse wallet = ApiService.gson.fromJson(apiRes.result, WalletDataResponse.class);
                         Platform.runLater(() -> {
@@ -132,48 +139,67 @@ public class MyAuctionListController {
                     }
                 }
 
-                // =========================================================
-                // 3. XỬ LÝ DANH SÁCH (Đã bỏ cơ chế Chunking vì ta đã tối ưu FXML)
-                // =========================================================
-                long parseStart = System.currentTimeMillis();
+                // Xử lý Danh sách
                 var resAuctions = auctionsReq.get();
                 if (resAuctions.statusCode() == 200) {
-                    com.auction.model.ApiResponse apiRes = ApiService.gson.fromJson(resAuctions.body(), com.auction.model.ApiResponse.class);
+                    ApiResponse apiRes = ApiService.gson.fromJson(resAuctions.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
-                        java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<AuctionModel>>(){}.getType();
+                        java.lang.reflect.Type listType = new TypeToken<List<AuctionModel>>(){}.getType();
                         List<AuctionModel> myAuctions = ApiService.gson.fromJson(apiRes.result, listType);
 
-                        System.out.println("⏳ [ĐO LƯỜNG] Thời gian dịch JSON (" + myAuctions.size() + " items): " + (System.currentTimeMillis() - parseStart) + "ms");
-
-                        // Đưa dữ liệu lên UI và tắt vòng xoay ngay lập tức (Không Sleep nữa)
-                        long uiStart = System.currentTimeMillis();
                         Platform.runLater(() -> {
-                            myAuctionListView.getItems().setAll(myAuctions);
-                            if (loadingOverlay != null) loadingOverlay.setVisible(false);
+                            allMyAuctions = myAuctions;
 
-                            System.out.println("⏳ [ĐO LƯỜNG] Thời gian JavaFX vẽ Danh sách: " + (System.currentTimeMillis() - uiStart) + "ms");
-                            System.out.println("🚀 [HOÀN THÀNH] TỔNG THỜI GIAN: " + (System.currentTimeMillis() - startTime) + "ms\n");
+                            if (allMyAuctions.isEmpty()) {
+                                myAuctionListView.getItems().clear();
+                                if (loadingOverlay != null) loadingOverlay.setVisible(false);
+                                myAuctionListView.setOpacity(1);
+                                return;
+                            }
+
+                            // Giữ nguyên vị trí thanh cuộn khi tải ngầm
+                            double scrollPos = 0;
+                            if (!showLoading && !myAuctionListView.getItems().isEmpty()) {
+                                Node scrollBar = myAuctionListView.lookup(".scroll-bar:vertical");
+                                if (scrollBar instanceof ScrollBar) scrollPos = ((ScrollBar) scrollBar).getValue();
+                            }
+
+                            myAuctionListView.getItems().setAll(allMyAuctions);
+
+                            if (showLoading) {
+                                javafx.animation.PauseTransition showPause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(100));
+                                showPause.setOnFinished(e -> {
+                                    if (loadingOverlay != null) loadingOverlay.setVisible(false);
+                                    myAuctionListView.setOpacity(1);
+                                });
+                                showPause.play();
+                            } else {
+                                final double finalPos = scrollPos;
+                                Platform.runLater(() -> {
+                                    Node scrollBar = myAuctionListView.lookup(".scroll-bar:vertical");
+                                    if (scrollBar instanceof ScrollBar) ((ScrollBar) scrollBar).setValue(finalPos);
+                                });
+                            }
                         });
-                    } else {
-                        Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
-                    }
-                } else {
-                    Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
-                }
+                    } else if (showLoading) hideLoading();
+                } else if (showLoading) hideLoading();
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Platform.runLater(() -> { if (loadingOverlay != null) loadingOverlay.setVisible(false); });
+                if (showLoading) hideLoading();
             }
         });
     }
 
     private void hideLoading() {
-        if (loadingOverlay != null) loadingOverlay.setVisible(false);
-        myAuctionListView.setOpacity(1);
+        Platform.runLater(() -> {
+            if (loadingOverlay != null) loadingOverlay.setVisible(false);
+            myAuctionListView.setOpacity(1);
+        });
     }
 
     private void showProductDetail(AuctionModel item) {
+        GlobalWebSocketManager.stopListeningGlobalAuctions(); // Ngắt cáp mạng khi qua trang chi tiết
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
             Node view = loader.load();
@@ -187,50 +213,35 @@ public class MyAuctionListController {
     @FXML
     public void goToAddProduct() {
         if (SessionManager.userName == null) return;
+        GlobalWebSocketManager.stopListeningGlobalAuctions();
 
-        // ===================================================================
-        // TỰ ĐỘNG CẬP NHẬT QUYỀN HẠN TỪ SERVER TRƯỚC KHI CHUYỂN TRANG
-        // ===================================================================
-
-        // Hiện vòng xoay loading (nếu có) để user biết đang xử lý
         if (loadingOverlay != null) loadingOverlay.setVisible(true);
-        
+
         ApiService.getAsync("/users/profile/" + SessionManager.userName).thenAccept(res -> {
             Platform.runLater(() -> {
-                // Tắt vòng xoay loading
                 if (loadingOverlay != null) loadingOverlay.setVisible(false);
 
                 if (res.statusCode() >= 200 && res.statusCode() < 300) {
                     ApiResponse apiRes = ApiService.gson.fromJson(res.body(), ApiResponse.class);
                     if (apiRes.code == 1000) {
-                        // Giải mã thông tin user mới nhất
                         com.auction.model.UserModel currentUser = ApiService.gson.fromJson(apiRes.result, com.auction.model.UserModel.class);
-
-                        // LÀM MỚI QUYỀN TRONG RAM MÀ KHÔNG CẦN ĐĂNG XUẤT
                         SessionManager.role = currentUser.role;
                     }
-                } else {
-                    System.err.println("Lỗi gọi API check quyền: " + res.statusCode());
                 }
 
-                // Sau khi đã làm mới RAM, tiến hành kiểm tra quyền
                 if ("SELLER".equals(SessionManager.role) || "ADMIN".equals(SessionManager.role)) {
-                    // Đã là Seller -> Mở trang thêm sản phẩm
                     try {
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/addauctionitem/AddProduct.fxml"));
                         Node view = loader.load();
                         StackPane contentArea = (StackPane) myAuctionListView.getScene().lookup("#contentArea");
                         if (contentArea != null) contentArea.getChildren().setAll(view);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    } catch (Exception e) { e.printStackTrace(); }
                 } else {
-                    // Chưa là Seller -> Chặn lại và hiện thông báo
                     javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
                     alert.setTitle("Từ chối truy cập");
                     alert.setHeaderText(null);
                     alert.setContentText("Bạn chưa có quyền SELLER để đưa sản phẩm lên sàn!\nVui lòng liên hệ Admin để được nâng cấp tài khoản.");
-                    com.auction.util.AlertUtils.applyStyle(alert); // Gọi CSS nếu có
+                    com.auction.util.AlertUtils.applyStyle(alert);
                     alert.showAndWait();
                 }
             });
