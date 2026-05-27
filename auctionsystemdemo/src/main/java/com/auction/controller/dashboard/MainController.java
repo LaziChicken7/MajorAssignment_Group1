@@ -216,13 +216,13 @@ public class MainController {
     }
 
     // ====== CÁC HÀM XỬ LÝ CHUYỂN TRANG ======
-    @FXML public void showDashboard(ActionEvent event) { loadView("/com/auction/view/dashboard/Dashboard.fxml"); setActiveButton(btnNavHome); collapseSidebar(); }
-    @FXML public void showWallet(ActionEvent event) { loadView("/com/auction/view/wallet/Wallet.fxml"); setActiveButton(btnNavWallet); collapseSidebar(); }
-    @FXML public void showAuctionList(ActionEvent event) { loadView("/com/auction/view/auction/AuctionList.fxml"); setActiveButton(btnNavAuction); collapseSidebar(); }
-    @FXML public void handleShowMyProducts(ActionEvent event) { loadView("/com/auction/view/auction/MyAuctionList.fxml"); setActiveButton(btnNavAdd); collapseSidebar(); }
-    @FXML public void showNotification(ActionEvent event) { loadView("/com/auction/view/notification/NotificationList.fxml"); setActiveButton(btnNavNotif); collapseSidebar(); }
-    @FXML public void showProfile(ActionEvent event) { loadView("/com/auction/view/profile/Profile.fxml"); setActiveButton(btnNavProfile); collapseSidebar(); }
-    @FXML public void showChat(ActionEvent event) { loadView("/com/auction/view/chat/Chat.fxml"); setActiveButton(btnNavChat); collapseSidebar(); }
+    @FXML public void showDashboard(ActionEvent event) { loadView("/com/auction/view/dashboard/Dashboard.fxml"); setActiveButton(btnNavHome); }
+    @FXML public void showWallet(ActionEvent event) { loadView("/com/auction/view/wallet/Wallet.fxml"); setActiveButton(btnNavWallet); }
+    @FXML public void showAuctionList(ActionEvent event) { loadView("/com/auction/view/auction/AuctionList.fxml"); setActiveButton(btnNavAuction); }
+    @FXML public void handleShowMyProducts(ActionEvent event) { loadView("/com/auction/view/auction/MyAuctionList.fxml"); setActiveButton(btnNavAdd); }
+    @FXML public void showNotification(ActionEvent event) { loadView("/com/auction/view/notification/NotificationList.fxml"); setActiveButton(btnNavNotif); }
+    @FXML public void showProfile(ActionEvent event) { loadView("/com/auction/view/profile/Profile.fxml"); setActiveButton(btnNavProfile); }
+    @FXML public void showChat(ActionEvent event) { loadView("/com/auction/view/chat/Chat.fxml"); setActiveButton(btnNavChat); }
 
     @FXML
     public void toggleSidebar() {
@@ -422,7 +422,7 @@ public class MainController {
             for (Button btn : allMenuButtons) if (btn != null) btn.getStyleClass().remove("active-menu-btn");
 
             contentArea.getChildren().setAll(view);
-            collapseSidebar();
+            
         } catch (Exception e) { e.printStackTrace(); }
     }
 
