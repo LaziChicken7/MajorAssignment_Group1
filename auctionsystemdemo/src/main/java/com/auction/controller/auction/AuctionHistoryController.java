@@ -1,5 +1,7 @@
 package com.auction.controller.auction;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
 import com.auction.util.ApiService;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 public class AuctionHistoryController {
 
     @FXML private Label lblTitle;
@@ -34,6 +37,7 @@ public class AuctionHistoryController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         // Cài đặt dữ liệu cho các cột của Bảng
         colStt.setCellValueFactory(cellData -> {
             // Tính số thứ tự giảm dần (Người mới nhất là số 1)
@@ -126,6 +130,7 @@ public class AuctionHistoryController {
     // =====================================
     @FXML
     private void goBack() {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
             Node view = loader.load();
@@ -138,7 +143,7 @@ public class AuctionHistoryController {
                 contentArea.getChildren().setAll(view);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 }

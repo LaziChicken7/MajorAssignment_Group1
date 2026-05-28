@@ -17,6 +17,7 @@ import javafx.util.Duration;
 
 import java.time.LocalDateTime;
 
+@lombok.extern.slf4j.Slf4j
 public class MyAuctionItemController {
 
     @FXML private Pane rootPane;
@@ -137,6 +138,7 @@ public class MyAuctionItemController {
 
     @FXML
     private void handleStartAuction() {
+        log.info("\u25B6 Controller Action - Execute: handleStartAuction()");
         if (currentItem == null) return;
 
         ApiService.putAsync("/auctions/" + currentItem.id + "/start", null).thenAccept(res -> {
@@ -157,6 +159,7 @@ public class MyAuctionItemController {
     }
 
     private void showErrorAlert(String message) {
+        log.info("\u25B6 Controller Action - Execute: showErrorAlert()");
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
         alert.setTitle("Lỗi");
         alert.setHeaderText(null);

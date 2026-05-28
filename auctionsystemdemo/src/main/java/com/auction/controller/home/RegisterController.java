@@ -1,5 +1,7 @@
 package com.auction.controller.home;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.UserCreationRequest;
 import com.auction.util.ApiService;
@@ -25,6 +27,7 @@ import javafx.scene.input.KeyCode;
 
 import java.io.IOException;
 
+@Slf4j
 public class RegisterController {
 
     @FXML private HBox rootPane;
@@ -37,6 +40,7 @@ public class RegisterController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         applyCurrentTheme(false);
 
         // ==========================================
@@ -51,6 +55,7 @@ public class RegisterController {
 
     @FXML
     public void handleThemeToggle() {
+        log.info("\u25B6 Controller Action - Execute: handleThemeToggle()");
         SessionManager.isDarkMode = !SessionManager.isDarkMode;
         applyCurrentTheme(true);
     }
@@ -79,6 +84,7 @@ public class RegisterController {
 
     @FXML
     private void handleRegister() {
+        log.info("\u25B6 Controller Action - Execute: handleRegister()");
         String fullName = txtFullName.getText().trim();
         String email = txtEmail.getText().trim();
         String user = txtUsername.getText().trim();
@@ -133,14 +139,16 @@ public class RegisterController {
 
     @FXML
     private void goToLogin() {
+        log.info("\u25B6 Controller Action - Execute: goToLogin()");
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/com/auction/view/dashboard/Login.fxml"));
             Stage stage = (Stage) txtUsername.getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { log.error("Exception occurred", e); }
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null);
         if (content != null && content.length() > 100) {

@@ -1,5 +1,7 @@
 package com.auction.controller.auction;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
 import com.auction.util.ApiService;
@@ -25,6 +27,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 public class AuctionChartController {
 
     @FXML private VBox chartContainer;
@@ -251,6 +254,7 @@ public class AuctionChartController {
 
     @FXML
     private void goBack() {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         // =======================================================
         // ĐÓNG WEBSOCKET KHI QUAY LẠI ĐỂ TIẾT KIỆM TÀI NGUYÊN MẠNG
         // =======================================================
@@ -266,7 +270,7 @@ public class AuctionChartController {
                 contentArea.getChildren().setAll(view);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.auction.controller.search;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
 import com.auction.model.ConnectionModel;
@@ -27,6 +29,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Slf4j
 public class SearchController {
 
     @FXML private Label lblKeyword;
@@ -35,6 +38,7 @@ public class SearchController {
 
     @FXML
     public void handleGoBack(MouseEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleGoBack()");
         if (com.auction.controller.dashboard.MainController.getInstance() != null) {
             com.auction.controller.dashboard.MainController.getInstance().showDashboard(null);
         }
@@ -125,8 +129,8 @@ public class SearchController {
                                             contentArea.getChildren().setAll(view);
                                         }
                                     } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                        System.out.println("Lỗi khi mở chi tiết sản phẩm từ thanh tìm kiếm!");
+                                        log.error("Exception occurred", ex);
+                                        log.info("Lỗi khi mở chi tiết sản phẩm từ thanh tìm kiếm!");
                                     }
                                 });
 
@@ -354,6 +358,7 @@ public class SearchController {
     // HÀM HIỂN THỊ THÔNG BÁO POPUP
     // ===============================================
     private void showAlert(Alert.AlertType type, String title, String msg) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);

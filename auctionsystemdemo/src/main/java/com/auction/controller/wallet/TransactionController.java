@@ -1,5 +1,7 @@
 package com.auction.controller.wallet;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.TransactionHistoryResponse;
 import com.auction.model.WalletDataResponse;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 public class TransactionController {
 
     @FXML private VBox successContainer;
@@ -28,10 +31,12 @@ public class TransactionController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         loadTransactionData();
     }
 
     private void loadTransactionData() {
+        log.info("\u25B6 Controller Action - Execute: loadTransactionData()");
         if (SessionManager.userName == null) return;
 
         ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(response -> {
@@ -52,7 +57,7 @@ public class TransactionController {
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("Lỗi parse JSON trong Transaction: " + e.getMessage());
+                    log.info("Lỗi parse JSON trong Transaction: " + e.getMessage());
                 }
             });
         });
@@ -188,6 +193,7 @@ public class TransactionController {
 
     @FXML
     public void handleBackToWallet(javafx.scene.input.MouseEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleBackToWallet()");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/wallet/Wallet.fxml"));
             Node view = loader.load();
@@ -197,7 +203,7 @@ public class TransactionController {
                 contentArea.getChildren().setAll(view);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 }

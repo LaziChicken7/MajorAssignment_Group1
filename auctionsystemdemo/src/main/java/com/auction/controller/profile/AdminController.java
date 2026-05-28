@@ -1,5 +1,7 @@
 package com.auction.controller.profile;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.*;
 import com.auction.util.ApiService;
 import com.auction.util.AlertUtils; // IMPORT ALERTUTILS
@@ -16,6 +18,7 @@ import javafx.scene.layout.*;
 import java.lang.reflect.Type;
 import java.util.List;
 
+@Slf4j
 public class AdminController {
 
     @FXML private TableColumn<ItemModel, Void> colItemActions;
@@ -36,6 +39,7 @@ public class AdminController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         setupItemTable();
         setupAuctionTable();
         setupUserTable();
@@ -44,6 +48,7 @@ public class AdminController {
 
     @FXML
     public void loadAllData() {
+        log.info("\u25B6 Controller Action - Execute: loadAllData()");
         loadItems();
         loadAuctions();
         loadUsers();
@@ -131,6 +136,7 @@ public class AdminController {
     }
 
     private void loadItems() {
+        log.info("\u25B6 Controller Action - Execute: loadItems()");
         ApiService.getAsync("/items").thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -183,6 +189,7 @@ public class AdminController {
     }
 
     private void showBidHistory(AuctionModel auction) {
+        log.info("\u25B6 Controller Action - Execute: showBidHistory()");
         // SỬA LỖI 2: CHỐNG NULL POINTER KHIẾN POPUP KHÔNG THỂ HIỆN LÊN
         String productName = (auction.bidProduct != null && auction.bidProduct.name != null)
                 ? auction.bidProduct.name : "Sản phẩm không xác định";
@@ -219,6 +226,7 @@ public class AdminController {
     }
 
     private void loadAuctions() {
+        log.info("\u25B6 Controller Action - Execute: loadAuctions()");
         ApiService.getAsync("/auctions").thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -276,6 +284,7 @@ public class AdminController {
     }
 
     private void loadUsers() {
+        log.info("\u25B6 Controller Action - Execute: loadUsers()");
         ApiService.getAsync("/users/admin").thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -341,10 +350,11 @@ public class AdminController {
 
     @FXML
     private void goBack() {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         try {
             Node view = FXMLLoader.load(getClass().getResource("/com/auction/view/profile/Profile.fxml"));
             StackPane contentArea = (StackPane) tbItems.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 }

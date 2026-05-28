@@ -12,6 +12,7 @@ import javafx.scene.control.TextInputDialog;
 import java.util.HashMap;
 import java.util.Map;
 
+@lombok.extern.slf4j.Slf4j
 public class NotificationItemController {
 
     @FXML private Label lblTitle, lblDescription, lblTime;
@@ -46,6 +47,7 @@ public class NotificationItemController {
 
     @FXML
     private void handleAccept() {
+        log.info("\u25B6 Controller Action - Execute: handleAccept()");
         String tempMsg = "Xác nhận thành công!";
         if ("UPGRADE_REQUEST".equals(currentItem.type)) {
             tempMsg = "Đã phê duyệt yêu cầu lên Seller!";
@@ -64,6 +66,7 @@ public class NotificationItemController {
 
     @FXML
     private void handleDecline() {
+        log.info("\u25B6 Controller Action - Execute: handleDecline()");
         // NẾU LÀ YÊU CẦU LÊN SELLER -> BẬT HỘP THOẠI HỎI LÝ DO
         if ("UPGRADE_REQUEST".equals(currentItem.type)) {
             TextInputDialog dialog = new TextInputDialog();
@@ -96,12 +99,14 @@ public class NotificationItemController {
 
     @FXML
     private void handleDelete() {
+        log.info("\u25B6 Controller Action - Execute: handleDelete()");
         ApiService.deleteAsync("/notifications/" + currentItem.notificationId)
                 .thenAccept(res -> handleResponse(res.statusCode(), null)); // Null msg để không nhảy Popup thông báo
     }
 
     // Hàm xử lý chung sau khi gọi API
     private void handleResponse(int statusCode, String successMsg) {
+        log.info("\u25B6 Controller Action - Execute: handleResponse()");
         Platform.runLater(() -> {
             if (statusCode >= 200 && statusCode < 300) {
                 if (successMsg != null) showAlert(Alert.AlertType.INFORMATION, "Thành công", successMsg);
@@ -113,6 +118,7 @@ public class NotificationItemController {
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
         com.auction.util.AlertUtils.applyStyle(alert);

@@ -1,5 +1,7 @@
 package com.auction;
 
+
+import lombok.extern.slf4j.Slf4j;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,6 +11,7 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
+@Slf4j
 public class App extends Application {
 
     @Override
@@ -17,7 +20,7 @@ public class App extends Application {
         URL fxmlLocation = getClass().getResource("/com/auction/view/dashboard/Login.fxml");
 
         if (fxmlLocation == null) {
-            System.out.println("Lỗi: Không tìm thấy file Main.fxml. Hãy kiểm tra lại thư mục resources!");
+            log.info("Lỗi: Không tìm thấy file Main.fxml. Hãy kiểm tra lại thư mục resources!");
             return;
         }
         Image logo = new Image(getClass().getResourceAsStream("/com/auction/view/logo.png"));

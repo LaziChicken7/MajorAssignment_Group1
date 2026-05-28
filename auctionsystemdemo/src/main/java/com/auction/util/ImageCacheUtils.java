@@ -1,5 +1,7 @@
 package com.auction.util;
 
+
+import lombok.extern.slf4j.Slf4j;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 public class ImageCacheUtils {
 
     private static final ConcurrentHashMap<String, SoftReference<Image>> memoryCache = new ConcurrentHashMap<>();
@@ -61,7 +64,7 @@ public class ImageCacheUtils {
         SoftReference<Image> cachedRef = memoryCache.get(safeFileName);
         if (cachedRef != null && cachedRef.get() != null) {
             imageView.setImage(cachedRef.get());
-            System.out.println("⚡ RAM Cache Hit: " + safeFileName);
+            log.info("⚡ RAM Cache Hit: " + safeFileName);
             return;
         }
 
@@ -74,13 +77,13 @@ public class ImageCacheUtils {
                 Image finalImage;
 
                 if (localFile.exists() && localFile.length() > 0) {
-                    System.out.println("✅ MỞ LẠI TỪ Ổ CỨNG (Không tải mạng): " + safeFileName);
+                    log.info("✅ MỞ LẠI TỪ Ổ CỨNG (Không tải mạng): " + safeFileName);
                     finalImage = new Image(localFile.toURI().toString(), width, height, true, true, false);
                 } else {
                     Object lock = fileLocks.computeIfAbsent(safeFileName, k -> new Object());
                     synchronized (lock) {
                         if (!localFile.exists() || localFile.length() == 0) {
-                            System.out.println("🌐 ĐANG TẢI MỚI TỪ MẠNG: " + imageUrl);
+                            log.info("🌐 ĐANG TẢI MỚI TỪ MẠNG: " + imageUrl);
                             URL url = new URL(imageUrl);
                             try (InputStream in = url.openStream()) {
                                 Files.copy(in, localFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -94,7 +97,7 @@ public class ImageCacheUtils {
                 Platform.runLater(() -> imageView.setImage(finalImage));
 
             } catch (Exception e) {
-                System.err.println("❌ LỖI TẢI ẢNH: " + imageUrl + " -> " + e.getMessage());
+                log.error("❌ LỖI TẢI ẢNH: " + imageUrl + " -> " + e.getMessage());
                 File localFile = new File(CACHE_DIR, safeFileName);
                 if (localFile.exists()) localFile.delete();
 
@@ -110,7 +113,7 @@ public class ImageCacheUtils {
     public static void clearMemoryCache() {
         memoryCache.clear();
         placeholderCache.clear(); // Xóa luôn cache placeholder
-        System.out.println("🧹 Đã dọn sạch ảnh lưu trên RAM.");
+        log.info("🧹 Đã dọn sạch ảnh lưu trên RAM.");
     }
 
     public static void clearDiskCache() {
@@ -125,9 +128,9 @@ public class ImageCacheUtils {
                         }
                     }
                 }
-                System.out.println("🗑️ Đã xóa toàn bộ file ảnh rác trên Ổ CỨNG (.AuctionAppCache).");
+                log.info("🗑️ Đã xóa toàn bộ file ảnh rác trên Ổ CỨNG (.AuctionAppCache).");
             } catch (Exception e) {
-                System.err.println("❌ Lỗi khi dọn dẹp ổ cứng: " + e.getMessage());
+                log.error("❌ Lỗi khi dọn dẹp ổ cứng: " + e.getMessage());
             }
         });
     }

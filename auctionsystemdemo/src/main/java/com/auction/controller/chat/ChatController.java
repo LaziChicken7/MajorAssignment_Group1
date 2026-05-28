@@ -1,5 +1,7 @@
 package com.auction.controller.chat;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.ChatMessageModel;
 import com.auction.model.ConnectionModel;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class ChatController {
 
     @FXML private VBox vboxFriends, vboxMessages, paneWaiting;
@@ -75,6 +78,7 @@ public class ChatController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         vboxMessages.heightProperty().addListener((observable, oldValue, newValue) -> scrollMessages.setVvalue(1.0));
         loadFriendsList();
         GlobalWebSocketManager.setActiveChatListener(this::handleIncomingMessageUI);
@@ -90,6 +94,7 @@ public class ChatController {
 
     @FXML
     public void goBack(javafx.scene.input.MouseEvent event) {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         try {
             GlobalWebSocketManager.currentActiveChatPartner = null;
             GlobalWebSocketManager.setActiveChatListener(null);
@@ -101,11 +106,12 @@ public class ChatController {
             javafx.scene.layout.Pane contentArea = (javafx.scene.layout.Pane) source.getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 
     private void handleIncomingMessageUI(ChatMessageModel msg) {
+        log.info("\u25B6 Controller Action - Execute: handleIncomingMessageUI()");
         if (msg == null) return;
         Platform.runLater(() -> processNewMessageState(msg));
     }
@@ -227,6 +233,7 @@ public class ChatController {
     }
 
     private void loadChatHistory() {
+        log.info("\u25B6 Controller Action - Execute: loadChatHistory()");
         vboxMessages.getChildren().clear();
         lastMessageTime = null; // Reset lại biến đếm thời gian khi mở chat mới
 
@@ -260,6 +267,7 @@ public class ChatController {
     }
 
     private void loadFriendsList() {
+        log.info("\u25B6 Controller Action - Execute: loadFriendsList()");
         ApiService.getAsync("/chat/friends?username=" + SessionManager.userName).thenAccept(res -> {
             Platform.runLater(() -> {
                 if (res.statusCode() == 200) {
@@ -500,6 +508,7 @@ public class ChatController {
     }
 
     private void openChatWith(ConnectionModel.UserModel friend) {
+        log.info("\u25B6 Controller Action - Execute: openChatWith()");
         currentChatPartner = friend.userName;
         GlobalWebSocketManager.currentActiveChatPartner = currentChatPartner;
 
@@ -554,6 +563,7 @@ public class ChatController {
 
     @FXML
     private void showChatInfo() {
+        log.info("\u25B6 Controller Action - Execute: showChatInfo()");
         if (currentChatPartner == null) return;
 
         isInfoPanelOpen = !isInfoPanelOpen;
@@ -586,11 +596,13 @@ public class ChatController {
 
     @FXML
     private void handleViewProfile() {
+        log.info("\u25B6 Controller Action - Execute: handleViewProfile()");
         com.auction.util.ToastNotification.show("Tính năng", "Tính năng xem trang cá nhân đang được cập nhật!");
     }
 
     @FXML
     private void handleUnfriend() {
+        log.info("\u25B6 Controller Action - Execute: handleUnfriend()");
         if (currentChatPartner == null) return;
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Hủy kết bạn với người này?", ButtonType.YES, ButtonType.NO);
         com.auction.util.AlertUtils.applyStyle(alert);
@@ -646,7 +658,7 @@ public class ChatController {
                             }
                         }
                     } catch (Exception e) {
-                        System.err.println("Lỗi đọc JSON Role: " + e.getMessage());
+                        log.error("Lỗi đọc JSON Role: " + e.getMessage());
                     }
                 }
                 lblInfoRole.setText(roleDisplay);
@@ -683,6 +695,7 @@ public class ChatController {
 
     @FXML
     private void showAttachmentMenu() {
+        log.info("\u25B6 Controller Action - Execute: showAttachmentMenu()");
         if (attachmentMenuPopup == null) {
             attachmentMenuPopup = new Popup();
             attachmentMenuPopup.setAutoHide(true);
@@ -734,6 +747,7 @@ public class ChatController {
 
     @FXML
     private void showAllFriends(javafx.event.ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: showAllFriends()");
         try {
             GlobalWebSocketManager.currentActiveChatPartner = null;
             GlobalWebSocketManager.setActiveChatListener(null);
@@ -745,7 +759,7 @@ public class ChatController {
             javafx.scene.layout.Pane contentArea = (javafx.scene.layout.Pane) source.getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.auction.controller.notification;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.NotificationModel;
 import com.auction.util.ApiService;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class NotificationController {
 
     @FXML private ListView<NotificationModel> lvNotifications;
@@ -33,6 +36,7 @@ public class NotificationController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         // Render từng dòng thông báo
         lvNotifications.setCellFactory(param -> new ListCell<NotificationModel>() {
             @Override
@@ -49,7 +53,7 @@ public class NotificationController {
                         NotificationItemController controller = loader.getController();
                         controller.setData(item, () -> loadData());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("Exception occurred", e);
                     }
                 }
             }
@@ -68,6 +72,7 @@ public class NotificationController {
 
     @FXML
     public void loadData() {
+        log.info("\u25B6 Controller Action - Execute: loadData()");
         if (SessionManager.userName == null) return;
 
         ApiService.getAsync("/notifications/" + SessionManager.userName).thenAccept(res -> {
@@ -96,6 +101,7 @@ public class NotificationController {
     // ==========================================
 
     private void openPopup(NotificationModel item) {
+        log.info("\u25B6 Controller Action - Execute: openPopup()");
         this.selectedNotification = item;
 
         lblPopupTitle.setText(item.title);
@@ -130,6 +136,7 @@ public class NotificationController {
     // ==========================================
     @FXML
     private void handlePopupAccept() {
+        log.info("\u25B6 Controller Action - Execute: handlePopupAccept()");
         if (selectedNotification == null) return;
 
         String tempMsg = "Xác nhận thành công!";
@@ -152,6 +159,7 @@ public class NotificationController {
     // ==========================================
     @FXML
     private void handlePopupDecline() {
+        log.info("\u25B6 Controller Action - Execute: handlePopupDecline()");
         if (selectedNotification == null) return;
 
         // NẾU LÀ YÊU CẦU LÊN SELLER -> BẬT HỘP THOẠI HỎI LÝ DO
@@ -188,6 +196,7 @@ public class NotificationController {
     // Xử lý khi ấn nút Xóa trên Popup
     @FXML
     private void handlePopupDelete() {
+        log.info("\u25B6 Controller Action - Execute: handlePopupDelete()");
         if (selectedNotification == null) return;
         ApiService.deleteAsync("/notifications/" + selectedNotification.notificationId)
                 .thenAccept(res -> handleResponse(res.statusCode(), "Đã xóa thông báo!"));
@@ -195,6 +204,7 @@ public class NotificationController {
 
     @FXML
     private void handleDeleteAll() {
+        log.info("\u25B6 Controller Action - Execute: handleDeleteAll()");
         if (SessionManager.userName == null) return;
 
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -219,6 +229,7 @@ public class NotificationController {
     }
 
     private void handleResponse(int statusCode, String successMsg) {
+        log.info("\u25B6 Controller Action - Execute: handleResponse()");
         Platform.runLater(() -> {
             closePopup(); // Đóng popup sau khi bấm xong
             if (statusCode >= 200 && statusCode < 300) {
@@ -231,6 +242,7 @@ public class NotificationController {
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
         com.auction.util.AlertUtils.applyStyle(alert);

@@ -1,5 +1,7 @@
 package com.auction.controller.profile;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.controller.dashboard.MainController;
 import com.auction.model.ApiResponse;
 import com.auction.model.UserProfile;
@@ -41,6 +43,7 @@ import javafx.scene.shape.Shape;
 import javafx.stage.Modality;
 import javax.imageio.ImageIO;
 
+@Slf4j
 public class ProfileController {
 
     @FXML private TextField txtUsername;
@@ -57,6 +60,7 @@ public class ProfileController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         // 1. Cập nhật hiển thị nút dựa theo RAM hiện tại (Để giao diện mượt không bị nháy)
         updateRoleButtons();
 
@@ -104,12 +108,13 @@ public class ProfileController {
     // THÊM HÀM CHUYỂN TRANG ADMIN NÀY:
     @FXML
     public void handleOpenAdminControl(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleOpenAdminControl()");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/dashboard/AdminDashboard.fxml"));
             javafx.scene.Node view = loader.load();
             javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) txtUsername.getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     // ==========================================
@@ -119,6 +124,7 @@ public class ProfileController {
     // 1. HÀM LẤY DỮ LIỆU TỪ SERVER ĐỔ VÀO UI
     // ==========================================
     private void loadUserData() {
+        log.info("\u25B6 Controller Action - Execute: loadUserData()");
         String currentUser = SessionManager.userName;
         if (currentUser == null) return;
 
@@ -156,7 +162,7 @@ public class ProfileController {
                                 showAlert(Alert.AlertType.ERROR, "Lỗi tải dữ liệu", apiResponse.message);
                             }
                         } else {
-                            System.out.println("Lỗi load dữ liệu: " + response.body());
+                            log.info("Lỗi load dữ liệu: " + response.body());
                         }
                     });
                 })
@@ -191,7 +197,7 @@ public class ProfileController {
                             }
                         }
                     } catch (Exception e) {
-                        System.out.println("Lỗi quét thư từ chối: " + e.getMessage());
+                        log.info("Lỗi quét thư từ chối: " + e.getMessage());
                     }
                 }
             });
@@ -203,6 +209,7 @@ public class ProfileController {
     // ==========================================
     @FXML
     public void handleUpdateProfile(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleUpdateProfile()");
         String currentUser = SessionManager.userName;
         if (currentUser == null) return;
 
@@ -255,13 +262,14 @@ public class ProfileController {
     // ==========================================
     @FXML
     public void handleLogout(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleLogout()");
         // 1. NGẮT KẾT NỐI WEBSOCKET CHỐNG TREO APP VÀ RÒ RỈ DỮ LIỆU
         try {
             // Tùy vào cách bạn đang gọi class WebSocket của mình, hãy mở comment dòng phù hợp:
             GlobalWebSocketManager.disconnect();
             // Hoặc nếu dùng Singleton: com.auction.util.GlobalWebSocketManager.getInstance().disconnect();
         } catch (Exception e) {
-            System.err.println("Lỗi khi ngắt kết nối WebSocket: " + e.getMessage());
+            log.error("Lỗi khi ngắt kết nối WebSocket: " + e.getMessage());
         }
 
         // Dừng các luồng check ngầm (Nếu code này nằm trong MainController thì mở comment 2 dòng dưới)
@@ -278,7 +286,7 @@ public class ProfileController {
             stage.setScene(new javafx.scene.Scene(root));
             stage.centerOnScreen();
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
             // Lệnh showAlert này tôi giữ nguyên theo code cũ của bạn
             showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Lỗi giao diện", "Không thể mở trang đăng nhập!");
         }
@@ -288,6 +296,7 @@ public class ProfileController {
     // 4. HÀM TIỆN ÍCH (HIỂN THỊ THÔNG BÁO)
     // ==========================================
     private void showAlert(Alert.AlertType type, String title, String content) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -301,6 +310,7 @@ public class ProfileController {
     // ==========================================
     @FXML
     public void handleUploadAvatar(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleUploadAvatar()");
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Chọn ảnh đại diện");
         fileChooser.getExtensionFilters().addAll(
@@ -319,6 +329,7 @@ public class ProfileController {
     // 6. TẠO CỬA SỔ DI CHUYỂN, PHÓNG TO VÀ CẮT ẢNH
     // ==========================================
     private void openCropDialog(File imageFile, Stage parentStage) {
+        log.info("\u25B6 Controller Action - Execute: openCropDialog()");
         Stage cropStage = new Stage();
         cropStage.initOwner(parentStage);
         cropStage.initModality(Modality.APPLICATION_MODAL);
@@ -429,7 +440,7 @@ public class ProfileController {
                 uploadFileToServer(tempFile);
                 cropStage.close();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                log.error("Exception occurred", ex);
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể lưu ảnh đã cắt!");
             }
         });
@@ -535,7 +546,7 @@ public class ProfileController {
                 });
 
             } catch (Exception e) {
-                e.printStackTrace(); // In ra console cho lập trình viên (Terminal)
+                log.error("Exception occurred", e); // In ra console cho lập trình viên (Terminal)
 
                 // Lấy thông điệp lỗi cụ thể từ Java
                 String detailedError = e.getMessage() != null ? e.getMessage() : e.toString();
@@ -593,6 +604,7 @@ public class ProfileController {
     // 9. THÊM HÀM GỬI YÊU CẦU
     @FXML
     public void handleRequestSeller(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleRequestSeller()");
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Bạn có chắc chắn muốn gửi yêu cầu nâng cấp lên Seller cho Ban quản trị?", ButtonType.YES, ButtonType.NO);
         com.auction.util.AlertUtils.applyStyle(confirm);
         confirm.showAndWait().ifPresent(res -> {
@@ -623,6 +635,7 @@ public class ProfileController {
     // ==========================================
     @FXML
     public void handleClearCache(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleClearCache()");
         // Hiện hộp thoại cảnh báo trước khi xóa
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Xác nhận dọn dẹp");

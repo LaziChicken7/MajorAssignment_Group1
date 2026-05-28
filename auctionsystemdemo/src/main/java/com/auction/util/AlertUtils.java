@@ -1,9 +1,12 @@
 package com.auction.util;
 
+
+import lombok.extern.slf4j.Slf4j;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import java.util.Objects;
 
+@Slf4j
 public class AlertUtils {
 
     // Dùng chung 1 hàm duy nhất cho cả Alert và TextInputDialog
@@ -19,7 +22,7 @@ public class AlertUtils {
                 dialogPane.getStylesheets().add(cssPath);
             }
         } catch (Exception e) {
-            System.err.println("Không tìm thấy file CSS cho Dialog! " + e.getMessage());
+            log.error("Không tìm thấy file CSS cho Dialog! " + e.getMessage());
         }
 
         // Gắn class định dạng dùng chung cho mọi hộp thoại

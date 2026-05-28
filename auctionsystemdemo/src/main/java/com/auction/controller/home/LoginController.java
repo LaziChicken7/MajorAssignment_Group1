@@ -1,5 +1,7 @@
 package com.auction.controller.home;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.LoginRequest;
 import com.auction.util.ApiService;
@@ -26,6 +28,7 @@ import javafx.scene.input.KeyCode;
 
 import java.io.IOException;
 
+@Slf4j
 public class LoginController {
 
     @FXML private HBox rootPane;
@@ -39,6 +42,7 @@ public class LoginController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         txtServerIp.setText(ApiService.BASE_URL);
         applyCurrentTheme(false);
 
@@ -57,6 +61,7 @@ public class LoginController {
     // ==========================================
     @FXML
     public void handleThemeToggle() {
+        log.info("\u25B6 Controller Action - Execute: handleThemeToggle()");
         SessionManager.isDarkMode = !SessionManager.isDarkMode;
         applyCurrentTheme(true);
     }
@@ -85,6 +90,7 @@ public class LoginController {
 
     @FXML
     private void handleApplyIp() {
+        log.info("\u25B6 Controller Action - Execute: handleApplyIp()");
         String serverIp = txtServerIp.getText().trim();
         if (!serverIp.isEmpty()) {
             if (serverIp.endsWith("/")) serverIp = serverIp.substring(0, serverIp.length() - 1);
@@ -97,6 +103,7 @@ public class LoginController {
 
     @FXML
     private void handleLogin() {
+        log.info("\u25B6 Controller Action - Execute: handleLogin()");
         String serverIp = txtServerIp.getText().trim();
         if (!serverIp.isEmpty()) {
             if (serverIp.endsWith("/")) serverIp = serverIp.substring(0, serverIp.length() - 1);
@@ -123,7 +130,7 @@ public class LoginController {
                         SessionManager.fullName = resultObj.get("fullName") != null && !resultObj.get("fullName").isJsonNull() ? resultObj.get("fullName").getAsString() : "Người dùng";
                         SessionManager.role = resultObj.get("role").getAsString();
 
-                        System.out.println("Đăng nhập thành công: " + SessionManager.userName);
+                        log.info("Đăng nhập thành công: " + SessionManager.userName);
                         switchToMain();
                     } else {
                         showAlert(Alert.AlertType.ERROR, "Lỗi đăng nhập", apiResponse.message);
@@ -153,19 +160,21 @@ public class LoginController {
             Stage stage = (Stage) txtUsername.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.centerOnScreen();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { log.error("Exception occurred", e); }
     }
 
     @FXML
     private void goToRegister() {
+        log.info("\u25B6 Controller Action - Execute: goToRegister()");
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/com/auction/view/dashboard/Register.fxml"));
             Stage stage = (Stage) txtUsername.getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { log.error("Exception occurred", e); }
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);

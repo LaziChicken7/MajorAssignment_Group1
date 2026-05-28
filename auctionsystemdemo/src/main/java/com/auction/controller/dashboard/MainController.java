@@ -1,5 +1,7 @@
 package com.auction.controller.dashboard;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.controller.chat.ChatController;
 import com.auction.controller.notification.NotificationController;
 import com.auction.model.NotificationModel;
@@ -32,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 public class MainController {
 
     private static MainController instance;
@@ -69,6 +72,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         // ========================================================
         // 1. ĐƯA LỆNH NÀY LÊN TRÊN CÙNG ĐỂ NÓ TRANH THỦ KẾT NỐI MẠNG
         // ========================================================
@@ -102,6 +106,7 @@ public class MainController {
 
     @FXML
     public void handleThemeToggle() {
+        log.info("\u25B6 Controller Action - Execute: handleThemeToggle()");
         SessionManager.isDarkMode = !SessionManager.isDarkMode;
         applyCurrentTheme(true);
     }
@@ -127,6 +132,7 @@ public class MainController {
     }
 
     public void loadUserInfo() {
+        log.info("\u25B6 Controller Action - Execute: loadUserInfo()");
         if (btnNavProfile == null || SessionManager.userName == null) return;
         btnNavProfile.setText(SessionManager.userName);
 
@@ -170,6 +176,7 @@ public class MainController {
     // HÀM LOAD VIEW NÂNG CẤP (CÓ HIỆU ỨNG LOADING TOÀN CỤC)
     // ==========================================
     public void loadView(String fxmlPath) {
+        log.info("\u25B6 Controller Action - Execute: loadView()");
         // 1. TẠO MÀN HÌNH LOADING TẠM THỜI BẰNG CODE JAVA
         VBox loadingBox = new VBox(20);
         loadingBox.setAlignment(javafx.geometry.Pos.CENTER);
@@ -205,7 +212,7 @@ public class MainController {
                 contentArea.getChildren().setAll(view);
 
             } catch (IOException ex) {
-                ex.printStackTrace();
+                log.error("Exception occurred", ex);
                 Label lblError = new Label("Lỗi khi tải giao diện!");
                 lblError.setTextFill(Color.RED);
                 contentArea.getChildren().setAll(lblError);
@@ -221,13 +228,20 @@ public class MainController {
     }
 
     // ====== CÁC HÀM XỬ LÝ CHUYỂN TRANG ======
-    @FXML public void showDashboard(ActionEvent event) { loadView("/com/auction/view/dashboard/Dashboard.fxml"); setActiveButton(btnNavHome); }
-    @FXML public void showWallet(ActionEvent event) { loadView("/com/auction/view/wallet/Wallet.fxml"); setActiveButton(btnNavWallet); }
-    @FXML public void showAuctionList(ActionEvent event) { loadView("/com/auction/view/auction/AuctionList.fxml"); setActiveButton(btnNavAuction); }
-    @FXML public void handleShowMyProducts(ActionEvent event) { loadView("/com/auction/view/auction/MyAuctionList.fxml"); setActiveButton(btnNavAdd); }
-    @FXML public void showNotification(ActionEvent event) { loadView("/com/auction/view/notification/NotificationList.fxml"); setActiveButton(btnNavNotif); }
-    @FXML public void showProfile(ActionEvent event) { loadView("/com/auction/view/profile/Profile.fxml"); setActiveButton(btnNavProfile); }
-    @FXML public void showChat(ActionEvent event) { loadView("/com/auction/view/chat/Chat.fxml"); setActiveButton(btnNavChat); }
+    @FXML public void showDashboard(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: showDashboard()"); loadView("/com/auction/view/dashboard/Dashboard.fxml"); setActiveButton(btnNavHome); }
+    @FXML public void showWallet(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: showWallet()"); loadView("/com/auction/view/wallet/Wallet.fxml"); setActiveButton(btnNavWallet); }
+    @FXML public void showAuctionList(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: showAuctionList()"); loadView("/com/auction/view/auction/AuctionList.fxml"); setActiveButton(btnNavAuction); }
+    @FXML public void handleShowMyProducts(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleShowMyProducts()"); loadView("/com/auction/view/auction/MyAuctionList.fxml"); setActiveButton(btnNavAdd); }
+    @FXML public void showNotification(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: showNotification()"); loadView("/com/auction/view/notification/NotificationList.fxml"); setActiveButton(btnNavNotif); }
+    @FXML public void showProfile(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: showProfile()"); loadView("/com/auction/view/profile/Profile.fxml"); setActiveButton(btnNavProfile); }
+    @FXML public void showChat(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: showChat()"); loadView("/com/auction/view/chat/Chat.fxml"); setActiveButton(btnNavChat); }
 
     @FXML
     public void toggleSidebar() {
@@ -335,7 +349,7 @@ public class MainController {
                                 updateNotificationCount(newCount);
                             }
                         } catch (Exception ex) {
-                            System.out.println("Lỗi quét thông báo ngầm: " + ex.getMessage());
+                            log.info("Lỗi quét thông báo ngầm: " + ex.getMessage());
                         }
                     }
                 });
@@ -406,11 +420,12 @@ public class MainController {
             javafx.stage.Stage stage = (javafx.stage.Stage) contentArea.getScene().getWindow();
             stage.setScene(new javafx.scene.Scene(root));
             stage.centerOnScreen();
-        } catch (Exception ex) { ex.printStackTrace(); }
+        } catch (Exception ex) { log.error("Exception occurred", ex); }
     }
 
     @FXML
     public void handleSearch() {
+        log.info("\u25B6 Controller Action - Execute: handleSearch()");
         String keyword = txtSearch.getText().trim();
         if (keyword.isEmpty()) return;
 
@@ -428,13 +443,14 @@ public class MainController {
 
             contentArea.getChildren().setAll(view);
 
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     // ==========================================
     // HÀM CHUYỂN NHANH ĐẾN ĐOẠN CHAT CỤ THỂ
     // ==========================================
     public void openSpecificChat(String targetUsername) {
+        log.info("\u25B6 Controller Action - Execute: openSpecificChat()");
         // 1. Gắn tên người cần mở vào biến tĩnh (static) của ChatController
         com.auction.controller.chat.ChatController.targetUsernameToOpen = targetUsername;
 

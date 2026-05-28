@@ -1,5 +1,7 @@
 package com.auction.controller.home;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.controller.auction.AuctionDetailController;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class HomeController {
 
     @FXML private VBox vboxFeaturedAuctions;
@@ -50,6 +53,7 @@ public class HomeController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         // 1. Tải dữ liệu API lần đầu như bình thường
         loadAuctionsAndStats();
         loadNotifications();
@@ -62,7 +66,7 @@ public class HomeController {
             GlobalWebSocketManager.listenToGlobalAuctions(() -> {
                 Platform.runLater(() -> {
                     wsDebouncer.setOnFinished(e -> {
-                        System.out.println("⚡ WS HOME: Có giá mới, đang cập nhật lại Trang chủ ngầm...");
+                        log.info("⚡ WS HOME: Có giá mới, đang cập nhật lại Trang chủ ngầm...");
                         loadAuctionsAndStats();
                     });
                     wsDebouncer.playFromStart();
@@ -81,6 +85,7 @@ public class HomeController {
     }
 
     private void loadAuctionsAndStats() {
+        log.info("\u25B6 Controller Action - Execute: loadAuctionsAndStats()");
         ApiService.getAsync("/auctions").thenAccept(res -> {
             Platform.runLater(() -> {
                 try {
@@ -184,7 +189,7 @@ public class HomeController {
                                                 contentArea.getChildren().setAll(view);
                                             }
                                         } catch (IOException e) {
-                                            e.printStackTrace();
+                                            log.error("Exception occurred", e);
                                         }
                                     });
 
@@ -264,13 +269,14 @@ public class HomeController {
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("Lỗi parse JSON ở Dashboard: " + e.getMessage());
+                    log.info("Lỗi parse JSON ở Dashboard: " + e.getMessage());
                 }
             });
         });
     }
 
     private void loadNotifications() {
+        log.info("\u25B6 Controller Action - Execute: loadNotifications()");
         if (SessionManager.userName == null) return;
         ApiService.getAsync("/notifications/" + SessionManager.userName).thenAccept(res -> {
             Platform.runLater(() -> {
@@ -346,7 +352,7 @@ public class HomeController {
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("Lỗi load Thông báo ở Dashboard.");
+                    log.info("Lỗi load Thông báo ở Dashboard.");
                 }
             });
         });
@@ -398,6 +404,7 @@ public class HomeController {
     }
 
     private void handleActionResponse(int statusCode, String successMsg) {
+        log.info("\u25B6 Controller Action - Execute: handleActionResponse()");
         Platform.runLater(() -> {
             if (statusCode >= 200 && statusCode < 300) {
                 if (successMsg != null) {
@@ -429,17 +436,19 @@ public class HomeController {
                 contentArea.getChildren().setAll(view);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 
     @FXML
     public void goToAuctionList(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: goToAuctionList()");
         switchView(event, "/com/auction/view/auction/AuctionList.fxml");
     }
 
     @FXML
     public void handleViewMoreNotifications(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleViewMoreNotifications()");
         switchView(event, "/com/auction/view/notification/NotificationList.fxml");
     }
 }

@@ -1,5 +1,7 @@
 package com.auction.controller.addauctionitem;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.controller.auction.AuctionDetailController;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 public class MyAuctionListController {
 
     @FXML private ListView<AuctionModel> myAuctionListView;
@@ -42,6 +45,7 @@ public class MyAuctionListController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         myAuctionListView.setCellFactory(param -> new ListCell<AuctionModel>() {
             private Node view;
             private MyAuctionItemController controller;
@@ -52,7 +56,7 @@ public class MyAuctionListController {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/MyAuctionItem.fxml"));
                     view = loader.load();
                     controller = loader.getController();
-                } catch (IOException e) { e.printStackTrace(); }
+                } catch (IOException e) { log.error("Exception occurred", e); }
             }
 
             @Override
@@ -88,7 +92,7 @@ public class MyAuctionListController {
         GlobalWebSocketManager.listenToGlobalAuctions(() -> {
             Platform.runLater(() -> {
                 wsDebouncer.setOnFinished(e -> {
-                    System.out.println("⚡ WS MY-AUCTIONS: Có biến! Đang tải lại ngầm...");
+                    log.info("⚡ WS MY-AUCTIONS: Có biến! Đang tải lại ngầm...");
                     loadDataSilently();
                 });
                 wsDebouncer.playFromStart();
@@ -103,12 +107,14 @@ public class MyAuctionListController {
 
     @FXML
     public void loadData() {
+        log.info("\u25B6 Controller Action - Execute: loadData()");
         if (loadingOverlay != null) loadingOverlay.setVisible(true);
         myAuctionListView.setOpacity(0);
         fetchDataFromServer(true);
     }
 
     private void loadDataSilently() {
+        log.info("\u25B6 Controller Action - Execute: loadDataSilently()");
         fetchDataFromServer(false);
     }
 
@@ -185,7 +191,7 @@ public class MyAuctionListController {
                 } else if (showLoading) hideLoading();
 
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Exception occurred", e);
                 if (showLoading) hideLoading();
             }
         });
@@ -199,6 +205,7 @@ public class MyAuctionListController {
     }
 
     private void showProductDetail(AuctionModel item) {
+        log.info("\u25B6 Controller Action - Execute: showProductDetail()");
         GlobalWebSocketManager.stopListeningGlobalAuctions(); // Ngắt cáp mạng khi qua trang chi tiết
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
@@ -207,11 +214,12 @@ public class MyAuctionListController {
             controller.setAuctionData(item);
             StackPane contentArea = (StackPane) myAuctionListView.getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { log.error("Exception occurred", e); }
     }
 
     @FXML
     public void goToAddProduct() {
+        log.info("\u25B6 Controller Action - Execute: goToAddProduct()");
         if (SessionManager.userName == null) return;
         GlobalWebSocketManager.stopListeningGlobalAuctions();
 
@@ -235,7 +243,7 @@ public class MyAuctionListController {
                         Node view = loader.load();
                         StackPane contentArea = (StackPane) myAuctionListView.getScene().lookup("#contentArea");
                         if (contentArea != null) contentArea.getChildren().setAll(view);
-                    } catch (Exception e) { e.printStackTrace(); }
+                    } catch (Exception e) { log.error("Exception occurred", e); }
                 } else {
                     javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
                     alert.setTitle("Từ chối truy cập");

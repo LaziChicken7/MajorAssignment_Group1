@@ -1,5 +1,7 @@
 package com.auction.controller.chat;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.ConnectionModel;
 import com.auction.model.NotificationModel;
@@ -23,6 +25,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class FriendListController {
 
     @FXML private VBox vboxPending;
@@ -30,6 +33,7 @@ public class FriendListController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         loadPendingRequests();
         loadFriends();
     }
@@ -39,6 +43,7 @@ public class FriendListController {
     // ============================================
     @FXML
     public void goBack(javafx.scene.input.MouseEvent event) {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/auction/view/chat/Chat.fxml"));
             javafx.scene.Node view = loader.load();
@@ -47,12 +52,13 @@ public class FriendListController {
 
             if (contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 
     // Nút Back dành cho ActionEvent (Nút bấm thông thường)
     private void openChatPage(javafx.event.ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: openChatPage()");
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/auction/view/chat/Chat.fxml"));
             javafx.scene.Node view = loader.load();
@@ -61,7 +67,7 @@ public class FriendListController {
 
             if (contentArea != null) contentArea.getChildren().setAll(view);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 
@@ -69,6 +75,7 @@ public class FriendListController {
     // LOAD DANH SÁCH PENDING TỪ API THÔNG BÁO
     // ============================================
     private void loadPendingRequests() {
+        log.info("\u25B6 Controller Action - Execute: loadPendingRequests()");
         vboxPending.getChildren().clear();
         ApiService.getAsync("/notifications/" + SessionManager.userName).thenAccept(res -> {
             Platform.runLater(() -> {
@@ -96,6 +103,7 @@ public class FriendListController {
     // LOAD DANH SÁCH BẠN BÈ TỪ API FRIENDS
     // ============================================
     private void loadFriends() {
+        log.info("\u25B6 Controller Action - Execute: loadFriends()");
         vboxFriends.getChildren().clear();
         ApiService.getAsync("/chat/friends?username=" + SessionManager.userName).thenAccept(res -> {
             Platform.runLater(() -> {

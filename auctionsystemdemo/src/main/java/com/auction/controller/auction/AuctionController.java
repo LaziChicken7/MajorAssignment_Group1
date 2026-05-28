@@ -1,5 +1,7 @@
 package com.auction.controller.auction;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
 import com.auction.model.WalletDataResponse;
@@ -26,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 public class AuctionController {
 
     @FXML private ListView<AuctionModel> auctionListView;
@@ -47,6 +50,7 @@ public class AuctionController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         cbFilter.setItems(FXCollections.observableArrayList(
                 "Tất cả trạng thái", "Sắp diễn ra (OPEN)", "Đang diễn ra (RUNNING)",
                 "Đã kết thúc (FINISHED)", "Đã thanh toán (PAID)", "Đã hủy (CANCELLED)"
@@ -71,7 +75,7 @@ public class AuctionController {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionItem.fxml"));
                     view = loader.load();
                     controller = loader.getController();
-                } catch (IOException e) { e.printStackTrace(); }
+                } catch (IOException e) { log.error("Exception occurred", e); }
             }
 
             @Override
@@ -110,7 +114,7 @@ public class AuctionController {
         GlobalWebSocketManager.listenToGlobalAuctions(() -> {
             Platform.runLater(() -> {
                 wsDebouncer.setOnFinished(e -> {
-                    System.out.println("⚡ WS GLOBAL: Đã cập nhật xong, tải lại ngầm...");
+                    log.info("⚡ WS GLOBAL: Đã cập nhật xong, tải lại ngầm...");
                     loadDataSilently();
                 });
                 wsDebouncer.playFromStart();
@@ -130,7 +134,7 @@ public class AuctionController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
                 this.cachedDetailView = loader.load();
                 this.cachedDetailController = loader.getController();
-            } catch (IOException ex) { ex.printStackTrace(); }
+            } catch (IOException ex) { log.error("Exception occurred", ex); }
         });
         delay.play();
     }
@@ -140,6 +144,7 @@ public class AuctionController {
     // ==================================================
     @FXML
     public void loadData() {
+        log.info("\u25B6 Controller Action - Execute: loadData()");
         if (loadingOverlay != null) loadingOverlay.setVisible(true);
         fetchDataFromServer(true);
     }
@@ -148,6 +153,7 @@ public class AuctionController {
     // LOAD DỮ LIỆU NGẦM (Dùng cho WebSocket, không bị chớp giật)
     // ==================================================
     public void loadDataSilently() {
+        log.info("\u25B6 Controller Action - Execute: loadDataSilently()");
         fetchDataFromServer(false);
     }
 
@@ -279,6 +285,7 @@ public class AuctionController {
     }
 
     private void showDetail(AuctionModel item) {
+        log.info("\u25B6 Controller Action - Execute: showDetail()");
         GlobalWebSocketManager.stopListeningGlobalAuctions(); // Gỡ kết nối khi chuyển trang
         if (cachedDetailView == null || cachedDetailController == null) return;
         try {
@@ -287,6 +294,6 @@ public class AuctionController {
             if (contentArea != null) {
                 contentArea.getChildren().setAll(cachedDetailView);
             }
-        } catch (Exception ex) { ex.printStackTrace(); }
+        } catch (Exception ex) { log.error("Exception occurred", ex); }
     }
 }

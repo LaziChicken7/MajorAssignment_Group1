@@ -1,5 +1,7 @@
 package com.auction.controller.addauctionitem;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionCreationRequest;
 import com.auction.model.ItemCreationRequest;
@@ -19,6 +21,7 @@ import javafx.scene.shape.Rectangle; // IMPORT THƯ VIỆN BO GÓC ẢNH
 import javafx.stage.FileChooser;
 import java.io.File;
 
+@Slf4j
 public class AddProductController {
 
     @FXML private ImageView productImage;
@@ -48,6 +51,7 @@ public class AddProductController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         if (btnSubmit != null && chkAgree != null) {
             btnSubmit.disableProperty().bind(chkAgree.selectedProperty().not());
         }
@@ -86,6 +90,7 @@ public class AddProductController {
 
     @FXML
     private void handleUploadImage() {
+        log.info("\u25B6 Controller Action - Execute: handleUploadImage()");
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Ảnh", "*.png", "*.jpg", "*.jpeg"));
 
@@ -164,6 +169,7 @@ public class AddProductController {
 
     @FXML
     private void handleConfirmAdd() {
+        log.info("\u25B6 Controller Action - Execute: handleConfirmAdd()");
         // 1. Lấy dữ liệu cơ bản để validate
         String name = txtProductName.getText().trim();
         String desc = txtDescription.getText().trim();
@@ -393,7 +399,7 @@ public class AddProductController {
 
                 // Đợi upload xong thì kiểm tra kết quả
                 int code = conn.getResponseCode();
-                System.out.println("API Upload Image Response Code: " + code);
+                log.info("API Upload Image Response Code: " + code);
 
                 if (code >= 200 && code < 300) {
                     // THÀNH CÔNG -> Chuyển sang Bước C: Tạo phiên đấu giá
@@ -404,13 +410,13 @@ public class AddProductController {
                     if (errStream != null) {
                         java.util.Scanner s = new java.util.Scanner(errStream).useDelimiter("\\A");
                         errorMessage = s.hasNext() ? s.next() : "";
-                        System.out.println("Chi tiết lỗi từ Server: " + errorMessage);
+                        log.info("Chi tiết lỗi từ Server: " + errorMessage);
                     }
                     final String errorTitle = "Mã lỗi: " + code;
                     Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi Upload", "Không thể tải ảnh (" + errorTitle + ").\nSản phẩm đã tạo thành công nhưng không có ảnh."));
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Exception occurred", e);
                 Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Lỗi kết nối", "Đứt mạng hoặc server từ chối kết nối khi tải ảnh."));
             }
         }).start();
@@ -462,15 +468,17 @@ public class AddProductController {
 
     @FXML
     private void goBack() {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/MyAuctionList.fxml"));
             Node view = loader.load();
             StackPane contentArea = (StackPane) txtProductName.getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg);
         com.auction.util.AlertUtils.applyStyle(alert);

@@ -1,5 +1,7 @@
 package com.auction.controller.auction;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.controller.profile.SellerProfileController;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
@@ -27,6 +29,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.paint.Color;
 
+@Slf4j
 public class AuctionDetailController {
 
     @FXML private Label lblId, lblName, lblTime, lblStartPrice, lblCurrentPrice, lblConfirmAmount, lblBalance;
@@ -90,6 +93,7 @@ public class AuctionDetailController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         if (txtBidAmount != null) applyCurrencyFormat(txtBidAmount, value -> currentBidValue = value);
         if (txtAutoBidMaxAmount != null) applyCurrencyFormat(txtAutoBidMaxAmount, null);
     }
@@ -228,6 +232,7 @@ public class AuctionDetailController {
 
     @FXML
     private void handleOpenAutoBid() {
+        log.info("\u25B6 Controller Action - Execute: handleOpenAutoBid()");
         if (SessionManager.userName != null && currentItem.seller != null && SessionManager.userName.equals(currentItem.seller.userName)) return;
 
         if (txtAutoBidMaxAmount != null && lblAutoBidStep != null) {
@@ -285,7 +290,7 @@ public class AuctionDetailController {
                                 if (btnSubmitAutoBid != null) btnSubmitAutoBid.setText("Cập nhật Bot");
                             }
                         } catch (Exception e) {
-                            System.err.println("❌ Lỗi Parse API Bot: " + e.getMessage());
+                            log.error("❌ Lỗi Parse API Bot: " + e.getMessage());
                         }
                     }
                 }
@@ -377,9 +382,11 @@ public class AuctionDetailController {
         }
     }
 
-    @FXML private void handleCloseAutoBid() { paneAutoBidConfig.setVisible(false); }
+    @FXML private void handleCloseAutoBid() {
+        log.info("\u25B6 Controller Action - Execute: handleCloseAutoBid()"); paneAutoBidConfig.setVisible(false); }
 
     private void loadBalance() {
+        log.info("\u25B6 Controller Action - Execute: loadBalance()");
         if (SessionManager.userName == null) return;
         ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(res -> {
             Platform.runLater(() -> {
@@ -493,7 +500,7 @@ public class AuctionDetailController {
 
             } catch (Exception ex) {
                 lblTime.setText("Lỗi định dạng giờ");
-                ex.printStackTrace();
+                log.error("Exception occurred", ex);
             }
         } else {
             String baseColor = "#95a5a6";
@@ -586,6 +593,7 @@ public class AuctionDetailController {
 
     @FXML
     private void handleBidClick() {
+        log.info("\u25B6 Controller Action - Execute: handleBidClick()");
         if (SessionManager.userName != null && currentItem.seller != null && SessionManager.userName.equals(currentItem.seller.userName)) return;
         String amountStr = txtBidAmount.getText().replace(".", "").replace(",", "").trim();
         if (amountStr.isEmpty()) return;
@@ -619,9 +627,11 @@ public class AuctionDetailController {
         }).exceptionally(ex -> { Platform.runLater(() -> showToastError("Mất kết nối máy chủ!")); return null; });
     }
 
-    @FXML private void handleCancelPopup() { paneConfirm.setVisible(false); }
+    @FXML private void handleCancelPopup() {
+        log.info("\u25B6 Controller Action - Execute: handleCancelPopup()"); paneConfirm.setVisible(false); }
 
     private void showToastSuccess() {
+        log.info("\u25B6 Controller Action - Execute: showToastSuccess()");
         toastSuccess.setVisible(true);
         PauseTransition delay = new PauseTransition(Duration.seconds(2.5));
         delay.setOnFinished(e -> toastSuccess.setVisible(false));
@@ -629,6 +639,7 @@ public class AuctionDetailController {
     }
 
     private void showToastError(String msg) {
+        log.info("\u25B6 Controller Action - Execute: showToastError()");
         if(lblToastErrorMsg != null) lblToastErrorMsg.setText(msg);
         toastError.setVisible(true);
         PauseTransition delay = new PauseTransition(Duration.seconds(2.5));
@@ -666,7 +677,7 @@ public class AuctionDetailController {
             Platform.runLater(() -> {
                 // Đợi 0.4s để chắc chắn Database Server đã lưu xong lệnh của Bot
                 wsDebouncer.setOnFinished(e -> {
-                    System.out.println("⚡ WEBSOCKET: Máy chủ đã lưu xong, tải lại dữ liệu mới nhất!");
+                    log.info("⚡ WEBSOCKET: Máy chủ đã lưu xong, tải lại dữ liệu mới nhất!");
                     fetchBidDataFromServer(auctionId);
                     syncTimeAndStatusRealtime(auctionId);
                 });
@@ -773,6 +784,7 @@ public class AuctionDetailController {
     }
 
     @FXML private void handleOpenImageZoom() {
+        log.info("\u25B6 Controller Action - Execute: handleOpenImageZoom()");
         if (productImageView.getImage() != null) {
             zoomedImageView.setImage(productImageView.getImage());
             paneImageZoom.setVisible(true);
@@ -780,11 +792,13 @@ public class AuctionDetailController {
     }
 
     @FXML private void handleCloseImageZoom() {
+        log.info("\u25B6 Controller Action - Execute: handleCloseImageZoom()");
         paneImageZoom.setVisible(false);
         zoomedImageView.setImage(null);
     }
 
     @FXML private void handleOpenChart() {
+        log.info("\u25B6 Controller Action - Execute: handleOpenChart()");
         if (timeline != null) timeline.stop();
         GlobalWebSocketManager.stopListeningAuction(); // Đóng kết nối mạng
         try {
@@ -794,10 +808,11 @@ public class AuctionDetailController {
             controller.setAuctionData(currentItem);
             StackPane contentArea = (StackPane) lblBalance.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     @FXML private void handleOpenHistory() {
+        log.info("\u25B6 Controller Action - Execute: handleOpenHistory()");
         if (timeline != null) timeline.stop();
         GlobalWebSocketManager.stopListeningAuction(); // Đóng kết nối mạng
         try {
@@ -807,10 +822,11 @@ public class AuctionDetailController {
             controller.setAuctionData(currentItem);
             StackPane contentArea = (StackPane) lblBalance.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     @FXML private void handleOpenSellerProfile() {
+        log.info("\u25B6 Controller Action - Execute: handleOpenSellerProfile()");
         if (timeline != null) timeline.stop();
         GlobalWebSocketManager.stopListeningAuction(); // Đóng kết nối mạng
         try {
@@ -820,11 +836,12 @@ public class AuctionDetailController {
             controller.setSellerData(currentItem.seller, currentItem);
             StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     @FXML
     private void goBack() {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         if (timeline != null) timeline.stop();
         GlobalWebSocketManager.stopListeningAuction();
 
@@ -832,7 +849,7 @@ public class AuctionDetailController {
             Node view = FXMLLoader.load(getClass().getResource("/com/auction/view/auction/AuctionList.fxml"));
             StackPane contentArea = (StackPane) txtBidAmount.getScene().lookup("#contentArea");
             if(contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     private SVGPath createStar() {
@@ -870,7 +887,7 @@ public class AuctionDetailController {
             if (timeStr.contains("+")) timeStr = timeStr.substring(0, timeStr.indexOf("+"));
             return LocalDateTime.parse(timeStr);
         } catch (Exception e) {
-            System.err.println("❌ LỖI PARSE THỜI GIAN: Chuỗi gốc [" + timeStr + "] - Lỗi: " + e.getMessage());
+            log.error("❌ LỖI PARSE THỜI GIAN: Chuỗi gốc [" + timeStr + "] - Lỗi: " + e.getMessage());
             return null;
         }
     }

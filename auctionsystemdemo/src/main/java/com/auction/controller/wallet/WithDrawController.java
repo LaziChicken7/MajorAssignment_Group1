@@ -1,5 +1,7 @@
 package com.auction.controller.wallet;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.PaymentRequest;
 import com.auction.model.WalletDataResponse;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class WithDrawController {
 
     @FXML private TextField amountField;
@@ -31,10 +34,12 @@ public class WithDrawController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         loadRealData();
     }
 
     private void loadRealData() {
+        log.info("\u25B6 Controller Action - Execute: loadRealData()");
         if (SessionManager.userName == null || lblBankAccount == null) return;
 
         ApiService.getAsync("/payments/" + SessionManager.userName + "/history")
@@ -75,6 +80,7 @@ public class WithDrawController {
 
     @FXML
     public void handleWithdrawConfirm() {
+        log.info("\u25B6 Controller Action - Execute: handleWithdrawConfirm()");
         if (amountField == null) return;
         String amountStr = amountField.getText().replace(".", "").replace(",", "").trim();
         if (amountStr.isEmpty()) { showAlert("Vui lòng nhập số tiền!"); return; }
@@ -118,21 +124,24 @@ public class WithDrawController {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 
     @FXML
     public void handleBackToWallet() {
+        log.info("\u25B6 Controller Action - Execute: handleBackToWallet()");
         switchView("/com/auction/view/wallet/Wallet.fxml");
     }
 
     @FXML
     public void handleCancel() {
+        log.info("\u25B6 Controller Action - Execute: handleCancel()");
         handleBackToWallet();
     }
 
     private void showAlert(String message) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Thông báo");
         alert.setHeaderText(null);

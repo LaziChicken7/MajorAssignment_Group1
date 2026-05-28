@@ -1,5 +1,7 @@
 package com.auction.controller.wallet;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ApiResponse;
 import com.auction.model.TransactionHistoryResponse;
 import com.auction.model.WalletDataResponse;
@@ -24,6 +26,7 @@ import java.text.Normalizer;
 import java.util.List;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class WalletController {
 
     @FXML private VBox walletRoot;
@@ -50,10 +53,12 @@ public class WalletController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         loadWalletData();
     }
 
     private void loadWalletData() {
+        log.info("\u25B6 Controller Action - Execute: loadWalletData()");
         if (SessionManager.userName == null) return;
 
         ApiService.getAsync("/payments/" + SessionManager.userName + "/history").thenAccept(response -> {
@@ -100,7 +105,7 @@ public class WalletController {
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("Lỗi parse JSON trong Wallet: " + e.getMessage());
+                    log.info("Lỗi parse JSON trong Wallet: " + e.getMessage());
                 }
             });
         });
@@ -189,14 +194,18 @@ public class WalletController {
                 contentArea.getChildren().setAll(view);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception occurred", e);
         }
     }
 
-    @FXML public void handleDeposit(ActionEvent event) { switchView(event, "/com/auction/view/wallet/DepositForm.fxml"); }
-    @FXML public void handleWithdraw(ActionEvent event) { switchView(event, "/com/auction/view/wallet/WithDrawForm.fxml"); }
-    @FXML public void handleSuccessfulTransaction(ActionEvent event) { switchView(event, "/com/auction/view/wallet/SuccessfulTransaction.fxml"); }
-    @FXML public void handleFailureTransaction(ActionEvent event) { switchView(event, "/com/auction/view/wallet/FailureTransaction.fxml"); }
+    @FXML public void handleDeposit(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleDeposit()"); switchView(event, "/com/auction/view/wallet/DepositForm.fxml"); }
+    @FXML public void handleWithdraw(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleWithdraw()"); switchView(event, "/com/auction/view/wallet/WithDrawForm.fxml"); }
+    @FXML public void handleSuccessfulTransaction(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleSuccessfulTransaction()"); switchView(event, "/com/auction/view/wallet/SuccessfulTransaction.fxml"); }
+    @FXML public void handleFailureTransaction(ActionEvent event) {
+        log.info("\u25B6 Controller Action - Execute: handleFailureTransaction()"); switchView(event, "/com/auction/view/wallet/FailureTransaction.fxml"); }
 
     private String formatMoney(double amount) {
         return String.format("%,.0f", amount).replace(",", ".") + " VND";

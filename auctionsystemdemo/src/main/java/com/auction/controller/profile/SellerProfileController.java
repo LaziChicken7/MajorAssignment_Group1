@@ -1,5 +1,7 @@
 package com.auction.controller.profile;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.controller.auction.AuctionDetailController;
 import com.auction.model.ApiResponse;
 import com.auction.model.AuctionModel;
@@ -27,6 +29,7 @@ import javafx.scene.paint.Color;
 
 import java.util.List;
 
+@Slf4j
 public class SellerProfileController {
 
     @FXML private ImageView imgAvatar;
@@ -44,6 +47,7 @@ public class SellerProfileController {
 
     @FXML
     public void initialize() {
+        log.info("\u25B6 Controller Action - Execute: initialize()");
         cbStar.getItems().addAll("5 Sao - Tuyệt vời", "4 Sao - Rất tốt", "3 Sao - Tốt", "2 Sao - Trung bình", "1 Sao - Tệ");
     }
 
@@ -72,6 +76,7 @@ public class SellerProfileController {
 
     @FXML
     private void loadReviews() {
+        log.info("\u25B6 Controller Action - Execute: loadReviews()");
         btnLoadMore.setText("Đang tải...");
         btnLoadMore.setDisable(true);
 
@@ -150,6 +155,7 @@ public class SellerProfileController {
 
     @FXML
     private void handleSubmitReview() {
+        log.info("\u25B6 Controller Action - Execute: handleSubmitReview()");
         if (cbStar.getValue() == null || txtComment.getText().trim().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn số sao và nhập bình luận!");
             return;
@@ -188,7 +194,7 @@ public class SellerProfileController {
                                             }
                                         }
                                     } catch (Exception e) {
-                                        System.out.println("Lỗi khi fetch lại rating: " + e.getMessage());
+                                        log.info("Lỗi khi fetch lại rating: " + e.getMessage());
                                     }
                                 }
                             });
@@ -209,6 +215,7 @@ public class SellerProfileController {
 
     @FXML
     private void goBack() {
+        log.info("\u25B6 Controller Action - Execute: goBack()");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/auction/view/auction/AuctionDetail.fxml"));
             Node view = loader.load();
@@ -218,7 +225,7 @@ public class SellerProfileController {
 
             StackPane contentArea = (StackPane) lblName.getScene().lookup("#contentArea");
             if (contentArea != null) contentArea.getChildren().setAll(view);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     private SVGPath createStar() {
@@ -233,6 +240,7 @@ public class SellerProfileController {
 
     @FXML
     private void handleSendFriendRequest() {
+        log.info("\u25B6 Controller Action - Execute: handleSendFriendRequest()");
         String url = "/chat/friend-request?sender=" + SessionManager.userName + "&receiver=" + seller.userName;
 
         ApiService.postAsync(url, null).thenAccept(res -> {
@@ -258,6 +266,7 @@ public class SellerProfileController {
     // HÀM HIỂN THỊ THÔNG BÁO TÙY CHỈNH (CSS ALERT)
     // ==========================================
     private void showAlert(Alert.AlertType type, String title, String content) {
+        log.info("\u25B6 Controller Action - Execute: showAlert()");
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);

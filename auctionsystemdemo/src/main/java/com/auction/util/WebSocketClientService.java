@@ -1,5 +1,7 @@
 package com.auction.util;
 
+
+import lombok.extern.slf4j.Slf4j;
 import javafx.application.Platform;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+@Slf4j
 public class WebSocketClientService {
 
     private WebSocketStompClient stompClient;
@@ -38,7 +41,7 @@ public class WebSocketClientService {
         StompSessionHandler sessionHandler = new StompSessionHandlerAdapter() {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-                System.out.println("✅ STOMP: Đã kết nối thành công tới Server!");
+                log.info("✅ STOMP: Đã kết nối thành công tới Server!");
                 stompSession = session;
                 reconnectAttempts = 0; // Kết nối thành công thì reset bộ đếm
 
@@ -62,13 +65,13 @@ public class WebSocketClientService {
 
             @Override
             public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
-                System.err.println("❌ STOMP LỖI NỘI BỘ: " + exception.getMessage());
+                log.error("❌ STOMP LỖI NỘI BỘ: " + exception.getMessage());
             }
 
             @Override
             public void handleTransportError(StompSession session, Throwable exception) {
                 // ĐÃ XÓA ALERT LỖI UI. Thay vào đó là gọi hàm tự động kết nối lại ngầm
-                System.err.println("⚠️ STOMP: Mất kết nối mạng hoặc Server sập!");
+                log.error("⚠️ STOMP: Mất kết nối mạng hoặc Server sập!");
                 scheduleReconnect();
             }
         };
@@ -92,7 +95,7 @@ public class WebSocketClientService {
         }
 
         reconnectAttempts++;
-        System.out.println("🔄 STOMP: Đang thử kết nối lại... (Lần " + reconnectAttempts + ") sau 5 giây.");
+        log.info("🔄 STOMP: Đang thử kết nối lại... (Lần " + reconnectAttempts + ") sau 5 giây.");
 
         // Đẩy tiến trình chờ ra một luồng ngầm để KHÔNG LÀM ĐƠ JAVAFX UI
         CompletableFuture.runAsync(() -> {
@@ -121,7 +124,7 @@ public class WebSocketClientService {
             stompSession.send("/app/chat.send", jsonPayload);
 
         } else {
-            System.err.println("❌ Không thể gửi tin: WebSocket chưa sẵn sàng!");
+            log.error("❌ Không thể gửi tin: WebSocket chưa sẵn sàng!");
             // Nếu bạn muốn báo lỗi gửi tin thất bại cho user thì mở comment bên dưới,
             // Còn không thì bỏ qua để nó thử gửi lại sau khi reconnect
             // showErrorToUI("Lỗi Gửi Tin", "Mất kết nối tới Tổng đài chat. Tin nhắn chưa được gửi!");
@@ -139,7 +142,7 @@ public class WebSocketClientService {
         if (stompClient != null) {
             stompClient.stop();
         }
-        System.out.println("🛑 STOMP: Đã ngắt kết nối hoàn toàn.");
+        log.info("🛑 STOMP: Đã ngắt kết nối hoàn toàn.");
     }
 
     // ==============================================================
@@ -165,7 +168,7 @@ public class WebSocketClientService {
                     }
                 }
             });
-            System.out.println("🎧 STOMP: Đã kết nối vào phòng Đấu giá [" + auctionId + "]");
+            log.info("🎧 STOMP: Đã kết nối vào phòng Đấu giá [" + auctionId + "]");
         }
     }
 
@@ -173,7 +176,7 @@ public class WebSocketClientService {
         if (auctionSubscription != null) {
             auctionSubscription.unsubscribe();
             auctionSubscription = null;
-            System.out.println("🔇 STOMP: Đã rời khỏi phòng Đấu giá.");
+            log.info("🔇 STOMP: Đã rời khỏi phòng Đấu giá.");
         }
     }
 

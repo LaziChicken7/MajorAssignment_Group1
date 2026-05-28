@@ -1,10 +1,13 @@
 package com.auction.util;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.auction.model.ChatMessageModel;
 import javafx.application.Platform;
 
 import java.util.function.Consumer;
 
+@Slf4j
 public class GlobalWebSocketManager {
 
     private static WebSocketClientService webSocketService;
@@ -51,7 +54,7 @@ public class GlobalWebSocketManager {
                     if (activeChatListener != null) {
                         try {
                             activeChatListener.accept(finalMsg);
-                        } catch (Exception e) { e.printStackTrace(); }
+                        } catch (Exception e) { log.error("Exception occurred", e); }
                     }
                     // KỊCH BẢN 2: MÀN HÌNH CHAT ĐANG ĐÓNG (Ở Trang chủ, Ví...)
                     else {
@@ -73,12 +76,12 @@ public class GlobalWebSocketManager {
                                         com.auction.controller.dashboard.MainController.getInstance().openSpecificChat(finalMsg.sender.userName);
                                     }
                                 });
-                            } catch (Exception e) { e.printStackTrace(); }
+                            } catch (Exception e) { log.error("Exception occurred", e); }
                         }
                     }
                 });
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { log.error("Exception occurred", e); }
     }
 
     public static void disconnect() {
